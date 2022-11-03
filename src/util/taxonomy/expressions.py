@@ -7,11 +7,10 @@ class Expression(SerializableObject):
         pass
 
     @classmethod
-    def fromValue(cls, id, valueParam):
+    def fromIdValue(cls, id, valueParam):
         '''Factory method for expression from value'''
 
-        obj=Expression()
-        #obj.
+        obj=cls.fromId(id)
         obj.setValue(valueParam)
         return obj
 

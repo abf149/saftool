@@ -29,7 +29,7 @@ class SerializableObject:
     @classmethod
     def fromDict(cls, obj_dict):
         '''Init from dict'''
-        obj=SerializableObject()
+        obj=cls()
         obj.dict2obj(obj_dict)
         return obj
 
