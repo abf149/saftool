@@ -1,6 +1,7 @@
 import os
 from util.taxonomy.serializableobject import SerializableObject
 from util.taxonomy.expressions import *
+from util.taxonomy.rulesengine import *
 
 os.system('rm *test.yaml')
 
@@ -68,13 +69,26 @@ print(x.getValue())
 
 print("\n\n")
 
+rule_set_path='saftaxolib/ref_ruleset/'
+print('- Test setup: importing rule set context module',os.path.join(rule_set_path,"RuleSetContextModule.py"))
+old_sys_path=sys.path.copy()
+sys.path.append(rule_set_path)
+rule_set_context_module=importlib.import_module("RuleSetContextModule", package=None)
+sys.path=old_sys_path
+
+print("\n\n")
+
 print("- FunctionReference")
-print("-- From Id+Value('TestPredicate'), Dump, From YAML file")
-x = FunctionReference.fromIdValue('FunctionReferenceTest','TestPredicate')
+print("-- From Id+Value('alwaysTrue1','alwaysFalse1'), Dump, From YAML file")
+x = FunctionReference.fromIdValue('FunctionReferenceTest','alwaysTrue1')
+y = FunctionReference.fromIdValue('FunctionReferenceTest','alwaysFalse1')
 x.dump('function_reference_test.yaml')
 print("-- Load from YAML file; print")
 x = FunctionReference.fromYamlFilename('function_reference_test.yaml')
 print(x)
+print("-- Evaluate alwaysTrue1:", x.evaluateInModuleContext({}, rule_set_context_module))
+print("-- Evaluate alwaysFalse1:", y.evaluateInModuleContext({}, rule_set_context_module))
+
 
 print("\n\n")
 
@@ -100,8 +114,123 @@ print("\n\n")
 
 print("- FormatType")
 print("-- From Id+Value('C'), Dump, From YAML file")
-x = FormatType.fromIdValue('FormatTypeTest','data')
+x = FormatType.fromIdValue('FormatTypeTest','C')
 x.dump('format_type_test.yaml')
 print("-- Load from YAML file; print")
 x = FormatType.fromYamlFilename('format_type_test.yaml')
 print(x)
+
+# RulesEngine & subclasses (Rule, ValidationRule, RuleSet, ValidationRuleSet) tests
+print("RulesEngine & subclasses (Rule, ValidationRule, RuleSet, ValidationRuleSet) tests:")
+
+print("\n\n")
+
+print("- Rule")
+print("-- From Id+Predicate+Conditionally-evaluated-expression; print")
+predicateTrue1=FunctionReference.fromIdValue('predicateTrue1','alwaysTrue1')
+predicateTrue2=FunctionReference.fromIdValue('predicateTrue2','alwaysTrue2')
+predicateFalse1=FunctionReference.fromIdValue('predicateFalse1','alwaysFalse1')
+predicateFalse2=FunctionReference.fromIdValue('predicateFalse2','alwaysFalse2')
+x = Rule.fromIdPredicateConditionallyEvaluatedExpression('RuleTest', predicateTrue1, predicateTrue2)
+y = Rule.fromIdPredicateConditionallyEvaluatedExpression('RuleTest', predicateFalse1, predicateTrue2)
+z = Rule.fromIdPredicateConditionallyEvaluatedExpression('RuleTest', predicateTrue1, predicateFalse2)
+q = Rule.fromIdPredicateConditionallyEvaluatedExpression('RuleTest', predicateFalse1, predicateFalse2)
+print(x)
+print('getPredicate() type:', x.getPredicate().__class__.__name__,'getConditionallyEvaluatedExpression() type:', x.getConditionallyEvaluatedExpression().__class__.__name__)
+print("-- Dump to YAML and load")
+x.dump('rule_test.yaml')
+x = Rule.fromYamlFilename('rule_test.yaml')
+print(x)
+print("-- Evaluate Rule1:")
+pred,asst=x.evaluateInModuleContext({}, rule_set_context_module)
+print("--- predicate:",pred,"assert:",asst)
+print("-- Evaluate Rule2:")
+pred,asst=y.evaluateInModuleContext({}, rule_set_context_module)
+print("--- predicate:",pred,"assert:",asst)
+print("-- Evaluate Rule3:")
+pred,asst=z.evaluateInModuleContext({}, rule_set_context_module)
+print("--- predicate:",pred,"assert:",asst)
+print("-- Evaluate Rule4:")
+pred,asst=q.evaluateInModuleContext({}, rule_set_context_module)
+print("--- predicate:",pred,"assert:",asst)
+
+print("\n\n")
+
+print("- ValidationRule")
+print("-- From Id+Predicate+Assertion; print")
+x = ValidationRule.fromIdPredicateAssertion('ValidationRuleTest_T->T', predicateTrue1, predicateTrue2)
+y = ValidationRule.fromIdPredicateAssertion('ValidationRuleTest_F->T', predicateFalse1, predicateTrue2)
+z = ValidationRule.fromIdPredicateAssertion('ValidationRuleTest_T->F', predicateTrue1, predicateFalse2)
+q = ValidationRule.fromIdPredicateAssertion('ValidationRuleTest_F->F', predicateFalse1, predicateFalse2)
+print(x)
+print('getPredicate() type:', x.getPredicate().__class__.__name__,'getConditionallyEvaluatedExpression() type:', x.getAssertion().__class__.__name__)
+print("-- Dump to YAML and load")
+x.dump('validation_rule_test.yaml')
+x = ValidationRule.fromYamlFilename('validation_rule_test.yaml')
+print(x)
+print("-- Evaluate Rule1:")
+pred,asst=x.evaluateInModuleContext({}, rule_set_context_module)
+print("--- predicate:",pred,"assert:",asst)
+print("-- Evaluate Rule2:")
+pred,asst=y.evaluateInModuleContext({}, rule_set_context_module)
+print("--- predicate:",pred,"assert:",asst)
+print("-- Evaluate Rule3:")
+pred,asst=z.evaluateInModuleContext({}, rule_set_context_module)
+print("--- predicate:",pred,"assert:",asst)
+print("-- Evaluate Rule4:")
+pred,asst=q.evaluateInModuleContext({}, rule_set_context_module)
+print("--- predicate:",pred,"assert:",asst)
+
+print("\n\n")
+
+print("- ValidationRuleSet")
+print("-- From Id+ValidationRule-List; print")
+valid_rule_list=[x,y,z,q]
+valid_rule_set = ValidationRuleSet.fromIdValidationRules('ValidationRuleSetTest',valid_rule_list)
+print(valid_rule_set)
+print("-- getValidationRules(); print")
+print(valid_rule_set.getValidationRules())
+print("-- evaluateAssertionsInModuleContext(); print")
+try:
+    print(valid_rule_set.evaluateAssertionsInModuleContext({},rule_set_context_module))
+except:
+    print('----- EXCEPTION: this is expected for false assertions')
+
+print("\n\n")
+
+print("- RuleSet")
+print("-- From Id+None Sub RuleSet; print")
+rule_set = RuleSet.fromIdSubRuleSets('RuleSetTest')
+print(rule_set)
+print("-- hasValidationRuleSet; print")
+print(rule_set.hasValidationRuleSet())
+print("-- From Id+ValidationRuleSet; print")
+rule_set = RuleSet.fromIdSubRuleSets('RuleSetTest',valid_rule_set)
+print(rule_set)
+print("-- hasValidationRuleSet; print")
+print(rule_set.hasValidationRuleSet())
+print("-- getValidationRuleSet(); print")
+print(rule_set.getValidationRuleSet())
+print("-- evaluateInModuleContext(validate=False); print")
+rule_set.evaluateInModuleContext({},rule_set_context_module,validate=False)
+print("-- evaluateInModuleContext(validate=True); print")
+try:
+    rule_set.evaluateInModuleContext({},rule_set_context_module)
+except:
+    print('----- EXCEPTION: this is expected for false assertions')
+
+print("\n\n")
+
+print("- RulesEngine")
+rule_set_yaml_path=os.path.join(rule_set_path,'rule_set.yaml')
+print("-- Prepare experiment: dump rule set YAML to",rule_set_yaml_path)
+rule_set.dump(os.path.join(rule_set_path,'rule_set.yaml'))
+print("-- From list of rule set dir paths")
+rules_engine = RulesEngine([rule_set_path])
+print("-- Preload rules")
+rules_engine.preloadRules()
+print("-- run()")
+try:
+    rules_engine.run({})
+except:
+    print('----- EXCEPTION: this is expected for false assertions')

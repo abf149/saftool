@@ -1,4 +1,6 @@
+from pyclbr import Function
 from util.taxonomy.serializableobject import SerializableObject
+from util.taxonomy.expressions import *
 import importlib
 import os, sys
 
@@ -19,26 +21,26 @@ class Rule(SerializableObject):
 
     def setPredicate(self, predicate):
         '''Set the FunctionReference object which is the predicate of this rule'''
-        self.predicate=predicate
+        self.setAttrAsDict('predicate',predicate)
 
     def getPredicate(self):
         '''Get the FunctionReference object which is the predicate of this rule'''
-        return self.predicate
+        return FunctionReference.fromDict(self.predicate)
 
     def setConditionallyEvaluatedExpression(self, conditionally_evaluated_expression):
         '''Set the FunctionReference object which is evaluated when the predicate is True'''
-        self.conditionally_evaluated_expression=conditionally_evaluated_expression
+        self.setAttrAsDict('conditionally_evaluated_expression',conditionally_evaluated_expression)
 
     def getConditionallyEvaluatedExpression(self):
         '''Get the FunctionReference object which is evaluated when the predicate is True'''
-        return self.conditionally_evaluated_expression
+        return FunctionReference.fromDict(self.conditionally_evaluated_expression)
 
     def evaluateInModuleContext(self, component, context_module):
         '''Return the result of evaluating the predicate, and conditionally the result of evaluating the conditional expression'''
         result_conditionally_evaluated_expression=None
-        result_predicate=self.predicate.evaluateInModuleContext(component, context_module)
+        result_predicate=self.getPredicate().evaluateInModuleContext(component, context_module)
         if result_predicate:
-            result_conditionally_evaluated_expression=self.conditionally_evaluated_expression.evaluateInModuleContext(component, context_module)
+            result_conditionally_evaluated_expression=self.getConditionallyEvaluatedExpression().evaluateInModuleContext(component, context_module)
         return result_predicate, result_conditionally_evaluated_expression
 
 
@@ -72,10 +74,10 @@ class RuleSet(SerializableObject):
         pass
 
     @classmethod
-    def fromIdSubRuleSets(cls, validation_rule_set=None):
+    def fromIdSubRuleSets(cls, id, validation_rule_set=None):
         '''Init from individual sub-RuleSets'''
         obj=cls.fromId(id)
-        if validation_rule_set is not None:
+        if not (validation_rule_set is None):
             obj.setValidationRuleSet(validation_rule_set)
         return obj
 
@@ -163,7 +165,7 @@ class ValidationRuleSet(RuleSet):
 
         print("\n-- Exiting validation rule set: ",self.id,"\n")
 
-class RuleEngine:
+class RulesEngine:
     '''Methods for evaluating microarchitectural validation & transformation rules'''
 
     def __init__(self, rule_set_dir_path_list):
@@ -183,7 +185,7 @@ class RuleEngine:
         print('- Running validation tests...')
         for rule_set_name in self.rule_sets:
             # Evaluate RuleSet in context
-            self.rule_sets[rule_set_name]['rule_set_obj'].evaluateAssertionsInModuleContext(component, self.rule_sets[rule_set_name]['context_module'])
+            self.rule_sets[rule_set_name]['rule_set_obj'].evaluateInModuleContext(component, self.rule_sets[rule_set_name]['context_module'])
 
     def run(self, component):
         self.testValidationRules(component)
