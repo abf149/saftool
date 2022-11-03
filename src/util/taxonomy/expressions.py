@@ -26,6 +26,11 @@ class FunctionReference(Expression):
     def __init__(self):
         pass
 
+    def evaluateInModuleContext(self, fxn_arg, context_module):
+        '''Dereference and evaluate the function in the context of an imported module; currently only a single argument is supported'''
+        fxn = getattr(context_module, self.value)
+        return fxn(fxn_arg)
+
 class SolvableConstant(Expression):
     '''Expressions which support holes'''
 

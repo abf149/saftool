@@ -1,11 +1,15 @@
-import os, sys
+import os
 from util.taxonomy.serializableobject import SerializableObject
 from util.taxonomy.expressions import *
 
 os.system('rm *test.yaml')
 
+print("\n\n")
+
 # SerializableObject test
-print("SerializableObject tests")
+print("SerializableObject tests:")
+
+print("\n\n")
 
 print("- SerializableObject initialize, dump, load")
 print("-- From Id and Class")
@@ -35,6 +39,11 @@ parentObj.setAttrAsDict('child',childObj)
 parentObj.dump('nested_serializable_object_test.yaml')
 x = SerializableObject.fromYamlFilename('nested_serializable_object_test.yaml')
 print(x)
+
+print("\n\n")
+
+# Expression & subclass (FunctionReference, SolvableConstant, NetType, FormatType) tests
+print("Expression & subclass (FunctionReference, SolvableConstant, NetType, FormatType) tests:")
 
 print("\n\n")
 

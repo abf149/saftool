@@ -55,8 +55,12 @@ class SerializableObject:
         return self.__dict__.copy()
 
     def setAttrAsDict(self, attr_name, attr_obj):
-        '''Consume SerializableObject argument, convert to YAML and add as attribute'''
+        '''Consume SerializableObject argument, convert to dict and assign as an attribute'''
         setattr(self, attr_name, attr_obj.toDict())
+
+    def setAttrAsDictList(self, attr_name, attr_obj_list):
+        '''Consume SerializableObject list argument, convert to dict list and assign as an attribute'''
+        setattr(self, attr_name, [attr_obj.toDict() for attr_obj in attr_obj_list])
 
     def __str__(self):
         '''Print as dict'''
