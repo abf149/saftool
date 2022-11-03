@@ -75,6 +75,9 @@ class SAFSpec:
                     else:
                         self.dataspace_arch_map[dataspace_format['name']]=[arch_lvl]
 
+    def getDataspaceArchMap(self):
+        return self.dataspace_arch_map
+
     def getArchLevels(self):
         '''Return a list of architectural levels in the topology'''
         return self.arch_saf_map.keys()

@@ -1,0 +1,31 @@
+from util.taxonomy.serializableobject import SerializableObject
+
+# SerializableObject test
+print("SerializableObject tests")
+
+print("- SerializableObject initialize, dump, load")
+print("-- From Id and Class")
+x = SerializableObject.fromIdAndClass('SerializableObjectTest', 'SerializableObject')
+print("-- Dump")
+x.dump('serializable_object_test.yaml')
+print("-- From YAML file")
+x = SerializableObject.fromYamlFilename('serializable_object_test.yaml')
+print(x)
+print("-- From Id, Dump, From YAML file")
+x = SerializableObject.fromId('SerializableObjectTest')
+x.dump('serializable_object_test.yaml')
+x = SerializableObject.fromYamlFilename('serializable_object_test.yaml')
+print(x)
+
+print("- SerializableObject nesting")
+print("-- Child from Id and Class; print")
+childObj = SerializableObject.fromIdAndClass('childObj', 'SerializableObject')
+print(childObj)
+print("-- Parent from Id and Class; print")
+parentObj = SerializableObject.fromIdAndClass('parentObj', 'SerializableObject')
+print(parentObj)
+print("-- Child as child attribute of parent; dump; load from YAMl; print")
+parentObj.setAttrAsDict('child',childObj)
+parentObj.dump('nested_serializable_object_test.yaml')
+x = SerializableObject.fromYamlFilename('nested_serializable_object_test.yaml')
+print(x)
