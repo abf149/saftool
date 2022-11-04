@@ -174,9 +174,6 @@ class RulesEngine:
         self.rule_sets={}
         for rule_set_dir_path in self.rule_set_dir_path_list:
             rule_set_obj, context_module = RuleSet.importRuleSet(rule_set_dir_path)
-            print(rule_set_dir_path)
-            print(sys.path)
-            print(context_module)
             self.rule_sets[rule_set_obj.id]={'rule_set_obj':rule_set_obj, 'context_module':context_module}
 
     def testValidationRules(self, component):
