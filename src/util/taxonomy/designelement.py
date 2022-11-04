@@ -189,3 +189,47 @@ class Component(DesignElement):
     def getPortById(self, id):
         '''Get a Port by id'''
         return [port for port in self.getInterface() if port.id==id][0]
+
+
+class Primitive(Component):
+    '''A "black box" functional unit with no lower-level topology; from a microarchitectural synthesis perspective, a primitive is a terminal'''
+
+    def __init__(self):
+        pass
+
+    @classmethod
+    def fromIdCategoryAttributesInterface(cls, id, category, attributes, interface):
+        '''Get primitive from id, component category, component attributes, and interface ports'''
+        obj=cls.fromId(id)
+        obj.setCategory(category)
+        obj.setAttributes(attributes)
+        obj.setInterface(interface)
+        return obj
+
+    def setCategory(self, category):
+        '''Set the component category'''
+        self.category=category
+
+    def getCategory(self):
+        '''Get the component category'''
+        return self.category
+
+    def setAttributes(self, attributes):
+        '''Set the component attributes list'''
+        self.setAttrAsDictList('attributes', attributes)
+
+    def getAttributes(self):
+        '''Get the component attributes list'''
+        return getObjAttrAsObjListByClassType(self, 'attributes')
+
+    def setInterface(self, interface):
+        '''Set the component interface ports'''
+        self.setAttrAsDictList('interface', interface)
+
+    def getInterface(self):
+        '''Get the component interface ports'''
+        return getObjAttrAsObjListByClassType(self, 'interface')
+
+    def getPortById(self, id):
+        '''Get a Port by id'''
+        return [port for port in self.getInterface() if port.id==id][0]    
