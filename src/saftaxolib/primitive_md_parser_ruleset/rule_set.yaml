@@ -1,0 +1,24 @@
+classtype: RuleSet
+id: PrimitiveMetadataParserRuleSet
+validation_rule_set:
+  classtype: ValidationRuleSet
+  id: PrimitiveMetadataParserValidationRuleSet
+  validation_rules:
+
+  # Supported instantiations
+
+  #  NetHasConsistentPortNetType: all ports connected by a Net should have a consistent NetType
+  - classtype: ValidationRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: assertion
+      value: assertPrimitiveMetadataParserAttributesAreSupported
+    id: AssertPrimitiveMetadataParserSupportedInstantiation
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsPrimitiveMetadataParser
+
+  # Definitional rules
+  
+  # - TODO:Input metadata interface type matches format attribute

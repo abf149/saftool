@@ -193,10 +193,13 @@ class Component(DesignElement):
             # id format is xxx.portid; Lookup portid against subcomponent xxx in the topology
             subcomp_id,portid=id.split('.')
             subcomponent=[subcomp for subcomp in self.getTopology().getComponentList() if subcomp.getId()==subcomp_id][0]
-            return [port for port in subcomponent.getInterface() if port.id==portid][0]
+            return [port for port in subcomponent.getInterface() if port.getId()==portid][0]
         else:
             # Look up a port in this component's interface by id
-            return [port for port in self.getInterface() if port.id==id][0]
+            return [port for port in self.getInterface() if port.getId()==id][0]
+
+    def getAttributeById(self, id):
+        return [att for att in self.getAttributes() if att.getId()==id][0]
 
 
 class Primitive(Component):

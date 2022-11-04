@@ -109,7 +109,7 @@ def do_tests():
     print("\n\n")   
 
     print("- Topology validation rules, flat dummy architecture")
-    rule_set_path='saftaxolib/topology_ruleset'
+    rule_set_path='saftaxolib/base_ruleset'
 
     print("\n\n")   
 
