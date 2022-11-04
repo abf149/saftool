@@ -1,6 +1,7 @@
 import os
 from util.taxonomy.serializableobject import SerializableObject
 from util.taxonomy.expressions import *
+from util.taxonomy.designelement import *
 from util.taxonomy.rulesengine import *
 
 os.system('rm *test.yaml')
@@ -234,3 +235,136 @@ try:
     rules_engine.run({})
 except:
     print('----- EXCEPTION: this is expected for false assertions')
+
+print("\n\n")
+
+# DesignElement & subclass (Port, Net, Topology, Component) tests
+print("DesignElement & subclass (Port, Net, Topology, Component) tests:")
+
+print("\n\n")
+
+print("- Port")
+print("-- From id+NetType+FormatType; dump; load; print")
+net_type=NetType.fromIdValue('TestNetType','data')
+format_type=FormatType.fromIdValue('TestFormatType','C')
+p=Port.fromIdDirectionNetTypeFormatType('TestPort', 'in', net_type, format_type)
+p.dump('port_test.yaml')
+p=Port.fromYamlFilename('port_test.yaml')
+print(p)
+print("-- Test getters:")
+print(p.getDirection())
+print(p.getNetType())
+print(p.getFormatType())
+
+print("\n\n")
+
+print("- Net")
+print("-- From id+NetType+FormatType+Port ID list; dump; load; print")
+net_type=NetType.fromIdValue('TestNetType','data')
+format_type=FormatType.fromIdValue('TestFormatType','C')
+port_id_list=['md_in','md_out']
+n=Net.fromIdAttributes('TestNet', net_type, format_type, port_id_list)
+n.dump('net_test.yaml')
+n=Net.fromYamlFilename('net_test.yaml')
+print(n)
+print("-- Test getters:")
+print(n.getNetType())
+print(n.getFormatType())
+print(n.getPortIdList())
+
+print("\n\n")
+
+print("- Topology")
+print("-- Set up the test")
+
+# Topology ID
+topology_id='TestTopology'
+
+# Net list setup
+net_type=NetType.fromIdValue('TestNetType','data')
+format_type=FormatType.fromIdValue('TestFormatType','null')
+port_id_list=['data_in','data_out']
+net_data=Net.fromIdAttributes('TestDataNet', net_type, format_type, port_id_list)
+net_type=NetType.fromIdValue('TestNetType','md')
+format_type=FormatType.fromIdValue('TestFormatType','C')
+port_id_list=['md_in','md_out']
+net_md=Net.fromIdAttributes('TestMDNet', net_type, format_type, port_id_list)
+net_type=NetType.fromIdValue('TestNetType','pos')
+format_type=FormatType.fromIdValue('TestFormatType','addr')
+port_id_list=['pos_in','pos_out']
+net_pos=Net.fromIdAttributes('TestPosNet', net_type, format_type, port_id_list)
+net_list=[net_data,net_md,net_pos]
+
+# Component list setup
+component_list=[]
+
+print("-- From id+Net list+Component list; print")
+t=Topology.fromIdNetlistComponentList(topology_id,net_list,component_list)
+print(t)
+print("-- dump; load; print")
+t.dump('topology_test.yaml')
+t=Topology.fromYamlFilename('topology_test.yaml')
+print(t)
+print("-- Test getters")
+print(t.getNetList())
+print(t.getComponentList())
+print("\n\n")
+
+print("- Component")
+print("-- Set up the test")
+
+# Id
+component_id='TestComponent'
+
+# Category
+component_category='TestComponentCategory'
+
+# Attributes
+attribute0='attribute0'
+attribute1=1
+attribute2=FormatType.fromIdValue('TestAttributeFormatType','C')
+component_attributes=[attribute0,attribute1,attribute2]
+
+# Interface
+# - data_in, data_out ports
+net_type=NetType.fromIdValue('TestNetType','data')
+format_type=FormatType.fromIdValue('TestFormatType','null')
+port_data_in=Port.fromIdDirectionNetTypeFormatType('data_in', 'in', net_type, format_type)
+port_data_out=Port.fromIdDirectionNetTypeFormatType('data_out', 'out', net_type, format_type)
+
+# - md_in, md_out ports
+net_type=NetType.fromIdValue('TestNetType','md')
+format_type=FormatType.fromIdValue('TestFormatType','C')
+port_md_in=Port.fromIdDirectionNetTypeFormatType('md_in', 'in', net_type, format_type)
+port_md_out=Port.fromIdDirectionNetTypeFormatType('md_out', 'out', net_type, format_type)
+
+# - pos_in, pos_out ports
+net_type=NetType.fromIdValue('TestNetType','pos')
+format_type=FormatType.fromIdValue('TestFormatType','addr')
+port_pos_in=Port.fromIdDirectionNetTypeFormatType('pos_in', 'in', net_type, format_type)
+port_pos_out=Port.fromIdDirectionNetTypeFormatType('pos_out', 'out', net_type, format_type)
+
+# - build interface
+component_interface=[port_data_in,port_data_out,port_md_in,port_md_out,port_pos_in,port_pos_out]
+
+# Use topology from previous test
+component_topology=t
+
+print("-- From id+category+attributes+interface+topology; print")
+component=Component.fromIdCategoryAttributesInterfaceTopology(component_id,component_category,component_attributes,component_interface,component_topology)
+print(component)
+print("-- Dump; load; print")
+component.dump('component_test.yaml')
+component=Component.fromYamlFilename('component_test.yaml')
+print(component)
+print("-- Test getters")
+print(component.getAttributes())
+print(component.getCategory())
+print(component.getInterface())
+print(component.getTopology())
+print(component.getPortById('data_in'))
+print(component.getPortById('data_out'))
+print(component.getPortById('md_in'))
+print(component.getPortById('md_out'))
+print(component.getPortById('pos_in'))
+print(component.getPortById('pos_out'))

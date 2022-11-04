@@ -1,46 +1,46 @@
-class: RuleSet
+classtype: RuleSet
 id: RuleSetTest
 validation_rule_set:
-  class: ValidationRuleSet
+  classtype: ValidationRuleSet
   id: ValidationRuleSetTest
   validation_rules:
-  - class: ValidationRule
+  - classtype: ValidationRule
     conditionally_evaluated_expression:
-      class: FunctionReference
+      classtype: FunctionReference
       id: predicateTrue2
       value: alwaysTrue2
     id: ValidationRuleTest_T->T
     predicate:
-      class: FunctionReference
+      classtype: FunctionReference
       id: predicateTrue1
       value: alwaysTrue1
-  - class: ValidationRule
+  - classtype: ValidationRule
     conditionally_evaluated_expression:
-      class: FunctionReference
+      classtype: FunctionReference
       id: predicateTrue2
       value: alwaysTrue2
     id: ValidationRuleTest_F->T
     predicate:
-      class: FunctionReference
+      classtype: FunctionReference
       id: predicateFalse1
       value: alwaysFalse1
-  - class: ValidationRule
+  - classtype: ValidationRule
     conditionally_evaluated_expression:
-      class: FunctionReference
+      classtype: FunctionReference
       id: predicateFalse2
       value: alwaysFalse2
     id: ValidationRuleTest_T->F
     predicate:
-      class: FunctionReference
+      classtype: FunctionReference
       id: predicateTrue1
       value: alwaysTrue1
-  - class: ValidationRule
+  - classtype: ValidationRule
     conditionally_evaluated_expression:
-      class: FunctionReference
+      classtype: FunctionReference
       id: predicateFalse2
       value: alwaysFalse2
     id: ValidationRuleTest_F->F
     predicate:
-      class: FunctionReference
+      classtype: FunctionReference
       id: predicateFalse1
       value: alwaysFalse1

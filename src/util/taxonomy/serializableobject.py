@@ -18,7 +18,7 @@ class SerializableObject:
     def fromIdAndClass(cls, idParam, classParam):
         '''Init from id and class name'''
         obj=cls()
-        obj.dict2obj({'id':idParam, 'class':classParam})     
+        obj.dict2obj({'id':idParam, 'classtype':classParam})     
         return obj   
 
     @classmethod
@@ -59,8 +59,16 @@ class SerializableObject:
         setattr(self, attr_name, attr_obj.toDict())
 
     def setAttrAsDictList(self, attr_name, attr_obj_list):
-        '''Consume SerializableObject list argument, convert to dict list and assign as an attribute'''
-        setattr(self, attr_name, [attr_obj.toDict() for attr_obj in attr_obj_list])
+        '''Consume SerializableObject list argument, convert to dict list and assign as an attribute. int and string elements are unmodified'''
+        dict_list=[]
+
+        for attr_obj in attr_obj_list:
+            if type(attr_obj).__name__=='int' or type(attr_obj).__name__=='str':
+                dict_list.append(attr_obj)
+            else:
+                dict_list.append(attr_obj.toDict())
+
+        setattr(self, attr_name, dict_list)
 
     def __str__(self):
         '''Print as dict'''
