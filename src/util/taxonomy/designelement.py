@@ -187,8 +187,16 @@ class Component(DesignElement):
         return Topology.fromDict(self.topology)
 
     def getPortById(self, id):
-        '''Get a Port by id'''
-        return [port for port in self.getInterface() if port.id==id][0]
+        '''Look up a port in this component's interface by id; an id of the form xxx.portid causes a lookup for portid against subcomponent xxx in this component's topology'''
+
+        if '.' in id:
+            # id format is xxx.portid; Lookup portid against subcomponent xxx in the topology
+            subcomp_id,portid=id.split('.')
+            subcomponent=[subcomp for subcomp in self.getTopology().getComponentList() if subcomp.getId()==subcomp_id][0]
+            return [port for port in subcomponent.getInterface() if port.id==portid][0]
+        else:
+            # Look up a port in this component's interface by id
+            return [port for port in self.getInterface() if port.id==id][0]
 
 
 class Primitive(Component):
@@ -204,32 +212,4 @@ class Primitive(Component):
         obj.setCategory(category)
         obj.setAttributes(attributes)
         obj.setInterface(interface)
-        return obj
-
-    def setCategory(self, category):
-        '''Set the component category'''
-        self.category=category
-
-    def getCategory(self):
-        '''Get the component category'''
-        return self.category
-
-    def setAttributes(self, attributes):
-        '''Set the component attributes list'''
-        self.setAttrAsDictList('attributes', attributes)
-
-    def getAttributes(self):
-        '''Get the component attributes list'''
-        return getObjAttrAsObjListByClassType(self, 'attributes')
-
-    def setInterface(self, interface):
-        '''Set the component interface ports'''
-        self.setAttrAsDictList('interface', interface)
-
-    def getInterface(self):
-        '''Get the component interface ports'''
-        return getObjAttrAsObjListByClassType(self, 'interface')
-
-    def getPortById(self, id):
-        '''Get a Port by id'''
-        return [port for port in self.getInterface() if port.id==id][0]    
+        return obj  

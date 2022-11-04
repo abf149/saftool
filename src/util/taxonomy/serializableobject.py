@@ -40,6 +40,22 @@ class SerializableObject:
             obj = yaml.safe_load(file)
         return obj
 
+    def setId(self,id):
+        '''id setter'''
+        self.id=id
+    
+    def getId(self):
+        '''id getter'''
+        return self.id
+
+    def setClassType(self,classtype):
+        '''classtype setter'''
+        self.classtype=classtype
+
+    def getClassType(self):
+        '''classtype getter'''
+        return self.classtype
+
     def dict2obj(self, attr_dict):
         '''Configure object from dict'''
         for key in attr_dict:
