@@ -1,0 +1,30 @@
+classtype: RuleSet
+id: TopologyRuleSet
+validation_rule_set:
+  classtype: ValidationRuleSet
+  id: TopologyValidationRuleSet
+  validation_rules:
+
+  #  NetHasConsistentPortNetType: all ports connected by a Net should have a consistent NetType
+  - classtype: ValidationRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: assertion
+      value: assertNetsHaveConsistentPortNetTypes
+    id: AssertNetHasConsistentPortNetType
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsComponentHasNets
+
+  #  NetHasConsistentPortFormatType: all ports connected by a Net should have a consistent FormatType
+  - classtype: ValidationRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: assertion
+      value: assertNetsHaveConsistentPortFormatTypes
+    id: AssertNetHasConsistentPortFormatType
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsComponentHasNets

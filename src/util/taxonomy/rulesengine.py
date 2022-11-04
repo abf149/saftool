@@ -1,7 +1,6 @@
-from pyclbr import Function
 from util.taxonomy.serializableobject import SerializableObject
 from util.taxonomy.expressions import *
-import importlib
+from util.helper import dirpath_to_import_expression
 import os, sys
 
 class Rule(SerializableObject):
@@ -91,13 +90,10 @@ class RuleSet(SerializableObject):
         rule_set_obj=RuleSet.fromYamlFilename(rule_set_filename)
 
         print('\n-- Importing rule set context module',os.path.join(rule_set_path,"RuleSetContextModule.py"),'\n')
-        old_sys_path=sys.path.copy()
-        sys.path.append(rule_set_path)
-        rule_set_context_module=importlib.import_module("RuleSetContextModule", package=None)
-        sys.path=old_sys_path
-
+        exec_import_command=dirpath_to_import_expression(rule_set_path,'RuleSetContextModule','rule_set_context_module')
+        print('--- Performing generated import command: ',exec_import_command)
+        exec(exec_import_command)
         print('\n-- Done importing.\n')
-
         return rule_set_obj, rule_set_context_module
 
     def setValidationRuleSet(self, validation_rule_set):
@@ -178,6 +174,9 @@ class RulesEngine:
         self.rule_sets={}
         for rule_set_dir_path in self.rule_set_dir_path_list:
             rule_set_obj, context_module = RuleSet.importRuleSet(rule_set_dir_path)
+            print(rule_set_dir_path)
+            print(sys.path)
+            print(context_module)
             self.rule_sets[rule_set_obj.id]={'rule_set_obj':rule_set_obj, 'context_module':context_module}
 
     def testValidationRules(self, component):
@@ -187,5 +186,11 @@ class RulesEngine:
             # Evaluate RuleSet in context
             self.rule_sets[rule_set_name]['rule_set_obj'].evaluateInModuleContext(component, self.rule_sets[rule_set_name]['context_module'])
 
+        print('\n- SUCCESS: validation\n')
+
     def run(self, component):
+        print('\nSTARTING: rule engine \n')
+
         self.testValidationRules(component)
+
+        print('\nDONE: rule engine \n')

@@ -2,9 +2,14 @@ from util.taxonomy.serializableobject import SerializableObject
 from util.taxonomy.expressions import *
 from util.taxonomy.designelement import *
 from util.taxonomy.rulesengine import *
+import importlib
 
 def do_tests():
-    '''Tests of basic netlist and validation functionality'''
+    '''Tests of basic netlist and rule engine functionality'''
+
+    print("\n\n")
+
+    print("Tests of basic netlist and rule engine functionality")
 
     print("\n\n")
 
