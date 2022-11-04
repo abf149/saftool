@@ -74,17 +74,23 @@ class SerializableObject:
         '''Consume SerializableObject argument, convert to dict and assign as an attribute'''
         setattr(self, attr_name, attr_obj.toDict())
 
-    def setAttrAsDictList(self, attr_name, attr_obj_list):
-        '''Consume SerializableObject list argument, convert to dict list and assign as an attribute. int and string elements are unmodified'''
+    @classmethod
+    def objList2dictList(cls, obj_list):
         dict_list=[]
 
-        for attr_obj in attr_obj_list:
+        for attr_obj in obj_list:
             if type(attr_obj).__name__=='int' or type(attr_obj).__name__=='str':
                 dict_list.append(attr_obj)
+            elif type(attr_obj).__name__=='list':
+                dict_list.append(SerializableObject.objList2dictList(attr_obj))
             else:
                 dict_list.append(attr_obj.toDict())
 
-        setattr(self, attr_name, dict_list)
+        return dict_list
+
+    def setAttrAsDictList(self, attr_name, attr_obj_list):
+        '''Consume SerializableObject list argument, convert to dict list and assign as an attribute. int and string elements are unmodified'''
+        setattr(self, attr_name, SerializableObject.objList2dictList(attr_obj_list))
 
     def __str__(self):
         '''Print as dict'''

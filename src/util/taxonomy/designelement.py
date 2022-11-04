@@ -192,7 +192,7 @@ class Component(DesignElement):
         if '.' in id:
             # id format is xxx.portid; Lookup portid against subcomponent xxx in the topology
             subcomp_id,portid=id.split('.')
-            subcomponent=[subcomp for subcomp in self.getTopology().getComponentList() if subcomp.getId()==subcomp_id][0]
+            subcomponent=[subcomp for subcomp in self.getTopology().getComponentList() if subcomp.getId()==subcomp_id][0]      
             return [port for port in subcomponent.getInterface() if port.getId()==portid][0]
         else:
             # Look up a port in this component's interface by id
