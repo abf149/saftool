@@ -152,7 +152,7 @@ class ValidationRuleSet(RuleSet):
             # Evaluate predicate for each rule & conditionally make an assertion
 
             result_predicate, result_assertion = validation_rule.evaluateInModuleContext(component, context_module)
-            print("--- Validation rule:", self.id, "Predicate:",validation_rule.getPredicate().getValue(),"==",result_predicate)
+            print("--- Validation rule:", validation_rule.id, "Predicate:",validation_rule.getPredicate().getValue(),"==",result_predicate)
             if result_predicate:
                 # Predicate True; assert
                 print("---- Asserting:",validation_rule.getAssertion().getValue())
@@ -185,9 +185,21 @@ class RulesEngine:
 
         print('\n- SUCCESS: validation\n')
 
-    def run(self, component):
-        print('\nSTARTING: rule engine \n')
+    def runSingle(self, component, recurse=True):
+        print('\nSTARTING: rule engine  \n')
 
         self.testValidationRules(component)
 
+        if component.getClassType()!='Primitive' and recurse:
+            # Recurse against all subcomponents (unless this component is a primitive!)
+            print('\n- STARTING: recurse against subcomponents of',component.getId(),'\n')
+            for subcomponent in component.getTopology().getComponentList():
+                print('\n-- STARTING: recurse against subcomponent',subcomponent.getId(),'\n')
+                self.runSingle(subcomponent, recurse=recurse)
+            print('\n- DONE: recurse against subcomponents of',component.getId(),'\n')
+
         print('\nDONE: rule engine \n')
+
+    def run(self, component, recurse=True):
+        # Wrapper for (optionally-)recursive rule evaluation against the provided component and its subcomponents
+        self.runSingle(component, recurse=recurse)

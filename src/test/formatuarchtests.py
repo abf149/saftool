@@ -10,7 +10,7 @@ def genPrimitiveMetadataParser(primitive_id, fmt):
     primitive_category='MetadataParser'
 
     # Attributes
-    primitive_attributes=[FormatType.fromIdValue('MetadataParserFormatAttribute',fmt)]
+    primitive_attributes=[FormatType.fromIdValue('format',fmt)]
 
     # Interface
     # - md_in
@@ -38,7 +38,7 @@ def genFormatUarch():
     component_category='FormatUarch'
 
     # Attributes
-    rank_format_list=[FormatType.fromIdValue('TestAttributeFormatType','C'),FormatType.fromIdValue('TestAttributeFormatType','B')]
+    rank_format_list=[FormatType.fromIdValue('format','C'),FormatType.fromIdValue('format','B')]
     component_attributes=[rank_format_list]
 
     # Interface
