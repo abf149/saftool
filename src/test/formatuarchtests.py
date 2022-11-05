@@ -1,3 +1,5 @@
+'''Format uarch regression testbench'''
+
 from util.taxonomy.serializableobject import SerializableObject
 from util.taxonomy.expressions import *
 from util.taxonomy.designelement import *
@@ -96,11 +98,11 @@ def genFormatUarch():
     return component
 
 def do_tests():
-    '''Tests of generic component validation rules'''
+    '''Tests of format microarchitecture rule set'''
 
     print("\n\n")
 
-    print("Tests of format uarch validation rules")
+    print("Tests of format microarchitecture rule set")
 
     print("\n\n")    
 
@@ -108,26 +110,26 @@ def do_tests():
 
     print("- Setup")
     print("-- Create format uarch component with [C,B] tensor ranks; print; dump")
-    dummy_component=genFormatUarch()
+    format_uarch_component=genFormatUarch()
     import pprint
-    pprint.pprint(str(dummy_component))
-    dummy_component.dump('formatuarch_test.yaml')
+    pprint.pprint(str(format_uarch_component))
+    format_uarch_component.dump('formatuarch_test.yaml')
 
     # Topology validation rules
 
     print("\n\n")   
 
-    print("- Topology validation rules, flat dummy architecture")
+    print("- Topology validation rules against format uarch")
     base_rule_set_path='saftaxolib/base_ruleset'
     primitive_md_parser_rule_set_path='saftaxolib/primitive_md_parser_ruleset'
 
     print("\n\n")   
 
-    print("-- For known good dummy topology, load topology validation rules (",base_rule_set_path,",",primitive_md_parser_rule_set_path,") into RulesEngine & preload rules")
+    print("-- Load topology validation rules (",base_rule_set_path,",",primitive_md_parser_rule_set_path,") into RulesEngine & preload rules")
     rules_engine = RulesEngine([base_rule_set_path,primitive_md_parser_rule_set_path])
     rules_engine.preloadRules()
     print("-- run()")
 
     print("\n\n")   
 
-    rules_engine.run(dummy_component)
+    rules_engine.run(format_uarch_component)

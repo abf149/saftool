@@ -116,9 +116,25 @@ class Topology(DesignElement):
     def fromIdNetlistComponentList(cls, id, net_list, component_list):
         '''Get topology from id, topology nets, and topology components'''
         obj=cls.fromId(id)
+        obj.setIsHole(False)
         obj.setNetList(net_list)
         obj.setComponentList(component_list)
         return obj
+
+    @classmethod
+    def holeFromId(cls, id):
+        '''Get a topological hole from id'''
+        obj=cls.fromId(id)
+        obj.setIsHole(True)
+        obj.setNetList([])
+        obj.setComponentList([])
+        return obj
+
+    def setIsHole(self, is_hole):
+        self.is_hole=is_hole
+
+    def isHole(self):
+        return self.is_hole
 
     def setNetList(self, net_list):
         '''Set list of topological nets'''
