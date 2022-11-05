@@ -48,3 +48,18 @@ class FormatType(SolvableConstant):
 
     def __init__(self):
         pass
+
+    @classmethod
+    def compareFormatTypes(cls, format_type_0, format_type_1, unknowns_wild=True):
+        '''Compare two FormatTypes or format type strings for equality; unknowns are wildcards for comparison unless otherwise specified.'''
+
+        # If either format type argument is a string, convert to FormatType
+        if type(format_type_0).__name__ == 'str':
+            format_type_0=FormatType.fromIdValue('format_type_0',format_type_0)
+        if type(format_type_1).__name__ == 'str':
+            format_type_1=FormatType.fromIdValue('format_type_1',format_type_1)
+
+        if unknowns_wild and (format_type_0.getValue() == '?' or format_type_1.getValue() == '?'):
+            # Implement unknowns wild
+            return True
+        return format_type_0.getValue() == format_type_1.getValue()

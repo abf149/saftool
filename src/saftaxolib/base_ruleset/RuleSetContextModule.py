@@ -1,5 +1,7 @@
 # General topology rules
 
+from util.taxonomy.expressions import FormatType
+
 # - Topology validation rules
 
 # -- AssertNetHasConsistentPortNetType: all ports connected by a Net should have a consistent NetType
@@ -39,8 +41,9 @@ def assertNetsHaveConsistentPortFormatTypes(obj):
             port=obj.getPortById(port_id)
             if format_type is None:
                 format_type=port.getFormatType().getValue()
+                print(format_type)
             else:
-                if port.getFormatType().getValue() != format_type:                
+                if not  FormatType.compareFormatTypes(port.getFormatType(),format_type):                
                     # Assertion should fail if format types don't match                
                     return False
 
