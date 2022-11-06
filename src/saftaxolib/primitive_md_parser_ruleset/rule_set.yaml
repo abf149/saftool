@@ -1,13 +1,15 @@
 classtype: RuleSet
 id: PrimitiveMetadataParserRuleSet
+
+# Primitive MetadataParser validation rules
+
 validation_rule_set:
   classtype: ValidationRuleSet
   id: PrimitiveMetadataParserValidationRuleSet
   validation_rules:
 
-  # Supported instantiations
+  # - Supported-instantiation validation rules
 
-  #  NetHasConsistentPortNetType: all ports connected by a Net should have a consistent NetType
   - classtype: ValidationRule
     conditionally_evaluated_expression:
       classtype: FunctionReference
@@ -19,6 +21,22 @@ validation_rule_set:
       id: predicate
       value: predicateIsPrimitiveMetadataParser
 
-  # Definitional rules
-  
-  # - TODO:Input metadata interface type matches format attribute
+# Format uarch rewrite rules
+
+rewrite_rule_set:
+  classtype: RewriteRuleSet
+  id: PrimitiveMetadataParserRewriteRuleSet
+  rewrite_rules:
+
+  # - Unknown attribute type from known interface type
+
+  - classtype: RewriteRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: transform
+      value: transformUnknownAttributeTypeFromInterfaceType
+    id: TransformUnknownAttributeTypeFromInterfaceType
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsPrimitiveMetadataParserHasUnknownAttributeTypeAndKnownInterfaceType   

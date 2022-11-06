@@ -133,11 +133,12 @@ def do_tests():
     print("- Topology validation rules against incomplete format uarch (topological hole)")
     base_rule_set_path='saftaxolib/base_ruleset'
     primitive_md_parser_rule_set_path='saftaxolib/primitive_md_parser_ruleset'
+    format_uarch_rule_set_path='saftaxolib/format_uarch_ruleset'    
 
     print("\n\n")   
 
-    print("-- Load topology validation rules (",base_rule_set_path,",",primitive_md_parser_rule_set_path,") into RulesEngine & preload rules")
-    rules_engine = RulesEngine([base_rule_set_path,primitive_md_parser_rule_set_path])
+    print("-- Load topology validation rules (",base_rule_set_path,",",primitive_md_parser_rule_set_path,',',format_uarch_rule_set_path,") into RulesEngine & preload rules")
+    rules_engine = RulesEngine([base_rule_set_path,primitive_md_parser_rule_set_path,format_uarch_rule_set_path])
     rules_engine.preloadRules()
     print("-- run()")
 
@@ -145,6 +146,8 @@ def do_tests():
 
     result=rules_engine.run(format_uarch_component)
     print(result)    
+    print("-- Dump inferred microarchitecture")
+    result[1][-1].dump('incomplete_component_hole_test_SOLVED.yaml')    
 
     print("\n\n")
 
@@ -161,11 +164,12 @@ def do_tests():
     print("- Topology validation rules against incomplete format uarch (unknown interface/attributes)")
     base_rule_set_path='saftaxolib/base_ruleset'
     primitive_md_parser_rule_set_path='saftaxolib/primitive_md_parser_ruleset'
+    format_uarch_rule_set_path='saftaxolib/format_uarch_ruleset'
 
     print("\n\n")   
 
-    print("-- Load topology validation rules (",base_rule_set_path,",",primitive_md_parser_rule_set_path,") into RulesEngine & preload rules")
-    rules_engine = RulesEngine([base_rule_set_path,primitive_md_parser_rule_set_path])
+    print("-- Load topology validation rules (",base_rule_set_path,",",primitive_md_parser_rule_set_path,',',format_uarch_rule_set_path,") into RulesEngine & preload rules")
+    rules_engine = RulesEngine([base_rule_set_path,primitive_md_parser_rule_set_path,format_uarch_rule_set_path])
     rules_engine.preloadRules()
     print("-- run()")
 
@@ -173,4 +177,6 @@ def do_tests():
 
     result=rules_engine.run(format_uarch_component)    
     print(result)
+    print("-- Dump inferred microarchitecture")
+    result[1][-1].dump('incomplete_component_interface_attribute_type_test_SOLVED.yaml')    
 

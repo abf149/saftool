@@ -1,0 +1,3124 @@
+
+
+
+Tests of basic netlist and rule engine functionality
+
+
+
+SerializableObject tests:
+
+
+
+- SerializableObject initialize, dump, load
+-- From Id and Class
+-- Dump
+-- From YAML file
+{'classtype': 'SerializableObject', 'id': 'SerializableObjectTest'}
+-- From Id, Dump, From YAML file
+{'classtype': 'SerializableObject', 'id': 'SerializableObjectTest'}
+
+
+
+- SerializableObject nesting
+-- Child from Id and Class; print
+{'id': 'childObj', 'classtype': 'SerializableObject'}
+-- Parent from Id and Class; print
+{'id': 'parentObj', 'classtype': 'SerializableObject'}
+-- Child as child attribute of parent; dump; load from YAMl; print
+{'child': {'classtype': 'SerializableObject', 'id': 'childObj'}, 'classtype': 'SerializableObject', 'id': 'parentObj'}
+
+
+
+Expression & subclass (FunctionReference, SolvableConstant, NetType, FormatType) tests:
+
+
+
+- Expression
+-- From Id, Dump, From YAML file
+-- Load from YAML file; print
+{'id': 'ExpressionTest', 'classtype': 'Expression'}
+-- From Id+Value('1'), Dump, From YAML file
+-- Load from YAML file; print
+{'classtype': 'Expression', 'id': 'ExpressionTest', 'value': '1'}
+-- Expression().getValue()
+1
+-- Expression().setValue('2'); Expression().getValue()
+None
+2
+
+
+
+- Test setup: importing rule set context module saftaxolib/ref_ruleset/RuleSetContextModule.py
+
+
+
+- FunctionReference
+-- From Id+Value('alwaysTrue1','alwaysFalse1'), Dump, From YAML file
+-- Load from YAML file; print
+{'classtype': 'FunctionReference', 'id': 'FunctionReferenceTest', 'value': 'alwaysTrue1'}
+-- Evaluate alwaysTrue1: True
+-- Evaluate alwaysFalse1: False
+
+
+
+- SolvableConstant
+-- From Id+Value('1'), Dump, From YAML file
+-- Load from YAML file; print
+{'classtype': 'SolvableConstant', 'id': 'SolvableConstantTest', 'value': '1'}
+
+
+
+- NetType
+-- From Id+Value('data'), Dump, From YAML file
+-- Load from YAML file; print
+{'classtype': 'NetType', 'id': 'NetTypeTest', 'value': 'data'}
+
+
+
+- FormatType
+-- From Id+Value('C'), Dump, From YAML file
+-- Load from YAML file; print
+{'classtype': 'FormatType', 'id': 'FormatTypeTest', 'value': 'C'}
+RulesEngine & subclasses (Rule, ValidationRule, RuleSet, ValidationRuleSet) tests:
+
+
+
+- Rule
+-- From Id+Predicate+Conditionally-evaluated-expression; print
+{'id': 'RuleTest', 'classtype': 'Rule', 'predicate': {'id': 'predicateTrue1', 'classtype': 'FunctionReference', 'value': 'alwaysTrue1'}, 'conditionally_evaluated_expression': {'id': 'predicateTrue2', 'classtype': 'FunctionReference', 'value': 'alwaysTrue2'}}
+getPredicate() type: FunctionReference getConditionallyEvaluatedExpression() type: FunctionReference
+-- Dump to YAML and load
+{'classtype': 'Rule', 'conditionally_evaluated_expression': {'classtype': 'FunctionReference', 'id': 'predicateTrue2', 'value': 'alwaysTrue2'}, 'id': 'RuleTest', 'predicate': {'classtype': 'FunctionReference', 'id': 'predicateTrue1', 'value': 'alwaysTrue1'}}
+-- Evaluate Rule1:
+--- predicate: True assert: True
+-- Evaluate Rule2:
+--- predicate: False assert: None
+-- Evaluate Rule3:
+--- predicate: True assert: False
+-- Evaluate Rule4:
+--- predicate: False assert: None
+
+
+
+- ValidationRule
+-- From Id+Predicate+Assertion; print
+{'id': 'ValidationRuleTest_T->T', 'classtype': 'ValidationRule', 'predicate': {'id': 'predicateTrue1', 'classtype': 'FunctionReference', 'value': 'alwaysTrue1'}, 'conditionally_evaluated_expression': {'id': 'predicateTrue2', 'classtype': 'FunctionReference', 'value': 'alwaysTrue2'}}
+getPredicate() type: FunctionReference getConditionallyEvaluatedExpression() type: FunctionReference
+-- Dump to YAML and load
+{'classtype': 'ValidationRule', 'conditionally_evaluated_expression': {'classtype': 'FunctionReference', 'id': 'predicateTrue2', 'value': 'alwaysTrue2'}, 'id': 'ValidationRuleTest_T->T', 'predicate': {'classtype': 'FunctionReference', 'id': 'predicateTrue1', 'value': 'alwaysTrue1'}}
+-- Evaluate Rule1:
+--- predicate: True assert: True
+-- Evaluate Rule2:
+--- predicate: False assert: None
+-- Evaluate Rule3:
+--- predicate: True assert: False
+-- Evaluate Rule4:
+--- predicate: False assert: None
+
+
+
+- ValidationRuleSet
+-- From Id+ValidationRule-List; print
+{'id': 'ValidationRuleSetTest', 'classtype': 'ValidationRuleSet', 'validation_rules': [{'classtype': 'ValidationRule', 'conditionally_evaluated_expression': {'classtype': 'FunctionReference', 'id': 'predicateTrue2', 'value': 'alwaysTrue2'}, 'id': 'ValidationRuleTest_T->T', 'predicate': {'classtype': 'FunctionReference', 'id': 'predicateTrue1', 'value': 'alwaysTrue1'}}, {'id': 'ValidationRuleTest_F->T', 'classtype': 'ValidationRule', 'predicate': {'id': 'predicateFalse1', 'classtype': 'FunctionReference', 'value': 'alwaysFalse1'}, 'conditionally_evaluated_expression': {'id': 'predicateTrue2', 'classtype': 'FunctionReference', 'value': 'alwaysTrue2'}}, {'id': 'ValidationRuleTest_T->F', 'classtype': 'ValidationRule', 'predicate': {'id': 'predicateTrue1', 'classtype': 'FunctionReference', 'value': 'alwaysTrue1'}, 'conditionally_evaluated_expression': {'id': 'predicateFalse2', 'classtype': 'FunctionReference', 'value': 'alwaysFalse2'}}, {'id': 'ValidationRuleTest_F->F', 'classtype': 'ValidationRule', 'predicate': {'id': 'predicateFalse1', 'classtype': 'FunctionReference', 'value': 'alwaysFalse1'}, 'conditionally_evaluated_expression': {'id': 'predicateFalse2', 'classtype': 'FunctionReference', 'value': 'alwaysFalse2'}}]}
+-- getValidationRules(); print
+[<util.taxonomy.rulesengine.ValidationRule object at 0x101570550>, <util.taxonomy.rulesengine.ValidationRule object at 0x1015739a0>, <util.taxonomy.rulesengine.ValidationRule object at 0x101570130>, <util.taxonomy.rulesengine.ValidationRule object at 0x1015705b0>]
+-- evaluateAssertionsInModuleContext(); print
+
+-- Stepping into validation rule set:  ValidationRuleSetTest 
+
+--- Validation rule: ValidationRuleTest_T->T Predicate: alwaysTrue1 == True
+---- Asserting: alwaysTrue2
+---- => ok.
+--- Validation rule: ValidationRuleTest_F->T Predicate: alwaysFalse1 == False
+--- Validation rule: ValidationRuleTest_T->F Predicate: alwaysTrue1 == True
+---- Asserting: alwaysFalse2
+----- EXCEPTION: this is expected for false assertions
+
+
+
+- RuleSet
+-- From Id+None Sub RuleSet; print
+{'id': 'RuleSetTest', 'classtype': 'RuleSet'}
+-- hasValidationRuleSet; print
+False
+-- From Id+ValidationRuleSet; print
+{'id': 'RuleSetTest', 'classtype': 'RuleSet', 'validation_rule_set': {'id': 'ValidationRuleSetTest', 'classtype': 'ValidationRuleSet', 'validation_rules': [{'classtype': 'ValidationRule', 'conditionally_evaluated_expression': {'classtype': 'FunctionReference', 'id': 'predicateTrue2', 'value': 'alwaysTrue2'}, 'id': 'ValidationRuleTest_T->T', 'predicate': {'classtype': 'FunctionReference', 'id': 'predicateTrue1', 'value': 'alwaysTrue1'}}, {'id': 'ValidationRuleTest_F->T', 'classtype': 'ValidationRule', 'predicate': {'id': 'predicateFalse1', 'classtype': 'FunctionReference', 'value': 'alwaysFalse1'}, 'conditionally_evaluated_expression': {'id': 'predicateTrue2', 'classtype': 'FunctionReference', 'value': 'alwaysTrue2'}}, {'id': 'ValidationRuleTest_T->F', 'classtype': 'ValidationRule', 'predicate': {'id': 'predicateTrue1', 'classtype': 'FunctionReference', 'value': 'alwaysTrue1'}, 'conditionally_evaluated_expression': {'id': 'predicateFalse2', 'classtype': 'FunctionReference', 'value': 'alwaysFalse2'}}, {'id': 'ValidationRuleTest_F->F', 'classtype': 'ValidationRule', 'predicate': {'id': 'predicateFalse1', 'classtype': 'FunctionReference', 'value': 'alwaysFalse1'}, 'conditionally_evaluated_expression': {'id': 'predicateFalse2', 'classtype': 'FunctionReference', 'value': 'alwaysFalse2'}}]}}
+-- hasValidationRuleSet; print
+True
+-- getValidationRuleSet(); print
+{'id': 'ValidationRuleSetTest', 'classtype': 'ValidationRuleSet', 'validation_rules': [{'classtype': 'ValidationRule', 'conditionally_evaluated_expression': {'classtype': 'FunctionReference', 'id': 'predicateTrue2', 'value': 'alwaysTrue2'}, 'id': 'ValidationRuleTest_T->T', 'predicate': {'classtype': 'FunctionReference', 'id': 'predicateTrue1', 'value': 'alwaysTrue1'}}, {'id': 'ValidationRuleTest_F->T', 'classtype': 'ValidationRule', 'predicate': {'id': 'predicateFalse1', 'classtype': 'FunctionReference', 'value': 'alwaysFalse1'}, 'conditionally_evaluated_expression': {'id': 'predicateTrue2', 'classtype': 'FunctionReference', 'value': 'alwaysTrue2'}}, {'id': 'ValidationRuleTest_T->F', 'classtype': 'ValidationRule', 'predicate': {'id': 'predicateTrue1', 'classtype': 'FunctionReference', 'value': 'alwaysTrue1'}, 'conditionally_evaluated_expression': {'id': 'predicateFalse2', 'classtype': 'FunctionReference', 'value': 'alwaysFalse2'}}, {'id': 'ValidationRuleTest_F->F', 'classtype': 'ValidationRule', 'predicate': {'id': 'predicateFalse1', 'classtype': 'FunctionReference', 'value': 'alwaysFalse1'}, 'conditionally_evaluated_expression': {'id': 'predicateFalse2', 'classtype': 'FunctionReference', 'value': 'alwaysFalse2'}}]}
+-- evaluateInModuleContext(validate=False); print
+
+- Stepping into rule set: RuleSetTest 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  RuleSetTest 
+
+-- evaluateInModuleContext(validate=True); print
+
+- Stepping into rule set: RuleSetTest 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  RuleSetTest 
+
+
+
+
+- RulesEngine
+-- Prepare experiment: dump rule set YAML to saftaxolib/ref_ruleset/rule_set.yaml
+-- From list of rule set dir paths
+-- Preload rules
+Pre-loading rule sets...
+
+- Detecting rule set at saftaxolib/ref_ruleset/ 
+
+
+-- Importing rule set from saftaxolib/ref_ruleset/rule_set.yaml 
+
+
+-- Importing rule set context module saftaxolib/ref_ruleset/RuleSetContextModule.py 
+
+--- Performing generated import command:  global rule_set_context_module; from saftaxolib.ref_ruleset import RuleSetContextModule as rule_set_context_module
+
+-- Done importing.
+
+-- run()
+
+STARTING: rule engine  
+
+
+- STARTING: state-machine pass 0 
+
+----- EXCEPTION: this is expected for false assertions
+
+
+
+DesignElement & subclass (Port, Net, Topology, Component) tests:
+
+
+
+- Port
+-- From id+NetType+FormatType; dump; load; print
+{'classtype': 'Port', 'direction': 'in', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'C'}, 'id': 'TestPort', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'data'}}
+-- Test getters:
+in
+{'classtype': 'NetType', 'id': 'TestNetType', 'value': 'data'}
+{'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'C'}
+
+
+
+- Net
+-- From id+NetType+FormatType+Port ID list; dump; load; print
+{'classtype': 'Net', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'C'}, 'id': 'TestNet', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'data'}, 'port_id_list': ['md_in', 'md_out']}
+-- Test getters:
+{'classtype': 'NetType', 'id': 'TestNetType', 'value': 'data'}
+{'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'C'}
+['md_in', 'md_out']
+
+
+
+- Topology
+-- Set up the test
+-- From id+Net list+Component list; print
+{'id': 'TestTopology', 'classtype': 'Topology', 'is_hole': False, 'net_list': [{'id': 'TestDataNet', 'classtype': 'Net', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'data'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': 'null'}, 'port_id_list': ['data_in', 'data_out']}, {'id': 'TestMDNet', 'classtype': 'Net', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'md'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': 'C'}, 'port_id_list': ['md_in', 'md_out']}, {'id': 'TestPosNet', 'classtype': 'Net', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'pos'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': 'addr'}, 'port_id_list': ['pos_in', 'pos_out']}], 'component_list': []}
+-- dump; load; print
+{'classtype': 'Topology', 'component_list': [], 'id': 'TestTopology', 'is_hole': False, 'net_list': [{'classtype': 'Net', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'null'}, 'id': 'TestDataNet', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'data'}, 'port_id_list': ['data_in', 'data_out']}, {'classtype': 'Net', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'C'}, 'id': 'TestMDNet', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'md'}, 'port_id_list': ['md_in', 'md_out']}, {'classtype': 'Net', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'addr'}, 'id': 'TestPosNet', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'pos'}, 'port_id_list': ['pos_in', 'pos_out']}]}
+-- Test getters
+[<util.taxonomy.designelement.Net object at 0x101573cd0>, <util.taxonomy.designelement.Net object at 0x101570c40>, <util.taxonomy.designelement.Net object at 0x101573d30>]
+[]
+
+
+
+- Component
+-- Set up the test
+-- From id+category+attributes+interface+topology; print
+{'id': 'TestComponent', 'classtype': 'Component', 'category': 'TestComponentCategory', 'attributes': ['attribute0', 1, {'id': 'TestAttributeFormatType', 'classtype': 'FormatType', 'value': 'C'}], 'interface': [{'id': 'data_in', 'classtype': 'Port', 'direction': 'in', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'data'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': 'null'}}, {'id': 'data_out', 'classtype': 'Port', 'direction': 'out', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'data'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': 'null'}}, {'id': 'md_in', 'classtype': 'Port', 'direction': 'in', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'md'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': 'C'}}, {'id': 'md_out', 'classtype': 'Port', 'direction': 'out', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'md'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': 'C'}}, {'id': 'pos_in', 'classtype': 'Port', 'direction': 'in', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'pos'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': 'addr'}}, {'id': 'pos_out', 'classtype': 'Port', 'direction': 'out', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'pos'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': 'addr'}}], 'topology': {'classtype': 'Topology', 'component_list': [], 'id': 'TestTopology', 'is_hole': False, 'net_list': [{'classtype': 'Net', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'null'}, 'id': 'TestDataNet', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'data'}, 'port_id_list': ['data_in', 'data_out']}, {'classtype': 'Net', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'C'}, 'id': 'TestMDNet', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'md'}, 'port_id_list': ['md_in', 'md_out']}, {'classtype': 'Net', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'addr'}, 'id': 'TestPosNet', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'pos'}, 'port_id_list': ['pos_in', 'pos_out']}]}}
+-- Dump; load; print
+{'attributes': ['attribute0', 1, {'classtype': 'FormatType', 'id': 'TestAttributeFormatType', 'value': 'C'}], 'category': 'TestComponentCategory', 'classtype': 'Component', 'id': 'TestComponent', 'interface': [{'classtype': 'Port', 'direction': 'in', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'null'}, 'id': 'data_in', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'data'}}, {'classtype': 'Port', 'direction': 'out', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'null'}, 'id': 'data_out', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'data'}}, {'classtype': 'Port', 'direction': 'in', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'C'}, 'id': 'md_in', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'md'}}, {'classtype': 'Port', 'direction': 'out', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'C'}, 'id': 'md_out', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'md'}}, {'classtype': 'Port', 'direction': 'in', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'addr'}, 'id': 'pos_in', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'pos'}}, {'classtype': 'Port', 'direction': 'out', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'addr'}, 'id': 'pos_out', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'pos'}}], 'topology': {'classtype': 'Topology', 'component_list': [], 'id': 'TestTopology', 'is_hole': False, 'net_list': [{'classtype': 'Net', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'null'}, 'id': 'TestDataNet', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'data'}, 'port_id_list': ['data_in', 'data_out']}, {'classtype': 'Net', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'C'}, 'id': 'TestMDNet', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'md'}, 'port_id_list': ['md_in', 'md_out']}, {'classtype': 'Net', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'addr'}, 'id': 'TestPosNet', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'pos'}, 'port_id_list': ['pos_in', 'pos_out']}]}}
+-- Test getters
+['attribute0', 1, <util.taxonomy.expressions.FormatType object at 0x1010018d0>]
+TestComponentCategory
+[<util.taxonomy.designelement.Port object at 0x101001930>, <util.taxonomy.designelement.Port object at 0x1010018a0>, <util.taxonomy.designelement.Port object at 0x101001840>, <util.taxonomy.designelement.Port object at 0x101001810>, <util.taxonomy.designelement.Port object at 0x101001870>, <util.taxonomy.designelement.Port object at 0x101001900>]
+{'classtype': 'Topology', 'component_list': [], 'id': 'TestTopology', 'is_hole': False, 'net_list': [{'classtype': 'Net', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'null'}, 'id': 'TestDataNet', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'data'}, 'port_id_list': ['data_in', 'data_out']}, {'classtype': 'Net', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'C'}, 'id': 'TestMDNet', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'md'}, 'port_id_list': ['md_in', 'md_out']}, {'classtype': 'Net', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'addr'}, 'id': 'TestPosNet', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'pos'}, 'port_id_list': ['pos_in', 'pos_out']}]}
+{'classtype': 'Port', 'direction': 'in', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'null'}, 'id': 'data_in', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'data'}}
+{'classtype': 'Port', 'direction': 'out', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'null'}, 'id': 'data_out', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'data'}}
+{'classtype': 'Port', 'direction': 'in', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'C'}, 'id': 'md_in', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'md'}}
+{'classtype': 'Port', 'direction': 'out', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'C'}, 'id': 'md_out', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'md'}}
+{'classtype': 'Port', 'direction': 'in', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'addr'}, 'id': 'pos_in', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'pos'}}
+{'classtype': 'Port', 'direction': 'out', 'format_type': {'classtype': 'FormatType', 'id': 'TestFormatType', 'value': 'addr'}, 'id': 'pos_out', 'net_type': {'classtype': 'NetType', 'id': 'TestNetType', 'value': 'pos'}}
+
+
+
+Tests of generic component validation rules
+
+
+
+- Setup
+-- Create dummy flat component with no subcomponents & nets directly connecting the interface ports; print
+{'id': 'TestComponent', 'classtype': 'Component', 'category': 'TestComponentCategory', 'attributes': ['attribute0', 1, {'id': 'TestAttributeFormatType', 'classtype': 'FormatType', 'value': 'C'}], 'interface': [{'id': 'data_in', 'classtype': 'Port', 'direction': 'in', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'data'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': 'null'}}, {'id': 'data_out', 'classtype': 'Port', 'direction': 'out', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'data'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': 'null'}}, {'id': 'md_in', 'classtype': 'Port', 'direction': 'in', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'md'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': 'C'}}, {'id': 'md_out', 'classtype': 'Port', 'direction': 'out', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'md'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': 'C'}}, {'id': 'pos_in', 'classtype': 'Port', 'direction': 'in', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'pos'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': 'addr'}}, {'id': 'pos_out', 'classtype': 'Port', 'direction': 'out', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'pos'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': 'addr'}}], 'topology': {'id': 'TestTopology', 'classtype': 'Topology', 'is_hole': False, 'net_list': [{'id': 'TestDataNet', 'classtype': 'Net', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'data'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': 'null'}, 'port_id_list': ['data_in', 'data_out']}, {'id': 'TestMDNet', 'classtype': 'Net', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'md'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': 'C'}, 'port_id_list': ['md_in', 'md_out']}, {'id': 'TestPosNet', 'classtype': 'Net', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'pos'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': 'addr'}, 'port_id_list': ['pos_in', 'pos_out']}], 'component_list': []}}
+
+
+
+- Topology validation rules, flat dummy architecture
+
+
+
+-- For known good dummy topology, load topology validation rules ( saftaxolib/base_ruleset ) into RulesEngine & preload rules
+Pre-loading rule sets...
+
+- Detecting rule set at saftaxolib/base_ruleset 
+
+
+-- Importing rule set from saftaxolib/base_ruleset/rule_set.yaml 
+
+
+-- Importing rule set context module saftaxolib/base_ruleset/RuleSetContextModule.py 
+
+--- Performing generated import command:  global rule_set_context_module; from saftaxolib.base_ruleset import RuleSetContextModule as rule_set_context_module
+
+-- Done importing.
+
+-- run()
+
+
+
+
+STARTING: rule engine  
+
+
+- STARTING: state-machine pass 0 
+
+- Evaluating validate tests against component TestComponent ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  TopologyValidationRuleSet 
+
+--- Validation rule: AssertNetHasConsistentPortNetType Predicate: predicateIsComponentHasNets == True
+---- Asserting: assertNetsHaveConsistentPortNetTypes
+---- => ok.
+--- Validation rule: AssertNetHasConsistentPortFormatType Predicate: predicateIsComponentHasNets == True
+---- Asserting: assertNetsHaveConsistentPortFormatTypes
+---- => ok.
+
+-- Exiting validation rule set:  TopologyValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- STARTING: recurse against subcomponents of TestComponent 
+
+
+- DONE: recurse against subcomponents of TestComponent 
+
+- Evaluating rewrite tests against component TestComponent ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  TopologicalRewriteRuleSet 
+
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentHasNetsHasUnknownChildComponentPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+
+-- Rewrite ruleset evaluated with NO rewrites: TopologicalRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  TopologicalRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- STARTING: recurse against subcomponents of TestComponent 
+
+
+- DONE: recurse against subcomponents of TestComponent 
+
+result_rewrite_modify {'result_validate': True, 'result_rewrite_modify': False, 'result_rewrite_component': <util.taxonomy.designelement.Component object at 0x101001870>, 'result_check_complete': True}
+- Evaluating check_complete tests against component TestComponent ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Test completion rule set. 
+
+
+-- Stepping into completion rule set:  TopologyCompletionRuleSet 
+
+--- Completion rule: CheckComponentHasNoTopologicalHoles Predicate: predicateIsComponent == True
+---- Evaluating: checkComponentHasNoTopologicalHoles
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownInterfaceTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownInterfaceTypes
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownAttributeTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownAttributeTypes
+---- => Completion rule PASSED.
+
+-- Completion ruleset PASSED: TopologyCompletionRuleSet 
+
+
+-- Exiting completion rule set:  TopologyCompletionRuleSet 
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- STARTING: recurse against subcomponents of TestComponent 
+
+
+- DONE: recurse against subcomponents of TestComponent 
+
+
+- DONE: state-machine pass 0 
+
+
+- COMPLETE: microarchitecture inference
+
+
+DONE: rule engine 
+
+-- For known bad dummy topology (port net-type mismatch on same net), load topology validation rules ( saftaxolib/base_ruleset ) into RulesEngine & preload rules
+
+STARTING: rule engine  
+
+
+- STARTING: state-machine pass 0 
+
+- Evaluating validate tests against component TestComponent ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  TopologyValidationRuleSet 
+
+--- Validation rule: AssertNetHasConsistentPortNetType Predicate: predicateIsComponentHasNets == True
+---- Asserting: assertNetsHaveConsistentPortNetTypes
+EXCEPTION: this is expected for a known bad dummy topology
+
+
+
+-- For known bad dummy topology (port format-type mismatch on same net), load topology validation rules ( saftaxolib/base_ruleset ) into RulesEngine & preload rules
+
+STARTING: rule engine  
+
+
+- STARTING: state-machine pass 0 
+
+- Evaluating validate tests against component TestComponent ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  TopologyValidationRuleSet 
+
+--- Validation rule: AssertNetHasConsistentPortNetType Predicate: predicateIsComponentHasNets == True
+---- Asserting: assertNetsHaveConsistentPortNetTypes
+---- => ok.
+--- Validation rule: AssertNetHasConsistentPortFormatType Predicate: predicateIsComponentHasNets == True
+---- Asserting: assertNetsHaveConsistentPortFormatTypes
+EXCEPTION: this is expected for a known bad topology
+
+
+
+Tests of format microarchitecture rule set
+
+
+
+- Setup
+-- Create format uarch component with [C,B] tensor ranks; print; dump
+("{'id': 'TestFormatUarch', 'classtype': 'Component', 'category': "
+ "'FormatUarch', 'attributes': [[{'id': 'format', 'classtype': 'FormatType', "
+ "'value': 'C'}, {'id': 'format', 'classtype': 'FormatType', 'value': 'B'}]], "
+ "'interface': [{'id': 'md_in0', 'classtype': 'Port', 'direction': 'in', "
+ "'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'md'}, "
+ "'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': "
+ "'C'}}, {'id': 'at_bound_out0', 'classtype': 'Port', 'direction': 'out', "
+ "'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'pos'}, "
+ "'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': "
+ "'addr'}}, {'id': 'md_in1', 'classtype': 'Port', 'direction': 'in', "
+ "'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'md'}, "
+ "'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': "
+ "'B'}}, {'id': 'at_bound_out1', 'classtype': 'Port', 'direction': 'out', "
+ "'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'pos'}, "
+ "'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': "
+ "'addr'}}], 'topology': {'id': 'TestTopology', 'classtype': 'Topology', "
+ "'is_hole': False, 'net_list': [{'id': 'TestMDNet0', 'classtype': 'Net', "
+ "'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'md'}, "
+ "'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': "
+ "'C'}, 'port_id_list': ['md_in0', 'TestMetadataParser0.md_in']}, {'id': "
+ "'TestMDNet0', 'classtype': 'Net', 'net_type': {'id': 'TestNetType', "
+ "'classtype': 'NetType', 'value': 'md'}, 'format_type': {'id': "
+ "'TestFormatType', 'classtype': 'FormatType', 'value': 'B'}, 'port_id_list': "
+ "['md_in1', 'TestMetadataParser1.md_in']}, {'id': 'TestPosNet0', 'classtype': "
+ "'Net', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': "
+ "'pos'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', "
+ "'value': 'addr'}, 'port_id_list': ['at_bound_out0', "
+ "'TestMetadataParser0.at_bound_out']}, {'id': 'TestPosNet1', 'classtype': "
+ "'Net', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': "
+ "'pos'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', "
+ "'value': 'addr'}, 'port_id_list': ['at_bound_out1', "
+ "'TestMetadataParser1.at_bound_out']}], 'component_list': [{'id': "
+ "'TestMetadataParser0', 'classtype': 'Primitive', 'category': "
+ "'MetadataParser', 'attributes': [{'id': 'format', 'classtype': 'FormatType', "
+ "'value': 'C'}], 'interface': [{'id': 'md_in', 'classtype': 'Port', "
+ "'direction': 'in', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', "
+ "'value': 'md'}, 'format_type': {'id': 'TestFormatType', 'classtype': "
+ "'FormatType', 'value': 'C'}}, {'id': 'at_bound_out', 'classtype': 'Port', "
+ "'direction': 'out', 'net_type': {'id': 'TestNetType', 'classtype': "
+ "'NetType', 'value': 'pos'}, 'format_type': {'id': 'TestFormatType', "
+ "'classtype': 'FormatType', 'value': 'addr'}}]}, {'id': "
+ "'TestMetadataParser1', 'classtype': 'Primitive', 'category': "
+ "'MetadataParser', 'attributes': [{'id': 'format', 'classtype': 'FormatType', "
+ "'value': 'B'}], 'interface': [{'id': 'md_in', 'classtype': 'Port', "
+ "'direction': 'in', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', "
+ "'value': 'md'}, 'format_type': {'id': 'TestFormatType', 'classtype': "
+ "'FormatType', 'value': 'B'}}, {'id': 'at_bound_out', 'classtype': 'Port', "
+ "'direction': 'out', 'net_type': {'id': 'TestNetType', 'classtype': "
+ "'NetType', 'value': 'pos'}, 'format_type': {'id': 'TestFormatType', "
+ "'classtype': 'FormatType', 'value': 'addr'}}]}]}}")
+
+
+
+- Topology validation rules against format uarch
+
+
+
+-- Load topology validation rules ( saftaxolib/base_ruleset , saftaxolib/primitive_md_parser_ruleset ) into RulesEngine & preload rules
+Pre-loading rule sets...
+
+- Detecting rule set at saftaxolib/base_ruleset 
+
+
+-- Importing rule set from saftaxolib/base_ruleset/rule_set.yaml 
+
+
+-- Importing rule set context module saftaxolib/base_ruleset/RuleSetContextModule.py 
+
+--- Performing generated import command:  global rule_set_context_module; from saftaxolib.base_ruleset import RuleSetContextModule as rule_set_context_module
+
+-- Done importing.
+
+
+- Detecting rule set at saftaxolib/primitive_md_parser_ruleset 
+
+
+-- Importing rule set from saftaxolib/primitive_md_parser_ruleset/rule_set.yaml 
+
+
+-- Importing rule set context module saftaxolib/primitive_md_parser_ruleset/RuleSetContextModule.py 
+
+--- Performing generated import command:  global rule_set_context_module; from saftaxolib.primitive_md_parser_ruleset import RuleSetContextModule as rule_set_context_module
+
+-- Done importing.
+
+-- run()
+
+
+
+
+STARTING: rule engine  
+
+
+- STARTING: state-machine pass 0 
+
+- Evaluating validate tests against component TestFormatUarch ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  TopologyValidationRuleSet 
+
+--- Validation rule: AssertNetHasConsistentPortNetType Predicate: predicateIsComponentHasNets == True
+---- Asserting: assertNetsHaveConsistentPortNetTypes
+---- => ok.
+--- Validation rule: AssertNetHasConsistentPortFormatType Predicate: predicateIsComponentHasNets == True
+---- Asserting: assertNetsHaveConsistentPortFormatTypes
+---- => ok.
+
+-- Exiting validation rule set:  TopologyValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+--- Validation rule: AssertPrimitiveMetadataParserSupportedInstantiation Predicate: predicateIsPrimitiveMetadataParser == False
+
+-- Exiting validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- STARTING: recurse against subcomponents of TestFormatUarch 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser0 
+
+- Evaluating validate tests against component TestMetadataParser0 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  TopologyValidationRuleSet 
+
+--- Validation rule: AssertNetHasConsistentPortNetType Predicate: predicateIsComponentHasNets == False
+--- Validation rule: AssertNetHasConsistentPortFormatType Predicate: predicateIsComponentHasNets == False
+
+-- Exiting validation rule set:  TopologyValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+--- Validation rule: AssertPrimitiveMetadataParserSupportedInstantiation Predicate: predicateIsPrimitiveMetadataParser == True
+---- Asserting: assertPrimitiveMetadataParserAttributesAreSupported
+---- => ok.
+
+-- Exiting validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser1 
+
+- Evaluating validate tests against component TestMetadataParser1 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  TopologyValidationRuleSet 
+
+--- Validation rule: AssertNetHasConsistentPortNetType Predicate: predicateIsComponentHasNets == False
+--- Validation rule: AssertNetHasConsistentPortFormatType Predicate: predicateIsComponentHasNets == False
+
+-- Exiting validation rule set:  TopologyValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+--- Validation rule: AssertPrimitiveMetadataParserSupportedInstantiation Predicate: predicateIsPrimitiveMetadataParser == True
+---- Asserting: assertPrimitiveMetadataParserAttributesAreSupported
+---- => ok.
+
+-- Exiting validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- DONE: recurse against subcomponents of TestFormatUarch 
+
+- Evaluating rewrite tests against component TestFormatUarch ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  TopologicalRewriteRuleSet 
+
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentHasNetsHasUnknownChildComponentPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+
+-- Rewrite ruleset evaluated with NO rewrites: TopologicalRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  TopologicalRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  PrimitiveMetadataParserRewriteRuleSet 
+
+--- Rewrite rule: TransformUnknownAttributeTypeFromInterfaceType Predicate: predicateIsPrimitiveMetadataParserHasUnknownAttributeTypeAndKnownInterfaceType == False
+
+-- Rewrite ruleset evaluated with NO rewrites: PrimitiveMetadataParserRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  PrimitiveMetadataParserRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- STARTING: recurse against subcomponents of TestFormatUarch 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser0 
+
+- Evaluating rewrite tests against component TestMetadataParser0 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  TopologicalRewriteRuleSet 
+
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentHasNetsHasUnknownChildComponentPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+
+-- Rewrite ruleset evaluated with NO rewrites: TopologicalRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  TopologicalRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  PrimitiveMetadataParserRewriteRuleSet 
+
+--- Rewrite rule: TransformUnknownAttributeTypeFromInterfaceType Predicate: predicateIsPrimitiveMetadataParserHasUnknownAttributeTypeAndKnownInterfaceType == False
+
+-- Rewrite ruleset evaluated with NO rewrites: PrimitiveMetadataParserRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  PrimitiveMetadataParserRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser1 
+
+- Evaluating rewrite tests against component TestMetadataParser1 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  TopologicalRewriteRuleSet 
+
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentHasNetsHasUnknownChildComponentPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+
+-- Rewrite ruleset evaluated with NO rewrites: TopologicalRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  TopologicalRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  PrimitiveMetadataParserRewriteRuleSet 
+
+--- Rewrite rule: TransformUnknownAttributeTypeFromInterfaceType Predicate: predicateIsPrimitiveMetadataParserHasUnknownAttributeTypeAndKnownInterfaceType == False
+
+-- Rewrite ruleset evaluated with NO rewrites: PrimitiveMetadataParserRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  PrimitiveMetadataParserRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- DONE: recurse against subcomponents of TestFormatUarch 
+
+result_rewrite_modify {'result_validate': True, 'result_rewrite_modify': False, 'result_rewrite_component': <util.taxonomy.designelement.Component object at 0x10155e9e0>, 'result_check_complete': True}
+- Evaluating check_complete tests against component TestFormatUarch ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Test completion rule set. 
+
+
+-- Stepping into completion rule set:  TopologyCompletionRuleSet 
+
+--- Completion rule: CheckComponentHasNoTopologicalHoles Predicate: predicateIsComponent == True
+---- Evaluating: checkComponentHasNoTopologicalHoles
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownInterfaceTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownInterfaceTypes
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownAttributeTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownAttributeTypes
+---- => Completion rule PASSED.
+
+-- Completion ruleset PASSED: TopologyCompletionRuleSet 
+
+
+-- Exiting completion rule set:  TopologyCompletionRuleSet 
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- STARTING: recurse against subcomponents of TestFormatUarch 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser0 
+
+- Evaluating check_complete tests against component TestMetadataParser0 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Test completion rule set. 
+
+
+-- Stepping into completion rule set:  TopologyCompletionRuleSet 
+
+--- Completion rule: CheckComponentHasNoTopologicalHoles Predicate: predicateIsComponent == False
+--- Completion rule: CheckComponentHasNoUnknownInterfaceTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownInterfaceTypes
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownAttributeTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownAttributeTypes
+---- => Completion rule PASSED.
+
+-- Completion ruleset PASSED: TopologyCompletionRuleSet 
+
+
+-- Exiting completion rule set:  TopologyCompletionRuleSet 
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser1 
+
+- Evaluating check_complete tests against component TestMetadataParser1 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Test completion rule set. 
+
+
+-- Stepping into completion rule set:  TopologyCompletionRuleSet 
+
+--- Completion rule: CheckComponentHasNoTopologicalHoles Predicate: predicateIsComponent == False
+--- Completion rule: CheckComponentHasNoUnknownInterfaceTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownInterfaceTypes
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownAttributeTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownAttributeTypes
+---- => Completion rule PASSED.
+
+-- Completion ruleset PASSED: TopologyCompletionRuleSet 
+
+
+-- Exiting completion rule set:  TopologyCompletionRuleSet 
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- DONE: recurse against subcomponents of TestFormatUarch 
+
+
+- DONE: state-machine pass 0 
+
+
+- COMPLETE: microarchitecture inference
+
+
+DONE: rule engine 
+
+
+
+
+Tests of rule set evaluation against incomplete microarchitectures which include topological holes and unknown attribute types
+
+
+
+- Setup
+
+
+
+-- Create format uarch component with a topological hole; print; dump
+("{'id': 'TestFormatUarch', 'classtype': 'Component', 'category': "
+ "'FormatUarch', 'attributes': [[{'id': 'format', 'classtype': 'FormatType', "
+ "'value': 'C'}, {'id': 'format', 'classtype': 'FormatType', 'value': 'B'}]], "
+ "'interface': [{'id': 'md_in0', 'classtype': 'Port', 'direction': 'in', "
+ "'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'md'}, "
+ "'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': "
+ "'C'}}, {'id': 'at_bound_out0', 'classtype': 'Port', 'direction': 'out', "
+ "'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'pos'}, "
+ "'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': "
+ "'addr'}}, {'id': 'md_in1', 'classtype': 'Port', 'direction': 'in', "
+ "'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'md'}, "
+ "'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': "
+ "'B'}}, {'id': 'at_bound_out1', 'classtype': 'Port', 'direction': 'out', "
+ "'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'pos'}, "
+ "'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': "
+ "'addr'}}], 'topology': {'id': <built-in function id>, 'classtype': "
+ "'Topology', 'is_hole': True, 'net_list': [], 'component_list': []}}")
+
+
+
+- Topology validation rules against incomplete format uarch (topological hole)
+
+
+
+-- Load topology validation rules ( saftaxolib/base_ruleset , saftaxolib/primitive_md_parser_ruleset , saftaxolib/format_uarch_ruleset ) into RulesEngine & preload rules
+Pre-loading rule sets...
+
+- Detecting rule set at saftaxolib/base_ruleset 
+
+
+-- Importing rule set from saftaxolib/base_ruleset/rule_set.yaml 
+
+
+-- Importing rule set context module saftaxolib/base_ruleset/RuleSetContextModule.py 
+
+--- Performing generated import command:  global rule_set_context_module; from saftaxolib.base_ruleset import RuleSetContextModule as rule_set_context_module
+
+-- Done importing.
+
+
+- Detecting rule set at saftaxolib/primitive_md_parser_ruleset 
+
+
+-- Importing rule set from saftaxolib/primitive_md_parser_ruleset/rule_set.yaml 
+
+
+-- Importing rule set context module saftaxolib/primitive_md_parser_ruleset/RuleSetContextModule.py 
+
+--- Performing generated import command:  global rule_set_context_module; from saftaxolib.primitive_md_parser_ruleset import RuleSetContextModule as rule_set_context_module
+
+-- Done importing.
+
+
+- Detecting rule set at saftaxolib/format_uarch_ruleset 
+
+
+-- Importing rule set from saftaxolib/format_uarch_ruleset/rule_set.yaml 
+
+
+-- Importing rule set context module saftaxolib/format_uarch_ruleset/RuleSetContextModule.py 
+
+--- Performing generated import command:  global rule_set_context_module; from saftaxolib.format_uarch_ruleset import RuleSetContextModule as rule_set_context_module
+
+-- Done importing.
+
+-- run()
+
+
+
+
+STARTING: rule engine  
+
+
+- STARTING: state-machine pass 0 
+
+- Evaluating validate tests against component TestFormatUarch ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  TopologyValidationRuleSet 
+
+--- Validation rule: AssertNetHasConsistentPortNetType Predicate: predicateIsComponentHasNets == False
+--- Validation rule: AssertNetHasConsistentPortFormatType Predicate: predicateIsComponentHasNets == False
+
+-- Exiting validation rule set:  TopologyValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+--- Validation rule: AssertPrimitiveMetadataParserSupportedInstantiation Predicate: predicateIsPrimitiveMetadataParser == False
+
+-- Exiting validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- No validate rule set. 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+- STARTING: recurse against subcomponents of TestFormatUarch 
+
+
+- DONE: recurse against subcomponents of TestFormatUarch 
+
+- Evaluating rewrite tests against component TestFormatUarch ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  TopologicalRewriteRuleSet 
+
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentHasNetsHasUnknownChildComponentPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+
+-- Rewrite ruleset evaluated with NO rewrites: TopologicalRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  TopologicalRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  PrimitiveMetadataParserRewriteRuleSet 
+
+--- Rewrite rule: TransformUnknownAttributeTypeFromInterfaceType Predicate: predicateIsPrimitiveMetadataParserHasUnknownAttributeTypeAndKnownInterfaceType == False
+
+-- Rewrite ruleset evaluated with NO rewrites: PrimitiveMetadataParserRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  PrimitiveMetadataParserRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  FormatUarchRewriteRuleSet 
+
+--- Rewrite rule: TransformTopologicalHoleToPerRankMdParserTopology Predicate: predicateIsComponentIsFormatUarchHasTopologicalHole == True
+---- Evaluating: transformTopologicalHoleToPerRankMdParserTopology
+---- => did REWRITE!
+
+-- Rewrite ruleset evaluated WITH rewrites: FormatUarchRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  FormatUarchRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+result_rewrite_modify {'result_validate': True, 'result_rewrite_modify': True, 'result_rewrite_component': <util.taxonomy.designelement.Component object at 0x10155ead0>, 'result_check_complete': True}
+result_rewrite_modify {'result_validate': True, 'result_rewrite_modify': True, 'result_rewrite_component': <util.taxonomy.designelement.Component object at 0x10155ead0>, 'result_check_complete': True}
+- Evaluating check_complete tests against component TestFormatUarch ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Test completion rule set. 
+
+
+-- Stepping into completion rule set:  TopologyCompletionRuleSet 
+
+--- Completion rule: CheckComponentHasNoTopologicalHoles Predicate: predicateIsComponent == True
+---- Evaluating: checkComponentHasNoTopologicalHoles
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownInterfaceTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownInterfaceTypes
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownAttributeTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownAttributeTypes
+---- => Completion rule PASSED.
+
+-- Completion ruleset PASSED: TopologyCompletionRuleSet 
+
+
+-- Exiting completion rule set:  TopologyCompletionRuleSet 
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+- STARTING: recurse against subcomponents of TestFormatUarch 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser0 
+
+- Evaluating check_complete tests against component TestMetadataParser0 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Test completion rule set. 
+
+
+-- Stepping into completion rule set:  TopologyCompletionRuleSet 
+
+--- Completion rule: CheckComponentHasNoTopologicalHoles Predicate: predicateIsComponent == False
+--- Completion rule: CheckComponentHasNoUnknownInterfaceTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownInterfaceTypes
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownAttributeTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownAttributeTypes
+---- => Completion rule PASSED.
+
+-- Completion ruleset PASSED: TopologyCompletionRuleSet 
+
+
+-- Exiting completion rule set:  TopologyCompletionRuleSet 
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser1 
+
+- Evaluating check_complete tests against component TestMetadataParser1 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Test completion rule set. 
+
+
+-- Stepping into completion rule set:  TopologyCompletionRuleSet 
+
+--- Completion rule: CheckComponentHasNoTopologicalHoles Predicate: predicateIsComponent == False
+--- Completion rule: CheckComponentHasNoUnknownInterfaceTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownInterfaceTypes
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownAttributeTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownAttributeTypes
+---- => Completion rule PASSED.
+
+-- Completion ruleset PASSED: TopologyCompletionRuleSet 
+
+
+-- Exiting completion rule set:  TopologyCompletionRuleSet 
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+- DONE: recurse against subcomponents of TestFormatUarch 
+
+
+- DONE: state-machine pass 0 
+
+
+- COMPLETE: microarchitecture inference
+
+
+DONE: rule engine 
+
+(True, [<util.taxonomy.designelement.Component object at 0x10155ead0>, <util.taxonomy.designelement.Component object at 0x10155ead0>])
+-- Dump inferred microarchitecture
+
+
+
+-- Create format uarch component with a primitives that have unknown interface and attribute types, and [C,B] tensor ranks; print; dump
+("{'id': 'TestFormatUarch', 'classtype': 'Component', 'category': "
+ "'FormatUarch', 'attributes': [[{'id': 'format', 'classtype': 'FormatType', "
+ "'value': 'C'}, {'id': 'format', 'classtype': 'FormatType', 'value': 'B'}]], "
+ "'interface': [{'id': 'md_in0', 'classtype': 'Port', 'direction': 'in', "
+ "'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'md'}, "
+ "'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': "
+ "'C'}}, {'id': 'at_bound_out0', 'classtype': 'Port', 'direction': 'out', "
+ "'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'pos'}, "
+ "'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': "
+ "'addr'}}, {'id': 'md_in1', 'classtype': 'Port', 'direction': 'in', "
+ "'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'md'}, "
+ "'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': "
+ "'B'}}, {'id': 'at_bound_out1', 'classtype': 'Port', 'direction': 'out', "
+ "'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'pos'}, "
+ "'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': "
+ "'addr'}}], 'topology': {'id': 'TestTopology', 'classtype': 'Topology', "
+ "'is_hole': False, 'net_list': [{'id': 'TestMDNet0', 'classtype': 'Net', "
+ "'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': 'md'}, "
+ "'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', 'value': "
+ "'C'}, 'port_id_list': ['md_in0', 'TestMetadataParser0.md_in']}, {'id': "
+ "'TestMDNet0', 'classtype': 'Net', 'net_type': {'id': 'TestNetType', "
+ "'classtype': 'NetType', 'value': 'md'}, 'format_type': {'id': "
+ "'TestFormatType', 'classtype': 'FormatType', 'value': 'B'}, 'port_id_list': "
+ "['md_in1', 'TestMetadataParser1.md_in']}, {'id': 'TestPosNet0', 'classtype': "
+ "'Net', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': "
+ "'pos'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', "
+ "'value': 'addr'}, 'port_id_list': ['at_bound_out0', "
+ "'TestMetadataParser0.at_bound_out']}, {'id': 'TestPosNet1', 'classtype': "
+ "'Net', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', 'value': "
+ "'pos'}, 'format_type': {'id': 'TestFormatType', 'classtype': 'FormatType', "
+ "'value': 'addr'}, 'port_id_list': ['at_bound_out1', "
+ "'TestMetadataParser1.at_bound_out']}], 'component_list': [{'id': "
+ "'TestMetadataParser0', 'classtype': 'Primitive', 'category': "
+ "'MetadataParser', 'attributes': [{'id': 'format', 'classtype': 'FormatType', "
+ "'value': '?'}], 'interface': [{'id': 'md_in', 'classtype': 'Port', "
+ "'direction': 'in', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', "
+ "'value': 'md'}, 'format_type': {'id': 'TestFormatType', 'classtype': "
+ "'FormatType', 'value': '?'}}, {'id': 'at_bound_out', 'classtype': 'Port', "
+ "'direction': 'out', 'net_type': {'id': 'TestNetType', 'classtype': "
+ "'NetType', 'value': 'pos'}, 'format_type': {'id': 'TestFormatType', "
+ "'classtype': 'FormatType', 'value': 'addr'}}]}, {'id': "
+ "'TestMetadataParser1', 'classtype': 'Primitive', 'category': "
+ "'MetadataParser', 'attributes': [{'id': 'format', 'classtype': 'FormatType', "
+ "'value': '?'}], 'interface': [{'id': 'md_in', 'classtype': 'Port', "
+ "'direction': 'in', 'net_type': {'id': 'TestNetType', 'classtype': 'NetType', "
+ "'value': 'md'}, 'format_type': {'id': 'TestFormatType', 'classtype': "
+ "'FormatType', 'value': '?'}}, {'id': 'at_bound_out', 'classtype': 'Port', "
+ "'direction': 'out', 'net_type': {'id': 'TestNetType', 'classtype': "
+ "'NetType', 'value': 'pos'}, 'format_type': {'id': 'TestFormatType', "
+ "'classtype': 'FormatType', 'value': 'addr'}}]}]}}")
+
+
+
+- Topology validation rules against incomplete format uarch (unknown interface/attributes)
+
+
+
+-- Load topology validation rules ( saftaxolib/base_ruleset , saftaxolib/primitive_md_parser_ruleset , saftaxolib/format_uarch_ruleset ) into RulesEngine & preload rules
+Pre-loading rule sets...
+
+- Detecting rule set at saftaxolib/base_ruleset 
+
+
+-- Importing rule set from saftaxolib/base_ruleset/rule_set.yaml 
+
+
+-- Importing rule set context module saftaxolib/base_ruleset/RuleSetContextModule.py 
+
+--- Performing generated import command:  global rule_set_context_module; from saftaxolib.base_ruleset import RuleSetContextModule as rule_set_context_module
+
+-- Done importing.
+
+
+- Detecting rule set at saftaxolib/primitive_md_parser_ruleset 
+
+
+-- Importing rule set from saftaxolib/primitive_md_parser_ruleset/rule_set.yaml 
+
+
+-- Importing rule set context module saftaxolib/primitive_md_parser_ruleset/RuleSetContextModule.py 
+
+--- Performing generated import command:  global rule_set_context_module; from saftaxolib.primitive_md_parser_ruleset import RuleSetContextModule as rule_set_context_module
+
+-- Done importing.
+
+
+- Detecting rule set at saftaxolib/format_uarch_ruleset 
+
+
+-- Importing rule set from saftaxolib/format_uarch_ruleset/rule_set.yaml 
+
+
+-- Importing rule set context module saftaxolib/format_uarch_ruleset/RuleSetContextModule.py 
+
+--- Performing generated import command:  global rule_set_context_module; from saftaxolib.format_uarch_ruleset import RuleSetContextModule as rule_set_context_module
+
+-- Done importing.
+
+-- run()
+
+
+
+
+STARTING: rule engine  
+
+
+- STARTING: state-machine pass 0 
+
+- Evaluating validate tests against component TestFormatUarch ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  TopologyValidationRuleSet 
+
+--- Validation rule: AssertNetHasConsistentPortNetType Predicate: predicateIsComponentHasNets == True
+---- Asserting: assertNetsHaveConsistentPortNetTypes
+---- => ok.
+--- Validation rule: AssertNetHasConsistentPortFormatType Predicate: predicateIsComponentHasNets == True
+---- Asserting: assertNetsHaveConsistentPortFormatTypes
+---- => ok.
+
+-- Exiting validation rule set:  TopologyValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+--- Validation rule: AssertPrimitiveMetadataParserSupportedInstantiation Predicate: predicateIsPrimitiveMetadataParser == False
+
+-- Exiting validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- No validate rule set. 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+- STARTING: recurse against subcomponents of TestFormatUarch 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser0 
+
+- Evaluating validate tests against component TestMetadataParser0 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  TopologyValidationRuleSet 
+
+--- Validation rule: AssertNetHasConsistentPortNetType Predicate: predicateIsComponentHasNets == False
+--- Validation rule: AssertNetHasConsistentPortFormatType Predicate: predicateIsComponentHasNets == False
+
+-- Exiting validation rule set:  TopologyValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+--- Validation rule: AssertPrimitiveMetadataParserSupportedInstantiation Predicate: predicateIsPrimitiveMetadataParser == True
+---- Asserting: assertPrimitiveMetadataParserAttributesAreSupported
+---- => ok.
+
+-- Exiting validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- No validate rule set. 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser1 
+
+- Evaluating validate tests against component TestMetadataParser1 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  TopologyValidationRuleSet 
+
+--- Validation rule: AssertNetHasConsistentPortNetType Predicate: predicateIsComponentHasNets == False
+--- Validation rule: AssertNetHasConsistentPortFormatType Predicate: predicateIsComponentHasNets == False
+
+-- Exiting validation rule set:  TopologyValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+--- Validation rule: AssertPrimitiveMetadataParserSupportedInstantiation Predicate: predicateIsPrimitiveMetadataParser == True
+---- Asserting: assertPrimitiveMetadataParserAttributesAreSupported
+---- => ok.
+
+-- Exiting validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- No validate rule set. 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+- DONE: recurse against subcomponents of TestFormatUarch 
+
+- Evaluating rewrite tests against component TestFormatUarch ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  TopologicalRewriteRuleSet 
+
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentHasNetsHasUnknownChildComponentPortTypesOnNetsWithKnownTypes == True
+---- Evaluating: transformUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType
+---- => did REWRITE!
+
+-- Rewrite ruleset evaluated WITH rewrites: TopologicalRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  TopologicalRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+result_rewrite_modify {'result_validate': True, 'result_rewrite_modify': True, 'result_rewrite_component': <util.taxonomy.designelement.Component object at 0x10164d480>, 'result_check_complete': True}
+result_rewrite_modify {'result_validate': True, 'result_rewrite_modify': True, 'result_rewrite_component': <util.taxonomy.designelement.Component object at 0x10164d480>, 'result_check_complete': True}
+- Evaluating check_complete tests against component TestFormatUarch ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Test completion rule set. 
+
+
+-- Stepping into completion rule set:  TopologyCompletionRuleSet 
+
+--- Completion rule: CheckComponentHasNoTopologicalHoles Predicate: predicateIsComponent == True
+---- Evaluating: checkComponentHasNoTopologicalHoles
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownInterfaceTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownInterfaceTypes
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownAttributeTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownAttributeTypes
+---- => Completion rule PASSED.
+
+-- Completion ruleset PASSED: TopologyCompletionRuleSet 
+
+
+-- Exiting completion rule set:  TopologyCompletionRuleSet 
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+- STARTING: recurse against subcomponents of TestFormatUarch 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser0 
+
+- Evaluating check_complete tests against component TestMetadataParser0 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Test completion rule set. 
+
+
+-- Stepping into completion rule set:  TopologyCompletionRuleSet 
+
+--- Completion rule: CheckComponentHasNoTopologicalHoles Predicate: predicateIsComponent == False
+--- Completion rule: CheckComponentHasNoUnknownInterfaceTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownInterfaceTypes
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownAttributeTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownAttributeTypes
+---- => Completion rule FAILED!
+
+-- Completion ruleset FAILED: TopologyCompletionRuleSet 
+
+
+-- Exiting completion rule set:  TopologyCompletionRuleSet 
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- DONE: state-machine pass 0 
+
+
+- STARTING: state-machine pass 1 
+
+- Evaluating validate tests against component TestFormatUarch ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  TopologyValidationRuleSet 
+
+--- Validation rule: AssertNetHasConsistentPortNetType Predicate: predicateIsComponentHasNets == True
+---- Asserting: assertNetsHaveConsistentPortNetTypes
+---- => ok.
+--- Validation rule: AssertNetHasConsistentPortFormatType Predicate: predicateIsComponentHasNets == True
+---- Asserting: assertNetsHaveConsistentPortFormatTypes
+---- => ok.
+
+-- Exiting validation rule set:  TopologyValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+--- Validation rule: AssertPrimitiveMetadataParserSupportedInstantiation Predicate: predicateIsPrimitiveMetadataParser == False
+
+-- Exiting validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- No validate rule set. 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+- STARTING: recurse against subcomponents of TestFormatUarch 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser0 
+
+- Evaluating validate tests against component TestMetadataParser0 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  TopologyValidationRuleSet 
+
+--- Validation rule: AssertNetHasConsistentPortNetType Predicate: predicateIsComponentHasNets == False
+--- Validation rule: AssertNetHasConsistentPortFormatType Predicate: predicateIsComponentHasNets == False
+
+-- Exiting validation rule set:  TopologyValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+--- Validation rule: AssertPrimitiveMetadataParserSupportedInstantiation Predicate: predicateIsPrimitiveMetadataParser == True
+---- Asserting: assertPrimitiveMetadataParserAttributesAreSupported
+---- => ok.
+
+-- Exiting validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- No validate rule set. 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser1 
+
+- Evaluating validate tests against component TestMetadataParser1 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  TopologyValidationRuleSet 
+
+--- Validation rule: AssertNetHasConsistentPortNetType Predicate: predicateIsComponentHasNets == False
+--- Validation rule: AssertNetHasConsistentPortFormatType Predicate: predicateIsComponentHasNets == False
+
+-- Exiting validation rule set:  TopologyValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+--- Validation rule: AssertPrimitiveMetadataParserSupportedInstantiation Predicate: predicateIsPrimitiveMetadataParser == True
+---- Asserting: assertPrimitiveMetadataParserAttributesAreSupported
+---- => ok.
+
+-- Exiting validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- No validate rule set. 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+- DONE: recurse against subcomponents of TestFormatUarch 
+
+- Evaluating rewrite tests against component TestFormatUarch ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  TopologicalRewriteRuleSet 
+
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentHasNetsHasUnknownChildComponentPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+
+-- Rewrite ruleset evaluated with NO rewrites: TopologicalRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  TopologicalRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  PrimitiveMetadataParserRewriteRuleSet 
+
+--- Rewrite rule: TransformUnknownAttributeTypeFromInterfaceType Predicate: predicateIsPrimitiveMetadataParserHasUnknownAttributeTypeAndKnownInterfaceType == False
+
+-- Rewrite ruleset evaluated with NO rewrites: PrimitiveMetadataParserRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  PrimitiveMetadataParserRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  FormatUarchRewriteRuleSet 
+
+--- Rewrite rule: TransformTopologicalHoleToPerRankMdParserTopology Predicate: predicateIsComponentIsFormatUarchHasTopologicalHole == False
+
+-- Rewrite ruleset evaluated with NO rewrites: FormatUarchRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  FormatUarchRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+- STARTING: recurse against subcomponents of TestFormatUarch 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser0 
+
+- Evaluating rewrite tests against component TestMetadataParser0 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  TopologicalRewriteRuleSet 
+
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentHasNetsHasUnknownChildComponentPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+
+-- Rewrite ruleset evaluated with NO rewrites: TopologicalRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  TopologicalRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  PrimitiveMetadataParserRewriteRuleSet 
+
+--- Rewrite rule: TransformUnknownAttributeTypeFromInterfaceType Predicate: predicateIsPrimitiveMetadataParserHasUnknownAttributeTypeAndKnownInterfaceType == True
+---- Evaluating: transformUnknownAttributeTypeFromInterfaceType
+---- => did REWRITE!
+
+-- Rewrite ruleset evaluated WITH rewrites: PrimitiveMetadataParserRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  PrimitiveMetadataParserRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+result_rewrite_modify {'result_validate': True, 'result_rewrite_modify': True, 'result_rewrite_component': <util.taxonomy.designelement.Primitive object at 0x10164ee60>, 'result_check_complete': True}
+result_rewrite_modify {'result_validate': True, 'result_rewrite_modify': True, 'result_rewrite_component': <util.taxonomy.designelement.Component object at 0x10164d480>, 'result_check_complete': True}
+- Evaluating check_complete tests against component TestFormatUarch ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Test completion rule set. 
+
+
+-- Stepping into completion rule set:  TopologyCompletionRuleSet 
+
+--- Completion rule: CheckComponentHasNoTopologicalHoles Predicate: predicateIsComponent == True
+---- Evaluating: checkComponentHasNoTopologicalHoles
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownInterfaceTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownInterfaceTypes
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownAttributeTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownAttributeTypes
+---- => Completion rule PASSED.
+
+-- Completion ruleset PASSED: TopologyCompletionRuleSet 
+
+
+-- Exiting completion rule set:  TopologyCompletionRuleSet 
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+- STARTING: recurse against subcomponents of TestFormatUarch 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser0 
+
+- Evaluating check_complete tests against component TestMetadataParser0 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Test completion rule set. 
+
+
+-- Stepping into completion rule set:  TopologyCompletionRuleSet 
+
+--- Completion rule: CheckComponentHasNoTopologicalHoles Predicate: predicateIsComponent == False
+--- Completion rule: CheckComponentHasNoUnknownInterfaceTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownInterfaceTypes
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownAttributeTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownAttributeTypes
+---- => Completion rule PASSED.
+
+-- Completion ruleset PASSED: TopologyCompletionRuleSet 
+
+
+-- Exiting completion rule set:  TopologyCompletionRuleSet 
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser1 
+
+- Evaluating check_complete tests against component TestMetadataParser1 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Test completion rule set. 
+
+
+-- Stepping into completion rule set:  TopologyCompletionRuleSet 
+
+--- Completion rule: CheckComponentHasNoTopologicalHoles Predicate: predicateIsComponent == False
+--- Completion rule: CheckComponentHasNoUnknownInterfaceTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownInterfaceTypes
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownAttributeTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownAttributeTypes
+---- => Completion rule FAILED!
+
+-- Completion ruleset FAILED: TopologyCompletionRuleSet 
+
+
+-- Exiting completion rule set:  TopologyCompletionRuleSet 
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- DONE: state-machine pass 1 
+
+
+- STARTING: state-machine pass 2 
+
+- Evaluating validate tests against component TestFormatUarch ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  TopologyValidationRuleSet 
+
+--- Validation rule: AssertNetHasConsistentPortNetType Predicate: predicateIsComponentHasNets == True
+---- Asserting: assertNetsHaveConsistentPortNetTypes
+---- => ok.
+--- Validation rule: AssertNetHasConsistentPortFormatType Predicate: predicateIsComponentHasNets == True
+---- Asserting: assertNetsHaveConsistentPortFormatTypes
+---- => ok.
+
+-- Exiting validation rule set:  TopologyValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+--- Validation rule: AssertPrimitiveMetadataParserSupportedInstantiation Predicate: predicateIsPrimitiveMetadataParser == False
+
+-- Exiting validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- No validate rule set. 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+- STARTING: recurse against subcomponents of TestFormatUarch 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser0 
+
+- Evaluating validate tests against component TestMetadataParser0 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  TopologyValidationRuleSet 
+
+--- Validation rule: AssertNetHasConsistentPortNetType Predicate: predicateIsComponentHasNets == False
+--- Validation rule: AssertNetHasConsistentPortFormatType Predicate: predicateIsComponentHasNets == False
+
+-- Exiting validation rule set:  TopologyValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+--- Validation rule: AssertPrimitiveMetadataParserSupportedInstantiation Predicate: predicateIsPrimitiveMetadataParser == True
+---- Asserting: assertPrimitiveMetadataParserAttributesAreSupported
+---- => ok.
+
+-- Exiting validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- No validate rule set. 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser1 
+
+- Evaluating validate tests against component TestMetadataParser1 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  TopologyValidationRuleSet 
+
+--- Validation rule: AssertNetHasConsistentPortNetType Predicate: predicateIsComponentHasNets == False
+--- Validation rule: AssertNetHasConsistentPortFormatType Predicate: predicateIsComponentHasNets == False
+
+-- Exiting validation rule set:  TopologyValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Test validate rule set. 
+
+
+-- Stepping into validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+--- Validation rule: AssertPrimitiveMetadataParserSupportedInstantiation Predicate: predicateIsPrimitiveMetadataParser == True
+---- Asserting: assertPrimitiveMetadataParserAttributesAreSupported
+---- => ok.
+
+-- Exiting validation rule set:  PrimitiveMetadataParserValidationRuleSet 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- No validate rule set. 
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+- DONE: recurse against subcomponents of TestFormatUarch 
+
+- Evaluating rewrite tests against component TestFormatUarch ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  TopologicalRewriteRuleSet 
+
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentHasNetsHasUnknownChildComponentPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+
+-- Rewrite ruleset evaluated with NO rewrites: TopologicalRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  TopologicalRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  PrimitiveMetadataParserRewriteRuleSet 
+
+--- Rewrite rule: TransformUnknownAttributeTypeFromInterfaceType Predicate: predicateIsPrimitiveMetadataParserHasUnknownAttributeTypeAndKnownInterfaceType == False
+
+-- Rewrite ruleset evaluated with NO rewrites: PrimitiveMetadataParserRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  PrimitiveMetadataParserRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  FormatUarchRewriteRuleSet 
+
+--- Rewrite rule: TransformTopologicalHoleToPerRankMdParserTopology Predicate: predicateIsComponentIsFormatUarchHasTopologicalHole == False
+
+-- Rewrite ruleset evaluated with NO rewrites: FormatUarchRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  FormatUarchRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+- STARTING: recurse against subcomponents of TestFormatUarch 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser0 
+
+- Evaluating rewrite tests against component TestMetadataParser0 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  TopologicalRewriteRuleSet 
+
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentHasNetsHasUnknownChildComponentPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+
+-- Rewrite ruleset evaluated with NO rewrites: TopologicalRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  TopologicalRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  PrimitiveMetadataParserRewriteRuleSet 
+
+--- Rewrite rule: TransformUnknownAttributeTypeFromInterfaceType Predicate: predicateIsPrimitiveMetadataParserHasUnknownAttributeTypeAndKnownInterfaceType == False
+
+-- Rewrite ruleset evaluated with NO rewrites: PrimitiveMetadataParserRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  PrimitiveMetadataParserRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  FormatUarchRewriteRuleSet 
+
+--- Rewrite rule: TransformTopologicalHoleToPerRankMdParserTopology Predicate: predicateIsComponentIsFormatUarchHasTopologicalHole == False
+
+-- Rewrite ruleset evaluated with NO rewrites: FormatUarchRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  FormatUarchRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser1 
+
+- Evaluating rewrite tests against component TestMetadataParser1 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  TopologicalRewriteRuleSet 
+
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentHasNetsHasUnknownChildComponentPortTypesOnNetsWithKnownTypes == False
+--- Rewrite rule: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType Predicate: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes == False
+
+-- Rewrite ruleset evaluated with NO rewrites: TopologicalRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  TopologicalRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Evaluate rewrite rule set.
+
+
+-- Stepping into rewrite rule set:  PrimitiveMetadataParserRewriteRuleSet 
+
+--- Rewrite rule: TransformUnknownAttributeTypeFromInterfaceType Predicate: predicateIsPrimitiveMetadataParserHasUnknownAttributeTypeAndKnownInterfaceType == True
+---- Evaluating: transformUnknownAttributeTypeFromInterfaceType
+---- => did REWRITE!
+
+-- Rewrite ruleset evaluated WITH rewrites: PrimitiveMetadataParserRewriteRuleSet 
+
+
+-- Exiting rewrite rule set:  PrimitiveMetadataParserRewriteRuleSet 
+
+
+-- Skipping check_complete rule set, if any.
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+result_rewrite_modify {'result_validate': True, 'result_rewrite_modify': True, 'result_rewrite_component': <util.taxonomy.designelement.Primitive object at 0x10164eb90>, 'result_check_complete': True}
+result_rewrite_modify {'result_validate': True, 'result_rewrite_modify': True, 'result_rewrite_component': <util.taxonomy.designelement.Component object at 0x10164d480>, 'result_check_complete': True}
+- Evaluating check_complete tests against component TestFormatUarch ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Test completion rule set. 
+
+
+-- Stepping into completion rule set:  TopologyCompletionRuleSet 
+
+--- Completion rule: CheckComponentHasNoTopologicalHoles Predicate: predicateIsComponent == True
+---- Evaluating: checkComponentHasNoTopologicalHoles
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownInterfaceTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownInterfaceTypes
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownAttributeTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownAttributeTypes
+---- => Completion rule PASSED.
+
+-- Completion ruleset PASSED: TopologyCompletionRuleSet 
+
+
+-- Exiting completion rule set:  TopologyCompletionRuleSet 
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+- STARTING: recurse against subcomponents of TestFormatUarch 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser0 
+
+- Evaluating check_complete tests against component TestMetadataParser0 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Test completion rule set. 
+
+
+-- Stepping into completion rule set:  TopologyCompletionRuleSet 
+
+--- Completion rule: CheckComponentHasNoTopologicalHoles Predicate: predicateIsComponent == False
+--- Completion rule: CheckComponentHasNoUnknownInterfaceTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownInterfaceTypes
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownAttributeTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownAttributeTypes
+---- => Completion rule PASSED.
+
+-- Completion ruleset PASSED: TopologyCompletionRuleSet 
+
+
+-- Exiting completion rule set:  TopologyCompletionRuleSet 
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+-- STARTING: recurse against subcomponent TestMetadataParser1 
+
+- Evaluating check_complete tests against component TestMetadataParser1 ...
+
+- Stepping into rule set: TopologyRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- Test completion rule set. 
+
+
+-- Stepping into completion rule set:  TopologyCompletionRuleSet 
+
+--- Completion rule: CheckComponentHasNoTopologicalHoles Predicate: predicateIsComponent == False
+--- Completion rule: CheckComponentHasNoUnknownInterfaceTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownInterfaceTypes
+---- => Completion rule PASSED.
+--- Completion rule: CheckComponentHasNoUnknownAttributeTypes Predicate: predicateIsComponentOrSubclass == True
+---- Evaluating: checkComponentHasNoUnknownAttributeTypes
+---- => Completion rule PASSED.
+
+-- Completion ruleset PASSED: TopologyCompletionRuleSet 
+
+
+-- Exiting completion rule set:  TopologyCompletionRuleSet 
+
+
+- Exiting rule set:  TopologyRuleSet 
+
+
+- Stepping into rule set: PrimitiveMetadataParserRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  PrimitiveMetadataParserRuleSet 
+
+
+- Stepping into rule set: FormatUarchRuleSet 
+
+
+-- Skipping validate rule set, if any.
+
+
+-- Skipping rewrite rule set, if any.
+
+
+-- No check_complete rule set. 
+
+
+- Exiting rule set:  FormatUarchRuleSet 
+
+
+- DONE: recurse against subcomponents of TestFormatUarch 
+
+
+- DONE: state-machine pass 2 
+
+
+- COMPLETE: microarchitecture inference
+
+
+DONE: rule engine 
+
+(True, [<util.taxonomy.designelement.Component object at 0x10164d480>, <util.taxonomy.designelement.Component object at 0x10164d480>, <util.taxonomy.designelement.Component object at 0x10164d480>, <util.taxonomy.designelement.Component object at 0x10164d480>])
+-- Dump inferred microarchitecture

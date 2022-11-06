@@ -78,16 +78,39 @@ class CompletionRule(Rule):
 
         obj=cls.fromId(id)
         obj.setPredicate(predicate)
-        obj.setCriterion(predicate)
+        obj.setCriterion(criterion)
         return obj
 
     def setCriterion(self, criterion):
-        '''Set the FunctionReference object which refers to a compeltion criterion'''
+        '''Set the FunctionReference object which refers to a completion criterion'''
         self.setConditionallyEvaluatedExpression(criterion)
 
     def getCriterion(self):
-        '''Get the FunctionReference object which refers to a compeltion criterion'''
+        '''Get the FunctionReference object which refers to a completion criterion'''
         return self.getConditionallyEvaluatedExpression()        
+
+class RewriteRule(Rule):
+    '''SAF component rewrite rule'''
+
+    def __init__(self):
+        pass
+
+    @classmethod
+    def fromIdPredicateTransform(cls, id, predicate, transform):
+        '''Create a RewriteRule specifying the Rule id, predicate, and transform'''
+
+        obj=cls.fromId(id)
+        obj.setPredicate(predicate)
+        obj.setTransform(transform)
+        return obj
+
+    def setTransform(self, transform):
+        '''Set the FunctionReference object which refers to a transform'''
+        self.setConditionallyEvaluatedExpression(transform)
+
+    def getTransform(self):
+        '''Get the FunctionReference object which refers to a transform'''
+        return self.getConditionallyEvaluatedExpression() 
 
 class RuleSet(SerializableObject):
     '''Rule engine rule set, comprising one or more different sub-RuleSets (i.e. ValidationRuleSet, CompletionRuleSet)'''
@@ -96,11 +119,13 @@ class RuleSet(SerializableObject):
         pass
 
     @classmethod
-    def fromIdSubRuleSets(cls, id, validation_rule_set=None, completion_rule_set=None):
+    def fromIdSubRuleSets(cls, id, validation_rule_set=None, rewrite_rule_set=None, completion_rule_set=None):
         '''Init from individual sub-RuleSets'''
         obj=cls.fromId(id)
         if validation_rule_set is not None:
             obj.setValidationRuleSet(validation_rule_set)
+        if rewrite_rule_set is not None:
+            obj.setRewriteRuleSet(rewrite_rule_set)            
         if completion_rule_set is not None:
             obj.setCompletionRuleSet(completion_rule_set)
         return obj
@@ -135,6 +160,20 @@ class RuleSet(SerializableObject):
             return ValidationRuleSet.fromDict(self.validation_rule_set)
         return None
 
+    def setRewriteRuleSet(self, rewrite_rule_set):
+        '''Set the RewriteRuleSet sub-RuleSet associated with this RuleSet'''
+        self.setAttrAsDict('rewrite_rule_set', rewrite_rule_set)
+
+    def hasRewriteRuleSet(self):
+        '''True if RuleSet includes a RewriteRuleSet'''
+        return "rewrite_rule_set" in self.__dict__
+
+    def getRewriteRuleSet(self):
+        '''Return the RewriteRuleSet in this RuleSet, or None if none exists'''
+        if self.hasRewriteRuleSet():
+            return RewriteRuleSet.fromDict(self.rewrite_rule_set)
+        return None
+
     def setCompletionRuleSet(self, completion_rule_set):
         '''Set the CompletionRuleSet sub-RuleSet associated with this RuleSet'''
         self.setAttrAsDict('completion_rule_set', completion_rule_set)
@@ -154,7 +193,7 @@ class RuleSet(SerializableObject):
 
         result_validate=True
         result_rewrite_modify=False
-        result_rewrite_component={}
+        result_rewrite_component=component
         result_check_complete=True
 
         print("\n- Stepping into rule set:",self.id,"\n")  
@@ -162,9 +201,9 @@ class RuleSet(SerializableObject):
         # Optionally evaluate validate rules
         if validate:
             if self.hasValidationRuleSet():
-                print("\n-- Test validation rule set. \n")
-                validation_rule_set=self.getValidationRuleSet()
-                validation_rule_set.evaluateAssertionsInModuleContext(component,context_module)
+                print("\n-- Test validate rule set. \n")
+                validate_rule_set=self.getValidationRuleSet()
+                validate_rule_set.evaluateAssertionsInModuleContext(component,context_module)
             else:
                 print("\n-- No validate rule set. \n")
         else:
@@ -172,6 +211,16 @@ class RuleSet(SerializableObject):
 
         # Optionally evaluate rewrite rules
         # TODO
+
+        if rewrite:
+            if self.hasRewriteRuleSet():
+                print("\n-- Evaluate rewrite rule set.\n")
+                rewrite_rule_set=self.getRewriteRuleSet()
+                result_rewrite_modify,result_rewrite_component = rewrite_rule_set.evaluateTransformsInModuleContext(component,context_module)             
+            else:
+                print("\n-- No rewrite rule set. \n")
+        else:
+            print("\n-- Skipping rewrite rule set, if any.\n")
 
         # Optionally evaluate check_complete rules
         if check_complete:
@@ -278,6 +327,59 @@ class CompletionRuleSet(RuleSet):
 
         return True
 
+class RewriteRuleSet(RuleSet):
+    '''Rule engine RewriteRule set, comprising a list of RewriteRule's '''
+
+    def __init__(self):
+        pass
+
+    @classmethod
+    def fromIdRewriteRules(cls, id, rewrite_rule_obj_list):
+        '''Init from id and a list of RewriteRule's '''
+        obj=cls.fromId(id)
+        obj.setRewriteRules(rewrite_rule_obj_list)
+        return obj
+
+    def setRewriteRules(self, rewrite_rule_obj_list):
+        '''Consumes a list of CompletionRule objects, converts to a list of dicts and sets the completion_rules attribute'''
+        self.setAttrAsDictList('rewrite_rules', rewrite_rule_obj_list)
+
+    def getRewriteRules(self):
+        '''Converts the rewrite_rules attribute from a list of dicts to a list of RewriteRule objects, and returns the result'''
+        return [RewriteRule.fromDict(rewrite_rule_dict) for rewrite_rule_dict in self.rewrite_rules]
+
+    def evaluateTransformsInModuleContext(self, component, context_module):
+        '''Return the results of evaluating the RewriteRule's in this RewriteRuleSet'''
+        
+        print("\n-- Stepping into rewrite rule set: ",self.getId(),"\n")        
+        rewrite_rule_obj_list=self.getRewriteRules()
+
+        rewrite_modify=False
+        rewrite_component=component
+
+        for rewrite_rule in rewrite_rule_obj_list:
+            # Evaluate predicate for each rule & conditionally evaluate transform
+
+            rewrite_modify, rewrite_component = rewrite_rule.evaluateInModuleContext(component, context_module)
+            print("--- Rewrite rule:", rewrite_rule.getId(), "Predicate:",rewrite_rule.getPredicate().getValue(),"==",rewrite_modify)
+            if rewrite_modify:
+                # Predicate True; evaluate rewrite 
+
+                print("---- Evaluating:",rewrite_rule.getTransform().getValue())
+
+                if rewrite_modify:
+                    print("---- => did REWRITE!")
+                    print("\n-- Rewrite ruleset evaluated WITH rewrites:",self.getId(),"\n")
+                    print("\n-- Exiting rewrite rule set: ",self.getId(),"\n")
+                    return True, rewrite_component                    
+                else:
+                    print("---- => No rewrite.")                    
+
+        print("\n-- Rewrite ruleset evaluated with NO rewrites:",self.getId(),"\n")
+        print("\n-- Exiting rewrite rule set: ",self.getId(),"\n")    
+
+        return False, component
+
 class RulesEngine:
     '''Methods for evaluating microarchitectural validation & transformation rules'''
 
@@ -297,38 +399,56 @@ class RulesEngine:
         '''Iterate pre-loaded rule sets and run only the validation rules in each rule set, optionally with recursion'''
 
         validate=False
+        rewrite=False
         check_complete=False
         if rule_type=='validate':
             validate=True
+        if rule_type=='rewrite':
+            rewrite=True
         if rule_type=='check_complete':
             check_complete=True
 
-        result_dict={'result_validate':True,'result_rewrite_modify':False,"result_rewrite_component":{},'result_check_complete':True}
+        result_dict={'result_validate':True,'result_rewrite_modify':False,"result_rewrite_component":component,'result_check_complete':True}
 
         print('- Evaluating',rule_type,'tests against component',component.getId(),'...')
         for rule_set_name in self.rule_sets:
             # Evaluate RuleSet in context
-            rule_set_result_dict=self.rule_sets[rule_set_name]['rule_set_obj'].evaluateInModuleContext(component, self.rule_sets[rule_set_name]['context_module'], validate=validate, check_complete=check_complete)
+            rule_set_result_dict=self.rule_sets[rule_set_name]['rule_set_obj'].evaluateInModuleContext(component, self.rule_sets[rule_set_name]['context_module'], validate=validate, rewrite=rewrite, check_complete=check_complete)
             result_dict['result_validate']=result_dict['result_validate'] and rule_set_result_dict['result_validate']
             result_dict['result_check_complete']=result_dict['result_check_complete'] and rule_set_result_dict['result_check_complete']
             if not result_dict['result_check_complete']:
-                break
+                return result_dict
             if rule_type=='rewrite' and rule_set_result_dict['result_rewrite_modify']:
                 result_dict['result_rewrite_modify']=True
                 result_dict['result_rewrite_component']=rule_set_result_dict['result_rewrite_component']
+                print('result_rewrite_modify',result_dict)
                 return result_dict
 
         if component.getClassType()!='Primitive' and recurse and not(rule_type=='check_complete' and not result_dict['result_check_complete']):
             # Recurse against all subcomponents (unless this component is a primitive!)
             print('\n- STARTING: recurse against subcomponents of',component.getId(),'\n')
-            for subcomponent in component.getTopology().getComponentList():
+            topology=component.getTopology()
+            comp_list=topology.getComponentList()
+            for idx in range(len(comp_list)):
+                subcomponent=comp_list[idx]
                 print('\n-- STARTING: recurse against subcomponent',subcomponent.getId(),'\n')
                 recursive_result_dict=self.evaluateRuleSet(subcomponent, rule_type=rule_type, recurse=recurse)
                 result_dict['result_validate']=result_dict['result_validate'] and recursive_result_dict['result_validate']
-                result_dict['result_check_complete']=result_dict['result_check_complete'] and recursive_result_dict['result_check_complete']               
+                result_dict['result_check_complete']=result_dict['result_check_complete'] and recursive_result_dict['result_check_complete']   
+                if not result_dict['result_check_complete']:
+                    return result_dict       
+                if rule_type=='rewrite' and recursive_result_dict['result_rewrite_modify']:
+                    result_dict['result_rewrite_modify']=True
+                    comp_list[idx]=recursive_result_dict['result_rewrite_component']
+                    topology.setComponentList(comp_list)
+                    component.setTopology(topology)
+                    result_dict['result_rewrite_component']=component
+
+                    #print('result_rewrite_modify',result_dict['result_rewrite_component'].getTopology().getComponentList()[0].getAttributes())
+                    return result_dict                                         
             print('\n- DONE: recurse against subcomponents of',component.getId(),'\n')
 
-        print('\n- SUCCESS: validation\n')
+#        print('\n- DONE: validation\n')
         return result_dict
 
     def runSMPass(self, component, recurse=True):
@@ -340,10 +460,15 @@ class RulesEngine:
         # Rewrite step
         result_rewrite_modify=False
         result_rewrite_component=component
+        result_dict=self.evaluateRuleSet(component, rule_type='rewrite', recurse=recurse)
+        print('result_rewrite_modify',result_dict)
+        result_rewrite_modify=result_dict['result_rewrite_modify']
+        result_rewrite_component=result_dict['result_rewrite_component']     
 
         # Check-completion step
         result_dict=self.evaluateRuleSet(component, rule_type='check_complete', recurse=recurse)
         result_check_complete=result_dict['result_check_complete']
+
 
         if result_check_complete:
             # Completed microarchitecture inference
@@ -365,7 +490,7 @@ class RulesEngine:
 
         print('\nSTARTING: rule engine  \n')
 
-        while(next_sm_state=='doValidate'):
+        while(next_sm_state=='doValidate' and rule_engine_sm_pass_count < max_sm_passes):
             print('\n- STARTING: state-machine pass',rule_engine_sm_pass_count,'\n')
             next_sm_state, component=self.runSMPass(component, recurse=recurse)
             component_iterations.append(component)

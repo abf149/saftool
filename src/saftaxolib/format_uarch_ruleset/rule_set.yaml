@@ -1,0 +1,22 @@
+classtype: RuleSet
+id: FormatUarchRuleSet
+
+# Format uarch rewrite rules
+
+rewrite_rule_set:
+  classtype: RewriteRuleSet
+  id: FormatUarchRewriteRuleSet
+  rewrite_rules:
+
+  # - Topological hole rewrite
+
+  - classtype: RewriteRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: transform
+      value: transformTopologicalHoleToPerRankMdParserTopology
+    id: TransformTopologicalHoleToPerRankMdParserTopology
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsComponentIsFormatUarchHasTopologicalHole

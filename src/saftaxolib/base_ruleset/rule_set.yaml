@@ -32,6 +32,50 @@ validation_rule_set:
       id: predicate
       value: predicateIsComponentHasNets
 
+# Format uarch rewrite rules
+
+rewrite_rule_set:
+  classtype: RewriteRuleSet
+  id: TopologicalRewriteRuleSet
+  rewrite_rules:
+
+  # - Infer unknown port types on nets where some port types are known
+
+  - classtype: RewriteRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: transform
+      value: transformUnknownPortTypesOnNetsWithKnownTypesToKnownType
+    id: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes
+
+  # - Infer unknown child port types on nets where some port types are known
+  - classtype: RewriteRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: transform
+      value: transformUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType
+    id: TransformUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsComponentHasNetsHasUnknownChildComponentPortTypesOnNetsWithKnownTypes  
+
+  - classtype: RewriteRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: transform
+      value: transformUnknownPortTypesOnNetsWithKnownTypesToKnownType
+    id: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes      
+
+
 # Topology completion rules
 
 completion_rule_set:

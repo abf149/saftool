@@ -217,7 +217,8 @@ class Component(DesignElement):
             return [port for port in self.getInterface() if port.getId()==id][0]
 
     def getAttributeById(self, id):
-        return [att for att in self.getAttributes() if att.getId()==id][0]
+        # TODO: handle lists well
+        return [att for att in self.getAttributes() if (type(att).__name__!='list') and att.getId()==id][0]
 
 
 class Primitive(Component):

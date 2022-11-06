@@ -44,13 +44,123 @@ def assertNetsHaveConsistentPortFormatTypes(obj):
             port=obj.getPortById(port_id)
             if format_type is None:
                 format_type=port.getFormatType().getValue()
-                print(format_type)
             else:
                 if not  FormatType.compareFormatTypes(port.getFormatType(),format_type):                
                     # Assertion should fail if format types don't match                
                     return False
 
     return True
+
+# - Topology rewrite rules
+
+# -- TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType: infer unknown port types on nets where some port types are known
+
+def transformUnknownPortTypesOnNetsWithKnownTypesToKnownType(obj):
+    net_list=obj.getTopology().getNetList()
+    iface=obj.getInterface() # TODO: hack for not having a good port read/modify/write
+
+    for port in iface:
+        # Look for unknown port types on nets with known port types. 
+        if port.getFormatType().isUnknown():
+            # For each port of unknown type in the component interface,
+            for net in net_list:
+                if port.getId() in net.getPortIdList():
+                    # find any connected net(s) and attempt to infer net type from a connected port of known type.
+                    net_type_str=None
+                    for connected_port_id in net.getPortIdList():
+                        if not obj.getPortById(connected_port_id).getFormatType().isUnknown():
+                            net_type_str=obj.getPortById(connected_port_id).getFormatType().getValue()
+                            break
+                    if net_type_str is not None:
+                        # Upon successful net-type inference, update the unknown port type to a known value.
+                        new_format_type=port.getFormatType()
+                        new_format_type.setValue(net_type_str)
+                        port.setFormatType(new_format_type)
+                    
+
+    obj.setInterface(iface)
+    return obj
+
+def predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes(obj):
+    #if not ((predicateIsComponent(obj) or type(obj).__name__ == 'Primitive') and len(obj.getTopology().getNetList())>0):
+    if not (predicateIsComponentHasNets(obj)):
+        return False
+
+    net_list=obj.getTopology().getNetList()
+
+    for port in obj.getInterface():
+        # Look for unknown port types on nets with known port types. 
+        if port.getFormatType().isUnknown():
+            # For each port of unknown type in the component interface,
+            for net in net_list:
+                if port.getId() in net.getPortIdList():
+                    # examine all component topology nets connected to the port of unknown type,
+                    for connected_port_id in net.getPortIdList():
+                        if not obj.getPortById(connected_port_id).getFormatType().isUnknown():
+                            # and return True if the net's type can be inferred from connected ports of known type.
+                            return True
+
+    return False
+
+# -- TransformUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType: infer unknown child component port types on nets where some port types are known
+
+def transformUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType(obj):
+    net_list=obj.getTopology().getNetList()
+    comp_list=obj.getTopology().getComponentList() # TODO: hack for not having a good component read/modify/write     
+
+    for subcomponent in comp_list:
+        # Examine all subcomponents.
+        subcomponent_id=subcomponent.getId() 
+        iface=subcomponent.getInterface() # TODO: hack for not having a good port read/modify/write       
+        for port in iface:
+            # Look for unknown port types on nets with known port types. 
+            if port.getFormatType().isUnknown():
+                # For each port of unknown type in the subcomponent interface,
+                full_port_id=subcomponent_id+'.'+port.getId()
+                for net in net_list:
+                    if full_port_id in net.getPortIdList():
+                        # find any connected net(s) and attempt to infer net type from a connected port of known type.
+                        net_type_str=None
+                        for connected_port_id in net.getPortIdList():
+                            if not obj.getPortById(connected_port_id).getFormatType().isUnknown():
+                                net_type_str=obj.getPortById(connected_port_id).getFormatType().getValue()
+                                break
+                        if net_type_str is not None:
+                            # Upon successful net-type inference, update the unknown port type to a known value.
+                            new_format_type=port.getFormatType()
+                            new_format_type.setValue(net_type_str)
+                            port.setFormatType(new_format_type)
+
+        subcomponent.setInterface(iface)
+    
+    topology=obj.getTopology()
+    topology.setComponentList(comp_list)
+    obj.setTopology(topology)
+    return obj
+
+def predicateIsComponentHasNetsHasUnknownChildComponentPortTypesOnNetsWithKnownTypes(obj):
+    #if not ((predicateIsComponent(obj) or type(obj).__name__ == 'Primitive') and len(obj.getTopology().getNetList())>0):
+    if not (predicateIsComponentHasNets(obj)):
+        return False
+
+    net_list=obj.getTopology().getNetList()
+
+    for subcomponent in obj.getTopology().getComponentList():
+        # Examine all subcomponents.
+        subcomponent_id=subcomponent.getId()
+        for port in subcomponent.getInterface():    
+            if port.getFormatType().isUnknown():
+                # For each port of unknown type in the subcomponent interface,
+                full_port_id=subcomponent_id+'.'+port.getId()
+                for net in net_list:
+                    if full_port_id in net.getPortIdList():
+                        # examine all component topology nets connected to the port of unknown type,
+                        for connected_port_id in net.getPortIdList():
+                            if not obj.getPortById(connected_port_id).getFormatType().isUnknown():
+                                # and return True if the net's type can be inferred from connected ports of known type.
+                                return True
+
+    return False
 
 # - Topology completion rules
 
@@ -66,7 +176,6 @@ def predicateIsComponentOrSubclass(obj):
     return predicateIsComponent(obj) or type(obj).__name__ == 'Primitive'
 
 def checkComponentHasNoUnknownInterfaceTypes(component):
-    
     for port in component.getInterface():
         # Fail check if any interface port has an unknown format type
         if port.getFormatType().isUnknown():
