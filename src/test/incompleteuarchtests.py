@@ -120,7 +120,7 @@ def do_tests():
 
     print("\n\n")
 
-    print("-- Create format uarch component with a topological hole and [C,B] tensor ranks; print; dump")
+    print("-- Create format uarch component with a topological hole; print; dump")
     format_uarch_component=genFormatUarchWithHoleOrUnknownTypes(useTopologicalHole=True)
     import pprint
     pprint.pprint(str(format_uarch_component))
@@ -130,7 +130,7 @@ def do_tests():
 
     print("\n\n")   
 
-    print("- Topology validation rules against incomplete format uarch")
+    print("- Topology validation rules against incomplete format uarch (topological hole)")
     base_rule_set_path='saftaxolib/base_ruleset'
     primitive_md_parser_rule_set_path='saftaxolib/primitive_md_parser_ruleset'
 
@@ -143,7 +143,8 @@ def do_tests():
 
     print("\n\n")   
 
-    rules_engine.run(format_uarch_component)
+    result=rules_engine.run(format_uarch_component)
+    print(result)    
 
     print("\n\n")
 
@@ -157,7 +158,7 @@ def do_tests():
 
     print("\n\n")   
 
-    print("- Topology validation rules against incomplete format uarch")
+    print("- Topology validation rules against incomplete format uarch (unknown interface/attributes)")
     base_rule_set_path='saftaxolib/base_ruleset'
     primitive_md_parser_rule_set_path='saftaxolib/primitive_md_parser_ruleset'
 
@@ -170,5 +171,6 @@ def do_tests():
 
     print("\n\n")   
 
-    rules_engine.run(format_uarch_component)    
+    result=rules_engine.run(format_uarch_component)    
+    print(result)
 

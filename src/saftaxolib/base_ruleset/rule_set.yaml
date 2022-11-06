@@ -61,7 +61,7 @@ completion_rule_set:
     predicate:
       classtype: FunctionReference
       id: predicate
-      value: predicateIsComponent
+      value: predicateIsComponentOrSubclass
 
   # - CheckComponentHasNoUnknownAttributes: the component's attributes should all have known types
   - classtype: CompletionRule
@@ -73,4 +73,4 @@ completion_rule_set:
     predicate:
       classtype: FunctionReference
       id: predicate
-      value: predicateIsComponent            
+      value: predicateIsComponentOrSubclass          

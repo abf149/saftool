@@ -53,14 +53,17 @@ def assertNetsHaveConsistentPortFormatTypes(obj):
     return True
 
 # - Topology completion rules
-#  --- Reuse predicateIsComponent() helper function from NetHasConsistentPortNetType as a predicate for all of these rules
 
 # -- CheckComponentHasNoTopologicalHoles: the component should contain no topological holes
 
 def checkComponentHasNoTopologicalHoles(obj):
-    return obj.getTopology().isHole()
+    return not obj.getTopology().isHole()
 
 # -- CheckComponentHasNoUnknownInterfaceTypes: the component's interface ports should all have known types
+#  --- Reuse predicateIsComponent() helper function from NetHasConsistentPortNetType as a predicate
+
+def predicateIsComponentOrSubclass(obj):
+    return predicateIsComponent(obj) or type(obj).__name__ == 'Primitive'
 
 def checkComponentHasNoUnknownInterfaceTypes(component):
     

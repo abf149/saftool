@@ -311,12 +311,14 @@ class RulesEngine:
             rule_set_result_dict=self.rule_sets[rule_set_name]['rule_set_obj'].evaluateInModuleContext(component, self.rule_sets[rule_set_name]['context_module'], validate=validate, check_complete=check_complete)
             result_dict['result_validate']=result_dict['result_validate'] and rule_set_result_dict['result_validate']
             result_dict['result_check_complete']=result_dict['result_check_complete'] and rule_set_result_dict['result_check_complete']
+            if not result_dict['result_check_complete']:
+                break
             if rule_type=='rewrite' and rule_set_result_dict['result_rewrite_modify']:
                 result_dict['result_rewrite_modify']=True
                 result_dict['result_rewrite_component']=rule_set_result_dict['result_rewrite_component']
                 return result_dict
 
-        if component.getClassType()!='Primitive' and recurse:
+        if component.getClassType()!='Primitive' and recurse and not(rule_type=='check_complete' and not result_dict['result_check_complete']):
             # Recurse against all subcomponents (unless this component is a primitive!)
             print('\n- STARTING: recurse against subcomponents of',component.getId(),'\n')
             for subcomponent in component.getTopology().getComponentList():
@@ -337,7 +339,7 @@ class RulesEngine:
 
         # Rewrite step
         result_rewrite_modify=False
-        result_rewrite_component={}
+        result_rewrite_component=component
 
         # Check-completion step
         result_dict=self.evaluateRuleSet(component, rule_type='check_complete', recurse=recurse)
@@ -358,7 +360,7 @@ class RulesEngine:
 
         rule_engine_sm_pass_count=0
         next_sm_state='doValidate'
-        component_iterations=[str(component)]
+        component_iterations=[component]
         res=False
 
         print('\nSTARTING: rule engine  \n')
@@ -366,7 +368,7 @@ class RulesEngine:
         while(next_sm_state=='doValidate'):
             print('\n- STARTING: state-machine pass',rule_engine_sm_pass_count,'\n')
             next_sm_state, component=self.runSMPass(component, recurse=recurse)
-            component_iterations.append(str(component.copy()))
+            component_iterations.append(component)
             print('\n- DONE: state-machine pass',rule_engine_sm_pass_count,'\n')
             rule_engine_sm_pass_count += 1            
 
