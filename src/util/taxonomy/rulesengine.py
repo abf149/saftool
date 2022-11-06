@@ -66,18 +66,43 @@ class ValidationRule(Rule):
         '''Get the FunctionReference object which refers to an assertion'''
         return self.getConditionallyEvaluatedExpression()
 
-class RuleSet(SerializableObject):
-    '''Rule engine rule set, comprising one or more different sub-RuleSets (i.e. ValidationRuleSet)'''
+class CompletionRule(Rule):
+    '''SAF microarchitecture inference completion rule with predicate and completion criterion'''
 
     def __init__(self):
         pass
 
     @classmethod
-    def fromIdSubRuleSets(cls, id, validation_rule_set=None):
+    def fromIdPredicateCriterion(cls, id, predicate, criterion):
+        '''Create a CompletionRule specifying the Rule id, predicate, and completion criterion'''
+
+        obj=cls.fromId(id)
+        obj.setPredicate(predicate)
+        obj.setCriterion(predicate)
+        return obj
+
+    def setCriterion(self, criterion):
+        '''Set the FunctionReference object which refers to a compeltion criterion'''
+        self.setConditionallyEvaluatedExpression(criterion)
+
+    def getCriterion(self):
+        '''Get the FunctionReference object which refers to a compeltion criterion'''
+        return self.getConditionallyEvaluatedExpression()        
+
+class RuleSet(SerializableObject):
+    '''Rule engine rule set, comprising one or more different sub-RuleSets (i.e. ValidationRuleSet, CompletionRuleSet)'''
+
+    def __init__(self):
+        pass
+
+    @classmethod
+    def fromIdSubRuleSets(cls, id, validation_rule_set=None, completion_rule_set=None):
         '''Init from individual sub-RuleSets'''
         obj=cls.fromId(id)
-        if not (validation_rule_set is None):
+        if validation_rule_set is not None:
             obj.setValidationRuleSet(validation_rule_set)
+        if completion_rule_set is not None:
+            obj.setCompletionRuleSet(completion_rule_set)
         return obj
 
     @classmethod
@@ -94,9 +119,10 @@ class RuleSet(SerializableObject):
         print('--- Performing generated import command: ',exec_import_command)
         exec(exec_import_command)
         print('\n-- Done importing.\n')
-        return rule_set_obj, rule_set_context_module
+        return rule_set_obj, rule_set_context_module #rule_set_context_module is loaded by exec() above
 
     def setValidationRuleSet(self, validation_rule_set):
+        '''Set the ValidationRuleSet sub-RuleSet associated with this RuleSet'''
         self.setAttrAsDict('validation_rule_set', validation_rule_set)
 
     def hasValidationRuleSet(self):
@@ -109,16 +135,57 @@ class RuleSet(SerializableObject):
             return ValidationRuleSet.fromDict(self.validation_rule_set)
         return None
 
-    def evaluateInModuleContext(self, component, context_module, validate=True):
+    def setCompletionRuleSet(self, completion_rule_set):
+        '''Set the CompletionRuleSet sub-RuleSet associated with this RuleSet'''
+        self.setAttrAsDict('completion_rule_set', completion_rule_set)
+
+    def hasCompletionRuleSet(self):
+        '''True if RuleSet includes a CompletionRuleSet'''
+        return "completion_rule_set" in self.__dict__
+
+    def getCompletionRuleSet(self):
+        '''Return the CompletionRuleSet in this RuleSet, or None if none exists'''
+        if self.hasCompletionRuleSet():
+            return CompletionRuleSet.fromDict(self.completion_rule_set)
+        return None        
+
+    def evaluateInModuleContext(self, component, context_module, validate=False, rewrite=False, check_complete=False):
         '''Evaluate this RuleSet against provided component with imported module as context.'''
 
-        print("\n- Stepping into rule set: ",self.id,"\n")  
-        if validate and self.hasValidationRuleSet():
-            print("\n-- Test validation rule set. \n")
-            validation_rule_set=self.getValidationRuleSet()
-            validation_rule_set.evaluateAssertionsInModuleContext(component,context_module)
+        result_validate=True
+        result_rewrite_modify=False
+        result_rewrite_component={}
+        result_check_complete=True
+
+        print("\n- Stepping into rule set:",self.id,"\n")  
+
+        # Optionally evaluate validate rules
+        if validate:
+            if self.hasValidationRuleSet():
+                print("\n-- Test validation rule set. \n")
+                validation_rule_set=self.getValidationRuleSet()
+                validation_rule_set.evaluateAssertionsInModuleContext(component,context_module)
+            else:
+                print("\n-- No validate rule set. \n")
+        else:
+            print("\n-- Skipping validate rule set, if any.\n")
+
+        # Optionally evaluate rewrite rules
+        # TODO
+
+        # Optionally evaluate check_complete rules
+        if check_complete:
+            if self.hasCompletionRuleSet():
+                print("\n-- Test completion rule set. \n")
+                completion_rule_set=self.getCompletionRuleSet()
+                result_check_complete=completion_rule_set.evaluateCriteriaInModuleContext(component,context_module)
+            else:
+                print("\n-- No check_complete rule set. \n")
+        else:
+            print("\n-- Skipping check_complete rule set, if any.\n")        
 
         print("\n- Exiting rule set: ",self.id,"\n") 
+        return {"result_validate":result_validate,"result_rewrite_modify":result_rewrite_modify,"result_rewrite_component":result_rewrite_component,"result_check_complete":result_check_complete}
 
 
 class ValidationRuleSet(RuleSet):
@@ -161,6 +228,56 @@ class ValidationRuleSet(RuleSet):
 
         print("\n-- Exiting validation rule set: ",self.id,"\n")
 
+
+class CompletionRuleSet(RuleSet):
+    '''Rule engine CompletionRule set, comprising a list of CompletionRule's '''
+
+    def __init__(self):
+        pass
+
+    @classmethod
+    def fromIdCompletionRules(cls, id, completion_rule_obj_list):
+        '''Init from id and a list of ValidationRule's '''
+        obj=cls.fromId(id)
+        obj.setCompletionRules(completion_rule_obj_list)
+        return obj
+
+    def setCompletionRules(self, completion_rule_obj_list):
+        '''Consumes a list of CompletionRule objects, converts to a list of dicts and sets the completion_rules attribute'''
+        self.setAttrAsDictList('completion_rules', completion_rule_obj_list)
+
+    def getCompletionRules(self):
+        '''Converts the completion_rules attribute from a list of dicts to a list of CompletionRule objects, and returns the result'''
+        return [CompletionRule.fromDict(completion_rule_dict) for completion_rule_dict in self.completion_rules]
+
+    def evaluateCriteriaInModuleContext(self, component, context_module):
+        '''Return the results of evaluating the CompletionRule's in this CompletionRuleSet'''
+        
+        print("\n-- Stepping into completion rule set: ",self.getId(),"\n")        
+        completion_rule_obj_list=self.getCompletionRules()
+
+        for completion_rule in completion_rule_obj_list:
+            # Evaluate predicate for each rule & conditionally evaluate completion criterion
+
+            result_predicate, result_criterion = completion_rule.evaluateInModuleContext(component, context_module)
+            print("--- Completion rule:", completion_rule.id, "Predicate:",completion_rule.getPredicate().getValue(),"==",result_predicate)
+            if result_predicate:
+                # Predicate True; check completion criterion
+                print("---- Evaluating:",completion_rule.getCriterion().getValue())
+                if result_criterion:
+                    print("---- => Completion rule PASSED.")
+                else:
+                    print("---- => Completion rule FAILED!")
+                    print("\n-- Completion ruleset FAILED:",self.getId(),"\n")
+                    print("\n-- Exiting completion rule set: ",self.getId(),"\n")
+                    return False
+                
+
+        print("\n-- Completion ruleset PASSED:",self.getId(),"\n")
+        print("\n-- Exiting completion rule set: ",self.getId(),"\n")    
+
+        return True
+
 class RulesEngine:
     '''Methods for evaluating microarchitectural validation & transformation rules'''
 
@@ -176,30 +293,89 @@ class RulesEngine:
             rule_set_obj, context_module = RuleSet.importRuleSet(rule_set_dir_path)
             self.rule_sets[rule_set_obj.id]={'rule_set_obj':rule_set_obj, 'context_module':context_module}
 
-    def testValidationRules(self, component):
-        '''Iterate pre-loaded rule sets and run only the validation rules in each rule set'''
-        print('- Running validation tests...')
+    def evaluateRuleSet(self, component, validate=False, rule_type='validate', recurse=True):
+        '''Iterate pre-loaded rule sets and run only the validation rules in each rule set, optionally with recursion'''
+
+        validate=False
+        check_complete=False
+        if rule_type=='validate':
+            validate=True
+        if rule_type=='check_complete':
+            check_complete=True
+
+        result_dict={'result_validate':True,'result_rewrite_modify':False,"result_rewrite_component":{},'result_check_complete':True}
+
+        print('- Evaluating',rule_type,'tests against component',component.getId(),'...')
         for rule_set_name in self.rule_sets:
             # Evaluate RuleSet in context
-            self.rule_sets[rule_set_name]['rule_set_obj'].evaluateInModuleContext(component, self.rule_sets[rule_set_name]['context_module'])
-
-        print('\n- SUCCESS: validation\n')
-
-    def runSingle(self, component, recurse=True):
-        print('\nSTARTING: rule engine  \n')
-
-        self.testValidationRules(component)
+            rule_set_result_dict=self.rule_sets[rule_set_name]['rule_set_obj'].evaluateInModuleContext(component, self.rule_sets[rule_set_name]['context_module'], validate=validate, check_complete=check_complete)
+            result_dict['result_validate']=result_dict['result_validate'] and rule_set_result_dict['result_validate']
+            result_dict['result_check_complete']=result_dict['result_check_complete'] and rule_set_result_dict['result_check_complete']
+            if rule_type=='rewrite' and rule_set_result_dict['result_rewrite_modify']:
+                result_dict['result_rewrite_modify']=True
+                result_dict['result_rewrite_component']=rule_set_result_dict['result_rewrite_component']
+                return result_dict
 
         if component.getClassType()!='Primitive' and recurse:
             # Recurse against all subcomponents (unless this component is a primitive!)
             print('\n- STARTING: recurse against subcomponents of',component.getId(),'\n')
             for subcomponent in component.getTopology().getComponentList():
                 print('\n-- STARTING: recurse against subcomponent',subcomponent.getId(),'\n')
-                self.runSingle(subcomponent, recurse=recurse)
+                recursive_result_dict=self.evaluateRuleSet(subcomponent, rule_type=rule_type, recurse=recurse)
+                result_dict['result_validate']=result_dict['result_validate'] and recursive_result_dict['result_validate']
+                result_dict['result_check_complete']=result_dict['result_check_complete'] and recursive_result_dict['result_check_complete']               
             print('\n- DONE: recurse against subcomponents of',component.getId(),'\n')
 
-        print('\nDONE: rule engine \n')
+        print('\n- SUCCESS: validation\n')
+        return result_dict
 
-    def run(self, component, recurse=True):
-        # Wrapper for (optionally-)recursive rule evaluation against the provided component and its subcomponents
-        self.runSingle(component, recurse=recurse)
+    def runSMPass(self, component, recurse=True):
+        '''One pass of the microarchitecture inference state machine entails validation, rewrite, and completion criteria check'''
+
+        # Validation step
+        self.evaluateRuleSet(component, rule_type='validate', recurse=recurse)
+
+        # Rewrite step
+        result_rewrite_modify=False
+        result_rewrite_component={}
+
+        # Check-completion step
+        result_dict=self.evaluateRuleSet(component, rule_type='check_complete', recurse=recurse)
+        result_check_complete=result_dict['result_check_complete']
+
+        if result_check_complete:
+            # Completed microarchitecture inference
+            return 'complete', result_rewrite_component
+        elif (not result_check_complete) and result_rewrite_modify:
+            # Validate the partial microarchitecture produced by this pass
+            return 'doValidate', result_rewrite_component
+        elif not (result_check_complete or result_rewrite_modify):
+            # Microarchitecture is valid but cannot be completely inferred; error
+            return 'error', result_rewrite_component
+
+    def run(self, component, recurse=True, max_sm_passes=100):
+        # Wrapper for multiple passes of (optionally-)recursive rule evaluation against the provided component and its subcomponents
+
+        rule_engine_sm_pass_count=0
+        next_sm_state='doValidate'
+        component_iterations=[str(component)]
+        res=False
+
+        print('\nSTARTING: rule engine  \n')
+
+        while(next_sm_state=='doValidate'):
+            print('\n- STARTING: state-machine pass',rule_engine_sm_pass_count,'\n')
+            next_sm_state, component=self.runSMPass(component, recurse=recurse)
+            component_iterations.append(str(component.copy()))
+            print('\n- DONE: state-machine pass',rule_engine_sm_pass_count,'\n')
+            rule_engine_sm_pass_count += 1            
+
+        if next_sm_state=='complete':
+            print('\n- COMPLETE: microarchitecture inference\n')
+            res=True
+        else:
+            print('\n- ERROR: could not infer microarchitecture\n')
+            res=False
+
+        print('\nDONE: rule engine \n')
+        return res, component_iterations

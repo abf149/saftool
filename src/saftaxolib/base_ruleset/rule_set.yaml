@@ -1,11 +1,14 @@
 classtype: RuleSet
 id: TopologyRuleSet
+
+# Topology validation rules
+
 validation_rule_set:
   classtype: ValidationRuleSet
   id: TopologyValidationRuleSet
   validation_rules:
 
-  #  NetHasConsistentPortNetType: all ports connected by a Net should have a consistent NetType
+  # - NetHasConsistentPortNetType: all ports connected by a Net should have a consistent NetType
   - classtype: ValidationRule
     conditionally_evaluated_expression:
       classtype: FunctionReference
@@ -17,7 +20,7 @@ validation_rule_set:
       id: predicate
       value: predicateIsComponentHasNets
 
-  #  NetHasConsistentPortFormatType: all ports connected by a Net should have a consistent FormatType
+  # - NetHasConsistentPortFormatType: all ports connected by a Net should have a consistent FormatType
   - classtype: ValidationRule
     conditionally_evaluated_expression:
       classtype: FunctionReference
@@ -28,3 +31,46 @@ validation_rule_set:
       classtype: FunctionReference
       id: predicate
       value: predicateIsComponentHasNets
+
+# Topology completion rules
+
+completion_rule_set:
+  classtype: CompletionRuleSet
+  id: TopologyCompletionRuleSet
+  completion_rules:
+
+  # - CheckComponentHasNoTopologicalHoles: the component should contain no topological holes
+  - classtype: CompletionRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: criterion
+      value: checkComponentHasNoTopologicalHoles
+    id: CheckComponentHasNoTopologicalHoles
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsComponent
+
+  # - CheckComponentHasNoUnknownInterfaceTypes: the component's interface ports should all have known types
+  - classtype: CompletionRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: criterion
+      value: checkComponentHasNoUnknownInterfaceTypes
+    id: CheckComponentHasNoUnknownInterfaceTypes
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsComponent
+
+  # - CheckComponentHasNoUnknownAttributes: the component's attributes should all have known types
+  - classtype: CompletionRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: criterion
+      value: checkComponentHasNoUnknownAttributeTypes
+    id: CheckComponentHasNoUnknownAttributeTypes
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsComponent            

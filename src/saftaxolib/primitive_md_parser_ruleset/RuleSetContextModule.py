@@ -5,7 +5,7 @@
 # -- AssertPrimitiveMetadataParserSupportedInstantiation: MetadataParser instance must be supported
 
 def assertPrimitiveMetadataParserAttributesAreSupported(obj):
-    '''Assert that MetadataParser primitive instance is supported. Format must be in ['C','B']'''
+    '''Assert that MetadataParser primitive instance is supported. Format must be in ['C','B'] or unknown'''
     fmt=obj.getAttributeById('format').getValue()
     return fmt in ['C','B','?']
 

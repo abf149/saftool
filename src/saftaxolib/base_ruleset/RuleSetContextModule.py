@@ -24,8 +24,11 @@ def assertNetsHaveConsistentPortNetTypes(obj):
     return True
 
 
+def predicateIsComponent(obj):
+    return type(obj).__name__ == 'Component'
+
 def predicateIsComponentHasNets(obj):
-    return type(obj).__name__ == 'Component' and len(obj.getTopology().getNetList())>0
+    return predicateIsComponent(obj) and len(obj.getTopology().getNetList())>0
     
 #  -- AssertNetHasConsistentPortFormatType: all ports connected by a Net should have a consistent FormatType
 #  --- Reuse predicateIsComponentHasNets() from NetHasConsistentPortNetType
@@ -46,5 +49,35 @@ def assertNetsHaveConsistentPortFormatTypes(obj):
                 if not  FormatType.compareFormatTypes(port.getFormatType(),format_type):                
                     # Assertion should fail if format types don't match                
                     return False
+
+    return True
+
+# - Topology completion rules
+#  --- Reuse predicateIsComponent() helper function from NetHasConsistentPortNetType as a predicate for all of these rules
+
+# -- CheckComponentHasNoTopologicalHoles: the component should contain no topological holes
+
+def checkComponentHasNoTopologicalHoles(obj):
+    return obj.getTopology().isHole()
+
+# -- CheckComponentHasNoUnknownInterfaceTypes: the component's interface ports should all have known types
+
+def checkComponentHasNoUnknownInterfaceTypes(component):
+    
+    for port in component.getInterface():
+        # Fail check if any interface port has an unknown format type
+        if port.getFormatType().isUnknown():
+            return False
+
+    return True
+
+# -- CheckComponentHasNoUnknownAttributeTypes: the component's attributes should all have known types
+
+def checkComponentHasNoUnknownAttributeTypes(component):
+    
+    for att in component.getAttributes():
+        # Fail check if any attributes is a FormatType with unknown format type
+        if type(att).__name__ == 'FormatType' and att.isUnknown():
+            return False
 
     return True

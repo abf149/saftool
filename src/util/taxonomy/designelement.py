@@ -4,9 +4,11 @@ from util.taxonomy.expressions import *
 
 
 def dictToObjByClassAttr(dictParam):
-    '''Convert a dict to an object, choosing the class type by the class attribute value. Strings and ints are returned as-is'''
-    if type(dictParam).__name__=='int' or type(dictParam).__name__=='str':
+    '''Convert a dict to an object, choosing the class type by the class attribute value. Strings, ints and lists are returned as-is'''
+    if type(dictParam).__name__=='int' or type(dictParam).__name__=='str' or type(dictParam).__name__=='list':
         return dictParam
+
+    #print(type(dictParam).__name__)
     obj=globals()[dictParam['classtype']].fromDict(dictParam)
     return obj
 

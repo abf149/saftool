@@ -32,10 +32,14 @@ class FunctionReference(Expression):
         return fxn(fxn_arg)
 
 class SolvableConstant(Expression):
-    '''Expressions which support holes'''
+    '''Expressions which support unknown values'''
 
     def __init__(self):
         pass
+
+    def isUnknown(self):
+        '''SolvableConstants can be unknown, this method returns True for unknown'''
+        return self.getValue()=='?'
 
 class NetType(SolvableConstant):
     '''Net types capture the wire-types (data, metadata, position) in the Efficient Processing taxonomy'''
