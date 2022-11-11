@@ -4,8 +4,14 @@ from util.taxonomy.expressions import *
 
 
 def dictToObjByClassAttr(dictParam):
+    #print('dictParam:',dictParam)
     '''Convert a dict to an object, choosing the class type by the class attribute value. Strings, ints and lists are returned as-is'''
-    if type(dictParam).__name__=='int' or type(dictParam).__name__=='str' or type(dictParam).__name__=='list':
+
+    if type(dictParam).__name__=='list':
+        # Recurse for lists
+        return [dictToObjByClassAttr(elem) for elem in dictParam]
+
+    if type(dictParam).__name__=='int' or type(dictParam).__name__=='str':
         return dictParam
 
     #print(type(dictParam).__name__)
@@ -154,6 +160,11 @@ class Topology(DesignElement):
         '''Get list of topological components'''
         return getObjAttrAsObjListByClassType(self, 'component_list')
 
+    def getComponentById(self, id):
+        '''Look up a component by id'''
+
+        return [component for component in self.getComponentList() if component.getId()==id][0]
+
 
 
 class Component(DesignElement):
@@ -220,6 +231,10 @@ class Component(DesignElement):
         # TODO: handle lists well
         return [att for att in self.getAttributes() if (type(att).__name__!='list') and att.getId()==id][0]
 
+    def getSubcomponentById(self, id):
+        # Return subcomponent from topology
+
+        return self.getTopology().getComponentById(id)
 
 class Primitive(Component):
     '''A "black box" functional unit with no lower-level topology; from a microarchitectural synthesis perspective, a primitive is a terminal'''
@@ -276,7 +291,7 @@ class Architecture(Component):
         self.setAttrAsDictList('saf_list', saf_list)
 
     def getSAFList(self):
-        return self.getObjAttrAsObjListByClassType(self, 'saf_list')
+        return getObjAttrAsObjListByClassType(self, 'saf_list')
 
     def setBufferHierarchy(self, buffer_hierarchy):
         self.buffer_hierarchy = buffer_hierarchy

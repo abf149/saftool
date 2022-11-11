@@ -109,7 +109,7 @@ def do_tests():
     print(arch)
     arch.dump('arch_test.yaml')
     print(arch)
-    print("- Run Rules Engine against architecture")
+    print("- Run Rules Engine against architecture; print; dump")
     print("\n\n")   
 
     base_rule_set_path='saftaxolib/base_ruleset'
@@ -124,6 +124,7 @@ def do_tests():
     print("\n\n")   
 
     result=rules_engine.run(arch)    
-    print(result)
+    print(result[-1][-1])
+    result[-1][-1].dump('inferred_architecture_with_format_saf_test.yaml')
     #print("-- Dump inferred microarchitecture")
     #result[1][-1].dump('incomplete_component_interface_attribute_type_test_SOLVED.yaml')    

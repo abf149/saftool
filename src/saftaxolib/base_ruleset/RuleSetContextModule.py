@@ -161,6 +161,11 @@ def predicateIsComponentHasNetsHasUnknownChildComponentPortTypesOnNetsWithKnownT
                         for connected_port_id in net.getPortIdList():
                             if not obj.getPortById(connected_port_id).getFormatType().isUnknown():
                                 # and return True if the net's type can be inferred from connected ports of known type.
+                                print("TransformUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType rewrite:")
+                                print("- Component:", obj.getId())
+                                print("- Port with known net type:",connected_port_id)
+                                print("- Net type:",obj.getPortById(connected_port_id).getFormatType().getValue())
+                                print("- Port with unknown net type:",full_port_id)
                                 return True
 
     return False
@@ -182,6 +187,10 @@ def checkComponentHasNoUnknownInterfaceTypes(component):
     for port in component.getInterface():
         # Fail check if any interface port has an unknown format type
         if port.getFormatType().isUnknown():
+            print('\nFailed',checkComponentHasNoUnknownInterfaceTypes,'details:')
+            print('- Component id:',component.getId())
+            print('- Port id:',port.getId())
+            print('- Port format:',port.getFormatType())
             return False
 
     return True

@@ -167,3 +167,6 @@ cython_debug/
 
 # docs
 docs
+
+# log
+log.txt

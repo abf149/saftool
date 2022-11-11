@@ -80,7 +80,7 @@ class SAFSpec:
 
     def getArchLevels(self):
         '''Return a list of architectural levels in the topology'''
-        return self.arch_saf_map.keys()
+        return list(self.arch_saf_map.keys())
 
     def getArchLevelDataspaces(self, arch_lvl):
         '''
