@@ -8,6 +8,20 @@ rewrite_rule_set:
   id: FormatUarchRewriteRuleSet
   rewrite_rules:
 
+  # - Format SAF to Format uarch rewrite rule
+
+  - id: ConcretizeArchitectureFormatSAFsToFormatUarches
+    classtype: RewriteRule
+    predicate:
+      id: predicate
+      classtype: FunctionReference
+      value: predicateIsArchitectureHasFormatSAF
+    conditionally_evaluated_expression:
+      id: concretization
+      classtype: FunctionReference
+      value: concretizeArchitectureFormatSAFsToFormatUarches
+
+
   # - Topological hole rewrite
 
   - classtype: RewriteRule

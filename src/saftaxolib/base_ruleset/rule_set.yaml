@@ -18,7 +18,7 @@ validation_rule_set:
     predicate:
       classtype: FunctionReference
       id: predicate
-      value: predicateIsComponentHasNets
+      value: predicateIsComponentOrArchitectureHasNets
 
   # - NetHasConsistentPortFormatType: all ports connected by a Net should have a consistent FormatType
   - classtype: ValidationRule
@@ -30,7 +30,7 @@ validation_rule_set:
     predicate:
       classtype: FunctionReference
       id: predicate
-      value: predicateIsComponentHasNets
+      value: predicateIsComponentOrArchitectureHasNets
 
 # Format uarch rewrite rules
 
@@ -50,7 +50,7 @@ rewrite_rule_set:
     predicate:
       classtype: FunctionReference
       id: predicate
-      value: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes
+      value: predicateIsComponentOrArchitectureAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes
 
   # - Infer unknown child port types on nets where some port types are known
   - classtype: RewriteRule
@@ -73,7 +73,7 @@ rewrite_rule_set:
     predicate:
       classtype: FunctionReference
       id: predicate
-      value: predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes      
+      value: predicateIsComponentOrArchitectureAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes      
 
 
 # Topology completion rules
@@ -105,7 +105,7 @@ completion_rule_set:
     predicate:
       classtype: FunctionReference
       id: predicate
-      value: predicateIsComponentOrSubclass
+      value: predicateIsComponentOrPrimitive
 
   # - CheckComponentHasNoUnknownAttributes: the component's attributes should all have known types
   - classtype: CompletionRule
@@ -117,4 +117,4 @@ completion_rule_set:
     predicate:
       classtype: FunctionReference
       id: predicate
-      value: predicateIsComponentOrSubclass          
+      value: predicateIsComponentOrPrimitive        

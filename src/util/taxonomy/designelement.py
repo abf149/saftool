@@ -234,4 +234,54 @@ class Primitive(Component):
         obj.setCategory(category)
         obj.setAttributes(attributes)
         obj.setInterface(interface)
-        return obj  
+        return obj
+
+class SAF(Component):
+    '''Representation of an architecture-level sparse acceleration feature (SAF) specification'''
+
+    def __init__(self):
+        pass
+
+    @classmethod
+    def fromIdCategoryAttributesTarget(cls, id, category, attributes, target):
+        '''Get SAF from id, SAF category, SAF attributes, and target architectural buffer (described hierarchically as a.b.c.....y.z'''
+        obj=cls.fromId(id)
+        obj.setCategory(category)
+        obj.setAttributes(attributes)
+        obj.setTarget(target)
+
+        return obj
+
+    def setTarget(self, target):
+        self.target=target
+
+    def getTarget(self):
+        return self.target
+
+class Architecture(Component):
+    '''Skeletal representation of an accelerator architecture for the purpose of defining shared FU interfaces for microarchitecture inference'''
+
+    def __init__(self):
+        pass
+
+    @classmethod
+    def fromIdSAFListTopologyBufferHierarchy(cls, id, saf_list, topology, buffer_hierarchy):
+        '''Get architecture from id, SAF list, architecture topology consisting of buffer stubs, and a list of buffer names sorted from top- to bottom-of-hierarchy'''
+        obj=cls.fromIdCategoryAttributesInterfaceTopology(id, 'Architecture', [], [], topology)
+        obj.setSAFList(saf_list)
+        obj.setBufferHierarchy(buffer_hierarchy)
+        return obj
+
+    def setSAFList(self, saf_list):
+        self.setAttrAsDictList('saf_list', saf_list)
+
+    def getSAFList(self):
+        return self.getObjAttrAsObjListByClassType(self, 'saf_list')
+
+    def setBufferHierarchy(self, buffer_hierarchy):
+        self.buffer_hierarchy = buffer_hierarchy
+
+    def getBufferHierarchy(self):
+        return self.buffer_hierarchy
+
+    

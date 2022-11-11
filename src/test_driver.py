@@ -2,7 +2,7 @@
 
 import os
 from util.taxonomy.designelement import Port
-from test import basictests, validationtests, formatuarchtests, incompleteuarchtests
+from test import basictests, validationtests, formatuarchtests, incompleteuarchtests, formatsaftests
 
 os.system('rm -f *test.yaml')
 
@@ -17,3 +17,6 @@ formatuarchtests.do_tests()
 
 # Incomplete microarchitecture rule set
 incompleteuarchtests.do_tests()
+
+# Format SAF rule set
+formatsaftests.do_tests()

@@ -27,8 +27,11 @@ def assertNetsHaveConsistentPortNetTypes(obj):
 def predicateIsComponent(obj):
     return type(obj).__name__ == 'Component'
 
-def predicateIsComponentHasNets(obj):
-    return predicateIsComponent(obj) and len(obj.getTopology().getNetList())>0
+def predicateIsArchitecture(obj):
+    return type(obj).__name__ == 'Architecture'
+
+def predicateIsComponentOrArchitectureHasNets(obj):
+    return (predicateIsComponent(obj) or predicateIsArchitecture(obj)) and len(obj.getTopology().getNetList())>0
     
 #  -- AssertNetHasConsistentPortFormatType: all ports connected by a Net should have a consistent FormatType
 #  --- Reuse predicateIsComponentHasNets() from NetHasConsistentPortNetType
@@ -81,9 +84,9 @@ def transformUnknownPortTypesOnNetsWithKnownTypesToKnownType(obj):
     obj.setInterface(iface)
     return obj
 
-def predicateIsComponentOrSubclassAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes(obj):
+def predicateIsComponentOrArchitectureAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes(obj):
     #if not ((predicateIsComponent(obj) or type(obj).__name__ == 'Primitive') and len(obj.getTopology().getNetList())>0):
-    if not (predicateIsComponentHasNets(obj)):
+    if not (predicateIsComponentOrArchitectureHasNets(obj)):
         return False
 
     net_list=obj.getTopology().getNetList()
@@ -140,7 +143,7 @@ def transformUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType(obj):
 
 def predicateIsComponentHasNetsHasUnknownChildComponentPortTypesOnNetsWithKnownTypes(obj):
     #if not ((predicateIsComponent(obj) or type(obj).__name__ == 'Primitive') and len(obj.getTopology().getNetList())>0):
-    if not (predicateIsComponentHasNets(obj)):
+    if not (predicateIsComponentOrArchitectureHasNets(obj)):
         return False
 
     net_list=obj.getTopology().getNetList()
@@ -172,7 +175,7 @@ def checkComponentHasNoTopologicalHoles(obj):
 # -- CheckComponentHasNoUnknownInterfaceTypes: the component's interface ports should all have known types
 #  --- Reuse predicateIsComponent() helper function from NetHasConsistentPortNetType as a predicate
 
-def predicateIsComponentOrSubclass(obj):
+def predicateIsComponentOrPrimitive(obj):
     return predicateIsComponent(obj) or type(obj).__name__ == 'Primitive'
 
 def checkComponentHasNoUnknownInterfaceTypes(component):
