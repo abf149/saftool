@@ -5,6 +5,7 @@ from util.taxonomy.serializableobject import *
 from util.taxonomy.expressions import *
 from util.taxonomy.designelement import *
 from util.taxonomy.rulesengine import *
+import argparse
 
 
 def genArch(buffer_stub_list, buffer_hierarchy, arch_saf_list):
@@ -112,9 +113,29 @@ def loadSparseloopArchitecture(filename):
     print('\n',[str(saf) for saf in processed_buffer_safs],'\n')
     print('\n',[str(buffer) for buffer in buffer_stub_list],'\n')
 
-    arch.dump('sparseloop_processed_arch_test.yaml')
+    #arch.dump('sparseloop_processed_arch_test.yaml')
 
+    return arch
 
+if __name__=="__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("in_yaml")
+    parser.add_argument("out_yaml")
+    args = parser.parse_args()
 
+    print("Loading",args.in_yaml,"...")
+    arch=loadSparseloopArchitecture(args.in_yaml)
 
+    print("Performing arch inference...")
+    rules_engine = RulesEngine(['saftaxolib/base_ruleset','saftaxolib/primitive_md_parser_ruleset','saftaxolib/format_uarch_ruleset'])
+    rules_engine.preloadRules()
+    result=rules_engine.run(arch)
 
+    outcome=result[0]
+    if outcome:
+        print("SUCCESS")
+        print("Savings to",args.out_yaml,"...")
+        inferred_arch=result[-1][-1]
+        inferred_arch.dump(args.out_yaml)
+    else:
+        print("FAILURE")
