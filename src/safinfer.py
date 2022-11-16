@@ -67,6 +67,24 @@ def genBufferStubByName(buffer_stub_id, rank_format_list_str):
 
     return Primitive.fromIdCategoryAttributesInterface(buffer_stub_id, primitive_category, primitive_attributes, primitive_interface)
 
+def loadArchitectureRecurse(hierarchical_arch):
+    '''Recursive unwrapping of Sparseloop architecture'''
+    res=[]
+    for parent in hierarchical_arch:
+        if 'local' in parent:
+            # Append buffer-level names at this hierarchical level
+            res.extend([lvl['name'] for lvl in parent['local']])
+        if 'subtree' in parent:
+            # Recurse to list of buffer subtrees below this node
+            res.extend(loadArchitectureRecurse(parent['subtree']))
+
+    return res
+
+def loadArchitecture(filename):
+    '''Wrapper for recursive flattening of Sparseloop architecture file'''
+    return loadArchitectureRecurse(sl_config.load_config_yaml(filename)['architecture']['subtree'])
+
+
 def loadSparseloopArchitecture(filename):
     saf_spec=sl_config.SAFSpec(filename)
 
