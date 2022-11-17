@@ -84,6 +84,13 @@ def loadArchitecture(filename):
     '''Wrapper for recursive flattening of Sparseloop architecture file'''
     return loadArchitectureRecurse(sl_config.load_config_yaml(filename)['architecture']['subtree'])
 
+def loadProb(filename):
+    '''Load Sparseloop problem file'''
+    return sl_config.load_config_yaml(filename)
+
+def loadMap(filename):
+    '''Load Sparseloop map file'''
+    return sl_config.load_config_yaml(filename)
 
 def loadSparseloopArchitecture(filename):
     saf_spec=sl_config.SAFSpec(filename)
