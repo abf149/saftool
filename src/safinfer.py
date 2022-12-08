@@ -140,7 +140,7 @@ def loadSparseloopArchitecture(filename):
 
     #arch.dump('sparseloop_processed_arch_test.yaml')
 
-    return arch
+    return arch, saf_spec
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
@@ -149,7 +149,7 @@ if __name__=="__main__":
     args = parser.parse_args()
 
     print("Loading",args.in_yaml,"...")
-    arch=loadSparseloopArchitecture(args.in_yaml)
+    arch, saf_spec=loadSparseloopArchitecture(args.in_yaml)
 
     print("Performing arch inference...")
     rules_engine = RulesEngine(['saftaxolib/base_ruleset','saftaxolib/primitive_md_parser_ruleset','saftaxolib/format_uarch_ruleset'])
