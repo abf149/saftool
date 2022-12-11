@@ -1,4 +1,8 @@
 # sparse config for dense input activations and sparse weights
+# Assumptions: 
+# - The only circumstances where ranks are flattened are:
+# -- A datatype tensor has a rank which is a projection of other ranks, in which case the rank IDs comprising the projection formula must be flattened in that tensor's spec
+# -- A datatype tensor is compressed at one level of storage and then decompressed using some SAF uarch in between storage levels
 
 sparse_optimizations:
   targets:
@@ -7,17 +11,17 @@ sparse_optimizations:
       data-spaces:
         - name: Inputs
           ranks:
-            - format: UOP             # G
+            - format: UOP             # G4
               payload-word-bits:  0
-            - format: UOP             # C1
+            - format: UOP             # N4
               payload-word-bits:  0
-            - format: UOP             # M1
+            - format: UOP             # C4
               payload-word-bits:  0
             - format: UOP             
               flattened-rankIDs: [ [ S, F ] ]
               payload-word-bits:  0
             - format: UOP             
-              flattened-rankIDs: [ [ E, N ] ]
+              flattened-rankIDs: [ [ R, E] ]
               payload-word-bits:  0
             - format: UOP             
               payload-word-bits:  4
