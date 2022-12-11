@@ -108,6 +108,7 @@ def parse_sl_mapping(mapping, prob_instance_rank_sizes):
 
                 parsed_mapping[buffer]['loops']=loops
             
+    '''
     # Account for residuals (rank length=0) in each rank
     for rank in prob_instance_rank_sizes:
         rank_len=prob_instance_rank_sizes[rank]
@@ -125,6 +126,7 @@ def parse_sl_mapping(mapping, prob_instance_rank_sizes):
                 # TODO: currently no support for factors that are no factors
                 assert(rank_len == int(rank_len))
                 parsed_mapping[buffer]['loops']['factors'][rank] = int(rank_len)
+    '''
 
     return parsed_mapping
 
@@ -149,7 +151,8 @@ def flatten_arch_wrapper(arch):
     '''Wrapper for recursive flattening of Sparseloop architecture config'''
     return flatten_arch_recursive(arch['architecture']['subtree'])
 
-def buffer_loop_binding_from_sl_arch_and_map(arch, parsed_mapping):
+def buffer_loop_binding_from_sl_arch_and_map(arch, mapping, prob_instance_rank_sizes):
+    parsed_mapping=parse_sl_mapping(mapping, prob_instance_rank_sizes)
 
     buffer_hierarchy=flatten_arch_wrapper(arch)
 
@@ -159,7 +162,41 @@ def buffer_loop_binding_from_sl_arch_and_map(arch, parsed_mapping):
 
     return buffer_hierarchy
 
+# Bindings
 
+def bind_pgens(arch, mapping, prob):
+    '''Bind pgens to loops & buffers'''
+
+    # Extract data-space, mapping & flattened architecture info
+    data_space_dict_list, prob_coeff_list, prob_instance_rank_sizes, prob_instance_densities=data_space_dict_list_from_sl_prob(prob)
+    buffer_loop_binding=buffer_loop_binding_from_sl_arch_and_map(arch, mapping, prob_instance_rank_sizes)
+    flat_arch=flatten_arch_wrapper(arch)
+
+    top_lvl_buffer=list(flat_arch.keys())[0]
+
+    # Create pgens and bind them to loops and buffer levels
+    # The loop (which the pgen is bound to) may itself be bound to a different buffer level than the pgen
+    pgens={buffer:{dtype:[] for dtype in data_space_dict_list} for buffer in flat_arch}
+    last_buffer={dtype:top_lvl_buffer for dtype in data_space_dict_list}
+
+    for loop_buffer in flat_arch:
+        loop_buffer_kept_data_spaces=buffer_loop_binding[loop_buffer]['data-spaces']
+        loop_factors=buffer_loop_binding[loop_buffer]['loops']['factors']
+        for dtype in data_space_dict_list:
+            # For each combination of buffer and datatype, determine which buffer (pgen_buffer) to bind pgens to:
+            if dtype in loop_buffer_kept_data_spaces:
+                # (either this buffer or the lowest higher buffer which keeps dtype.)
+                last_buffer[dtype]=loop_buffer
+            pgen_buffer=last_buffer[dtype]
+            
+            # Then, for each loop that is bound to loop_buffer AND projects onto dtype, create a pgen bound to that loop AND pgen_buffer.
+            # Each loop is represented by a rank and the buffer it is bound to, rather than by the usual rank + tiling-level notation (i.e. M0, R2, etc.)
+            dtype_projection_ranks=data_space_dict_list[dtype]['rank-list']
+            print(loop_factors)
+            pgens[pgen_buffer][dtype].extend([{'rank':rank,'loop_buffer':loop_buffer} for rank in loop_factors if rank in dtype_projection_ranks])
+
+    return pgens
+                
 
 class FormatSAF:
     '''
