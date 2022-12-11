@@ -168,5 +168,8 @@ cython_debug/
 # Test YAML files
 *test.yaml
 
+# Test Python file
+test_script.py
+
 # Log file
 log.txt

@@ -13,6 +13,36 @@ def load_config_yaml(config_filename):
     
     return config
 
+def data_space_rank_list_from_projection(projection, prob_coeff_list):
+    data_space_rank_list=[]
+    for sum in projection:
+        for product in sum:
+            for fact in product:
+                if fact not in prob_coeff_list:
+                    data_space_rank_list.append(fact)
+
+    return data_space_rank_list
+
+def data_space_dict_list_from_sl_prob(prob):
+    """ Extract a list of data-space representations from the sparseloop prob dict
+    Keyword arguments:
+    prob -- the Sparseloop config
+    """
+
+    data_space_types_dict={}
+    prob_coeff_list={coeff['name']:coeff['default'] for coeff in prob['problem']['shape']['coefficients']}
+    prob_instance_rank_sizes={rank:prob['problem']['instance'][rank] for rank in prob['problem']['instance'] if rank != 'densities'}
+    prob_instance_densities=prob['problem']['instance']['densities']
+    data_space_idx=0
+    for data_space in prob['problem']['shape']['data-spaces']:
+        if 'read-write' not in data_space:
+            data_space['read-write']=False
+        data_space_rank_list=data_space_rank_list_from_projection(data_space['projection'], prob_coeff_list)
+        data_space_types_dict[data_space['name']]={'idx':data_space_idx,'projection':data_space['projection'],'rank-list':data_space_rank_list,'read-write':data_space['read-write']}
+        data_space_idx += 1
+
+    return data_space_types_dict, prob_coeff_list, prob_instance_rank_sizes, prob_instance_densities
+
 class FormatSAF:
     '''
     Represents an abstract Format SAF
