@@ -13,20 +13,45 @@ def load_config_yaml(config_filename):
     
     return config
 
+# Data-space parsing routines
+
+def data_space_rank_list_from_product(product, prob_coeff_list):
+    """ Extract a list of ranks that project onto a data-space, from a particular product in the data-space's projection expression.
+
+    Keyword arguments:
+    product -- the data-space's projection expression
+    prob_coeff_list -- a list of the constant coefficients associated with this problem
+    """
+
+    data_space_rank_list=[]
+
+    for fact in product:
+        if fact not in prob_coeff_list:
+            data_space_rank_list.append(fact)    
+
+    return data_space_rank_list
+
+
 def data_space_rank_list_from_projection(projection, prob_coeff_list):
+    """ Extract a list of ranks that project onto a data-space, from the data-space's projection expression.
+
+    Keyword arguments:
+    projection -- the data-space's projection expression
+    prob_coeff_list -- a list of the constant coefficients associated with this problem
+    """
+
     data_space_rank_list=[]
     for sum in projection:
         for product in sum:
-            for fact in product:
-                if fact not in prob_coeff_list:
-                    data_space_rank_list.append(fact)
+            product_ranks=data_space_rank_list_from_product(product, prob_coeff_list)
+            data_space_rank_list.extend(product_ranks)
 
     return data_space_rank_list
 
 def data_space_dict_list_from_sl_prob(prob):
     """ Extract a list of data-space representations from the sparseloop prob dict
     Keyword arguments:
-    prob -- the Sparseloop config
+    prob -- the Sparseloop prob config
     """
 
     data_space_types_dict={}
@@ -42,6 +67,99 @@ def data_space_dict_list_from_sl_prob(prob):
         data_space_idx += 1
 
     return data_space_types_dict, prob_coeff_list, prob_instance_rank_sizes, prob_instance_densities
+
+# Mapping parsing routines
+
+def parse_sl_mapping(mapping, prob_instance_rank_sizes):
+    """ Reformat the Sparseloop mapping file.
+
+    Keyword arguments:
+    mapping -- The Sparseloop map config
+    """
+
+    parsed_mapping={}
+
+    type_blacklist=['spatial']
+
+    for attrib in mapping['mapping']:
+        # For each mapping config line
+        attrib_type=attrib['type']
+        if attrib['type'] not in type_blacklist:
+            buffer=attrib['target']
+            if buffer not in parsed_mapping:
+                parsed_mapping[buffer]={}
+                parsed_mapping[buffer]['data-spaces']=list(prob_instance_rank_sizes.keys())
+            if attrib_type=='bypass':
+                # Collect data-space bypass info @ buffer-level
+                parsed_mapping[buffer]['data-spaces']=attrib['keep']
+            elif attrib_type=='temporal':
+                # Collect permutation & factor info @ buffer-level
+
+                # Extract loops
+                loops={'permutation':[rank for rank in attrib['permutation']]}
+
+                # Extract factors
+                loops['factors']={factor_expr.split('=')[0]:int(factor_expr.split('=')[1]) for factor_expr in attrib['factors'].split(' ')}
+
+                # Introduce implicit factors
+                for rank in prob_instance_rank_sizes:
+                    if rank not in loops['factors']:
+                        loops['factors'][rank]=1
+
+                parsed_mapping[buffer]['loops']=loops
+            
+    # Account for residuals (rank length=0) in each rank
+    for rank in prob_instance_rank_sizes:
+        rank_len=prob_instance_rank_sizes[rank]
+        # For each problem rank - 
+        # First-pass: compute residual
+        for buffer in parsed_mapping:
+            if parsed_mapping[buffer]['loops']['factors'][rank] != 0:
+                # in computing residual, skip loop with residual factor placeholder
+                rank_len=rank_len/parsed_mapping[buffer]['loops']['factors'][rank]
+        
+        # Second-pass: detect loop with residual factor
+        for buffer in parsed_mapping:
+            if parsed_mapping[buffer]['loops']['factors'][rank] == 0:
+                # replace residual factor placeholder with residual
+                # TODO: currently no support for factors that are no factors
+                assert(rank_len == int(rank_len))
+                parsed_mapping[buffer]['loops']['factors'][rank] = int(rank_len)
+
+    return parsed_mapping
+
+# Architecture parsing routines
+
+def flatten_arch_recursive(hierarchical_arch):
+    '''Recursive unwrapping of Sparseloop architecture'''
+    res={}
+    for parent in hierarchical_arch:
+        if 'local' in parent:
+            # Append buffer-level names at this hierarchical level
+            for lvl in parent['local']:
+                if lvl['name'] != 'MAC':
+                    res[lvl['name']]={attrib:lvl[attrib] for attrib in lvl if attrib != 'name'}
+        if 'subtree' in parent:
+            # Recurse to list of buffer subtrees below this node
+            res=dict(res,**flatten_arch_recursive(parent['subtree']))
+
+    return res
+
+def flatten_arch_wrapper(arch):
+    '''Wrapper for recursive flattening of Sparseloop architecture config'''
+    return flatten_arch_recursive(arch['architecture']['subtree'])
+
+def buffer_loop_binding_from_sl_arch_and_map(arch, parsed_mapping):
+
+    buffer_hierarchy=flatten_arch_wrapper(arch)
+
+    for buffer in buffer_hierarchy:
+        buffer_hierarchy[buffer]['loops']=parsed_mapping[buffer]['loops']
+        buffer_hierarchy[buffer]['data-spaces']=parsed_mapping[buffer]['data-spaces']
+
+    return buffer_hierarchy
+
+
 
 class FormatSAF:
     '''
