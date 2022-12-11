@@ -106,9 +106,12 @@ def parse_sl_mapping(mapping, prob_instance_rank_sizes):
                     if rank not in loops['factors']:
                         loops['factors'][rank]=1
 
+                # Identify non-trivial loops (factor==1 or else residual (factor==0))
+                # (need to do this before we compute residuals)
+                loops['non-trivial']={rank:(loops['factors'][rank]!=1) for rank in loops['factors']}
+
                 parsed_mapping[buffer]['loops']=loops
-            
-    '''
+
     # Account for residuals (rank length=0) in each rank
     for rank in prob_instance_rank_sizes:
         rank_len=prob_instance_rank_sizes[rank]
@@ -126,7 +129,6 @@ def parse_sl_mapping(mapping, prob_instance_rank_sizes):
                 # TODO: currently no support for factors that are no factors
                 assert(rank_len == int(rank_len))
                 parsed_mapping[buffer]['loops']['factors'][rank] = int(rank_len)
-    '''
 
     return parsed_mapping
 
@@ -192,7 +194,6 @@ def bind_pgens(arch, mapping, prob):
             # Then, for each loop that is bound to loop_buffer AND projects onto dtype, create a pgen bound to that loop AND pgen_buffer.
             # Each loop is represented by a rank and the buffer it is bound to, rather than by the usual rank + tiling-level notation (i.e. M0, R2, etc.)
             dtype_projection_ranks=data_space_dict_list[dtype]['rank-list']
-            print(loop_factors)
             pgens[pgen_buffer][dtype].extend([{'rank':rank,'loop_buffer':loop_buffer} for rank in loop_factors if rank in dtype_projection_ranks])
 
     return pgens
