@@ -448,7 +448,8 @@ def bind_format_iface(arch, mapping, prob, sparseopts):
                 #print("fmt_access_rank_is_bound (POST)",fmt_access_rank_is_bound)
                 #print("nontrivial_pgen_is_bound",nontrivial_pgen_is_bound)
 
-    print(fmt_ifaces)            
+    #print(fmt_ifaces)   
+    return fmt_ifaces         
 
 """
 

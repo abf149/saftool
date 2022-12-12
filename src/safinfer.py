@@ -128,24 +128,78 @@ def loadSparseloopArchitecture(filename):
     return arch, saf_spec
 '''
 
+def topology_with_holes_from_bindings(arch, fmt_iface_bindings):
+
+    # Fix mismatch in conventions
+    fmt_str_convert={"UOP":"U", "RLE":"R", "C":"C"}
+
+    # Extract buffer hierarchy
+    buffer_hierarchy=[buffer for buffer in list(sl_config.flatten_arch_wrapper(arch).keys()) if buffer != 'MAC']
+
+    # Generate buffer stubs
+    buffer_stub_list=[]
+    saf_list=[]
+    for buffer in buffer_hierarchy:
+        datatype_fmt_ifaces=fmt_iface_bindings[buffer]
+        # - Flatten the interface formats associated with this buffer stub
+        flat_rank_fmts=[]
+        for dtype in datatype_fmt_ifaces:
+            flat_rank_fmts.extend([fmt_str_convert[fmt_iface[format]] for fmt_iface in datatype_fmt_ifaces[dtype]])
+        # - Create the buffer stub
+        buffer_stub=genBufferStubByName(buffer, flat_rank_fmts)
+        buffer_stub_list.append(buffer_stub)
+        # - Create the Format SAF if sparse traversal support is required
+        if len(flat_rank_fmts)>0:
+            fmt_saf=SAF.fromIdCategoryAttributesTarget('format_saf', 'format', [flat_rank_fmts], buffer)
+            saf_list.append(fmt_saf)
+
+    taxo_arch=genArch(buffer_stub_list, buffer_hierarchy, saf_list)
+
+    return taxo_arch   
+
+
+        
+
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("in_yaml")
-    parser.add_argument("out_yaml")
+    parser.add_argument('-a','--arch',default='ref_input/arch.yaml')
+    parser.add_argument('-m','--map',default='ref_input/map.yaml')
+    parser.add_argument('-p','--prob',default='ref_input/prob.yaml')
+    parser.add_argument('-s','--sparseopts',default='ref_input/sparseopts.yaml')
+    parser.add_argument('-b','--binding-out',default='ref_output/bindings.yaml')
+    parser.add_argument('-t','--topology-out',default='ref_output/new_arch.yaml')
     args = parser.parse_args()
 
-    print("Loading",args.in_yaml,"...")
-    arch, saf_spec=loadSparseloopArchitecture(args.in_yaml)
+    print("SAFinfer.\n")
+
+    print("Parsing input files:")
+    print("- arch:",args.arch)
+    arch=sl_config.load_config_yaml(args.arch)
+    print("- map:",args.map)
+    mapping=sl_config.load_config_yaml(args.map)
+    print("- prob:",args.prob)
+    prob=sl_config.load_config_yaml(args.prob)
+    print("- sparseopts:",args.sparseopts)
+    sparseopts=sl_config.load_config_yaml(args.sparseopts)
+    #arch, saf_spec=loadSparseloopArchitecture(args.in_yaml)
+
+    print("\nComputing bindings.")
+    fmt_iface_bindings=sl_config.bind_format_iface(arch, mapping, prob, sparseopts)
+    print("- Saving to",args.binding_out)
+    fmt_iface_bindings.dump(args.binding_out)
+
+    print("\nRealizing microarchitecture with topological holes, based on bindings.\n")
+    taxo_arch=topology_with_holes_from_bindings(arch, fmt_iface_bindings)
 
     print("Performing arch inference...")
     rules_engine = RulesEngine(['saftaxolib/base_ruleset','saftaxolib/primitive_md_parser_ruleset','saftaxolib/format_uarch_ruleset'])
     rules_engine.preloadRules()
-    result=rules_engine.run(arch)
+    result=rules_engine.run(taxo_arch)
 
     outcome=result[0]
     if outcome:
         print("SUCCESS")
-        print("Savings to",args.out_yaml,"...")
+        print("Saving to",args.topology_out,"...")
         inferred_arch=result[-1][-1]
         inferred_arch.dump(args.out_yaml)
     else:
