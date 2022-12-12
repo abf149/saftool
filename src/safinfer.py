@@ -8,6 +8,8 @@ from util.taxonomy.rulesengine import *
 import argparse
 
 
+yaml.Dumper.ignore_aliases = lambda *args : True
+
 def genArch(buffer_stub_list, buffer_hierarchy, arch_saf_list):
 
     # Architecture id
@@ -144,7 +146,8 @@ def topology_with_holes_from_bindings(arch, fmt_iface_bindings):
         # - Flatten the interface formats associated with this buffer stub
         flat_rank_fmts=[]
         for dtype in datatype_fmt_ifaces:
-            flat_rank_fmts.extend([fmt_str_convert[fmt_iface[format]] for fmt_iface in datatype_fmt_ifaces[dtype]])
+            flat_rank_fmts.extend([fmt_str_convert[fmt_iface['format']] for fmt_iface in datatype_fmt_ifaces[dtype]])
+        flat_rank_fmts=[FormatType.fromIdValue('format',fmt_str) for fmt_str in flat_rank_fmts]
         # - Create the buffer stub
         buffer_stub=genBufferStubByName(buffer, flat_rank_fmts)
         buffer_stub_list.append(buffer_stub)
@@ -186,7 +189,8 @@ if __name__=="__main__":
     print("\nComputing bindings.")
     fmt_iface_bindings=sl_config.bind_format_iface(arch, mapping, prob, sparseopts)
     print("- Saving to",args.binding_out)
-    fmt_iface_bindings.dump(args.binding_out)
+    with open(args.binding_out, 'w') as fp:
+        yaml.dump(fmt_iface_bindings,fp, default_flow_style=False)
 
     print("\nRealizing microarchitecture with topological holes, based on bindings.\n")
     taxo_arch=topology_with_holes_from_bindings(arch, fmt_iface_bindings)
@@ -201,6 +205,6 @@ if __name__=="__main__":
         print("SUCCESS")
         print("Saving to",args.topology_out,"...")
         inferred_arch=result[-1][-1]
-        inferred_arch.dump(args.out_yaml)
+        inferred_arch.dump(args.topology_out)
     else:
         print("FAILURE")

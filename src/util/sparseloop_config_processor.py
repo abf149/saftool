@@ -449,7 +449,7 @@ def bind_format_iface(arch, mapping, prob, sparseopts):
                 #print("nontrivial_pgen_is_bound",nontrivial_pgen_is_bound)
 
     #print(fmt_ifaces)   
-    return fmt_ifaces         
+    return copy.deepcopy(fmt_ifaces)
 
 """
 
