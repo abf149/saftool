@@ -275,7 +275,7 @@ def bind_pgens(arch, mapping, prob):
             dtype_projection_ranks=data_space_dict_list[dtype]['rank-list']
             pgens[pgen_buffer][dtype].extend([{'rank':rank,'loop_buffer':loop_buffer} for rank in loop_factors if rank in dtype_projection_ranks])
 
-    print("Delegation table",delegation_table)
+    #print("Delegation table",delegation_table)
 
     return pgens, delegation_table
 
@@ -314,6 +314,8 @@ def bind_format_iface(arch, mapping, prob, sparseopts):
     pgens, delegation_table=bind_pgens(arch, mapping, prob)
     buffer_dataspace_to_fmt_layout_binding=get_buffer_dataspace_to_fmt_layout_bindings_from_sparseopts(sparseopts)
     buffer_dataspace_to_fmt_access_binding=get_buffer_dataspace_to_fmt_access_bindings_from_buffer_dataspace_to_fmt_layout_bindings(buffer_dataspace_to_fmt_layout_binding, data_space_dict_list, flat_arch, buffer_loop_binding)
+
+    loop_to_iface_map={buffer:{dtype:{} for dtype in data_space_dict_list} for buffer in flat_arch}
 
     #print(buffer_loop_binding)
 
@@ -450,15 +452,73 @@ def bind_format_iface(arch, mapping, prob, sparseopts):
                                             
 
                 fmt_ifaces[buffer][dtype].extend(fmt_ifaces_temp)
+
+            #print("buffer",buffer)
+            #print("dtype",dtype)
+            for idx in range(len(fmt_ifaces[buffer][dtype])):
+                fmt_iface=fmt_ifaces[buffer][dtype][idx]
+                for pgen_idx in fmt_iface['pgens']:
+                    loop_rank=pgens[buffer][dtype][pgen_idx]['rank']
+                    loop_buffer=pgens[buffer][dtype][pgen_idx]['loop_buffer']
+                    #print("loop_buffer",loop_buffer)
+                    loop_to_iface_map[loop_buffer][dtype][loop_rank]={'fmt_iface':idx, 'buffer':buffer, 'dtype':dtype}
+                    
                 #print("data_space_sop_is_bound (POST)",data_space_sop_is_bound)
                 #print("fmt_access_rank_is_bound (POST)",fmt_access_rank_is_bound)
                 #print("nontrivial_pgen_is_bound",nontrivial_pgen_is_bound)
 
-    #print(fmt_ifaces)   
-    return copy.deepcopy(fmt_ifaces)
+    #print(loop_to_iface_map)
 
-def bind_action_optimization(arch, mapping, prob, sparseopts):
-    pass
+    #print(fmt_ifaces)   
+    return copy.deepcopy(fmt_ifaces), pgens, buffer_loop_binding, loop_to_iface_map
+
+def get_skip_format_interface_bindings(target_buffer, target_dtype, condition_buffer, condition_dtype, loop_to_iface_map):
+    
+    fmt_iface_list=[]
+
+    for loop_buffer in loop_to_iface_map:
+        if (target_dtype in loop_to_iface_map[loop_buffer]) and (condition_dtype in loop_to_iface_map[loop_buffer]):
+            target_dtype_loop_ranks=loop_to_iface_map[loop_buffer][target_dtype]
+            condition_dtype_loop_ranks=loop_to_iface_map[loop_buffer][condition_dtype]
+
+            for target_rank in target_dtype_loop_ranks:
+                if target_dtype_loop_ranks[target_rank]['buffer']==target_buffer:
+                    target_fmt_iface=target_dtype_loop_ranks[target_rank]['fmt_iface']
+                    if (target_rank in condition_dtype_loop_ranks) and (condition_dtype_loop_ranks[target_rank]['buffer']==condition_buffer):
+                        condition_fmt_iface=condition_dtype_loop_ranks[target_rank]['fmt_iface']
+                        fmt_iface_list.append({'target':{'buffer':target_buffer, 'dtype':target_dtype, 'fmt_iface':target_fmt_iface}, 'condition':{'buffer':condition_buffer, 'dtype':condition_dtype, 'fmt_iface':condition_fmt_iface}, 'loop_binding':{'loop_buffer':loop_buffer, 'rank':target_rank}})
+
+    return fmt_iface_list
+
+def bind_action_optimization(arch, mapping, prob, sparseopts, fmt_ifaces, loop_to_iface_map):
+    # Extract data-space, mapping & flattened architecture info
+    data_space_dict_list, prob_coeff_list, prob_instance_rank_sizes, prob_instance_densities=data_space_dict_list_from_sl_prob(prob)
+    buffer_loop_binding=buffer_loop_binding_from_sl_arch_and_map(arch, mapping, prob_instance_rank_sizes, data_space_dict_list)
+    flat_arch=flatten_arch_wrapper(arch)
+    pgens, delegation_table=bind_pgens(arch, mapping, prob)
+    buffer_dataspace_to_fmt_layout_binding=get_buffer_dataspace_to_fmt_layout_bindings_from_sparseopts(sparseopts)
+
+    action_optim_blacklist=['gating']
+
+    raw_skips=[]
+
+    for target_buffer in flat_arch:
+        if 'action-optimization' in buffer_dataspace_to_fmt_layout_binding[target_buffer]:
+            buffer_action_optim=buffer_dataspace_to_fmt_layout_binding[target_buffer]['action-optimization']
+
+            for action_optim in buffer_action_optim:
+                if action_optim['type']=='skipping':
+                    for option in action_optim['options']:
+                        target_dtype=option['target']
+                        condition_dtypes=option['condition-on']
+
+                        for condition_dtype in condition_dtypes:
+                            condition_buffer=delegation_table[target_buffer][condition_dtype]
+
+                            fmt_iface_list=get_skip_format_interface_bindings(target_buffer, target_dtype, condition_buffer, condition_dtype, loop_to_iface_map)
+                            raw_skips.extend(fmt_iface_list)
+
+    return raw_skips
 
 """
 

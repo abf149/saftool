@@ -187,7 +187,8 @@ if __name__=="__main__":
     #arch, saf_spec=loadSparseloopArchitecture(args.in_yaml)
 
     print("\nComputing bindings.")
-    fmt_iface_bindings=sl_config.bind_format_iface(arch, mapping, prob, sparseopts)
+    fmt_iface_bindings, pgens, buffer_loop_binding, loop_to_iface_map=sl_config.bind_format_iface(arch, mapping, prob, sparseopts)
+    skip_bindings=sl_config.bind_action_optimization(arch, mapping, prob, sparseopts, fmt_iface_bindings, loop_to_iface_map)
     print("- Saving to",args.binding_out)
     with open(args.binding_out, 'w') as fp:
         yaml.dump(fmt_iface_bindings,fp, default_flow_style=False)
