@@ -273,7 +273,7 @@ def bind_pgens(arch, mapping, prob):
 
     return pgens
 
-def first_unbound_nontrival_pgen_idx_by_rank(target_rank, buffer_dtype_pgens, nontrivial_pgen_ptrs, nontrivial_pgen_is_bound):
+def first_unbound_nontrival_pgen_idx_by_rank(target_rank, buffer_dtype_pgens, nontrivial_pgen_ptrs, nontrivial_pgen_is_bound, update_is_bound=True):
     #print(target_rank)
     #print(buffer_dtype_pgens)
     #print(nontrivial_pgen_ptrs)
@@ -285,7 +285,8 @@ def first_unbound_nontrival_pgen_idx_by_rank(target_rank, buffer_dtype_pgens, no
             idx=nontrivial_pgen_ptrs[jdx]
             loop_ref=buffer_dtype_pgens[idx]
             if loop_ref['rank']==target_rank:
-                nontrivial_pgen_is_bound[jdx]=True
+                if update_is_bound:
+                    nontrivial_pgen_is_bound[jdx]=True
                 return idx, nontrivial_pgen_is_bound, True # last return value indicates that a non-trivial pgen was found
 
     # If we made it this far, there is no unbound non-trivial pgen. Widen the search to include trivial pgens.
@@ -313,13 +314,13 @@ def bind_format_iface(arch, mapping, prob, sparseopts):
     fmt_ifaces={buffer:{dtype:[] for dtype in data_space_dict_list} for buffer in flat_arch}
 
     for buffer in flat_arch:
-        print("Entering", buffer)
+        #print("Entering", buffer)
         # For each buffer, get 
         #loop_order=copy.deepcopy(buffer_loop_binding[buffer]['loops']['permutation'])
         #loop_order.reverse()
         loop_buffer_kept_data_spaces=buffer_loop_binding[buffer]['data-spaces']
         for dtype in data_space_dict_list:
-            print("Entering",dtype)
+            #print("Entering",dtype)
             #print(loop_buffer_kept_data_spaces)
             if dtype in loop_buffer_kept_data_spaces:
                 # For each combination of buffer and kept datatype,
@@ -330,6 +331,7 @@ def bind_format_iface(arch, mapping, prob, sparseopts):
                 data_space_projection=data_space_dict_list[dtype]['projection']
                 data_space_sop_is_bound=[False for expr in data_space_projection] # Initialize data-space projection SOP binding tracking
                 fmt_ifaces_temp=[]
+                fmt_access_rank_is_bound=[]
                 for idx in range(len(buffer_dtype_pgens)):
                     # Initialize pgen binding tracking
                     loop_ptr=buffer_dtype_pgens[idx]
@@ -338,10 +340,14 @@ def bind_format_iface(arch, mapping, prob, sparseopts):
                         nontrivial_pgen_ptrs.append(idx)
                         nontrivial_pgen_is_bound.append(False)
                 
-                # - First-pass binding: bind flattened sparseopts fibers which call out specific ranks, to the associated pgens 
+                # - First-pass binding: bind flattened sparseopts fibers which call out specific ranks, to the associated pgens and to a format interface
                 if dtype in buffer_dataspace_to_fmt_access_binding[buffer]['representation-format']:
-                    for fiber in buffer_dataspace_to_fmt_access_binding[buffer]['representation-format'][dtype]['ranks']:
+                    fmt_access_binding=buffer_dataspace_to_fmt_access_binding[buffer]['representation-format'][dtype]['ranks']
+                    fmt_access_rank_is_bound=[False for rank in fmt_access_binding]
+                    for fdx in range(len(fmt_access_binding)):
+                        fiber=fmt_access_binding[fdx]
                         if 'flattened-rankIDs' in fiber:
+                            fmt_access_rank_is_bound[fdx]=True
                             # -- Pass 1a: create a format interface for each fiber which comprises flattened rank IDs
                             fiber_layout=fiber['flattened-rankIDs']
                             #print(prob_coeff_list)
@@ -360,40 +366,89 @@ def bind_format_iface(arch, mapping, prob, sparseopts):
                             #print("DICT:",data_space_dict_list[dtype]['projection'])
                             for idx in range(len(data_space_projection)):
                                 expr=data_space_projection[idx]
-                                #print(expr)
+                                #print("EXPR",expr)
                                 expr_ranks=data_space_rank_list_from_SOP(expr, prob_coeff_list)
-                                #print("EXPR_RANKS")
-                                #print(expr_ranks)
+                                #print("EXPR_RANKS",expr_ranks)
 
-                                flat_fiber_ranks_contain_expr_ranks=True
-                                #print(ranks)
+                                flat_fiber_ranks_contain_expr_ranks=False #TODO: var name is no longer correct
+                                #print("RANKS",ranks)
                                 for rank in expr_ranks:
                                     # Determine whether a dataspace projection expression projects onto this format interface
-                                    #print(rank)
-                                    if rank not in ranks:
-                                        flat_fiber_ranks_contain_expr_ranks=False
-                                    else:
-                                        # assert: all or nothing
-                                        assert(flat_fiber_ranks_contain_expr_ranks)
+                                    #print(rank,ranks,rank not in ranks)
+                                    if rank in ranks:
+                                        flat_fiber_ranks_contain_expr_ranks=True
                                 
                                 if flat_fiber_ranks_contain_expr_ranks:
                                     dataspace_proj_onto_fmt_iface.append(expr)
                                     data_space_sop_is_bound[idx]=True
 
                             # Construct format interface
+                            #print("PROJECTION_ISSUE:",dataspace_proj_onto_fmt_iface)
                             fmt_ifaces_temp.append({'fiber_layout':fiber_layout,'format':fmt,'ranks':ranks,'pgens':pgen_idxs,'projection':dataspace_proj_onto_fmt_iface})
+                            #print("FORMAT:",fmt)
+
+                    
+                    # - Second-pass binding: bind dataspace projection SOPs (the ones not bound in the first-pass) to pgens and format interfaces; infer formats
+                    for idx in range(len(data_space_projection)):
+                        if not data_space_sop_is_bound[idx]:
+                            expr=data_space_projection[idx]
+                            expr_ranks=data_space_rank_list_from_SOP(expr, prob_coeff_list)
+                            pgen_idxs=[]
+                            fiber_layout=expr                    
+                            at_least_one_nontrivial_rank=False
+                            for target_rank in expr_ranks:
+                                # -- Pass 2a: bind dataspace projection SOPs (the ones not bound in the first-pass) to pgens and format interfaces
+                                pgen_idx, _, is_nontrivial = first_unbound_nontrival_pgen_idx_by_rank(target_rank, buffer_dtype_pgens, nontrivial_pgen_ptrs, nontrivial_pgen_is_bound, update_is_bound=False)
+                                at_least_one_nontrivial_rank = at_least_one_nontrivial_rank or is_nontrivial
+                                pgen_idxs.append(pgen_idx)
+                            if at_least_one_nontrivial_rank:
+                                # --- Commit SOP bindings only if at least one rank in SOP can bind to a non-trivial pgen
+                                for pgen_idx in pgen_idxs:
+                                    if pgen_idx in nontrivial_pgen_ptrs:
+                                        nontrivial_pgen_is_bound[nontrivial_pgen_ptrs.index(pgen_idx)]=True
+                                # Construct format interface
+                                fmt_ifaces_temp.append({'fiber_layout':fiber_layout,'ranks':expr_ranks,'pgens':pgen_idxs,'projection':expr})                        
+
+                            # Even if dataspace projection SOP cannot bind to a non-trivial pgen and a format interface, still mark it as bound to avoid revisiting.
+                            data_space_sop_is_bound[idx]=True
+
+                    # -- Pass 2b: infer formats
+
+                    #print("fmt_access_rank_is_bound (PRE)",fmt_access_rank_is_bound)
+                    #print("data_space_sop_is_bound (PRE)",data_space_sop_is_bound)
+                    for idx in range(len(fmt_access_binding)):
+                        #print("idx:",idx)
+                        if not fmt_access_rank_is_bound[idx]:
+                            seek_fmt_iface=True
+                            jdx=0
+                            while(seek_fmt_iface and jdx < len(fmt_ifaces_temp)):
+                                #print("jdx:",jdx)
+                                if not 'format' in fmt_ifaces_temp[jdx]:
+                                    seek_fmt_iface=False
+                                    fmt_ifaces_temp[jdx]['format']=fmt_access_binding[idx]['format']
+                                    fmt_access_rank_is_bound[idx]=True
+                                jdx+=1    
+
+                    # - Third-pass cleanup: delete candidate format interfaces which were not successfully bound to a metadata format
+                    cleanup_idxs=[]
+                    for idx in range(len(fmt_ifaces_temp)):
+                        # -- Pass 3a: mark format interfaces for cleanup
+                        if 'format' not in fmt_ifaces_temp[idx]:
+                            cleanup_idxs.append(idx)
+                    total_removed=0
+                    for jdx in range(len(cleanup_idxs)):
+                        # -- Pass 2b: perform cleanup of marked idxs
+                        idx=cleanup_idxs[jdx]-total_removed
+                        fmt_ifaces_temp=fmt_ifaces_temp[0:idx] + fmt_ifaces_temp[(idx+1):]
+                        total_removed+=1
+                                            
 
                 fmt_ifaces[buffer][dtype].extend(fmt_ifaces_temp)
-                print(data_space_sop_is_bound)
+                #print("data_space_sop_is_bound (POST)",data_space_sop_is_bound)
+                #print("fmt_access_rank_is_bound (POST)",fmt_access_rank_is_bound)
+                #print("nontrivial_pgen_is_bound",nontrivial_pgen_is_bound)
 
-
-
-                print(fmt_ifaces)
-                #print(dtype)
-                #print(nontrivial_pgen_ptrs)
-                #print(nontrivial_pgen_is_bound)
-                #print(buffer_dtype_pgens)
-
+    print(fmt_ifaces)            
 
 """
 
