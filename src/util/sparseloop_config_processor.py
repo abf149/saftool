@@ -518,6 +518,7 @@ def bind_action_optimization(arch, mapping, prob, sparseopts, fmt_ifaces, loop_t
                             fmt_iface_list=get_skip_format_interface_bindings(target_buffer, target_dtype, condition_buffer, condition_dtype, loop_to_iface_map)
                             raw_skips.extend(fmt_iface_list)
 
+    print(raw_skips)
     return raw_skips
 
 """

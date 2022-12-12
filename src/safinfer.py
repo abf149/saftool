@@ -6,6 +6,7 @@ from util.taxonomy.expressions import *
 from util.taxonomy.designelement import *
 from util.taxonomy.rulesengine import *
 import argparse
+import copy
 
 
 yaml.Dumper.ignore_aliases = lambda *args : True
@@ -130,13 +131,23 @@ def loadSparseloopArchitecture(filename):
     return arch, saf_spec
 '''
 
-def topology_with_holes_from_bindings(arch, fmt_iface_bindings):
+def topology_with_holes_from_bindings(arch, fmt_iface_bindings, skip_bindings, data_space_dict_list):
 
     # Fix mismatch in conventions
     fmt_str_convert={"UOP":"U", "RLE":"R", "C":"C"}
 
     # Extract buffer hierarchy
     buffer_hierarchy=[buffer for buffer in list(sl_config.flatten_arch_wrapper(arch).keys()) if buffer != 'MAC']
+
+    # Compute flattened port indices
+    port_idx={buffer:{dtype:[0 for fmt_iface in fmt_iface_bindings[buffer][dtype]] for dtype in data_space_dict_list} for buffer in buffer_hierarchy}
+    for buffer in buffer_hierarchy:
+        idx=0
+        for dtype in data_space_dict_list:
+            for jdx in range(len(port_idx[buffer][dtype])):
+                port_idx[buffer][dtype][jdx]=idx
+                idx+=1
+    #print(port_idx)
 
     # Generate buffer stubs
     buffer_stub_list=[]
@@ -155,6 +166,31 @@ def topology_with_holes_from_bindings(arch, fmt_iface_bindings):
         if len(flat_rank_fmts)>0:
             fmt_saf=SAF.fromIdCategoryAttributesTarget('format_saf', 'format', [flat_rank_fmts], buffer)
             saf_list.append(fmt_saf)
+
+    # Generate action-optimization SAFs
+    skip_bindings=copy.deepcopy(skip_bindings)
+    for bdx in range(len(skip_bindings)):
+        skip_binding=skip_bindings[bdx]
+        # First, transform skip binding to use flattened port indices
+        target_buffer=skip_binding['target']['buffer']
+        target_dtype=skip_binding['target']['dtype']
+        target_fmt_iface=skip_binding['target']['fmt_iface']
+        condition_buffer=skip_binding['condition']['buffer']
+        condition_dtype=skip_binding['condition']['dtype']
+        condition_fmt_iface=skip_binding['condition']['fmt_iface']        
+
+        target_fmt_iface_flat=port_idx[target_buffer][target_dtype][target_fmt_iface]
+        condition_fmt_iface_flat=port_idx[condition_buffer][condition_dtype][condition_fmt_iface]
+
+        skip_binding['target']['fmt_iface']=target_fmt_iface_flat
+        skip_binding['condition']['fmt_iface']=condition_fmt_iface_flat
+        skip_bindings[bdx]=skip_binding
+
+        # Second, create skipping SAF
+        skipping_saf=SAF.fromIdCategoryAttributesTarget('skipping_saf', 'skipping', [[target_buffer,target_fmt_iface_flat,condition_buffer,condition_fmt_iface_flat]], target_buffer)
+        saf_list.append(skipping_saf)
+
+    #print(skip_bindings)
 
     taxo_arch=genArch(buffer_stub_list, buffer_hierarchy, saf_list)
 
@@ -187,6 +223,7 @@ if __name__=="__main__":
     #arch, saf_spec=loadSparseloopArchitecture(args.in_yaml)
 
     print("\nComputing bindings.")
+    data_space_dict_list, prob_coeff_list, prob_instance_rank_sizes, prob_instance_densities=sl_config.data_space_dict_list_from_sl_prob(prob)    
     fmt_iface_bindings, pgens, buffer_loop_binding, loop_to_iface_map=sl_config.bind_format_iface(arch, mapping, prob, sparseopts)
     skip_bindings=sl_config.bind_action_optimization(arch, mapping, prob, sparseopts, fmt_iface_bindings, loop_to_iface_map)
     print("- Saving to",args.binding_out)
@@ -194,7 +231,7 @@ if __name__=="__main__":
         yaml.dump(fmt_iface_bindings,fp, default_flow_style=False)
 
     print("\nRealizing microarchitecture with topological holes, based on bindings.\n")
-    taxo_arch=topology_with_holes_from_bindings(arch, fmt_iface_bindings)
+    taxo_arch=topology_with_holes_from_bindings(arch, fmt_iface_bindings, skip_bindings, data_space_dict_list)
 
     print("Performing arch inference...")
     rules_engine = RulesEngine(['saftaxolib/base_ruleset','saftaxolib/primitive_md_parser_ruleset','saftaxolib/format_uarch_ruleset'])
