@@ -58,12 +58,18 @@ def genBufferStubByName(buffer_stub_id, rank_format_list_str):
         format_type=FormatType.fromIdValue('TestFormatType','?')    
         port_md_out=Port.fromIdDirectionNetTypeFormatType('md_out'+str(idx), 'out', net_type, format_type)   
 
+        # -- pos_in ports
+        net_type=NetType.fromIdValue('TestNetType','pos')
+        format_type=FormatType.fromIdValue('TestFormatType','addr')    
+        port_pos_in=Port.fromIdDirectionNetTypeFormatType('pos_in'+str(idx), 'in', net_type, format_type)   
+
         # -- at_bound_in ports
         net_type=NetType.fromIdValue('TestNetType','pos')
         format_type=FormatType.fromIdValue('TestFormatType','?')    
         port_at_bound_in=Port.fromIdDirectionNetTypeFormatType('at_bound_in'+str(idx), 'in', net_type, format_type)   
 
         primitive_interface.append(port_md_out)
+        primitive_interface.append(port_pos_in)
         primitive_interface.append(port_at_bound_in)
 
 

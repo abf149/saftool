@@ -1,0 +1,36 @@
+classtype: RuleSet
+id: SkippingUarchRuleSet
+
+# Skipping uarch rewrite rules
+
+rewrite_rule_set:
+  classtype: RewriteRuleSet
+  id: SkippingUarchRewriteRuleSet
+  rewrite_rules:
+
+  # - Skipping SAF to Skipping uarch rewrite rule
+
+  - id: ConcretizeArchitectureSkippingSAFsToSkippingUarches
+    classtype: RewriteRule
+    predicate:
+      id: predicate
+      classtype: FunctionReference
+      value: predicateIsArchitectureHasSkippingSAF
+    conditionally_evaluated_expression:
+      id: concretization
+      classtype: FunctionReference
+      value: concretizeArchitectureSkippingSAFsToSkippingUarches
+
+
+  # - Topological hole rewrite
+
+#  - classtype: RewriteRule
+#    conditionally_evaluated_expression:
+#      classtype: FunctionReference
+#      id: transform
+#      value: transformTopologicalHoleToPerRankMdParserTopology
+#    id: TransformTopologicalHoleToPerRankMdParserTopology
+#    predicate:
+#      classtype: FunctionReference
+#      id: predicate
+#      value: predicateIsComponentIsFormatUarchHasTopologicalHole
