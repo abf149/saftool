@@ -76,6 +76,7 @@ def loadMap(filename):
     '''Load Sparseloop map file'''
     return sl_config.load_config_yaml(filename)
 
+'''
 def loadSparseloopArchitecture(filename):
     saf_spec=sl_config.SAFSpec(filename)
 
@@ -125,6 +126,7 @@ def loadSparseloopArchitecture(filename):
     #arch.dump('sparseloop_processed_arch_test.yaml')
 
     return arch, saf_spec
+'''
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser()

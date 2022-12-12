@@ -1,4 +1,5 @@
 import yaml
+import copy
 
 def load_config_yaml(config_filename):
     """Load a Sparseloop YAML-format config file
@@ -25,12 +26,25 @@ def data_space_rank_list_from_product(product, prob_coeff_list):
 
     data_space_rank_list=[]
 
+    #print("PRODUCT")
+    #print(product)
+    #print(prob_coeff_list)
     for fact in product:
+        #print("FACT")
+        #print(fact)
         if fact not in prob_coeff_list:
             data_space_rank_list.append(fact)    
 
     return data_space_rank_list
 
+def data_space_rank_list_from_SOP(sop, prob_coeff_list):
+    data_space_rank_list=[]
+
+    for product in sop:
+        product_ranks=data_space_rank_list_from_product(product, prob_coeff_list)
+        data_space_rank_list.extend(product_ranks)
+
+    return data_space_rank_list    
 
 def data_space_rank_list_from_projection(projection, prob_coeff_list):
     """ Extract a list of ranks that project onto a data-space, from the data-space's projection expression.
@@ -41,12 +55,12 @@ def data_space_rank_list_from_projection(projection, prob_coeff_list):
     """
 
     data_space_rank_list=[]
-    for sum in projection:
-        for product in sum:
-            product_ranks=data_space_rank_list_from_product(product, prob_coeff_list)
-            data_space_rank_list.extend(product_ranks)
+    for sop in projection:
+        sop_ranks=data_space_rank_list_from_SOP(sop, prob_coeff_list)
+        data_space_rank_list.extend(sop_ranks)
 
     return data_space_rank_list
+
 
 def data_space_dict_list_from_sl_prob(prob):
     """ Extract a list of data-space representations from the sparseloop prob dict
@@ -70,7 +84,7 @@ def data_space_dict_list_from_sl_prob(prob):
 
 # Mapping parsing routines
 
-def parse_sl_mapping(mapping, prob_instance_rank_sizes):
+def parse_sl_mapping(mapping, prob_instance_rank_sizes, data_space_dict_list):
     """ Reformat the Sparseloop mapping file.
 
     Keyword arguments:
@@ -88,7 +102,7 @@ def parse_sl_mapping(mapping, prob_instance_rank_sizes):
             buffer=attrib['target']
             if buffer not in parsed_mapping:
                 parsed_mapping[buffer]={}
-                parsed_mapping[buffer]['data-spaces']=list(prob_instance_rank_sizes.keys())
+                parsed_mapping[buffer]['data-spaces']=list(data_space_dict_list.keys())
             if attrib_type=='bypass':
                 # Collect data-space bypass info @ buffer-level
                 parsed_mapping[buffer]['data-spaces']=attrib['keep']
@@ -153,8 +167,8 @@ def flatten_arch_wrapper(arch):
     '''Wrapper for recursive flattening of Sparseloop architecture config'''
     return flatten_arch_recursive(arch['architecture']['subtree'])
 
-def buffer_loop_binding_from_sl_arch_and_map(arch, mapping, prob_instance_rank_sizes):
-    parsed_mapping=parse_sl_mapping(mapping, prob_instance_rank_sizes)
+def buffer_loop_binding_from_sl_arch_and_map(arch, mapping, prob_instance_rank_sizes, data_space_dict_list):
+    parsed_mapping=parse_sl_mapping(mapping, prob_instance_rank_sizes, data_space_dict_list)
 
     buffer_hierarchy=flatten_arch_wrapper(arch)
 
@@ -164,6 +178,67 @@ def buffer_loop_binding_from_sl_arch_and_map(arch, mapping, prob_instance_rank_s
 
     return buffer_hierarchy
 
+# Sparseopts parsing routines
+
+def get_buffer_dataspace_to_fmt_layout_bindings_from_sparseopts(sparseopts):
+    buffer_dataspace_to_fmt_layout_binding={}
+    for target_buffer_dict in sparseopts['sparse_optimizations']['targets']:
+        # Extract per-arch-level SAFs
+        target_buffer=target_buffer_dict['name']
+        buffer_dataspace_to_fmt_layout_binding[target_buffer]={'representation-format':{}}
+        if 'representation-format' in target_buffer_dict:
+            target_data_space_dicts=target_buffer_dict['representation-format']['data-spaces']
+            for target_data_space_dict in target_data_space_dicts:
+                target_data_space=target_data_space_dict['name']
+                buffer_dataspace_to_fmt_layout_binding[target_buffer]['representation-format'][target_data_space]={attrib:target_data_space_dict[attrib] for attrib in target_data_space_dict if attrib != 'name'}
+        if 'action-optimization' in target_buffer_dict:
+            buffer_dataspace_to_fmt_layout_binding[target_buffer]['action-optimization']=target_buffer_dict['action-optimization']
+
+    return buffer_dataspace_to_fmt_layout_binding
+
+def get_buffer_dataspace_to_fmt_access_bindings_from_buffer_dataspace_to_fmt_layout_bindings(buffer_dataspace_to_fmt_layout_binding, data_space_dict_list, flat_arch, buffer_loop_binding):
+    ''' Generate buffer/datapsace/format-access bindings from buffer/dataspace/format-layout bindings.
+
+    Sparseloop sparseopts spec binds a fibertree memory layout to a datatype and buffer-level.
+    Not all fibers resident at a buffer-level are traversed at that buffer-level; some fibers are part of a tile which will be filled into lower memory.
+    This function consumes sparseopts-style fiber bindings and re-binds fibers to the memory levels where they are traversed.
+    '''
+    
+    buffer_dataspace_to_fmt_access_binding=copy.deepcopy(buffer_dataspace_to_fmt_layout_binding)
+
+    top_lvl_buffer=list(flat_arch.keys())[0]
+    last_resident_buffer={dtype:top_lvl_buffer for dtype in data_space_dict_list}
+
+    # Re-bind fibers to the buffer levels at which they are accessed
+    for buffer in flat_arch:
+        buffer_kept_data_spaces=buffer_loop_binding[buffer]['data-spaces']
+        for dtype in data_space_dict_list:
+            if dtype in buffer_kept_data_spaces:
+                # For each datatype resident in this buffer level,
+                upper_buffer=last_resident_buffer[dtype]
+                if upper_buffer != buffer:
+                    #if this is not top-level memory,
+                    if dtype in buffer_dataspace_to_fmt_layout_binding[upper_buffer]['representation-format']:
+                        # and if there are any sparse fibers at this buffer level,
+                        # then omit this tile from the lowest higher buffer level which keeps this datatype
+                        buffer_dtype_tile=buffer_dataspace_to_fmt_layout_binding[buffer]['representation-format'][dtype]['ranks']                        
+                        upper_buffer_dtype_tile=copy.deepcopy(buffer_dataspace_to_fmt_layout_binding[upper_buffer]['representation-format'][dtype]['ranks'])
+                        
+                        # TODO: more efficient approach to suffix pruning
+                        num_buffer_dtype_tile_fibers=len(buffer_dtype_tile)
+                        num_upper_buffer_dtype_tile_fibers=len(upper_buffer_dtype_tile)
+                        num_traversed_upper_buffer_dtype_tile_fibers=num_upper_buffer_dtype_tile_fibers-num_buffer_dtype_tile_fibers
+                        traversed_upper_buffer_dtype_tile_fibers=upper_buffer_dtype_tile[0:num_traversed_upper_buffer_dtype_tile_fibers]
+
+                        buffer_dataspace_to_fmt_access_binding[upper_buffer]['representation-format'][dtype]['ranks']=traversed_upper_buffer_dtype_tile_fibers
+
+                last_resident_buffer[dtype]=buffer
+
+        
+
+    return buffer_dataspace_to_fmt_access_binding
+
+
 # Bindings
 
 def bind_pgens(arch, mapping, prob):
@@ -171,7 +246,7 @@ def bind_pgens(arch, mapping, prob):
 
     # Extract data-space, mapping & flattened architecture info
     data_space_dict_list, prob_coeff_list, prob_instance_rank_sizes, prob_instance_densities=data_space_dict_list_from_sl_prob(prob)
-    buffer_loop_binding=buffer_loop_binding_from_sl_arch_and_map(arch, mapping, prob_instance_rank_sizes)
+    buffer_loop_binding=buffer_loop_binding_from_sl_arch_and_map(arch, mapping, prob_instance_rank_sizes, data_space_dict_list)
     flat_arch=flatten_arch_wrapper(arch)
 
     top_lvl_buffer=list(flat_arch.keys())[0]
@@ -197,7 +272,123 @@ def bind_pgens(arch, mapping, prob):
             pgens[pgen_buffer][dtype].extend([{'rank':rank,'loop_buffer':loop_buffer} for rank in loop_factors if rank in dtype_projection_ranks])
 
     return pgens
-                
+
+def first_unbound_nontrival_pgen_idx_by_rank(target_rank, buffer_dtype_pgens, nontrivial_pgen_ptrs, nontrivial_pgen_is_bound):
+    #print(target_rank)
+    #print(buffer_dtype_pgens)
+    #print(nontrivial_pgen_ptrs)
+    #print(nontrivial_pgen_is_bound)
+
+    '''Find the index of the outer-most (highest-level) non-trivial pgen which is not yet bound to a format interface'''
+    for jdx in range(len(nontrivial_pgen_ptrs)):
+        if not nontrivial_pgen_is_bound[jdx]:
+            idx=nontrivial_pgen_ptrs[jdx]
+            loop_ref=buffer_dtype_pgens[idx]
+            if loop_ref['rank']==target_rank:
+                nontrivial_pgen_is_bound[jdx]=True
+                return idx, nontrivial_pgen_is_bound, True # last return value indicates that a non-trivial pgen was found
+
+    # If we made it this far, there is no unbound non-trivial pgen. Widen the search to include trivial pgens.
+    for idx in range(len(buffer_dtype_pgens)):
+        #if not nontrivial_pgen_is_bound[jdx]:
+        #    idx=nontrivial_pgen_ptrs[jdx]
+        loop_ref=buffer_dtype_pgens[idx]
+        if loop_ref['rank']==target_rank:
+        #    nontrivial_pgen_is_bound[jdx]=True
+            return idx, nontrivial_pgen_is_bound, False # trivial pgen found
+
+def bind_format_iface(arch, mapping, prob, sparseopts):
+    '''Bind format interfaces to buffers, loops, ranks, formats & address arithmetic'''
+
+    # Extract data-space, mapping & flattened architecture info
+    data_space_dict_list, prob_coeff_list, prob_instance_rank_sizes, prob_instance_densities=data_space_dict_list_from_sl_prob(prob)
+    buffer_loop_binding=buffer_loop_binding_from_sl_arch_and_map(arch, mapping, prob_instance_rank_sizes, data_space_dict_list)
+    flat_arch=flatten_arch_wrapper(arch)
+    pgens=bind_pgens(arch, mapping, prob)
+    buffer_dataspace_to_fmt_layout_binding=get_buffer_dataspace_to_fmt_layout_bindings_from_sparseopts(sparseopts)
+    buffer_dataspace_to_fmt_access_binding=get_buffer_dataspace_to_fmt_access_bindings_from_buffer_dataspace_to_fmt_layout_bindings(buffer_dataspace_to_fmt_layout_binding, data_space_dict_list, flat_arch, buffer_loop_binding)
+
+    #print(buffer_loop_binding)
+
+    fmt_ifaces={buffer:{dtype:[] for dtype in data_space_dict_list} for buffer in flat_arch}
+
+    for buffer in flat_arch:
+        print("Entering", buffer)
+        # For each buffer, get 
+        #loop_order=copy.deepcopy(buffer_loop_binding[buffer]['loops']['permutation'])
+        #loop_order.reverse()
+        loop_buffer_kept_data_spaces=buffer_loop_binding[buffer]['data-spaces']
+        for dtype in data_space_dict_list:
+            print("Entering",dtype)
+            #print(loop_buffer_kept_data_spaces)
+            if dtype in loop_buffer_kept_data_spaces:
+                # For each combination of buffer and kept datatype,
+                # - Compute pointers to pgens bound to non-trivial loops
+                buffer_dtype_pgens=pgens[buffer][dtype]
+                nontrivial_pgen_ptrs=[]
+                nontrivial_pgen_is_bound=[]
+                fmt_ifaces_temp=[]
+                for idx in range(len(buffer_dtype_pgens)):
+                    loop_ptr=buffer_dtype_pgens[idx]
+                    #print(buffer_loop_binding[loop_ptr['loop_buffer']]['loops']['non-trivial'][loop_ptr['rank']])
+                    if buffer_loop_binding[loop_ptr['loop_buffer']]['loops']['non-trivial'][loop_ptr['rank']]:
+                        nontrivial_pgen_ptrs.append(idx)
+                        nontrivial_pgen_is_bound.append(False)
+                # - First-pass binding: bind flattened sparseopts fibers which call out specific ranks, to the associated pgens 
+                if dtype in buffer_dataspace_to_fmt_access_binding[buffer]['representation-format']:
+                    for fiber in buffer_dataspace_to_fmt_access_binding[buffer]['representation-format'][dtype]['ranks']:
+                        if 'flattened-rankIDs' in fiber:
+                            # -- Pass 1a: create a format interface for each fiber which comprises flattened rank IDs
+                            fiber_layout=fiber['flattened-rankIDs']
+                            #print(prob_coeff_list)
+                            fmt=fiber['format']
+                            ranks=data_space_rank_list_from_SOP(fiber_layout, prob_coeff_list)
+                            pgen_idxs=[]
+                            at_least_one_nontrivial_rank=False
+                            for target_rank in ranks:
+                                pgen_idx, nontrivial_pgen_is_bound, is_nontrivial = first_unbound_nontrival_pgen_idx_by_rank(target_rank, buffer_dtype_pgens, nontrivial_pgen_ptrs, nontrivial_pgen_is_bound)
+                                at_least_one_nontrivial_rank = at_least_one_nontrivial_rank or is_nontrivial
+                                pgen_idxs.append(pgen_idx)
+                            assert(at_least_one_nontrivial_rank)
+
+                            # -- Pass 1b: select for dataspace projection expressions which project onto this format interface
+                            dataspace_proj_onto_fmt_iface=[]
+                            #print("DICT:",data_space_dict_list[dtype]['projection'])
+                            for expr in data_space_dict_list[dtype]['projection']:
+                                #print(expr)
+                                expr_ranks=data_space_rank_list_from_SOP(expr, prob_coeff_list)
+                                #print("EXPR_RANKS")
+                                #print(expr_ranks)
+
+                                flat_fiber_ranks_contain_expr_ranks=True
+                                #print(ranks)
+                                for rank in expr_ranks:
+                                    # Determine whether a dataspace projection expression projects onto this format interface
+                                    #print(rank)
+                                    if rank not in ranks:
+                                        flat_fiber_ranks_contain_expr_ranks=False
+                                    else:
+                                        # assert: all or nothing
+                                        assert(flat_fiber_ranks_contain_expr_ranks)
+                                
+                                if flat_fiber_ranks_contain_expr_ranks:
+                                    dataspace_proj_onto_fmt_iface.append(expr)
+
+                            # Construct format interface
+                            fmt_ifaces_temp.append({'fiber_layout':fiber_layout,'format':fmt,'ranks':ranks,'pgens':pgen_idxs,'projection':dataspace_proj_onto_fmt_iface})
+
+                fmt_ifaces[buffer][dtype].extend(fmt_ifaces_temp)
+
+
+
+                print(fmt_ifaces)
+                #print(dtype)
+                #print(nontrivial_pgen_ptrs)
+                #print(nontrivial_pgen_is_bound)
+                #print(buffer_dtype_pgens)
+
+
+"""
 
 class FormatSAF:
     '''
@@ -301,3 +492,5 @@ class SAFSpec:
         for dataspace in self.dataspace_arch_map:
             str_val += "  - " + dataspace + ": " + str(self.dataspace_arch_map[dataspace]) + "\n"
         return str_val
+
+"""
