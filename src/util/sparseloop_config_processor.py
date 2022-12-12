@@ -327,13 +327,17 @@ def bind_format_iface(arch, mapping, prob, sparseopts):
                 buffer_dtype_pgens=pgens[buffer][dtype]
                 nontrivial_pgen_ptrs=[]
                 nontrivial_pgen_is_bound=[]
+                data_space_projection=data_space_dict_list[dtype]['projection']
+                data_space_sop_is_bound=[False for expr in data_space_projection] # Initialize data-space projection SOP binding tracking
                 fmt_ifaces_temp=[]
                 for idx in range(len(buffer_dtype_pgens)):
+                    # Initialize pgen binding tracking
                     loop_ptr=buffer_dtype_pgens[idx]
                     #print(buffer_loop_binding[loop_ptr['loop_buffer']]['loops']['non-trivial'][loop_ptr['rank']])
                     if buffer_loop_binding[loop_ptr['loop_buffer']]['loops']['non-trivial'][loop_ptr['rank']]:
                         nontrivial_pgen_ptrs.append(idx)
                         nontrivial_pgen_is_bound.append(False)
+                
                 # - First-pass binding: bind flattened sparseopts fibers which call out specific ranks, to the associated pgens 
                 if dtype in buffer_dataspace_to_fmt_access_binding[buffer]['representation-format']:
                     for fiber in buffer_dataspace_to_fmt_access_binding[buffer]['representation-format'][dtype]['ranks']:
@@ -354,7 +358,8 @@ def bind_format_iface(arch, mapping, prob, sparseopts):
                             # -- Pass 1b: select for dataspace projection expressions which project onto this format interface
                             dataspace_proj_onto_fmt_iface=[]
                             #print("DICT:",data_space_dict_list[dtype]['projection'])
-                            for expr in data_space_dict_list[dtype]['projection']:
+                            for idx in range(len(data_space_projection)):
+                                expr=data_space_projection[idx]
                                 #print(expr)
                                 expr_ranks=data_space_rank_list_from_SOP(expr, prob_coeff_list)
                                 #print("EXPR_RANKS")
@@ -373,11 +378,13 @@ def bind_format_iface(arch, mapping, prob, sparseopts):
                                 
                                 if flat_fiber_ranks_contain_expr_ranks:
                                     dataspace_proj_onto_fmt_iface.append(expr)
+                                    data_space_sop_is_bound[idx]=True
 
                             # Construct format interface
                             fmt_ifaces_temp.append({'fiber_layout':fiber_layout,'format':fmt,'ranks':ranks,'pgens':pgen_idxs,'projection':dataspace_proj_onto_fmt_iface})
 
                 fmt_ifaces[buffer][dtype].extend(fmt_ifaces_temp)
+                print(data_space_sop_is_bound)
 
 
 
