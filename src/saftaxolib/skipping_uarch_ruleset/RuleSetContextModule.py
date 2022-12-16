@@ -18,9 +18,6 @@ def genSkippingUarchWithHole(skipping_uarch_id):
     #rank_format_list=[FormatType.fromIdValue('format','C'),FormatType.fromIdValue('format','B')]
     component_attributes=['leader-follower']
 
-    # Interface
-    component_interface=[]
-
     # Leader/left interface
     md_format_type=FormatType.fromIdValue('TestFormatType','?') 
     pos_format_type=FormatType.fromIdValue('TestFormatType','addr')
@@ -31,12 +28,9 @@ def genSkippingUarchWithHole(skipping_uarch_id):
 
     # -- pos_out port
     net_type=NetType.fromIdValue('TestNetType','pos')
-    format_type=FormatType.fromIdValue('TestFormatType','addr')
     port_pos_out0=Port.fromIdDirectionNetTypeFormatType('pos_out0', 'out', net_type, pos_format_type)   
 
     # Follower/right interface
-    md_format_type=FormatType.fromIdValue('TestFormatType','?') 
-    pos_format_type=FormatType.fromIdValue('TestFormatType','addr')
 
     # -- md_in port
     net_type=NetType.fromIdValue('TestNetType','md')
@@ -44,13 +38,10 @@ def genSkippingUarchWithHole(skipping_uarch_id):
 
     # -- pos_out port
     net_type=NetType.fromIdValue('TestNetType','pos')
-    format_type=FormatType.fromIdValue('TestFormatType','addr')
     port_pos_out1=Port.fromIdDirectionNetTypeFormatType('pos_out1', 'out', net_type, pos_format_type)       
 
-    component_interface.append(port_md_in0)
-    component_interface.append(port_pos_out0)
-    component_interface.append(port_md_in1)
-    component_interface.append(port_pos_out1)    
+    # Interface
+    component_interface=[port_md_in0, port_pos_out0, port_md_in1, port_pos_out1] 
 
     # Create topological hole
     component_topology=[]
