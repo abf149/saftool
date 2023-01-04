@@ -95,6 +95,7 @@ sparse_optimizations:
               metadata-word-bits: 4
           rank-application-order: inner-to-outer
 
+# Pipeline bubble == discard
   - name: MAC
     compute-optimization:
     - type: skipping
