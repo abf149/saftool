@@ -15,13 +15,23 @@ def load_config_yaml(config_filename):
     return config
 
 # Data-space parsing routines
+# Terminology for dataspace projections
+# - Projection expression: a collection of SOP expressions projecting the problem dimensions onto each rank of a dataspace's
+#                          tensor
+#     - Example: [ [[coef_1,H],[coef_2,W]], [[M]] ]
+# - Sum-of-product (SOP) expression - represents the projection of problem dimensions onto a single rank
+#                                     of a dataspace's tensor. Takes the form of an affine transformation
+#                                     of problem dimensions, i.e. sum of coefficient*problem_dimension terms
+#     - Example: [[coef_1,H],[coef_2,W]]
+# - Product expression - a single coefficient*problem_dimension term
+#     - Example: [coef_1,H] or [[M]] (implicit coefficient of 1)
 
 def data_space_rank_list_from_product(product, prob_coeff_list):
-    """ Extract a list of ranks that project onto a data-space, from a particular product in the data-space's projection expression.
+    """ Extract a partial list of problem dimensions that project onto a dataspace rank, from a particular product expression. Excludes coefficients.
 
     Keyword arguments:
-    product -- the data-space's projection expression
-    prob_coeff_list -- a list of the constant coefficients associated with this problem
+    product -- the product expression
+    prob_coeff_list -- a complete list of the constant coefficients associated with this problem
     """
 
     data_space_rank_list=[]
@@ -38,6 +48,13 @@ def data_space_rank_list_from_product(product, prob_coeff_list):
     return data_space_rank_list
 
 def data_space_rank_list_from_SOP(sop, prob_coeff_list):
+    """ Extract a complete list of problem dimensions that project onto a dataspace rank, from a particular SOP expression. Excludes coefficients.
+
+    Keyword arguments:
+    product -- the SOP expression
+    prob_coeff_list -- a complete list of the constant coefficients associated with this problem
+    """
+
     data_space_rank_list=[]
 
     for product in sop:
@@ -47,11 +64,11 @@ def data_space_rank_list_from_SOP(sop, prob_coeff_list):
     return data_space_rank_list    
 
 def data_space_rank_list_from_projection(projection, prob_coeff_list):
-    """ Extract a list of ranks that project onto a data-space, from the data-space's projection expression.
+    """ Extract a complete list of problem dimensions that project onto a dataspace, from a particular projection expression. Excludes coefficients.
 
     Keyword arguments:
-    projection -- the data-space's projection expression
-    prob_coeff_list -- a list of the constant coefficients associated with this problem
+    product -- the projection expression
+    prob_coeff_list -- a complete list of the constant coefficients associated with this problem
     """
 
     data_space_rank_list=[]
