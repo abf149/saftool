@@ -8,7 +8,7 @@ rewrite_rule_set:
   id: SkippingUarchRewriteRuleSet
   rewrite_rules:
 
-  # - Skipping SAF to Skipping uarch rewrite rule
+  # - Skipping SAF to Skipping uarch rewrite rule (concretization)
 
   - id: ConcretizeArchitectureSkippingSAFsToSkippingUarches
     classtype: RewriteRule
@@ -24,13 +24,13 @@ rewrite_rule_set:
 
   # - Topological hole rewrite
 
-#  - classtype: RewriteRule
-#    conditionally_evaluated_expression:
-#      classtype: FunctionReference
-#      id: transform
-#      value: transformTopologicalHoleToPerRankMdParserTopology
-#    id: TransformTopologicalHoleToPerRankMdParserTopology
-#    predicate:
-#      classtype: FunctionReference
-#      id: predicate
-#      value: predicateIsComponentIsFormatUarchHasTopologicalHole
+  - classtype: RewriteRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: transform
+      value: transformTopologicalHoleToSkippingUarchTopology
+    id: TransformTopologicalHoleToSkippingUarchTopology
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsComponentIsSkippingUarchHasTopologicalHole
