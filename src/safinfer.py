@@ -196,8 +196,7 @@ def topology_with_holes_from_bindings(arch, fmt_iface_bindings, skip_bindings, d
         skipping_saf=SAF.fromIdCategoryAttributesTarget('skipping_saf', 'skipping', [[target_buffer,target_fmt_iface_flat,condition_buffer,condition_fmt_iface_flat]], target_buffer)
         saf_list.append(skipping_saf)
 
-    #print(skip_bindings)
-
+    [print(saf) for saf in saf_list]
     taxo_arch=genArch(buffer_stub_list, buffer_hierarchy, saf_list)
 
     return taxo_arch   

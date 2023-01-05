@@ -80,16 +80,16 @@ def concretizeArchitectureSkippingSAFsToFormatUarches(obj):
     for skipping_saf in arch_skipping_saf_list:
         attrib=skipping_saf.attributes[0]
 
-        # Unpack SAF attributes
-        skipping_uarch_id='SkippingUarch'+target_buffer+str(target_port_suffix)+condition_buffer+str(condition_port_suffix)
+        # Unpack SAF attributes & derive skipping uarch attributes
         target_buffer=attrib[0]
         target_port_suffix=attrib[1]
-        skipping_uarch_follower_right_md_in_port=skipping_uarch_id+'.md_in'+str(target_port_suffix)
-        skipping_uarch_follower_right_pos_out_port=skipping_uarch_id+'.pos_out'+str(target_port_suffix)        
+        skipping_uarch_id='SkippingUarch'+target_buffer+str(target_port_suffix)+condition_buffer+str(condition_port_suffix)
+        skipping_uarch_follower_right_md_in_port=skipping_uarch_id+'.md_in1'#+str(target_port_suffix)
+        skipping_uarch_follower_right_pos_out_port=skipping_uarch_id+'.pos_out1'#+str(target_port_suffix)        
         condition_buffer=attrib[2]
         condition_port_suffix=attrib[3]
-        skipping_uarch_leader_left_md_in_port=skipping_uarch_id+'.md_in'+str(condition_port_suffix)
-        skipping_uarch_leader_left_pos_out_port=skipping_uarch_id+'.pos_out'+str(condition_port_suffix)        
+        skipping_uarch_leader_left_md_in_port=skipping_uarch_id+'.md_in0'#+str(condition_port_suffix)
+        skipping_uarch_leader_left_pos_out_port=skipping_uarch_id+'.pos_out0'#+str(condition_port_suffix)        
 
         # Generate skipping uarch        
         skipping_uarch=genSkippingUarchWithHole(skipping_uarch_id)
@@ -98,59 +98,40 @@ def concretizeArchitectureSkippingSAFsToFormatUarches(obj):
         arch_topology_component_list.append(skipping_uarch) 
 
         # Left/leader metadata net       
-        net_type=NetType.fromIdValue('TestFormatType','md')
+        net_type=NetType.fromIdValue('TestNetType','md')
         format_type=FormatType.fromIdValue('TestFormatType','?')
-        port_id_list=[skipping_uarch_leader_left_md_in_port,buffer_port_id]
-        net=Net.fromIdAttributes('net_'+format_uarch_port_id+'_'+buffer_port_id, net_type, format_type, port_id_list)
+        condition_buffer_md_out_port=condition_buffer+'.md_out'+str(condition_port_suffix)
+        port_id_list=[skipping_uarch_leader_left_md_in_port,condition_buffer_md_out_port]
+        net=Net.fromIdAttributes('net_'+skipping_uarch_leader_left_md_in_port+'_'+condition_buffer_md_out_port, net_type, format_type, port_id_list)
+
+        # Left/leader position net       
+        net_type=NetType.fromIdValue('TestNetType','pos')
+        format_type=FormatType.fromIdValue('TestFormatType','addr')
+        condition_buffer_pos_in_port=condition_buffer+'.pos_in'+str(condition_port_suffix)
+        port_id_list=[skipping_uarch_leader_left_pos_out_port,condition_buffer_pos_in_port]
+        net=Net.fromIdAttributes('net_'+skipping_uarch_leader_left_pos_out_port+'_'+condition_buffer_pos_in_port, net_type, format_type, port_id_list)
+
+        # Right/follower metadata net       
+        net_type=NetType.fromIdValue('TestNetType','md')
+        format_type=FormatType.fromIdValue('TestFormatType','?')
+        target_buffer_md_out_port=target_buffer+'.md_out'+str(target_port_suffix)
+        port_id_list=[skipping_uarch_follower_right_md_in_port,target_buffer_md_out_port]
+        net=Net.fromIdAttributes('net_'+skipping_uarch_follower_right_md_in_port+'_'+target_buffer_md_out_port, net_type, format_type, port_id_list)
+
+        # Right/follower position net       
+        net_type=NetType.fromIdValue('TestNetType','pos')
+        format_type=FormatType.fromIdValue('TestFormatType','addr')
+        target_buffer_pos_in_port=target_buffer+'.pos_in'+str(target_port_suffix)
+        port_id_list=[skipping_uarch_follower_right_pos_out_port,target_buffer_pos_in_port]
+        net=Net.fromIdAttributes('net_'+skipping_uarch_follower_right_pos_out_port+'_'+target_buffer_pos_in_port, net_type, format_type, port_id_list)
 
         arch_topology_net_list.append(net)
-
-    arch_format_saf_target_list=[format_saf.getTarget() for format_saf in arch_format_saf_list]
-    arch_target_buffer_interface_list=[obj.getSubcomponentById(target_id).getInterface() for target_id in arch_format_saf_target_list]
-    arch_format_saf_ranks_list=[format_saf.getAttributes()[0] for format_saf in arch_format_saf_list]
-
-    arch_topology=obj.getTopology()
-    arch_topology_component_list=arch_topology.getComponentList()
-    arch_topology_net_list=arch_topology.getNetList()
-
-    for idx in range(len(arch_format_saf_list)):
-        # Concretize format SAF to format uarch
-        #print(arch_format_saf_ranks_list[idx])
-        print(arch_target_buffer_interface_list[idx])
-        print(obj.getSAFList()[0].getAttributes())
-        buffer_id=arch_format_saf_target_list[idx]        
-        format_uarch = genFormatUarchWithHole(buffer_id+"_datatype_format_uarch",arch_format_saf_ranks_list[idx])
-
-        # Add format uarch to architecture
-        arch_topology_component_list.append(format_uarch)
-
-        # Net list setup
-        format_uarch_id=format_uarch.getId()
-        format_uarch_interface_list=format_uarch.getInterface()
-        buffer_port_id_list=[port.getId() for port in arch_target_buffer_interface_list[idx]]
-
-        for format_uarch_port in format_uarch_interface_list:
-            format_uarch_port_id=format_uarch_port.getId()
-            buffer_port_id=formatUarchPortIdToBufferPortIdMapping(format_uarch_port_id)
-            print(buffer_port_id)
-            print(buffer_port_id_list)
-            assert(buffer_port_id in buffer_port_id_list) # Assert mapped buffer port exists
-            format_uarch_port_id=format_uarch_id+'.'+format_uarch_port_id
-            buffer_port_id=buffer_id+'.'+buffer_port_id
-            print('\nformat_uarch_port_id:',format_uarch_port_id,'buffer_port_id:',buffer_port_id,'\n')
-
-            net_type=format_uarch_port.getNetType()
-            format_type=FormatType.fromIdValue('TestFormatType','?')
-            port_id_list=[format_uarch_port_id,buffer_port_id]
-            net=Net.fromIdAttributes('net_'+format_uarch_port_id+'_'+buffer_port_id, net_type, format_type, port_id_list)
-
-            arch_topology_net_list.append(net)
 
     arch_topology.setComponentList(arch_topology_component_list)
     arch_topology.setNetList(arch_topology_net_list)
     obj.setTopology(arch_topology)
-    # Delete format SAFs
-    obj.setSAFList(arch_non_format_saf_list)
+    # Delete skipping SAFs
+    obj.setSAFList(arch_non_skipping_saf_list)
 
     print("\nobj:\n\n",obj,'\n\n')
 
@@ -160,12 +141,12 @@ def concretizeArchitectureSkippingSAFsToFormatUarches(obj):
 
 # --- predicate
 
-def predicateIsArchitectureHasFormatSAF(obj):
-    '''Object is an architecture with at least one format SAF'''
+def predicateIsArchitectureHasSkippingSAF(obj):
+    '''Object is an architecture with at least one skipping SAF'''
     print(obj.getId())
-    return type(obj).__name__ == 'Architecture' and ('format' in [saf.getCategory() for saf in obj.getSAFList()])
+    return type(obj).__name__ == 'Architecture' and ('skipping' in [saf.getCategory() for saf in obj.getSAFList()])
 
-# - Format uarch rewrite rules
+""" # - Format uarch rewrite rules
 
 # -- TransformTopologicalHoleToPerRankMdParserTopology: For a format uarch with a topological hole, fill the hole with a topology comprising one MetadataParser primitive per traversed tensor rank at this buffer level
 
@@ -246,4 +227,4 @@ def predicateHasTopologicalHole(obj):
     return obj.getTopology().isHole()
 
 def predicateIsComponentIsFormatUarchHasTopologicalHole(obj):
-    return predicateIsComponent(obj) and predicateIsFormatUarch(obj) and predicateHasTopologicalHole(obj)
+    return predicateIsComponent(obj) and predicateIsFormatUarch(obj) and predicateHasTopologicalHole(obj) """
