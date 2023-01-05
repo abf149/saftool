@@ -84,12 +84,12 @@ def concretizeArchitectureSkippingSAFsToFormatUarches(obj):
         target_buffer=attrib[0]
         target_port_suffix=attrib[1]
         skipping_uarch_id='SkippingUarch'+target_buffer+str(target_port_suffix)+condition_buffer+str(condition_port_suffix)
-        skipping_uarch_follower_right_md_in_port=skipping_uarch_id+'.md_in1'#+str(target_port_suffix)
-        skipping_uarch_follower_right_pos_out_port=skipping_uarch_id+'.pos_out1'#+str(target_port_suffix)        
+        skipping_uarch_follower_right_md_in_port=skipping_uarch_id+'.md_in1'
+        skipping_uarch_follower_right_pos_out_port=skipping_uarch_id+'.pos_out1'     
         condition_buffer=attrib[2]
         condition_port_suffix=attrib[3]
-        skipping_uarch_leader_left_md_in_port=skipping_uarch_id+'.md_in0'#+str(condition_port_suffix)
-        skipping_uarch_leader_left_pos_out_port=skipping_uarch_id+'.pos_out0'#+str(condition_port_suffix)        
+        skipping_uarch_leader_left_md_in_port=skipping_uarch_id+'.md_in0'
+        skipping_uarch_leader_left_pos_out_port=skipping_uarch_id+'.pos_out0'       
 
         # Generate skipping uarch        
         skipping_uarch=genSkippingUarchWithHole(skipping_uarch_id)
