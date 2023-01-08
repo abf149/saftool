@@ -1,0 +1,24 @@
+compound_components:
+  version: 0.3
+  classes:
+  - name: format_uarch
+    attributes:
+      # Implementation
+      technology: 65nm
+      metadatawidth: 4
+      # Modeling & taxonomic attributes live with primitives
+    # safmodel populates subcomponents and subcomponent actions
+    actions:
+      - name: idle
+      - name: parse_metadata
+  - name: skipping_uarch
+    attributes:
+      # Implementation
+      technology: 65nm
+      metadatawidth: 4
+      addresswidth: 32
+      # Modeling & taxonomic attributes live with primitives
+    # safmodel populates subcomponents and subcomponent actions
+    actions:
+      - name: idle
+      - name: skip
