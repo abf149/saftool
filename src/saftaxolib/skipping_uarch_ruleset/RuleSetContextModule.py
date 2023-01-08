@@ -137,7 +137,7 @@ def predicateIsArchitectureHasSkippingSAF(obj):
 # -- TransformTopologicalHoleToSkippingUarchTopology
 # --- rewrite rule
 
-def genPrimitivePgen():
+def genPrimitivePgen(pgen_name):
     '''Helper function for format uarch testbench. Generate a MetadataParser primitive.'''
 
     # Category
@@ -162,7 +162,7 @@ def genPrimitivePgen():
 
     return Primitive.fromIdCategoryAttributesInterface(primitive_id, primitive_category, primitive_attributes, primitive_interface)
 
-def genPrimitiveIntersect():
+def genPrimitiveIntersect(intersect_name):
     '''Helper function for format uarch testbench. Generate a MetadataParser primitive.'''
 
     # Category
@@ -192,15 +192,38 @@ def generateSkippingUarchTopology():
     topology_id='TestTopology'
 
     # Component list setup
-    component_list=[]
-    for idx in range(len(rank_format_strs)):
-        fmt_str=rank_format_strs[idx]
-        component_list.append(genPrimitiveMetadataParser('TestMetadataParser'+str(idx), fmt_str))
-        
+    intersect = genPrimitiveIntersect()
+    pgen_leader_left = genPrimitivePgen("leader_left")
+    pgen_follower_right = genPrimitivePgen("follower_right")    
+    component_list=[genPrimitiveIntersect("intersect"), genPrimitivePgen("pgen_leader_left"), genPrimitivePgen("pgen_follower_right")]
 
     # Net list setup
-
+    net_type=NetType.fromIdValue('TestNetType','md')
+    format_type=FormatType.fromIdValue('TestFormatType','?')    
     # - Nets connecting metadata (md) ports to primitives, position (pos) ports to primitives
+    # - Skipping uarch ports: md_in0 pos_out0 (leader/left) md_in1 pos_out1 (follower/right) md format is controlled by intersect format attribute
+    # - Intersect ports: md_in0 (leader/left) md_in1 (follower/right) md_out; md format is controlled by intersect format attribute
+    # - Pgen ports: md_in post_out; md format is controlled by pgen format attribute
+    # - Components: [intersect, pgen_left/leader, pgen_right/follower]
+    # - Netlist:
+    #   - [md_in0,intersect.md_in0]
+    port_id_list=['md_in0','intersect.md_in0']
+    net_md_in0_intersect_md_in0=Net.fromIdAttributes('net_md_in0_intersect_md_in0', net_type, format_type, port_id_list)
+    #   - [md_in1,intersect.md_in1]
+    port_id_list=['md_in1','intersect.md_in1']
+    net_md_in1_intersect_md_in1=Net.fromIdAttributes('net_md_in1_intersect_md_in1', net_type, format_type, port_id_list)
+    #   - [intersect.md_out, pgen_left/leader.md_in, pgen_right/follower.md_in]
+    port_id_list=['intersect.md_out','pgen_leader_left.md_in','pgen_follower_right.md_in']
+    net_intersect_out=Net.fromIdAttributes('net_intersect_out', net_type, format_type, port_id_list)
+    #   - [pgen_left/leader.pos_out,pos_out0]
+    port_id_list=['pgen_leader_left.pos_out','pos_out0']
+    net_pos_left=Net.fromIdAttributes('net_intersect_out', net_type, format_type, port_id_list)
+    #   - [pgen_right/follower.pos_out,pos_out1]
+
+
+    
+    port_id_list=['d_in'+str(idx),'TestMetadataParser'+str(idx)+'.md_in']
+
     net_list=[]
     for idx in range(len(rank_format_strs)): 
         fmt_str=rank_format_strs[idx]        
@@ -238,6 +261,9 @@ def predicateHasTopologicalHole(obj):
 
 def predicateIsComponentIsSkippingUarchHasTopologicalHole(obj):
     return predicateIsComponent(obj) and predicateIsSkippingUarch(obj) and predicateHasTopologicalHole(obj)
+
+
+    
 
 """ # - Format uarch rewrite rules
 

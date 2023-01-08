@@ -22,7 +22,7 @@ rewrite_rule_set:
       value: concretizeArchitectureSkippingSAFsToSkippingUarches
 
 
-  # - Topological hole rewrite
+  - Topological hole rewrite
 
   - classtype: RewriteRule
     conditionally_evaluated_expression:

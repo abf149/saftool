@@ -239,10 +239,16 @@ if __name__=="__main__":
     taxo_arch=topology_with_holes_from_bindings(arch, fmt_iface_bindings, skip_bindings, data_space_dict_list)
 
     print("Performing arch inference...")
-    rules_engine = RulesEngine(['saftaxolib/base_ruleset', \
+
+    ''' rules_engine = RulesEngine(['saftaxolib/base_ruleset', \
                                 'saftaxolib/primitive_md_parser_ruleset', \
                                 'saftaxolib/format_uarch_ruleset', \
-                                'saftaxolib/skipping_uarch_ruleset'])
+                                'saftaxolib/skipping_uarch_ruleset']) '''
+
+    rules_engine = RulesEngine(['saftaxolib/base_ruleset', \
+                                'saftaxolib/primitive_md_parser_ruleset', \
+                                'saftaxolib/format_uarch_ruleset'])
+
     rules_engine.preloadRules()
     result=rules_engine.run(taxo_arch)
 
