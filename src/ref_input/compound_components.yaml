@@ -1,6 +1,128 @@
 compound_components:
   version: 0.3
   classes:
+  - name: DUMMY_SRAM_MD
+    attributes:
+      # attributes that must be specified
+      technology: must_specify
+      data_storage_depth: must_specify
+      data_storage_width: must_specify
+      metadata_storage_width: 0
+      metadata_storage_depth: 0      
+      # attributes with default values
+      n_banks: 1
+      n_rdwr_ports: 2
+      counter_width: 0 # default to no (de)compression counter
+      phy_datawidth: data_storage_width
+      phy_metadata_datawidth: metadata_storage_width
+      ag_datawidth: log(data_storage_depth)
+
+    subcomponents:
+      - name: storage
+        class: regfile
+        attributes:
+          depth: 1
+          width: 1
+          word-bits: 1
+          block-size: 1
+
+    actions:
+      - name: write
+        subcomponents:
+          - name: storage
+            actions:
+              - name: idle
+      - name: read
+        subcomponents:
+          - name: storage
+            actions:
+              - name: idle      
+
+      - name: gated_write
+        subcomponents:
+          - name: storage
+            actions:
+              - name: idle      
+
+      - name: gated_read
+        subcomponents:
+          - name: storage
+            actions:
+              - name: idle      
+
+      - name: metadata_read
+        subcomponents:
+          - name: storage
+            actions:
+              - name: idle      
+
+      - name: metadata_write
+        subcomponents:
+          - name: storage
+            actions:
+              - name: idle      
+
+      - name: gated_metadata_read
+        subcomponents:
+          - name: storage
+            actions:
+              - name: idle      
+
+      - name: gated_metadata_write
+        subcomponents:
+          - name: storage
+            actions:
+              - name: idle      
+
+  
+  
+  - name: FIFO
+    attributes:
+      technology: must_specify
+      depth: must_specify
+      width: must_specify
+      counter_width: log2(depth)
+    subcomponents:
+      - name: storage
+        class: SRAM
+        attributes:
+          technology: technology
+          width: width
+          depth: depth
+          datawidth: width
+      - name: addr_counters[0..1] #read and write addr counters
+        class: intadder
+        attributes:
+          technology: technology
+          datawidth: counter_width
+      - name: occupancy_counter
+        class: intadder
+        attributes:
+          technology: technology
+          datawidth: counter_width
+    actions:
+      - name: read
+        subcomponents:
+          - name: storage
+            actions:
+              - name: read
+          - name: addr_counters[0]
+            actions: 
+              - name: add
+          - name: occupancy_counter
+            actions:
+              - name: add
+      - name: write
+        subcomponents:
+          - name: storage
+            actions:
+              - name: write
+          - name: addr_counters[0]
+            actions: 
+              - name: add
+          - name: occupancy_counter
+            actions:
+              - name: add  
   - name: SRAM_MD
     attributes:
       # attributes that must be specified

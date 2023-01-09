@@ -6,13 +6,15 @@ architecture:
         technology: 45nm
       local:
         - name: BackingStorage
-          class: DRAM  # a storage with inifinite capacity, so DRAM in timeloop repr
+          class: storage  # a storage with inifinite capacity, so DRAM in timeloop repr
+          subclass: DUMMY_SRAM_MD
           attributes:
-            type: LPDDR4
-            width: 64
-            block_size: 8
+            data_storage_depth: 16
+            data_storage_width: 8
+            metadata_storage_depth: 25  # 25  # 9 addr entries, 16 run entries   
+            metadata_storage_width: 4
             datawidth: 8
-            metadata_storage_width: 8
+            block_size: 1
 
       subtree:
         - name: PE

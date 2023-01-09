@@ -41,9 +41,11 @@ class SAFPrimitives(object):
         """
         if interface['action_name'] == 'idle':
             return 0
-        '''if interface["class_name"] == "SRAM" and interface["attributes"]["depth"] == 0:
+            '''if interface["class_name"] == "SRAM" and interface["attributes"]["depth"] == 0:
             return 0 # zero depth SRAM has zero energy'''
-        return 0.3
+        elif 'format_uarch' in interface['class_name']:
+            return 0
+        return 0.0
 
     def primitive_area_supported(self, interface):
         """
@@ -71,8 +73,10 @@ class SAFPrimitives(object):
         """
 
         supported = 1 # dummy support everything
-        return 0.2  if supported \
-                    else 0  # if not supported, accuracy is 0
+        if supported:
+            if 'format_uarch' in interface['class_name']:
+                return 0
+        return 0
 
         """if interface["class_name"] == "SRAM" and interface["attributes"]["depth"] == 0:
             return 0 # zero depth SRAM has zero area

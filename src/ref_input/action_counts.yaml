@@ -9,7 +9,17 @@ action_counts:
               counts: 100
             - name: read
               counts: 100
-            - name: idle
+            - name: gated_write
+              counts: 100
+            - name: gated_read
+              counts: 100
+            - name: metadata_read
+              counts: 100
+            - name: metadata_write
+              counts: 100
+            - name: gated_metadata_read
+              counts: 100
+            - name: gated_metadata_write
               counts: 100
       subtree:
         - name: PE
