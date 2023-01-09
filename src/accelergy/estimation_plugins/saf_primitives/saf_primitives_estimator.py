@@ -45,6 +45,16 @@ class SAFPrimitives(object):
             return 0 # zero depth SRAM has zero energy'''
         elif 'format_uarch' in interface['class_name']:
             return 0
+        elif 'intersect' in interface['class_name']:
+            if interface['attributes']['metadata_format']=='B':
+                return 0.000283
+            elif interface['attributes']['metadata_format']=='C':
+                return 0.018     
+        elif 'pgen' in interface['class_name']:
+            if interface['attributes']['metadata_format']=='B':
+                return 1.8
+            elif interface['attributes']['metadata_format']=='C':
+                return 0.0
         return 0.0
 
     def primitive_area_supported(self, interface):
@@ -75,7 +85,17 @@ class SAFPrimitives(object):
         supported = 1 # dummy support everything
         if supported:
             if 'format_uarch' in interface['class_name']:
-                return 0
+                return 0.0
+            elif 'intersect' in interface['class_name']:
+                if interface['attributes']['metadata_format']=='B':
+                    return 160.0
+                elif interface['attributes']['metadata_format']=='C':
+                    return 220.0
+            elif 'pgen' in interface['class_name']:
+                if interface['attributes']['metadata_format']=='B':
+                    return 154.0
+                elif interface['attributes']['metadata_format']=='C':
+                    return 0.0                    
         return 0
 
         """if interface["class_name"] == "SRAM" and interface["attributes"]["depth"] == 0:
