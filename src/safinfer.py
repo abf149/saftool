@@ -206,10 +206,13 @@ def topology_with_holes_from_bindings(arch, fmt_iface_bindings, skip_bindings, d
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument('-l','--saftaxolib',default='saftaxolib/')
+    parser.add_argument('-i','--dir-in',default='')
     parser.add_argument('-a','--arch',default='ref_input/arch.yaml')
     parser.add_argument('-m','--map',default='ref_input/map.yaml')
     parser.add_argument('-p','--prob',default='ref_input/prob.yaml')
     parser.add_argument('-s','--sparseopts',default='ref_input/sparseopts.yaml')
+    parser.add_argument('-o','--dir-out',default='')
     parser.add_argument('-b','--binding-out',default='ref_output/bindings.yaml')
     parser.add_argument('-t','--topology-out',default='ref_output/new_arch.yaml')
     args = parser.parse_args()
@@ -217,22 +220,41 @@ if __name__=="__main__":
     print("SAFinfer.\n")
 
     print("Parsing input files:")
-    print("- arch:",args.arch)
-    arch=sl_config.load_config_yaml(args.arch)
-    print("- map:",args.map)
-    mapping=sl_config.load_config_yaml(args.map)
-    print("- prob:",args.prob)
-    prob=sl_config.load_config_yaml(args.prob)
-    print("- sparseopts:",args.sparseopts)
-    sparseopts=sl_config.load_config_yaml(args.sparseopts)
+
+    if len(args.dir_in)>0:
+        print("- arch:",args.dir_in+'arch.yaml')
+        arch=sl_config.load_config_yaml(args.dir_in+'arch.yaml')
+        print("- map:",args.dir_in+'map.yaml')
+        mapping=sl_config.load_config_yaml(args.dir_in+'map.yaml')
+        print("- prob:",args.dir_in+'prob.yaml')
+        prob=sl_config.load_config_yaml(args.dir_in+'prob.yaml')
+        print("- sparseopts:",args.dir_in+'sparseopts.yaml')
+        sparseopts=sl_config.load_config_yaml(args.dir_in+'sparseopts.yaml')        
+    else:    
+        print("- arch:",args.arch)
+        arch=sl_config.load_config_yaml(args.arch)
+        print("- map:",args.map)
+        mapping=sl_config.load_config_yaml(args.map)
+        print("- prob:",args.prob)
+        prob=sl_config.load_config_yaml(args.prob)
+        print("- sparseopts:",args.sparseopts)
+        sparseopts=sl_config.load_config_yaml(args.sparseopts)
     #arch, saf_spec=loadSparseloopArchitecture(args.in_yaml)
 
     print("\nComputing bindings.")
+
     data_space_dict_list, prob_coeff_list, prob_instance_rank_sizes, prob_instance_densities=sl_config.data_space_dict_list_from_sl_prob(prob)    
     fmt_iface_bindings, pgens, buffer_loop_binding, loop_to_iface_map=sl_config.bind_format_iface(arch, mapping, prob, sparseopts)
     skip_bindings=sl_config.bind_action_optimization(arch, mapping, prob, sparseopts, fmt_iface_bindings, loop_to_iface_map)
-    print("- Saving to",args.binding_out)
-    with open(args.binding_out, 'w') as fp:
+    bind_out_path=args.binding_out
+    topo_out_path=args.topology_out
+
+    if len(args.dir_out) > 0:
+        bind_out_path=args.dir_out+'bindings.yaml'
+        topo_out_path=args.topology_out+'new_arch.yaml'
+
+    print("- Saving to",bind_out_path)
+    with open(bind_out_path, 'w') as fp:
         yaml.dump(fmt_iface_bindings,fp, default_flow_style=False)
 
     print("\nRealizing microarchitecture with topological holes, based on bindings.\n")
@@ -240,14 +262,10 @@ if __name__=="__main__":
 
     print("Performing arch inference...")
 
-    ''' rules_engine = RulesEngine(['saftaxolib/base_ruleset', \
-                                'saftaxolib/primitive_md_parser_ruleset', \
-                                'saftaxolib/format_uarch_ruleset', \
-                                'saftaxolib/skipping_uarch_ruleset']) '''
-
-    rules_engine = RulesEngine(['saftaxolib/base_ruleset', \
-                                'saftaxolib/primitive_md_parser_ruleset', \
-                                'saftaxolib/format_uarch_ruleset'])
+    rules_engine = RulesEngine([args.saftaxolib+'base_ruleset', \
+                                args.saftaxolib+'primitive_md_parser_ruleset', \
+                                args.saftaxolib+'format_uarch_ruleset'])
+                                #args.saftaxolib+'skipping_uarch_ruleset'])
 
     rules_engine.preloadRules()
     result=rules_engine.run(taxo_arch)
@@ -255,9 +273,8 @@ if __name__=="__main__":
     outcome=result[0]
     if outcome:
         print("SUCCESS")
+        print("Saving to",topo_out_path,"...")
+        inferred_arch=result[-1][-1]
+        inferred_arch.dump(topo_out_path)
     else:
         print("FAILURE")
-
-    print("Saving to",args.topology_out,"...")
-    inferred_arch=result[-1][-1]
-    inferred_arch.dump(args.topology_out)

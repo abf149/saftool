@@ -1,0 +1,63 @@
+# SAF microarchitectural modeling primitives
+version: 0.3
+classes:
+  - name: md_parser
+    attributes:
+      # Implementation
+      technology: 65nm
+      metadatawidth: 4
+      latency: 5ns
+      # Modeling
+      throughput: 0 # 0: no requirement; n>0: n md words/cycle
+      # Taxonomic
+      metadataformat: UOP
+      nnzmetadatatype: sentinel
+      nnzmetadatalocation: data
+      nummetadatatype: none
+      nummetadatalocation: none
+    actions:
+      - name: parse_metadata
+      - name: idle
+  - name: intersect
+    attributes:
+      # Implementation
+      technology: 65nm
+      metadatawidth: 4
+      latency: 5ns
+      # Modeling
+      throughput: 0 # 0: no requirement; n>0: n md words/cycle
+      # Taxonomic
+      direction: leader_follower
+      metadataformat: UOP
+      heuristic: none
+    actions:
+      - name: intersect
+      - name: idle
+  - name: pgen
+    # Specifically, *position* generator
+    attributes:
+      # Implementation
+      technology: 65nm
+      metadatawidth: 4
+      addresswidth: 32
+      latency: 5ns
+      # Modeling
+      throughput: 0 # 0: no requirement; n>0: n md words/cycle
+      # Taxonomic
+      metadataformat: UOP
+      positionformat: address
+    actions:
+      - name: generate_position
+      - name: idle
+  - name: discard
+    # Generalization of Eyeriss v2 MAC input skipping via pipeline bubble
+    attributes:
+      # Implementation - TODO
+      technology: 65nm
+      # Modeling
+      throughput: 0 # 0: no requirement; n>0: n md words/cycle
+      # Taxonomic
+      discard_type: pipeline_bubble
+    actions:
+      - name: discard
+      - name: idle      

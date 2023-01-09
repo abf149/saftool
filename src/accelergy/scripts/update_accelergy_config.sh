@@ -1,0 +1,1 @@
+cp ./accelergy_config.yaml.template ${HOME}/.config/accelergy/accelergy_config.yaml

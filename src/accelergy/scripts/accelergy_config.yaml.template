@@ -1,0 +1,8 @@
+compound_components: []
+estimator_plug_ins:
+- /usr/local/share/accelergy/estimation_plug_ins
+- /home/saftool/src/accelergy/estimation_plug_ins
+primitive_components:
+- /usr/local/share/accelergy/primitive_component_libs
+- /home/saftool/src/accelergy/primitive_component_libs
+version: 0.3

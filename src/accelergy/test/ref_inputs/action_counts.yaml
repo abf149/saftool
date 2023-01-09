@@ -1,0 +1,23 @@
+action_counts:
+  version: 0.2
+  subtree:
+    - name: design
+      local:
+        - name: reg
+          action_counts:
+            - name: write
+              counts: 100
+            - name: read
+              counts: 100
+            - name: gated_write
+              counts: 100
+            - name: gated_read
+              counts: 100
+            - name: metadata_read
+              counts: 100
+            - name: metadata_write
+              counts: 100
+            - name: gated_metadata_read
+              counts: 100
+            - name: gated_metadata_write
+              counts: 100

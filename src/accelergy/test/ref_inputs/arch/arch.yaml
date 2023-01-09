@@ -1,0 +1,16 @@
+architecture:
+  version: 0.3
+  subtree:
+    - name: design
+      attributes:
+        technology: 45nm
+      local:
+        - name: reg
+          class: storage
+          subclass: reg_SRAM_MD_SAF_FMT_ISECT
+          attributes:
+            data_storage_depth: 1
+            data_storage_width: 8
+            metadata_storage_width: 4
+            metadata_storage_depth: 1
+            datawidth: 8

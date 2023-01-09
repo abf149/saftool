@@ -1,0 +1,203 @@
+
+
+compound_components:
+  version: 0.3
+  classes:
+  - name: reg_format_uarch0
+    attributes:
+      technology: 65nm
+      metadatawidth: 4
+    subcomponents:
+      - name: md_parser0
+        class: md_parser
+        attributes:
+          technology: technology
+          metadatawidth: metadatawidth
+          throughput: 0
+          metadataformat: UOP  
+      - name: md_parser1
+        class: md_parser
+        attributes:
+          technology: technology
+          metadatawidth: metadatawidth
+          throughput: 10
+          metadataformat: B            
+    actions:
+      - name: idle
+        subcomponents:
+          - name: md_parser0
+            actions:
+              - name: idle
+          - name: md_parser1
+            actions:
+              - name: idle              
+      - name: parse_metadata
+        subcomponents:
+          - name: md_parser0
+            actions:
+              - name: parse_metadata
+          - name: md_parser1
+            actions:
+              - name: parse_metadata          
+
+  - name: reg_skipping_uarch0
+    attributes:
+      technology: 65nm
+      metadatawidth: 4
+      addresswidth: 32
+    subcomponents:
+      - name: isect
+        class: intersect
+        attributes:
+          technology: technology
+          metadatawidth: metadatawidth
+          throughput: 0 
+          direction: leader_follower
+          metadataformat: C
+          heuristic: none    
+      #- name: pgen_left_leader
+      #  class: pgen
+      #  attributes:
+      #    technology: technology
+      #    metadatawidth: metadatawidth
+      #    addresswidth: addresswidth
+      #    throughput: 0 
+      #    metadataformat: C
+      #    positionformat: address  
+      - name: pgen_right_follower
+        class: pgen
+        attributes:
+          technology: technology
+          metadatawidth: metadatawidth
+          addresswidth: addresswidth
+          throughput: 0
+          metadataformat: C
+          positionformat: address 
+      - name: disc
+        class: discard
+        attributes:
+          technology: technology
+          throughput: 0 
+          type: pipeline_bubble
+    actions:
+      - name: idle
+        subcomponents:
+          - name: isect
+            actions:
+              - name: idle
+          #- name: pgen_left_leader
+          #  actions:
+          #    - name: idle                                 
+          - name: pgen_right_follower
+            actions:
+              - name: idle         
+          - name: disc
+            actions:
+              - name: idle                            
+      - name: skip   
+        subcomponents:
+          - name: isect
+            actions:
+              - name: intersect
+          #- name: pgen_left_leader
+          #  actions:
+          #    - name: generate_position                                 
+          - name: pgen_right_follower
+            actions:
+              - name: generate_position         
+          - name: disc
+            actions:
+              - name: discard             
+
+  - name: reg_SRAM_MD_SAF_FMT_ISECT
+    attributes:
+      # attributes that must be specified
+      technology: must_specify
+      data_storage_depth: must_specify
+      data_storage_width: must_specify
+      metadata_storage_width: 0
+      metadata_storage_depth: 0      
+      # attributes with default values
+      n_banks: 1
+      n_rdwr_ports: 2
+      counter_width: 0 # default to no (de)compression counter
+      phy_datawidth: data_storage_width
+      phy_metadata_datawidth: metadata_storage_width
+      ag_datawidth: log(data_storage_depth)
+
+    subcomponents:
+      - name: storage
+        class: SRAM
+        attributes:
+          technology: technology
+          width: data_storage_width
+          depth: data_storage_depth
+          datawidth: phy_datawidth
+          n_rdwr_ports: n_rdwr_ports
+          n_banks: n_banks
+      - name: metadata_storage
+        class: SRAM
+        attributes:
+          technology: technology
+          width: metadata_storage_width
+          depth: metadata_storage_depth
+          datawidth: phy_metadata_datawidth
+      - name: fmt_uarch0
+        class: reg_format_uarch0
+        attributes:
+          technology: technology
+          metadatawidth: metadata_storage_width
+      - name: skip_uarch0
+        class: reg_skipping_uarch0
+        attributes:
+          technology: technology
+          metadatawidth: metadata_storage_width
+          addresswidth: 32      
+
+    actions:
+      - name: write
+        subcomponents:
+          - name: storage
+            actions:
+              - name: write
+      - name: read
+        subcomponents:
+          - name: storage
+            actions:
+              - name: read
+      - name: gated_write
+        subcomponents:
+          - name: storage
+            actions:
+            - name: idle
+      - name: gated_read
+        subcomponents:
+          - name: storage
+            actions:
+            - name: idle
+      - name: metadata_read
+        subcomponents:
+          - name: metadata_storage
+            actions:
+              - name: read
+          - name: fmt_uarch0
+            actions:
+              - name: parse_metadata
+          - name: skip_uarch0
+            actions:
+              - name: skip              
+      - name: metadata_write
+        subcomponents:
+          - name: metadata_storage
+            actions:
+              - name: write
+      - name: gated_metadata_read
+        subcomponents:
+          - name: metadata_storage
+            actions:
+              - name: idle
+      - name: gated_metadata_write
+        subcomponents:
+          - name: metadata_storage
+            actions:
+              - name: idle
