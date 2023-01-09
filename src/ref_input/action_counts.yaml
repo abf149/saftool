@@ -1,0 +1,78 @@
+action_counts:
+  version: 0.2
+  subtree:
+    - name: eyeriss_v2_PE
+      local:
+        - name: BackingStorage
+          action_counts:
+            - name: write
+              counts: 100
+            - name: read
+              counts: 100
+            - name: idle
+              counts: 100
+      subtree:
+        - name: PE
+          local:
+            - name: iact_spad
+              action_counts:
+                - name: write
+                  counts: 100
+                - name: read
+                  counts: 100
+                - name: gated_write
+                  counts: 100
+                - name: gated_read
+                  counts: 100
+                - name: metadata_read
+                  counts: 100
+                - name: metadata_write
+                  counts: 100
+                - name: gated_metadata_read
+                  counts: 100
+                - name: gated_metadata_write
+                  counts: 100
+            - name: weight_spad
+              action_counts:
+                - name: write
+                  counts: 100
+                - name: read
+                  counts: 100
+                - name: gated_write
+                  counts: 100
+                - name: gated_read
+                  counts: 100
+                - name: metadata_read
+                  counts: 100
+                - name: metadata_write
+                  counts: 100
+                - name: gated_metadata_read
+                  counts: 100
+                - name: gated_metadata_write
+                  counts: 100
+            - name: psum_spad
+              action_counts:
+                - name: write
+                  counts: 100
+                - name: read
+                  counts: 100
+                - name: idle
+                  counts: 100
+            - name: reg
+              action_counts:
+                - name: write
+                  counts: 100
+                - name: read
+                  counts: 100
+                - name: gated_write
+                  counts: 100
+                - name: gated_read
+                  counts: 100
+                - name: metadata_read
+                  counts: 100
+                - name: metadata_write
+                  counts: 100
+                - name: gated_metadata_read
+                  counts: 100
+                - name: gated_metadata_write
+                  counts: 100

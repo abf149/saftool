@@ -57,7 +57,7 @@ classes:
       # Modeling
       throughput: 0 # 0: no requirement; n>0: n md words/cycle
       # Taxonomic
-      type: pipeline_bubble
+      discard_type: pipeline_bubble
     actions:
       - name: discard
       - name: idle      

@@ -7,8 +7,8 @@ architecture:
       local:
         - name: BackingStorage
           class: DRAM  # a storage with inifinite capacity, so DRAM in timeloop repr
-          subclass: DummyStorage
           attributes:
+            type: LPDDR4
             width: 64
             block_size: 8
             datawidth: 8
