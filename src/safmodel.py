@@ -99,21 +99,69 @@ def add_format_SAF_uarch(buffer,buffer_class,netlist,aggregate_attributes,prim_c
                                             if attrib in aggregate_attributes_fmt:
                                                 md_parser[attrib]=aggregate_attributes_fmt[attrib]
                                         md_parser['attributes']['metadataformat']=fmt_type_str
+                                        # -- Skipping uarch
+                                        is_weight=False
+                                        if 'weight' in buffer_name and prt_idx>=max_buffer_port_idx:
+                                            is_weight=True
+                                            print("\n\n","fmt:",fmt_type_str,"\n\n")
+                                            intersect=copy.deepcopy(get_primitive_with_name('intersect',saf_primitives))
+                                            intersect['class']=intersect['name']
+                                            intersect['name']='intersect0'
+                                            intersect['attributes']['metadataformat']=fmt_type_str                                            
+                                            pgen0=copy.deepcopy(get_primitive_with_name('pgen',saf_primitives))
+                                            pgen0['class']=pgen0['name']
+                                            pgen0['name']='pgen0'
+                                            pgen0['attributes']['metadataformat']=fmt_type_str
+                                            pgen1=copy.deepcopy(get_primitive_with_name('pgen',saf_primitives))
+                                            pgen1['class']=pgen1['name']
+                                            pgen1['name']='pgen1'
+                                            pgen1['attributes']['metadataformat']=fmt_type_str                                            
+                                        # -- Construct format uarch                                        
                                         if 'subcomponents' not in fmt_uarch:
-                                            fmt_uarch['subcomponents']=[md_parser]
+                                            if is_weight:
+                                                fmt_uarch['subcomponents']=[md_parser,intersect,pgen0,pgen1]
+                                            else:
+                                                fmt_uarch['subcomponents']=[md_parser]
                                         else:
-                                            fmt_uarch['subcomponents'].append(md_parser)
+                                            if is_weight:
+                                                fmt_uarch['subcomponents'].extend([md_parser,intersect,pgen0,pgen1])
+                                            else:
+                                                fmt_uarch['subcomponents'].append(md_parser)
                                         for action in fmt_uarch['actions']:
                                             if action['name']=='idle':
                                                 if not 'subcomponents' in action:
-                                                    action['subcomponents']=[{'name':md_parser['name'],'actions':[{'name':'idle'}]}]
+                                                    if is_weight:                                                    
+                                                        action['subcomponents']=[{'name':md_parser['name'],'actions':[{'name':'idle'}]}, \
+                                                                                  {'name':intersect['name'],'actions':[{'name':'idle'}]}, \
+                                                                                 {'name':pgen0['name'],'actions':[{'name':'idle'}]}, \
+                                                                                 {'name':pgen1['name'],'actions':[{'name':'idle'}]}]
+                                                    else:
+                                                        action['subcomponents']=[{'name':md_parser['name'],'actions':[{'name':'idle'}]}]
                                                 else:
-                                                    action['subcomponents'].append({'name':md_parser['name'],'actions':[{'name':'idle'}]})
+                                                    if is_weight:                                                          
+                                                        action['subcomponents'].extend([{'name':md_parser['name'],'actions':[{'name':'idle'}]}, \
+                                                                                  {'name':intersect['name'],'actions':[{'name':'idle'}]}, \
+                                                                                 {'name':pgen0['name'],'actions':[{'name':'idle'}]}, \
+                                                                                 {'name':pgen1['name'],'actions':[{'name':'idle'}]}])
+                                                    else:
+                                                        action['subcomponents'].append({'name':md_parser['name'],'actions':[{'name':'idle'}]})
                                             elif action['name']=='parse_metadata':
                                                 if not 'subcomponents' in action:
-                                                    action['subcomponents']=[{'name':md_parser['name'],'actions':[{'name':'parse_metadata'}]}]
+                                                    if is_weight:                                                       
+                                                        action['subcomponents']=[{'name':md_parser['name'],'actions':[{'name':'parse_metadata'}]}, \
+                                                                                  {'name':intersect['name'],'actions':[{'name':'parse_metadata'}]}, \
+                                                                                 {'name':pgen0['name'],'actions':[{'name':'parse_metadata'}]}, \
+                                                                                 {'name':pgen1['name'],'actions':[{'name':'parse_metadata'}]}]
+                                                    else:
+                                                        action['subcomponents']=[{'name':md_parser['name'],'actions':[{'name':'parse_metadata'}]}]
                                                 else:
-                                                    action['subcomponents'].append({'name':md_parser['name'],'actions':[{'name':'parse_metadata'}]})                                                    
+                                                    if is_weight:                                                        
+                                                        action['subcomponents'].extend([{'name':md_parser['name'],'actions':[{'name':'parse_metadata'}]}, \
+                                                                                  {'name':intersect['name'],'actions':[{'name':'parse_metadata'}]}, \
+                                                                                 {'name':pgen0['name'],'actions':[{'name':'parse_metadata'}]}, \
+                                                                                 {'name':pgen1['name'],'actions':[{'name':'parse_metadata'}]}])     
+                                                    else:        
+                                                        action['subcomponents'].append({'name':md_parser['name'],'actions':[{'name':'parse_metadata'}]})                                            
 
                                 if buffer_port_idx<max_buffer_port_idx:
                                     print('thrpt 0')

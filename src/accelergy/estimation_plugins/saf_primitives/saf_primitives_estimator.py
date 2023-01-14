@@ -24,7 +24,12 @@ class SAFPrimitives(object):
         :return return the accuracy if supported, return 0 if not
         :rtype: int
         """
+        if 'regfile' in interface['class_name']:
+            return 1
+
         supported = 1 # dummy support everything
+        if ('format_uarch' not in interface['class_name']) and ('intersect' not in interface['class_name']) and ('pgen' not in interface['class_name']) and ('md_parser' not in interface['class_name']):
+            supported = 0        
         return 0.1  if supported \
                     else 0  # if not supported, accuracy is 0
 
@@ -39,22 +44,26 @@ class SAFPrimitives(object):
        :return the estimated energy
        :rtype float
         """
-        if interface['action_name'] == 'idle':
-            return 0
-            '''if interface["class_name"] == "SRAM" and interface["attributes"]["depth"] == 0:
-            return 0 # zero depth SRAM has zero energy'''
-        elif 'format_uarch' in interface['class_name']:
-            return 0
-        elif 'intersect' in interface['class_name']:
-            if interface['attributes']['metadata_format']=='B':
-                return 0.000283
-            elif interface['attributes']['metadata_format']=='C':
-                return 0.018     
-        elif 'pgen' in interface['class_name']:
-            if interface['attributes']['metadata_format']=='B':
-                return 1.8
-            elif interface['attributes']['metadata_format']=='C':
-                return 0.0
+        supported = 1 # dummy support everything
+        if ('format_uarch' not in interface['class_name']) and ('intersect' not in interface['class_name']) and ('pgen' not in interface['class_name']) and ('md_parser' not in interface['class_name']):
+            supported = 0
+        if supported:        
+            if interface['action_name'] == 'idle':
+                return 0
+                '''if interface["class_name"] == "SRAM" and interface["attributes"]["depth"] == 0:
+                return 0 # zero depth SRAM has zero energy'''
+            elif 'format_uarch' in interface['class_name']:
+                return 0
+            elif 'intersect' in interface['class_name']:
+                if interface['attributes']['metadataformat']=='B':
+                    return 1000.0*0.000283
+                elif interface['attributes']['metadataformat']=='C':
+                    return 18.0  
+            elif 'pgen' in interface['class_name']:
+                if interface['attributes']['metadataformat']=='B':
+                    return 1000.0*1.8
+                elif interface['attributes']['metadataformat']=='C':
+                    return 0.0
         return 0.0
 
     def primitive_area_supported(self, interface):
@@ -67,7 +76,12 @@ class SAFPrimitives(object):
         :return return the accuracy if supported, return 0 if not
         :rtype: int
         """
+        if 'regfile' in interface['class_name']:
+            return 1
+
         supported = 1 # dummy support everything
+        if ('format_uarch' not in interface['class_name']) and ('intersect' not in interface['class_name']) and ('pgen' not in interface['class_name']) and ('md_parser' not in interface['class_name']):
+            supported = 0        
         return 0.1  if supported \
                     else 0  # if not supported, accuracy is 0
 
@@ -83,18 +97,20 @@ class SAFPrimitives(object):
         """
 
         supported = 1 # dummy support everything
+        if ('format_uarch' not in interface['class_name']) and ('intersect' not in interface['class_name']) and ('pgen' not in interface['class_name']) and ('md_parser' not in interface['class_name']):
+            supported = 0
         if supported:
             if 'format_uarch' in interface['class_name']:
                 return 0.0
             elif 'intersect' in interface['class_name']:
-                if interface['attributes']['metadata_format']=='B':
+                if interface['attributes']['metadataformat']=='B':
                     return 160.0
-                elif interface['attributes']['metadata_format']=='C':
+                elif interface['attributes']['metadataformat']=='C':
                     return 220.0
             elif 'pgen' in interface['class_name']:
-                if interface['attributes']['metadata_format']=='B':
+                if interface['attributes']['metadataformat']=='B':
                     return 154.0
-                elif interface['attributes']['metadata_format']=='C':
+                elif interface['attributes']['metadataformat']=='C':
                     return 0.0                    
         return 0
 

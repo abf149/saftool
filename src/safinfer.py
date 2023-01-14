@@ -140,7 +140,7 @@ def loadSparseloopArchitecture(filename):
 def topology_with_holes_from_bindings(arch, fmt_iface_bindings, skip_bindings, data_space_dict_list):
 
     # Fix mismatch in conventions
-    fmt_str_convert={"UOP":"U", "RLE":"R", "C":"C"}
+    fmt_str_convert={"UOP":"U", "RLE":"R", "C":"C","B":"B"}
 
     # Extract buffer hierarchy
     buffer_hierarchy=[buffer for buffer in list(sl_config.flatten_arch_wrapper(arch).keys()) if buffer != 'MAC']

@@ -12,7 +12,7 @@ architecture:
             data_storage_depth: 15000
             data_storage_width: 64
             metadata_storage_depth: 368640 # 25  # 9 addr entries, 16 run entries   
-            metadata_storage_width: 14
+            metadata_storage_width: 7
             datawidth: 8
             block_size: 8
 
