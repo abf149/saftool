@@ -1,0 +1,1 @@
+./build_core.sh | tee characterize.log
