@@ -12,14 +12,14 @@ hw:
 	cd $(CHISEL_PATH);sbt test;cd $(STARTDIR); cp -r $(VERILOG_OUTPUT_PATH)* $(VERILOG_DEST_PATH);cp -r $(SIM_DATA_OUTPUT_PATH)* $(SIM_DATA_DEST_PATH)
 
 # Clean
-clean:
-	rm -rf $(VERILOG_OUTPUT_PATH)*/
+clean_hw:
+	rm -rf $(VERILOG_OUTPUT_PATH)*
 	rm -rf $(SIM_DATA_OUTPUT_PATH)
 
-clean_all: clean
+clean_hw_all: clean_hw
 	rm -rf $(VERILOG_DEST_PATH)*.v
 	rm -rf $(VERILOG_DEST_PATH)*/	
 	rm -rf $(SIM_DATA_DEST_PATH)*.vcd
 	rm -rf $(SIM_DATA_DEST_PATH)*/
 
-.PHONY: hw clean clean_all
+.PHONY: hw clean_hw clean_hw_all
