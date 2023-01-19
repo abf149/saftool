@@ -20,12 +20,32 @@ import saftool._
 class Test_Emit_Intersection extends AnyFreeSpec with ChiselScalatestTester {
 
   "Test_Emit_Intersection" in {
-    test(new AUX_Intersect_Format_C_MDOrch_Uncoupled(16)) { dut =>
+    test(new BidirectionalCoordinatePayloadIntersectDecoupled(8)) { dut =>
 
-      var x=chisel3.getVerilogString(new AUX_Intersect_Format_C_MDOrch_Uncoupled(metaDataWidth = 8))
+      var x=chisel3.getVerilogString(new BidirectionalCoordinatePayloadIntersectDecoupled(metaDataWidth = 8))
+
+      //new Help_Test_Do_Intersection(dut)
+
+      //print(x)
+      Files.write(Paths.get("src/verilog/IntersectFmtCDirBidirDecoupled.v"), x.getBytes(StandardCharsets.UTF_8))
+
+      x=chisel3.getVerilogString(new BidirectionalBitmaskIntersectDecoupled(metaDataWidth = 8))
+      //print(x)
+      Files.write(Paths.get("src/verilog/IntersectFmtBDirBidirDecoupled.v"), x.getBytes(StandardCharsets.UTF_8))      
+
+      /*
+      x=chisel3.getVerilogString(new LeaderFollowerCoordinatePayloadFrontendDecoupled(metaDataWidth = 8))
       print(x)
-      Files.write(Paths.get("src/verilog/AUX_Intersect_Format_C_MDOrch_Uncoupled.v"), x.getBytes(StandardCharsets.UTF_8))
+      Files.write(Paths.get("src/verilog/pipeline_stage.v"), x.getBytes(StandardCharsets.UTF_8))        
+      */
 
+      /*
+      x=chisel3.getVerilogString(new LeaderFollowerCoordinatePayloadIntersectDecoupled(metaDataWidth = 8))
+      print(x)
+      Files.write(Paths.get("src/verilog/IntersectFmtCDirLFDecoupled.v"), x.getBytes(StandardCharsets.UTF_8))
+      */
+
+      /*
       x=chisel3.getVerilogString(new AUX_Intersect_Format_B_MDOrch_Uncoupled(mdTileSize = 8))
       print(x)
       Files.write(Paths.get("src/verilog/AUX_Intersect_Format_B_MDOrch_Uncoupled.v"), x.getBytes(StandardCharsets.UTF_8))
@@ -33,6 +53,7 @@ class Test_Emit_Intersection extends AnyFreeSpec with ChiselScalatestTester {
       x=chisel3.getVerilogString(new AUX_Intersect_Format_C_MDOrch_Coupled(metaDataWidth = 8))
       print(x)
       Files.write(Paths.get("src/verilog/AUX_Intersect_Format_C_MDOrch_Coupled.v"), x.getBytes(StandardCharsets.UTF_8))      
+      */
 
     }
   }
