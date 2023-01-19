@@ -8,7 +8,7 @@ SIM_DATA_DEST_PATH = $(HW_PATH)sim_data/
 STARTDIR=$(shell pwd)
 
 # Chisel testbenches
-test:
+hw:
 	cd $(CHISEL_PATH);sbt test;cd $(STARTDIR); cp -r $(VERILOG_OUTPUT_PATH)* $(VERILOG_DEST_PATH);cp -r $(SIM_DATA_OUTPUT_PATH)* $(SIM_DATA_DEST_PATH)
 
 # Clean
@@ -22,4 +22,4 @@ clean_all: clean
 	rm -rf $(SIM_DATA_DEST_PATH)*.vcd
 	rm -rf $(SIM_DATA_DEST_PATH)*/
 
-.PHONY: test clean clean_all
+.PHONY: hw clean clean_all
