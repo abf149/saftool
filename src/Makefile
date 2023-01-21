@@ -1,7 +1,5 @@
 REMOTE_PATH := tmp/
 CLOCK_PERIOD := 5.000 # ns
-#TOPLEVEL := BidirectionalCoordinatePayloadIntersectDecoupled
-#VCDFILE := hw/sim_data/BidirectionalCoordinatePayloadIntersectDecoupled_should_default_workload/BidirectionalCoordinatePayloadIntersectDecoupled.vcd
 SYNTH_LIB := /homes/abf149/pdk/ncsu-FreePDK45-1.4/FreePDK45/osu_soc/lib/files/gscl45nm.db
 CHISEL_PATH := hw/chisel/
 HW_PATH := hw/
