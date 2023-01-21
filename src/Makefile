@@ -18,11 +18,13 @@ hw:
 
 # Characterization
 char: hw clean_remote
+	rm -f $(SIM_DATA_DEST_PATH)*.log
+	touch $(SIM_DATA_DEST_PATH)$(TOPLEVEL).log
 	echo "time CLOCK_PERIOD=$(CLOCK_PERIOD) DESIGN_RTL=mod.v DESIGN_TOPLEVEL=$(TOPLEVEL) SYNTH_LIB=$(SYNTH_LIB) dc_shell -f build_dc_nsa.tcl" | ssh abf149@effie.mit.edu "/bin/bash -c cat>$(REMOTE_PATH)build_shell_remote.sh"
 	cat scripts/build_dc_nsa.tcl | ssh abf149@effie.mit.edu "/bin/bash -c cat>$(REMOTE_PATH)build_dc_nsa.tcl"	
 	scp hw/rtl_out/$(TOPLEVEL).v abf149@effie.mit.edu:$(REMOTE_PATH)mod.v
 	scp $(VCDFILE) abf149@effie.mit.edu:$(REMOTE_PATH)sim.vcd
-	ssh abf149@effie.mit.edu "vcd2saif -input $(REMOTE_PATH)sim.vcd -o  $(REMOTE_PATH)sim.saif; cd $(REMOTE_PATH); chmod +x build_shell_remote.sh; ./build_shell_remote.sh"
+	ssh abf149@effie.mit.edu "vcd2saif -input $(REMOTE_PATH)sim.vcd -o  $(REMOTE_PATH)sim.saif; cd $(REMOTE_PATH); chmod +x build_shell_remote.sh; ./build_shell_remote.sh" | tee -a $(SIM_DATA_DEST_PATH)$(TOPLEVEL).log
 
 # Clean
 clean_hw:
@@ -32,7 +34,7 @@ clean_hw:
 clean_hw_all: clean_hw
 	rm -rf $(VERILOG_DEST_PATH)*.v
 	rm -rf $(VERILOG_DEST_PATH)*/	
-	rm -rf $(SIM_DATA_DEST_PATH)*.vcd
+	rm -rf $(SIM_DATA_DEST_PATH)*.vcd $(SIM_DATA_DEST_PATH)*.log
 	rm -rf $(SIM_DATA_DEST_PATH)*/
 
 
