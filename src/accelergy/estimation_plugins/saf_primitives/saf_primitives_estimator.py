@@ -26,8 +26,8 @@ class SAFPrimitives(object):
     def find_in_table(self,baseComponentName,paramList,paramValues):
         suffix_str = "_"
         for idx in range(len(paramList)):
-            suffix_str.append(paramList[idx])
-            suffix_str.append(str(paramValues[paramList[idx]]))
+            suffix_str = suffix_str + paramList[idx]
+            suffix_str = suffix_str + str(paramValues[paramList[idx]])
         targetComponentName=baseComponentName+suffix_str
         for row in self.primitives_table:
             if row[NAME_IDX] == targetComponentName:
@@ -84,17 +84,17 @@ class SAFPrimitives(object):
                     paramValues={'metaDataWidth':interface['attributes']['metadatawidth']}
                     targetTableRow = self.find_in_table(baseComponentName,paramList,paramValues)
                     assert(targetTableRow is not None)
-                    return targetTableRow[ACTION_ENERGY_IDX]
+                    return float(targetTableRow[ACTION_ENERGY_IDX])
                 elif interface['attributes']['metadataformat']=='C':
                     baseComponentName='BidirectionalCoordinatePayloadIntersectDecoupled'
                     paramList=['metaDataWidth']
                     paramValues={'metaDataWidth':interface['attributes']['metadatawidth']}
                     targetTableRow = self.find_in_table(baseComponentName,paramList,paramValues)
                     assert(targetTableRow is not None)
-                    return targetTableRow[ACTION_ENERGY_IDX]
+                    return float(targetTableRow[ACTION_ENERGY_IDX])
             elif 'pgen' in interface['class_name']:
                 if interface['attributes']['metadataformat']=='B':
-                    return 1000.0*1.8
+                    return 0.0 #*1.8
                 elif interface['attributes']['metadataformat']=='C':
                     return 0.0
         return 0.0
@@ -142,14 +142,14 @@ class SAFPrimitives(object):
                     paramValues={'metaDataWidth':interface['attributes']['metadatawidth']}
                     targetTableRow = self.find_in_table(baseComponentName,paramList,paramValues)
                     assert(targetTableRow is not None)
-                    return targetTableRow[TOTAL_AREA_IDX]
+                    return float(targetTableRow[TOTAL_AREA_IDX])
                 elif interface['attributes']['metadataformat']=='C':
                     baseComponentName='BidirectionalCoordinatePayloadIntersectDecoupled'
                     paramList=['metaDataWidth']
                     paramValues={'metaDataWidth':interface['attributes']['metadatawidth']}
                     targetTableRow = self.find_in_table(baseComponentName,paramList,paramValues)
                     assert(targetTableRow is not None)
-                    return targetTableRow[TOTAL_AREA_IDX]
+                    return float(targetTableRow[TOTAL_AREA_IDX])
             elif 'pgen' in interface['class_name']:
                 if interface['attributes']['metadataformat']=='B':
                     return 154.0
