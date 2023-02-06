@@ -82,8 +82,6 @@ sbt:
 
 vcd: $(DEST_SIM_FILES)	
 
-X := x_y_21.vcd
-
 test: $(DEST_SIM_FILES)
 
 # accelergy -v 3 -o examples/eyerissv2_bidir_bitmask/output/ ref_output/arch_w_SAF.yaml ref_output/compound_components.yaml ./ref_input/action_counts.yaml -v 1
