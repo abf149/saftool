@@ -251,7 +251,7 @@ if __name__=="__main__":
 
     if len(args.dir_out) > 0:
         bind_out_path=args.dir_out+'bindings.yaml'
-        topo_out_path=args.topology_out+'new_arch.yaml'
+        topo_out_path=args.dir_out+'new_arch.yaml'
 
     print("- Saving to",bind_out_path)
     with open(bind_out_path, 'w') as fp:

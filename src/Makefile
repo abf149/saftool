@@ -34,13 +34,13 @@ $(TARGET_VERILOG_FILES):
 	cp -r $(VERILOG_OUTPUT_PATH)* $(VERILOG_DEST_PATH)
 
 $(DEST_SIM_FILES): $(TARGET_VERILOG_FILES)
-	cp $(shell find $(SIM_DATA_OUTPUT_PATH) -type f -name '$(notdir $@)') $(SIM_DATA_DEST_PATH)
+	cp $(shell find $(SIM_DATA_OUTPUT_PATH)$(shell echo $(notdir $(basename $@)) | sed "s/_\(.*\)//")_should_$(shell echo $(notdir $(basename $@)) | sed "s/\(.*\)_//") -type f -name '$(shell echo $(notdir $(basename $@)) | sed "s/_\(.*\)//").vcd') $@
 
 $(CHAR_LOG_FILES): $(DEST_SIM_FILES)
 	echo $@
 	rm -f $@
 	touch $@
-	echo "time CLOCK_PERIOD=$(CLOCK_PERIOD) DESIGN_RTL=mod.v DESIGN_TOPLEVEL=$(basename $(notdir $@)) SYNTH_LIB=$(SYNTH_LIB) dc_shell -f build_dc_nsa.tcl" | ssh abf149@effie.mit.edu "/bin/bash -c cat>$(REMOTE_PATH)build_shell_remote.sh"
+	echo "time CLOCK_PERIOD=$(CLOCK_PERIOD) DESIGN_RTL=mod.v DESIGN_TOPLEVEL=$(shell echo $(notdir $(basename $@)) | sed "s/_\(.*\)//") SYNTH_LIB=$(SYNTH_LIB) dc_shell -f build_dc_nsa.tcl" | ssh abf149@effie.mit.edu "/bin/bash -c cat>$(REMOTE_PATH)build_shell_remote.sh"
 	cat scripts/build_dc_nsa.tcl | ssh abf149@effie.mit.edu "/bin/bash -c cat>$(REMOTE_PATH)build_dc_nsa.tcl"	
 	scp hw/rtl_out/$(basename $(notdir $@)).v abf149@effie.mit.edu:$(REMOTE_PATH)mod.v
 	scp $(basename $@).vcd abf149@effie.mit.edu:$(REMOTE_PATH)sim.vcd
@@ -77,6 +77,27 @@ $(ACCELERGY_DATA_PATH)$(notdir $(PRIMITIVES_TABLE_FILE)): $(PRIMITIVES_TABLE_FIL
 
 actions: $(ACCELERGY_DATA_PATH)$(notdir $(PRIMITIVES_TABLE_FILE))
 
+sbt:
+	cd $(CHISEL_PATH);sbt test;cd $(STARTDIR)
+
+vcd: $(DEST_SIM_FILES)	
+
+X := x_y_21.vcd
+
+test: $(DEST_SIM_FILES)
+
+# accelergy -v 3 -o examples/eyerissv2_bidir_bitmask/output/ ref_output/arch_w_SAF.yaml ref_output/compound_components.yaml ./ref_input/action_counts.yaml -v 1
+examples: $(ACCELERGY_DATA_PATH)$(notdir $(PRIMITIVES_TABLE_FILE))
+	./prep_accelergy.sh
+	python3 safinfer.py --dir-in examples/eyerissv2_bidir_bitmask/input/ --dir-out examples/eyerissv2_bidir_bitmask/output/
+	python3 safmodel.py --netlist examples/eyerissv2_bidir_bitmask/output/new_arch.yaml --arch examples/eyerissv2_bidir_bitmask/input/arch.yaml --comp-in examples/eyerissv2_bidir_bitmask/input/compound_components.yaml --arch-out examples/eyerissv2_bidir_bitmask/output/arch_w_SAF.yaml --comp-out examples/eyerissv2_bidir_bitmask/output/compound_components.yaml
+	timeloop-model -o examples/eyerissv2_bidir_bitmask/output/ examples/eyerissv2_bidir_bitmask/input/arch.yaml examples/eyerissv2_bidir_bitmask/input/compound_components.yaml examples/eyerissv2_bidir_bitmask/input/prob.yaml examples/eyerissv2_bidir_bitmask/input/map.yaml examples/eyerissv2_bidir_bitmask/input/sparseopts.yaml
+	timeloop-model -o examples/eyerissv2_bidir_bitmask/output_w_SAF/ examples/eyerissv2_bidir_bitmask/output/arch_w_SAF.yaml examples/eyerissv2_bidir_bitmask/output/compound_components.yaml examples/eyerissv2_bidir_bitmask/input/prob.yaml examples/eyerissv2_bidir_bitmask/input/map.yaml examples/eyerissv2_bidir_bitmask/input/sparseopts.yaml
+	python3 safinfer.py --dir-in examples/eyerissv2_bidir_coordpayload/input/ --dir-out examples/eyerissv2_bidir_coordpayload/output/
+	python3 safmodel.py --netlist examples/eyerissv2_bidir_coordpayload/output/new_arch.yaml --arch examples/eyerissv2_bidir_coordpayload/input/arch.yaml --comp-in examples/eyerissv2_bidir_coordpayload/input/compound_components.yaml --arch-out examples/eyerissv2_bidir_coordpayload/output/arch_w_SAF.yaml --comp-out examples/eyerissv2_bidir_coordpayload/output/compound_components.yaml
+	timeloop-model -o examples/eyerissv2_bidir_coordpayload/output/ examples/eyerissv2_bidir_coordpayload/input/arch.yaml examples/eyerissv2_bidir_coordpayload/input/compound_components.yaml examples/eyerissv2_bidir_coordpayload/input/prob.yaml examples/eyerissv2_bidir_coordpayload/input/map.yaml examples/eyerissv2_bidir_coordpayload/input/sparseopts.yaml
+	timeloop-model -o examples/eyerissv2_bidir_coordpayload/output_w_SAF/ examples/eyerissv2_bidir_coordpayload/output/arch_w_SAF.yaml examples/eyerissv2_bidir_coordpayload/output/compound_components.yaml examples/eyerissv2_bidir_coordpayload/input/prob.yaml examples/eyerissv2_bidir_coordpayload/input/map.yaml examples/eyerissv2_bidir_coordpayload/input/sparseopts.yaml	
+
 # Clean
 
 clean_actions:
@@ -102,8 +123,13 @@ clean_hw_all: clean_hw clean_log clean_summary clean_actions
 	rm -rf $(SIM_DATA_DEST_PATH)*.vcd $(SIM_DATA_DEST_PATH)*.log
 	rm -rf $(SIM_DATA_DEST_PATH)*/
 
-
 clean_remote:
 	ssh abf149@effie.mit.edu "cd $(REMOTE_PATH); rm -f *.v *.tcl *.sh *.log *.svf *.saif *.vcd; rm -rf alib-52; rm -rf analyzed"
 
-.PHONY: clean_hw clean_hw_all clean_remote clean_log characterize
+clean_examples:
+	rm -rf examples/eyerissv2_bidir_bitmask/output/*
+	rm -rf examples/eyerissv2_bidir_bitmask/output_w_SAF/*
+	rm -rf examples/eyerissv2_bidir_coordpayload/output/*
+	rm -rf examples/eyerissv2_bidir_coordpayload/output_w_SAF/*	
+
+.PHONY: clean_hw clean_hw_all clean_remote clean_log characterize sbt vcd test examples
