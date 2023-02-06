@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
-#import csv, os, sys
+import csv, os, sys
 #from accelergy.helper_functions import oneD_linear_interpolation
+
+NAME_IDX = 0
+ACTION_ENERGY_IDX = 1
+ENERGY_UNIT_IDX = 2
+TOTAL_AREA_IDX = 9
+CRITICAL_PATH_LENGTH_IDX = 14
 
 class SAFPrimitives(object):
     """
@@ -11,6 +17,23 @@ class SAFPrimitives(object):
     # -------------------------------------------------------------------------------------
     def __init__(self):
         self.estimator_name =  "saf_primitives_estimator"
+        self.primitives_table=[]
+        with open('accelergy/data/primitives_table.csv', newline='') as csvfile: 
+            csvreader = csv.reader(csvfile, delimiter=',')
+            for row in csvreader:
+                self.primitives_table.append(row)
+
+    def find_in_table(self,baseComponentName,paramList,paramValues):
+        suffix_str = "_"
+        for idx in range(len(paramList)):
+            suffix_str.append(paramList[idx])
+            suffix_str.append(str(paramValues[paramList[idx]]))
+        targetComponentName=baseComponentName+suffix_str
+        for row in self.primitives_table:
+            if row[NAME_IDX] == targetComponentName:
+                return row
+
+        return None
 
     def primitive_action_supported(self, interface):
         """
@@ -56,9 +79,19 @@ class SAFPrimitives(object):
                 return 0
             elif 'intersect' in interface['class_name']:
                 if interface['attributes']['metadataformat']=='B':
-                    return 1000.0*0.000283
+                    baseComponentName='BidirectionalBitmaskIntersectDecoupled'
+                    paramList=['metaDataWidth']
+                    paramValues={'metaDataWidth':interface['attributes']['metadatawidth']}
+                    targetTableRow = self.find_in_table(baseComponentName,paramList,paramValues)
+                    assert(targetTableRow is not None)
+                    return targetTableRow[ACTION_ENERGY_IDX]
                 elif interface['attributes']['metadataformat']=='C':
-                    return 18.0  
+                    baseComponentName='BidirectionalCoordinatePayloadIntersectDecoupled'
+                    paramList=['metaDataWidth']
+                    paramValues={'metaDataWidth':interface['attributes']['metadatawidth']}
+                    targetTableRow = self.find_in_table(baseComponentName,paramList,paramValues)
+                    assert(targetTableRow is not None)
+                    return targetTableRow[ACTION_ENERGY_IDX]
             elif 'pgen' in interface['class_name']:
                 if interface['attributes']['metadataformat']=='B':
                     return 1000.0*1.8
@@ -104,9 +137,19 @@ class SAFPrimitives(object):
                 return 0.0
             elif 'intersect' in interface['class_name']:
                 if interface['attributes']['metadataformat']=='B':
-                    return 160.0
+                    baseComponentName='BidirectionalBitmaskIntersectDecoupled'
+                    paramList=['metaDataWidth']
+                    paramValues={'metaDataWidth':interface['attributes']['metadatawidth']}
+                    targetTableRow = self.find_in_table(baseComponentName,paramList,paramValues)
+                    assert(targetTableRow is not None)
+                    return targetTableRow[TOTAL_AREA_IDX]
                 elif interface['attributes']['metadataformat']=='C':
-                    return 220.0
+                    baseComponentName='BidirectionalCoordinatePayloadIntersectDecoupled'
+                    paramList=['metaDataWidth']
+                    paramValues={'metaDataWidth':interface['attributes']['metadatawidth']}
+                    targetTableRow = self.find_in_table(baseComponentName,paramList,paramValues)
+                    assert(targetTableRow is not None)
+                    return targetTableRow[TOTAL_AREA_IDX]
             elif 'pgen' in interface['class_name']:
                 if interface['attributes']['metadataformat']=='B':
                     return 154.0
