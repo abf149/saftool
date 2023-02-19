@@ -65,20 +65,6 @@ class IntersectFmtCDirLFCombinational(metaDataWidth: Int) extends Module {
   io.out_inF_request := io.inL
 }
 
-class RegisteredAdder(bitwidth: Int) extends Module {
-  val io = IO(new Bundle {
-    val inL = Input(UInt(metaDataWidth.W))
-    //val in1_not_empty = Input(Bool())
-    val inF = Input(UInt(metaDataWidth.W))
-    val out_intersect = Output(UInt(metaDataWidth.W))
-    val out_inF_request= Output(UInt(metaDataWidth.W))
-  })
-
-  // Registered outputs
-  io.out_intersect := io.inL
-  io.out_inF_request := io.inL
-}
-
 // Intersect unit {Format: C, direction: bidirectional}
 class BidirectionalCoordinatePayloadIntersectDecoupled(metaDataWidth: Int) extends Module  with RequireSyncReset {
 
