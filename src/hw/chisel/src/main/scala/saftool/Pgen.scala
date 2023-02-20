@@ -11,14 +11,14 @@ import scala.math._
 
 /* Parallel priority encoder inter-stage interface encapsulation; idx = stage output index, vld = stage output valid */
 class PriorityEncoderBundle(val bitwidth: Int) extends Bundle {
-  val idx = UInt(bitwidth.W)
-  val vld = UInt(1.W)
+  val idx = Output(UInt(bitwidth.W))
+  val vld = Output(UInt(1.W))
 }
 
 /* Priority encoder first stage - takes two "0-bit" inputs each with a valid signal, outputs 1-bit index with valid signal */
 class ParallelDec2PriorityEncoderBaseCombinational() extends Module   with RequireSyncReset {
-  val input0 = IO(new Bundle{val vld = UInt(1.W)})
-  val input1 = IO(new Bundle{val vld = UInt(1.W)})
+  val input0 = IO(new Bundle{val vld = Input(UInt(1.W))})
+  val input1 = IO(new Bundle{val vld = Input(UInt(1.W))})
   val output = IO(new PriorityEncoderBundle(1))
 
   output.vld := (input0.vld.asBool || input1.vld.asBool).asUInt
@@ -27,29 +27,31 @@ class ParallelDec2PriorityEncoderBaseCombinational() extends Module   with Requi
 
 /* Priority encoder intermediate stage - takes two n-bit inputs each with a valid signal, outputs n+1-bit index with valid signl */
 class ParallelDec2PriorityEncoderStageCombinational(val bitwidth: Int) extends Module   with RequireSyncReset {
-  val input0 = IO(new PriorityEncoderBundle(bitwidth))
-  val input1 = IO(new PriorityEncoderBundle(bitwidth))
+  val input0 = IO(Flipped(new PriorityEncoderBundle(bitwidth)))
+  val input1 = IO(Flipped(new PriorityEncoderBundle(bitwidth)))
   val output = IO(new PriorityEncoderBundle(bitwidth+1))
 
   output.vld := (input0.vld.asBool || input1.vld.asBool).asUInt
   output.idx := Mux(input1.vld.asBool,Cat(input1.vld,input1.idx),Cat(input1.vld,input0.idx))
 }
 
-class ParallelDec2PriorityEncoderCombinational(val input_bits: Int) extends Module with RequireSyncReset {
-  val output_bits = (log10(input_bits)/log10(2.0)).toInt
+class ParallelDec2PriorityEncoderCombinational(val inputbits: Int) extends Module with RequireSyncReset {
+  val output_bits = (log10(inputbits)/log10(2.0)).toInt
 
-  val input = IO(new Bundle{val in = UInt(input_bits.W)})
+  val input = IO(new Bundle{val in = Input(UInt(inputbits.W))})
   val output = IO(new PriorityEncoderBundle(output_bits))
   
-  def doBuild(base_offset: Int, cur_input_bits: Int, cur_output: PriorityEncoderBundle): Unit =
-    //val new_input_bits = (cur_input_bits/2).toInt 
+  def doBuild(base_offset: Int, cur_inputbits: Int, cur_output: PriorityEncoderBundle): Unit =
+    //val new_inputbits = (cur_inputbits/2).toInt 
 
-    if (cur_input_bits > 0) {
-      val stage_penc = Module(new ParallelDec2PriorityEncoderStageCombinational((cur_input_bits/2).toInt))
+    
+
+    if (cur_inputbits > 0) {
+      val stage_penc = Module(new ParallelDec2PriorityEncoderStageCombinational((cur_inputbits).toInt))
       cur_output.vld := stage_penc.output.vld
       cur_output.idx := stage_penc.output.idx
-      doBuild(base_offset, (cur_input_bits/2).toInt, Flipped(stage_penc.input0))
-      doBuild(base_offset+cur_input_bits, (cur_input_bits/2).toInt, Flipped(stage_penc.input1))      
+      doBuild(base_offset, (cur_inputbits-1).toInt, stage_penc.input0)
+      doBuild(base_offset+(inputbits/(pow(2,output_bits-cur_inputbits))).toInt, (cur_inputbits-1).toInt, stage_penc.input1)      
 
 
     } else {
@@ -60,21 +62,21 @@ class ParallelDec2PriorityEncoderCombinational(val input_bits: Int) extends Modu
       base_penc.input1.vld := input.in(base_offset+1)
     }
 
-  doBuild(0, (input_bits/2).toInt , output)
+  doBuild(0, output_bits-1, output)
 }
 
 /* Registered interface wrapped around combinatorial parallel priority encoder */
-class ParallelDec2PriorityEncoderRegistered(val input_bits: Int) extends Module with RequireSyncReset {
-  val output_bits = (log10(input_bits)/log10(2.0)).toInt
+class ParallelDec2PriorityEncoderRegistered(val inputbits: Int) extends Module with RequireSyncReset {
+  val output_bits = (log10(inputbits)/log10(2.0)).toInt
 
-  val input = IO(new Bundle{val in = UInt(input_bits.W)})
+  val input = IO(new Bundle{val in = Input(UInt(inputbits.W))})
   val output = IO(new PriorityEncoderBundle(output_bits))
   val input_reg = RegInit(0.U)
   val output_idx_reg = RegInit(0.U) 
   val output_vld_reg = RegInit(0.U)
 
   // Combinatorial unit
-  val combinatorial_penc = Module(new ParallelDec2PriorityEncoderCombinational(input_bits))
+  val combinatorial_penc = Module(new ParallelDec2PriorityEncoderCombinational(inputbits))
 
   input_reg := input.in
   combinatorial_penc.input.in := input_reg
