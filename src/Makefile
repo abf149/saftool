@@ -36,6 +36,8 @@ $(TARGET_VERILOG_FILES):
 $(DEST_SIM_FILES): $(TARGET_VERILOG_FILES)
 	cp $(shell find $(SIM_DATA_OUTPUT_PATH)$(shell echo $(notdir $(basename $@)) | sed "s/_\(.*\)//")_should_$(shell echo $(notdir $(basename $@)) | sed "s/\(.*\)_//") -type f -name '$(shell echo $(notdir $(basename $@)) | sed "s/_\(.*\)//").vcd') $@
 
+# scp $(basename $@).vcd abf149@effie.mit.edu:$(REMOTE_PATH)sim.vcd
+# ssh abf149@effie.mit.edu "vcd2saif -input $(REMOTE_PATH)sim.vcd -o  $(REMOTE_PATH)sim.saif; cd $(REMOTE_PATH); chmod +x build_shell_remote.sh; ./build_shell_remote.sh" | tee -a $@
 $(CHAR_LOG_FILES): $(DEST_SIM_FILES)
 	echo $@
 	rm -f $@
@@ -43,8 +45,7 @@ $(CHAR_LOG_FILES): $(DEST_SIM_FILES)
 	echo "time CLOCK_PERIOD=$(CLOCK_PERIOD) DESIGN_RTL=mod.v DESIGN_TOPLEVEL=$(shell echo $(notdir $(basename $@)) | sed "s/_\(.*\)//") SYNTH_LIB=$(SYNTH_LIB) dc_shell -f build_dc_nsa.tcl" | ssh abf149@effie.mit.edu "/bin/bash -c cat>$(REMOTE_PATH)build_shell_remote.sh"
 	cat scripts/build_dc_nsa.tcl | ssh abf149@effie.mit.edu "/bin/bash -c cat>$(REMOTE_PATH)build_dc_nsa.tcl"	
 	scp hw/rtl_out/$(basename $(notdir $@)).v abf149@effie.mit.edu:$(REMOTE_PATH)mod.v
-	scp $(basename $@).vcd abf149@effie.mit.edu:$(REMOTE_PATH)sim.vcd
-	ssh abf149@effie.mit.edu "vcd2saif -input $(REMOTE_PATH)sim.vcd -o  $(REMOTE_PATH)sim.saif; cd $(REMOTE_PATH); chmod +x build_shell_remote.sh; ./build_shell_remote.sh" | tee -a $@
+	ssh abf149@effie.mit.edu "cd $(REMOTE_PATH); chmod +x build_shell_remote.sh; ./build_shell_remote.sh" | tee -a $@
 
 $(CHAR_POWER_FILES): $(CHAR_LOG_FILES)
 	rm -f $@
