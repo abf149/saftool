@@ -154,7 +154,7 @@ class SAFPrimitives(object):
                 if interface['attributes']['metadataformat']=='B':
                     baseComponentName='ParallelDec2PriorityEncoderRegistered'
                     paramList=['inputbits']
-                    paramValues={'inputbits':64}#interface['attributes']['metadatawidth']}
+                    paramValues={'inputbits':128}#interface['attributes']['metadatawidth']}
                     targetTableRow = self.find_in_table(baseComponentName,paramList,paramValues)
                     assert(targetTableRow is not None)
                     return float(targetTableRow[TOTAL_AREA_IDX])                    
