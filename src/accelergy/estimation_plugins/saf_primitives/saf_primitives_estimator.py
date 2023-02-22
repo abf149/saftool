@@ -139,7 +139,7 @@ class SAFPrimitives(object):
                 if interface['attributes']['metadataformat']=='B':
                     baseComponentName='BidirectionalBitmaskIntersectDecoupled'
                     paramList=['metaDataWidth']
-                    paramValues={'metaDataWidth':interface['attributes']['metadatawidth']}
+                    paramValues={'metaDataWidth':128} #interface['attributes']['metadatawidth']}
                     targetTableRow = self.find_in_table(baseComponentName,paramList,paramValues)
                     assert(targetTableRow is not None)
                     return float(targetTableRow[TOTAL_AREA_IDX])
@@ -152,7 +152,13 @@ class SAFPrimitives(object):
                     return float(targetTableRow[TOTAL_AREA_IDX])
             elif 'pgen' in interface['class_name']:
                 if interface['attributes']['metadataformat']=='B':
-                    return 154.0
+                    baseComponentName='ParallelDec2PriorityEncoderRegistered'
+                    paramList=['inputbits']
+                    paramValues={'inputbits':128}#interface['attributes']['metadatawidth']}
+                    targetTableRow = self.find_in_table(baseComponentName,paramList,paramValues)
+                    assert(targetTableRow is not None)
+                    return float(targetTableRow[TOTAL_AREA_IDX])                    
+                    #return 154.0
                 elif interface['attributes']['metadataformat']=='C':
                     return 0.0                    
         return 0
