@@ -3,6 +3,7 @@ architecture:
   subtree:
     - name: eyeriss_v2_PE
       attributes:
+        latency: 5ns
         technology: 45nm
       local:
         - name: BackingStorage
