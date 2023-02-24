@@ -91,7 +91,8 @@ if { [catch {
   run_dc_cmd "set_clock_uncertainty 0.040 -setup {[get_object_name [all_clocks]]}"
   run_dc_cmd "set_max_transition  0.040 {[get_object_name [all_inputs]]}"
   run_dc_cmd "set_max_transition  0.040 {[get_object_name [all_outputs]]}"
-  run_dc_cmd "set_load -pin_load  10 {[get_object_name [all_outputs]]}"
+  run_dc_cmd "set_load -pin_load  0 {[get_object_name [all_outputs]]}"
+  run_dc_cmd "set_load -pin_load  0 {[get_object_name [all_inputs]]}"  
   run_dc_cmd "report_timing -loops"
   
   # This actually does the synthesis. The -effort option indicates 
@@ -114,7 +115,7 @@ if { [catch {
   run_dc_cmd "report_qor"
   run_dc_cmd "report_timing -transition_time -nets -attributes -nosplit"
   run_dc_cmd "report_area -nosplit -hierarchy"
-  run_dc_cmd "report_power -nosplit -hier"
+  run_dc_cmd "report_power"
   run_dc_cmd "report_resources -nosplit -hierarchy"
   run_dc_cmd "report_reference -nosplit -hierarchy"
 
