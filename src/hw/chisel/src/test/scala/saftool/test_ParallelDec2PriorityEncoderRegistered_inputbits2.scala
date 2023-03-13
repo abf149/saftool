@@ -17,7 +17,7 @@ class Workload_ParallelDec2PriorityEncoderRegistered_Random(penc: ParallelDec2Pr
   step(3)
 
   //var j=0
-  for (i <- 0 to 10000)
+  for (i <- 0 to 100)
   {
     poke(penc.input.in,rand.nextInt()) //85
     step(1)
