@@ -155,9 +155,16 @@ class SAFPrimitives(object):
                     baseComponentName='ParallelDec2PriorityEncoderRegistered'
                     paramList=['inputbits']
                     paramValues={'inputbits':128}#interface['attributes']['metadatawidth']}
-                    targetTableRow = self.find_in_table(baseComponentName,paramList,paramValues)
-                    assert(targetTableRow is not None)
-                    return float(targetTableRow[TOTAL_AREA_IDX])                    
+                    targetTableRowPenc = self.find_in_table(baseComponentName,paramList,paramValues)
+                    PencAreaAmortizationOverMemories=0.5
+                    baseComponentName='ParallelPrefixSumRegistered'
+                    PfsumAreaAmortizationOverCycles=1.0/paramValues['inputbits']
+                    paramList=['bitwidth']
+                    paramValues={'bitwidth':128}#interface['attributes']['metadatawidth']}
+                    targetTableRowPfsum = self.find_in_table(baseComponentName,paramList,paramValues)                    
+                    assert((targetTableRowPenc is not None) and (targetTableRowPfsum is not None))
+                    return float(targetTableRowPenc[TOTAL_AREA_IDX]*PencAreaAmortizationOverMemories + \
+                                 targetTableRowPfsum[TOTAL_AREA_IDX]*PfsumAreaAmortizationOverCycles)                    
                     #return 154.0
                 elif interface['attributes']['metadataformat']=='C':
                     return 0.0                    
