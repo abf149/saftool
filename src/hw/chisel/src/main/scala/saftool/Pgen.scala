@@ -9,6 +9,112 @@ import chisel3.util.Decoupled
 import chisel3.util.{switch, is}
 import scala.math._
 
+/* Parallel prefix sum wrapper input interface encapsulation*/
+class ParallelPrefixSumWrapperInputBundle(val bitwidth: Int) extends Bundle {
+  val bitmask = Input(UInt(bitwidth.W))
+}
+
+/* Parallel prefix sum wrapper output interface encapsulation*/
+class ParallelPrefixSumWrapperOutputBundle(val bitwidth: Int, val num_items: Int) extends Bundle {
+  val sums = Output(Vec(num_items,UInt(bitwidth.W)))
+}
+
+/* Combinational Kogge-Stone parallel prefix sum */
+class KoggeStoneParallelPrefixSumCombinational(val bitwidth: Int) extends Module with RequireSyncReset {
+  val output_wordbits = (log10(bitwidth)/log10(2.0)).toInt + 1
+
+  val input = IO(new ParallelPrefixSumWrapperInputBundle(bitwidth))
+  val output = IO(new ParallelPrefixSumWrapperOutputBundle(output_wordbits,bitwidth))
+
+  // Build one level of Kogge-Stone parallel prefix-sum
+  def doBuild(current_level: Array[UInt], num_elements: Int, lvl_idx: Int): Array[UInt] = {
+    //println("doBuild")
+    //println("lvl_idx",lvl_idx)
+    //println("num_elements",num_elements)
+    //println("current_level",current_level)
+    val lvl_stride = pow(2,lvl_idx).toInt
+    val bits_in = lvl_idx+1
+    val bits_out = lvl_idx+2
+    val new_level = new Array[UInt](num_elements)
+    //println("lvl_stride",lvl_stride)
+    //println("bits_in",bits_in)
+    //println("bits_out",bits_out)
+    //println("new_level",new_level)
+
+    // Direct input/output connections
+    //println("first loop")
+    for (jdx <- 0 until lvl_stride) {
+      //println("j",jdx)
+      //val cl_val : UInt(bits_out.W) = current_level(jdx)
+      new_level(jdx) = Wire(UInt(bits_out.W))
+      new_level(jdx) := current_level(jdx).zext.asUInt
+    }
+
+    //println("second loop")
+    for (jdx <- lvl_stride until num_elements) {
+      //println("j",jdx)      
+      new_level(jdx) = Wire(UInt(bits_out.W))
+      new_level(jdx) := current_level(jdx).zext.asUInt + current_level(jdx - lvl_stride).zext.asUInt
+    }
+
+    return new_level
+  }
+
+  val num_lvls = output_wordbits
+  var logic_lvls:Array[Array[UInt]] = new Array[Array[UInt]](num_lvls)
+
+  logic_lvls(0) = new Array[UInt](bitwidth)    
+  for (kdx <- 0 until bitwidth) {
+    logic_lvls(0)(kdx) = Wire(UInt(1.W))
+    logic_lvls(0)(kdx) := input.bitmask(kdx)
+  }
+  
+  //Wire(UInt(bitwidth.W))
+
+  //var logic_lvls:Vec[Vec[UInt]] = Vec(num_lvls,Vec(bitwidth,UInt(output_wordbits.W)))
+  //logic_lvls(0) := input.bitmask//IO(new Bundle{val llvl = Output(Vec(bitwidth,UInt(1.W)))})
+
+  //var inputWire = new ParallelPrefixSumWrapperInputBundle(bitwidth)
+  //logic_lvls(0).llvl := input.bitmask
+  //input <> inputWire
+
+  //logic_lvls(0) <> input.bitmask
+
+  // Wire input to Kogge-Stone input layer
+
+
+  // Build successive Kogge-Stone layers
+  for (idx <- 1 until num_lvls) {
+    logic_lvls(idx) = doBuild(logic_lvls(idx-1), bitwidth, idx-1)
+  }
+
+  // Wire Kogge-Stone final layer to output
+
+  for (idx <- 0 until bitwidth) {
+    output.sums(idx) := logic_lvls(num_lvls-1)(idx)
+  }
+}
+
+/* Registered interface wrapped around parallel prefix sum */
+class ParallelPrefixSumRegistered(val bitwidth: Int) extends Module with RequireSyncReset {
+  val output_wordbits = (log10(bitwidth)/log10(2.0)).toInt+1
+
+  val input = IO(new ParallelPrefixSumWrapperInputBundle(bitwidth))
+  val output = IO(new ParallelPrefixSumWrapperOutputBundle(output_wordbits,bitwidth))
+  val bitmask_reg = RegInit(0.U)
+  val output_wordbits_reg = RegInit((VecInit(Seq.fill(bitwidth)(0.U(output_wordbits.W)))))
+    
+    //bitwidth,UInt(output_wordbits.W)))) //RegInit(Vec(Seq.fill(bitwidth)(0.U(output_wordbits.W))))
+
+  // Combinational unit
+  val combinational_prefix_sum = Module(new KoggeStoneParallelPrefixSumCombinational(bitwidth))
+
+  bitmask_reg := input.bitmask
+  combinational_prefix_sum.input.bitmask := bitmask_reg
+  output_wordbits_reg := combinational_prefix_sum.output.sums
+  output.sums := output_wordbits_reg
+}
+
 /* Parallel priority encoder inter-stage interface encapsulation; idx = stage output index, vld = stage output valid */
 class PriorityEncoderBundle(val bitwidth: Int) extends Bundle {
   val idx = Output(UInt(bitwidth.W))
@@ -75,7 +181,7 @@ class ParallelDec2PriorityEncoderRegistered(val inputbits: Int) extends Module w
   val output_idx_reg = RegInit(0.U) 
   val output_vld_reg = RegInit(0.U)
 
-  // Combinatorial unit
+  // Combinational unit (TODO: typo)
   val combinatorial_penc = Module(new ParallelDec2PriorityEncoderCombinational(inputbits))
 
   input_reg := input.in
@@ -86,157 +192,3 @@ class ParallelDec2PriorityEncoderRegistered(val inputbits: Int) extends Module w
   output.vld := output_vld_reg
 }
 
-/*
-// Intersect unit {Format: C, metadata orchestration: uncoupled}
-class IntersectFmtCDirBidirCombinational(metaDataWidth: Int) extends Module  with RequireSyncReset {
-  val io = IO(new Bundle {
-    val in0 = Input(UInt(metaDataWidth.W))
-    val in1 = Input(UInt(metaDataWidth.W))
-    val out_intersect = Output(UInt(metaDataWidth.W))
-    val out_in1_gt_in0 = Output(Bool())
-    val out_in1_eq_in0 = Output(Bool())
-  })
-
-  // Combinational naive bidirectional coordinate intersection:
-  // compare coordinate metadata
-  io.out_in1_gt_in0 := (io.in1 > io.in0)
-  io.out_in1_eq_in0 := (io.in1 === io.in0)
-  io.out_intersect := io.in0
-}
-
-class IntersectFmtCDirLFCombinational(metaDataWidth: Int) extends Module {
-  val io = IO(new Bundle {
-    val inL = Input(UInt(metaDataWidth.W))
-    //val in1_not_empty = Input(Bool())
-    val inF = Input(UInt(metaDataWidth.W))
-    val out_intersect = Output(UInt(metaDataWidth.W))
-    val out_inF_request= Output(UInt(metaDataWidth.W))
-  })
-
-  // Registered outputs
-  io.out_intersect := io.inL
-  io.out_inF_request := io.inL
-}
-
-
-// Intersect unit {Format: C, direction: bidirectional}
-class BidirectionalCoordinatePayloadIntersectDecoupled(metaDataWidth: Int) extends Module  with RequireSyncReset {
-
-  val input0 = IO(Flipped(Decoupled(new PartialBidirectionalInputBundle(metaDataWidth))))
-  val input1 = IO(Flipped(Decoupled(new PartialBidirectionalInputBundle(metaDataWidth))))
-  val output = IO(Decoupled(new IntersectionOutputBundle(metaDataWidth)))
-
-  // Data registers
-  val in0_reg = RegInit(0.U)
-  val in1_reg = RegInit(0.U)  
-  val out_intersect_reg =   RegInit(0.U)
-  val out_in1_gt_in0_reg = RegInit(false.B)
-  val out_in1_eq_in0_reg = RegInit(true.B)
-  
-  // Handshaking registers
-  val busy = RegInit(false.B)
-  val out_valid = RegInit(false.B)  
-
-  // Combinatorical intersection unit
-  val intersectCombinational = Module(new IntersectFmtCDirBidirCombinational(metaDataWidth))
-  intersectCombinational.reset := reset
-  intersectCombinational.clock := clock
-  intersectCombinational.io.in0 := in0_reg
-  intersectCombinational.io.in1 := in1_reg 
-  out_intersect_reg := intersectCombinational.io.out_intersect
-  
-  // Handshaking SM
-  output.valid := out_valid
-  input0.ready := (!busy) && (out_in1_eq_in0_reg || out_in1_gt_in0_reg)
-  input1.ready := (!busy) && (out_in1_eq_in0_reg || (!out_in1_gt_in0_reg))  
-  output.bits := DontCare
-
-  when(busy) {
-
-    out_intersect_reg := in0_reg //intersectCombinational.io.out_intersect
-    output.bits.out := out_intersect_reg
-    out_in1_eq_in0_reg := intersectCombinational.io.out_in1_eq_in0
-    out_in1_gt_in0_reg := intersectCombinational.io.out_in1_gt_in0
-
-    out_valid := true.B
-
-    when(output.ready && out_valid) {
-      busy := false.B
-      out_valid := false.B
-    }
-  }.otherwise {
-    when(out_in1_eq_in0_reg && input0.valid && input1.valid) {
-      // in0 == in1: pop both input queues and compare new heads
-      val bundle0 = input0.deq()
-      val bundle1 = input1.deq()
-      in0_reg := bundle0.in
-      in1_reg := bundle1.in
-      busy := true.B
-    }.otherwise {
-      when(out_in1_gt_in0_reg && input0.valid) {
-        // in0 < in1: pop in0 and compare new in0 head to in1
-        val bundle0 = input0.deq()
-        in0_reg := bundle0.in
-        busy := true.B
-      }
-      when((!out_in1_gt_in0_reg) && input1.valid) {
-        // in1 < in0: pop in1 and compare in0 to new in1 head
-        val bundle1 = input1.deq()
-        in1_reg := bundle1.in
-        busy := true.B      
-      }
-    }    
-  }
-}
-
-// Intersect unit {Format: B, direction: bidirectional}
-class BidirectionalBitmaskIntersectDecoupled(metaDataWidth: Int) extends Module  with RequireSyncReset {
-
-  val input0 = IO(Flipped(Decoupled(new PartialBidirectionalInputBundle(metaDataWidth))))
-  val input1 = IO(Flipped(Decoupled(new PartialBidirectionalInputBundle(metaDataWidth))))
-  val output = IO(Decoupled(new IntersectionOutputBundle(metaDataWidth)))
-
-  // Data registers
-  val in0_reg = RegInit(0.U)
-  val in1_reg = RegInit(0.U)  
-  val out_intersect_reg =   RegInit(0.U)
-  
-  // Handshaking registers
-  val busy = RegInit(false.B)
-  val out_valid = RegInit(false.B)  
-
-  // Combinatorical intersection unit
-  val intersectCombinational = Module(new IntersectFmtBDirBidirCombinational(metaDataWidth))
-  intersectCombinational.reset := reset
-  intersectCombinational.clock := clock
-  intersectCombinational.io.in0 := in0_reg
-  intersectCombinational.io.in1 := in1_reg 
-  out_intersect_reg := intersectCombinational.io.out_intersect  
-  
-  // Handshaking SM
-  output.valid := out_valid
-  input0.ready := (!busy)
-  input1.ready := (!busy)
-  output.bits := DontCare
-
-  when(busy) {
-
-    output.bits.out := out_intersect_reg
-    out_valid := true.B
-    when(output.ready && out_valid) {
-      busy := false.B
-      out_valid := false.B
-    }
-  }.otherwise {
-    when(input0.valid && input1.valid) {
-      // in0 == in1: pop both input queues and compare new heads
-      val bundle0 = input0.deq()
-      val bundle1 = input1.deq()
-      in0_reg := bundle0.in
-      in1_reg := bundle1.in
-      busy := true.B
-    }  
-  }
-}
-
-*/
