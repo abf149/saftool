@@ -94,7 +94,19 @@ class SAFPrimitives(object):
                     return float(targetTableRow[ACTION_ENERGY_IDX])
             elif 'pgen' in interface['class_name']:
                 if interface['attributes']['metadataformat']=='B':
-                    return 0.0 #*1.8
+                    baseComponentName='ParallelDec2PriorityEncoderRegistered'
+                    paramList=['inputbits']
+                    paramValues={'inputbits':128}#interface['attributes']['metadatawidth']}
+                    targetTableRowPenc = self.find_in_table(baseComponentName,paramList,paramValues)
+                    PencAreaAmortizationOverMemories=0.5
+                    baseComponentName='ParallelPrefixSumRegistered'
+                    PfsumAreaAmortizationOverCycles=1.0/paramValues['inputbits']
+                    paramList=['bitwidth']
+                    paramValues={'bitwidth':128}#interface['attributes']['metadatawidth']}
+                    targetTableRowPfsum = self.find_in_table(baseComponentName,paramList,paramValues)                    
+                    assert((targetTableRowPenc is not None) and (targetTableRowPfsum is not None))
+                    return float(targetTableRowPenc[ACTION_ENERGY_IDX]*PencAreaAmortizationOverMemories + \
+                                 targetTableRowPfsum[ACTION_ENERGY_IDX]*PfsumAreaAmortizationOverCycles)     
                 elif interface['attributes']['metadataformat']=='C':
                     return 0.0
         return 0.0
