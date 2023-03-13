@@ -106,7 +106,7 @@ if { [catch {
   run_dc_cmd "compile_ultra -scan -retime -timing"
 #  run_dc_cmd "compile -scan -map_effort low -area_effort low -power_effort low"
 
-  #run_dc_cmd "optimize_registers"
+  run_dc_cmd "optimize_registers"
   echo "======END COMPILATION=============================\n\n\n"
 
   read_saif -input sim.saif -instance_name $env(DESIGN_TOPLEVEL) -verbose
