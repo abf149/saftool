@@ -170,7 +170,7 @@ class SAFPrimitives(object):
                     targetTableRowPenc = self.find_in_table(baseComponentName,paramList,paramValues)
                     PencAreaAmortizationOverMemories=0.5
                     baseComponentName='ParallelPrefixSumRegistered'
-                    PfsumAreaAmortizationOverCycles=1.0/paramValues['inputbits']
+                    PfsumAreaAmortizationOverCycles=1.0 #/paramValues['inputbits']
                     paramList=['bitwidth']
                     paramValues={'bitwidth':128}#interface['attributes']['metadatawidth']}
                     targetTableRowPfsum = self.find_in_table(baseComponentName,paramList,paramValues)                    
