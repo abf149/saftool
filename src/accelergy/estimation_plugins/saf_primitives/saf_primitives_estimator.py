@@ -100,13 +100,17 @@ class SAFPrimitives(object):
                     targetTableRowPenc = self.find_in_table(baseComponentName,paramList,paramValues)
                     PencAreaAmortizationOverMemories=0.5
                     baseComponentName='ParallelPrefixSumRegistered'
-                    PfsumAreaAmortizationOverCycles=1.0/paramValues['inputbits']
+                    PfsumAreaAmortizationOverCycles=1.0/float(paramValues['inputbits'])
                     paramList=['bitwidth']
                     paramValues={'bitwidth':128}#interface['attributes']['metadatawidth']}
                     targetTableRowPfsum = self.find_in_table(baseComponentName,paramList,paramValues)                    
                     assert((targetTableRowPenc is not None) and (targetTableRowPfsum is not None))
-                    return float(targetTableRowPenc[ACTION_ENERGY_IDX]*PencAreaAmortizationOverMemories + \
-                                 targetTableRowPfsum[ACTION_ENERGY_IDX]*PfsumAreaAmortizationOverCycles)     
+                    print("targetTableRowPfsum[ACTION_ENERGY_IDX]:",targetTableRowPfsum[ACTION_ENERGY_IDX])
+                    print("PfsumAreaAmortizationOverCycles",PfsumAreaAmortizationOverCycles)
+                    print("targetTableRowPenc[ACTION_ENERGY_IDX]",targetTableRowPenc[ACTION_ENERGY_IDX])
+                    print("PencAreaAmortizationOverMemories",PencAreaAmortizationOverMemories)
+                    return float(float(targetTableRowPenc[ACTION_ENERGY_IDX])*PencAreaAmortizationOverMemories + \
+                                 float(targetTableRowPfsum[ACTION_ENERGY_IDX])*PfsumAreaAmortizationOverCycles)     
                 elif interface['attributes']['metadataformat']=='C':
                     return 0.0
         return 0.0
@@ -175,8 +179,8 @@ class SAFPrimitives(object):
                     paramValues={'bitwidth':128}#interface['attributes']['metadatawidth']}
                     targetTableRowPfsum = self.find_in_table(baseComponentName,paramList,paramValues)                    
                     assert((targetTableRowPenc is not None) and (targetTableRowPfsum is not None))
-                    return float(targetTableRowPenc[TOTAL_AREA_IDX]*PencAreaAmortizationOverMemories + \
-                                 targetTableRowPfsum[TOTAL_AREA_IDX]*PfsumAreaAmortizationOverCycles)                    
+                    return float(float(targetTableRowPenc[TOTAL_AREA_IDX])*PencAreaAmortizationOverMemories + \
+                                 float(targetTableRowPfsum[TOTAL_AREA_IDX])*PfsumAreaAmortizationOverCycles)                    
                     #return 154.0
                 elif interface['attributes']['metadataformat']=='C':
                     return 0.0                    
