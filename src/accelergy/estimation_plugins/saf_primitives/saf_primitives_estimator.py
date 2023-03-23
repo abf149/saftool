@@ -6,6 +6,7 @@ NAME_IDX = 0
 ACTION_ENERGY_IDX = 1
 ENERGY_UNIT_IDX = 2
 TOTAL_AREA_IDX = 9
+COMBINATIONAL_AREA_IDX = 10
 CRITICAL_PATH_LENGTH_IDX = 14
 
 class SAFPrimitives(object):
@@ -99,7 +100,7 @@ class SAFPrimitives(object):
                     paramValues={'inputbits':128}#interface['attributes']['metadatawidth']}
                     targetTableRowPenc = self.find_in_table(baseComponentName,paramList,paramValues)
                     PencAreaAmortizationOverMemories=0.5
-                    baseComponentName='ParallelPrefixSumRegistered'
+                    baseComponentName='RippleParallelPrefixSumRegistered'#'ParallelKoggeStonePrefixSumRegistered'
                     PfsumAreaAmortizationOverCycles=1.0/float(paramValues['inputbits'])
                     paramList=['bitwidth']
                     paramValues={'bitwidth':128}#interface['attributes']['metadatawidth']}
@@ -173,14 +174,16 @@ class SAFPrimitives(object):
                     paramValues={'inputbits':128}#interface['attributes']['metadatawidth']}
                     targetTableRowPenc = self.find_in_table(baseComponentName,paramList,paramValues)
                     PencAreaAmortizationOverMemories=0.5
-                    baseComponentName='ParallelPrefixSumRegistered'
+                    baseComponentName='RippleParallelPrefixSumRegistered'#'RippleParallelPrefixSumRegistered'#'ParallelKoggeStonePrefixSumRegistered'
                     PfsumAreaAmortizationOverCycles=1.0 #/paramValues['inputbits']
                     paramList=['bitwidth']
                     paramValues={'bitwidth':128}#interface['attributes']['metadatawidth']}
                     targetTableRowPfsum = self.find_in_table(baseComponentName,paramList,paramValues)                    
                     assert((targetTableRowPenc is not None) and (targetTableRowPfsum is not None))
-                    return float(float(targetTableRowPenc[TOTAL_AREA_IDX])*PencAreaAmortizationOverMemories + \
-                                 float(targetTableRowPfsum[TOTAL_AREA_IDX])*PfsumAreaAmortizationOverCycles)                    
+                    print("comb area:",float(float(targetTableRowPenc[COMBINATIONAL_AREA_IDX])*PencAreaAmortizationOverMemories + \
+                                 float(targetTableRowPfsum[COMBINATIONAL_AREA_IDX])*PfsumAreaAmortizationOverCycles)  )
+                    return float(float(targetTableRowPenc[COMBINATIONAL_AREA_IDX])*PencAreaAmortizationOverMemories + \
+                                 float(targetTableRowPfsum[COMBINATIONAL_AREA_IDX])*PfsumAreaAmortizationOverCycles)                    
                     #return 154.0
                 elif interface['attributes']['metadataformat']=='C':
                     return 0.0                    
