@@ -28,24 +28,12 @@ class KoggeStoneParallelPrefixSumCombinational(val bitwidth: Int) extends Module
 
   // Build one level of Kogge-Stone parallel prefix-sum
   def doBuild(current_level: Array[UInt], num_elements: Int, lvl_idx: Int): Array[UInt] = {
-    //println("doBuild")
-    //println("lvl_idx",lvl_idx)
-    //println("num_elements",num_elements)
-    //println("current_level",current_level)
     val lvl_stride = pow(2,lvl_idx).toInt
     val bits_in = lvl_idx+1
     val bits_out = lvl_idx+2
     val new_level = new Array[UInt](num_elements)
-    //println("lvl_stride",lvl_stride)
-    //println("bits_in",bits_in)
-    //println("bits_out",bits_out)
-    //println("new_level",new_level)
 
-    // Direct input/output connections
-    //println("first loop")
     for (jdx <- 0 until lvl_stride) {
-      //println("j",jdx)
-      //val cl_val : UInt(bits_out.W) = current_level(jdx)
       new_level(jdx) = Wire(UInt(bits_out.W))
       new_level(jdx) := current_level(jdx).zext.asUInt
     }
@@ -68,20 +56,6 @@ class KoggeStoneParallelPrefixSumCombinational(val bitwidth: Int) extends Module
     logic_lvls(0)(kdx) = Wire(UInt(1.W))
     logic_lvls(0)(kdx) := input.bitmask(kdx)
   }
-  
-  //Wire(UInt(bitwidth.W))
-
-  //var logic_lvls:Vec[Vec[UInt]] = Vec(num_lvls,Vec(bitwidth,UInt(output_wordbits.W)))
-  //logic_lvls(0) := input.bitmask//IO(new Bundle{val llvl = Output(Vec(bitwidth,UInt(1.W)))})
-
-  //var inputWire = new ParallelPrefixSumWrapperInputBundle(bitwidth)
-  //logic_lvls(0).llvl := input.bitmask
-  //input <> inputWire
-
-  //logic_lvls(0) <> input.bitmask
-
-  // Wire input to Kogge-Stone input layer
-
 
   // Build successive Kogge-Stone layers
   for (idx <- 1 until num_lvls) {
