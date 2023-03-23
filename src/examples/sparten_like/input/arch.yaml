@@ -26,9 +26,9 @@ architecture:
               class: storage
               subclass: SRAM_MD 
               attributes:
-                data_storage_depth: 256
+                data_storage_depth: 128
                 data_storage_width: 8
-                metadata_storage_depth: 64  # 25  # 9 addr entries, 16 run entries   
+                metadata_storage_depth: 32  # 25  # 9 addr entries, 16 run entries   
                 metadata_storage_width: 4
                 datawidth: 8
                 block_size: 1
@@ -37,9 +37,9 @@ architecture:
               class: storage
               subclass: SRAM_MD
               attributes:
-                data_storage_depth: 256     
+                data_storage_depth: 128     
                 data_storage_width: 8
-                metadata_storage_depth: 64  # 16 7b addr entries, 192 4b run entries
+                metadata_storage_depth: 32  # 16 7b addr entries, 192 4b run entries
                 metadata_storage_width: 4
                 datawidth: 8
                 block_size: 1
@@ -48,7 +48,7 @@ architecture:
               class: storage
               subclass: SRAM
               attributes:
-                depth: 64
+                depth: 32
                 width: 8
                 datawidth: 8
                 block_size: 1
