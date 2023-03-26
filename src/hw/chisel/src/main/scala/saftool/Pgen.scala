@@ -100,9 +100,14 @@ class RippleParallelPrefixSumCombinational(val bitwidth: Int) extends Module wit
 
   partial_sums(0) := input.bitmask(0)
   for (i <- 1 until bitwidth) {
+    val prev_adder_width = log2Ceil(i) + 1    
     val adder_width = log2Ceil(i + 1) + 1
+    val width_match = Wire(UInt(prev_adder_width.W))
+    width_match := partial_sums(i - 1)
+    val width_match_reg = RegInit(0.U(prev_adder_width.W))
+    width_match_reg := width_match
     val sum = Wire(UInt(adder_width.W))
-    sum := partial_sums(i - 1) +& input.bitmask(i)
+    sum := width_match_reg + input.bitmask(i) //+&
     partial_sums(i) := sum.zext.asUInt
   }
 
