@@ -3,7 +3,7 @@ architecture:
   subtree:
     - name: eyeriss_v2_PE
       attributes:
-        latency: 5ns
+        latency: 1.25ns
         technology: 45nm
       local:
         - name: BackingStorage
@@ -16,6 +16,7 @@ architecture:
             metadata_storage_width: 14
             datawidth: 8
             block_size: 8
+            latency: 1.25ns
 #           read_bandwidth: <# data words>
 
       subtree:
@@ -25,30 +26,33 @@ architecture:
               class: storage
               subclass: SRAM_MD 
               attributes:
-                data_storage_depth: 256
+                data_storage_depth: 128
                 data_storage_width: 8
-                metadata_storage_depth: 64  # 25  # 9 addr entries, 16 run entries   
+                metadata_storage_depth: 32  # 25  # 9 addr entries, 16 run entries   
                 metadata_storage_width: 4
                 datawidth: 8
                 block_size: 1
+                latency: 1.25ns
             - name: weight_spad
               class: storage
               subclass: SRAM_MD
               attributes:
-                data_storage_depth: 256     
+                data_storage_depth: 128     
                 data_storage_width: 8
-                metadata_storage_depth: 64  # 16 7b addr entries, 192 4b run entries
+                metadata_storage_depth: 32  # 16 7b addr entries, 192 4b run entries
                 metadata_storage_width: 4
                 datawidth: 8
                 block_size: 1
+                latency: 1.25ns
             - name: psum_spad
               class: storage
               subclass: SRAM
               attributes:
-                depth: 64
+                depth: 32
                 width: 8
                 datawidth: 8
                 block_size: 1
+                latency: 1.25ns
             - name: reg
               class: storage
               subclass: SRAM_MD # we use sram for regfile, sram, and reg, the plug-in uses the right energy number
@@ -60,6 +64,7 @@ architecture:
                 datawidth: 8
             - name: MAC
               class: compute
-              subclass: Imac
+              subclass: intmac
               attributes:
                 datawidth: 8
+                latency: 1.25ns

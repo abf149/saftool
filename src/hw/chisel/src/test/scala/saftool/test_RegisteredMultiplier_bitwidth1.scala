@@ -30,6 +30,9 @@ class Test_Sim_RegisteredMultiplier extends AnyFlatSpec with ChiselScalatestTest
   it should "bitwidth1" in {
     test(new RegisteredMultiplier(bitwidth = 1)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_RegisteredMultiplier_Random(_))
   }  
+  it should "bitwidth8" in {
+    test(new RegisteredMultiplier(bitwidth = 8)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_RegisteredMultiplier_Random(_))
+  }    
   it should "bitwidth16" in {
     test(new RegisteredMultiplier(bitwidth = 16)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_RegisteredMultiplier_Random(_))
   }  
@@ -48,6 +51,12 @@ class Test_Emit_RegisteredMultiplier extends AnyFreeSpec with ChiselScalatestTes
   "Emit_RegisteredMultiplier_bitwidth1" in {
       var filename="RegisteredMultiplier_bitwidth1.v"
       var intersect=chisel3.getVerilogString(new RegisteredMultiplier(bitwidth = 1))
+      Files.write(Paths.get(verilog_dir+filename), intersect.getBytes(StandardCharsets.UTF_8))      
+  }
+
+  "Emit_RegisteredMultiplier_bitwidth8" in {
+      var filename="RegisteredMultiplier_bitwidth8.v"
+      var intersect=chisel3.getVerilogString(new RegisteredMultiplier(bitwidth = 8))
       Files.write(Paths.get(verilog_dir+filename), intersect.getBytes(StandardCharsets.UTF_8))      
   }
 

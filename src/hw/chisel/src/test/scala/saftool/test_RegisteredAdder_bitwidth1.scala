@@ -30,6 +30,9 @@ class Test_Sim_RegisteredAdder extends AnyFlatSpec with ChiselScalatestTester {
   it should "bitwidth1" in {
     test(new RegisteredAdder(bitwidth = 1)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_RegisteredAdder_Random(_))
   }  
+  it should "bitwidth8" in {
+    test(new RegisteredAdder(bitwidth = 8)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_RegisteredAdder_Random(_))
+  }    
   it should "bitwidth16" in {
     test(new RegisteredAdder(bitwidth = 16)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_RegisteredAdder_Random(_))
   }  
@@ -48,6 +51,12 @@ class Test_Emit_RegisteredAdder extends AnyFreeSpec with ChiselScalatestTester {
   "Emit_RegisteredAdder_bitwidth1" in {
       var filename="RegisteredAdder_bitwidth1.v"
       var intersect=chisel3.getVerilogString(new RegisteredAdder(bitwidth = 1))
+      Files.write(Paths.get(verilog_dir+filename), intersect.getBytes(StandardCharsets.UTF_8))      
+  }
+
+  "Emit_RegisteredAdder_bitwidth8" in {
+      var filename="RegisteredAdder_bitwidth8.v"
+      var intersect=chisel3.getVerilogString(new RegisteredAdder(bitwidth = 8))
       Files.write(Paths.get(verilog_dir+filename), intersect.getBytes(StandardCharsets.UTF_8))      
   }
 
