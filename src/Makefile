@@ -1,5 +1,5 @@
 REMOTE_PATH := tmp/
-CLOCK_PERIOD := 1.25 # 5ns
+CLOCK_PERIOD := 5 # 5ns
 SYNTH_LIB := /homes/abf149/pdk/ncsu-FreePDK45-1.4/FreePDK45/osu_soc/lib/files/gscl45nm.db
 CHISEL_PATH := hw/chisel/
 HW_PATH := hw/

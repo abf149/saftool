@@ -114,7 +114,7 @@ if { [catch {
   # NSA: added (to report all relevant results)
   run_dc_cmd "report_qor"
   run_dc_cmd "report_timing -transition_time -nets -attributes -nosplit"
-  run_dc_cmd "report_area -nosplit -hierarchy"
+  run_dc_cmd "report_area"
   run_dc_cmd "report_power"
   run_dc_cmd "report_resources -nosplit -hierarchy"
   run_dc_cmd "report_reference -nosplit -hierarchy"
