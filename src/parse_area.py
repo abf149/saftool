@@ -6,23 +6,38 @@ def parse_area(fn):
 
     with open(fn) as f:
         lns=f.readlines()
-        found_hierarchy=False
-        found_divider=False
+
+        found_area=False
+
         for ln in lns:
+            print(ln)
 
-            if found_divider:
-                flds_str=ln.strip().split()
-                flds=[]
-                for fld_str in flds_str:
-                    try:
-                        flds.append(float(fld_str))
-                    except:
-                        pass
-                res = [flds[0]]
-                res.extend(flds[2:])
-                return res, area_unit
+            if found_area:
+                pass
+            else:
+                print("strip:",ln.strip())
+                if ln.strip()=="Area":
+                    print("Detected.")
 
-            if found_hierarchy and '-' in ln:
-                found_divider=True
-            if 'Hierarchical' in ln:
-                found_hierarchy=True
+
+
+        # found_hierarchy=False
+        # found_divider=False
+        # for ln in lns:
+
+        #     if found_divider:
+        #         flds_str=ln.strip().split()
+        #         flds=[]
+        #         for fld_str in flds_str:
+        #             try:
+        #                 flds.append(float(fld_str))
+        #             except:
+        #                 pass
+        #         res = [flds[0]]
+        #         res.extend(flds[2:])
+        #         return res, area_unit
+
+        #     if found_hierarchy and '-' in ln:
+        #         found_divider=True
+        #     if 'Hierarchical' in ln:
+        #         found_hierarchy=True

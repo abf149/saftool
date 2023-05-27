@@ -53,7 +53,7 @@ $(CHAR_POWER_FILES): $(CHAR_LOG_FILES)
 
 $(CHAR_AREA_FILES): $(CHAR_LOG_FILES)
 	rm -f $@
-	sed -n -e "/Hierarchical area distribution/,/Execution successful/ p" $(basename $@).log | sed -e '1d;$d' > $@
+	sed -n -e "/Cell Leakage Power/,/Execution successful/ p" $(basename $@).log | sed -e '1d;$d' > $@
 
 $(CHAR_LATENCY_FILES): $(CHAR_LOG_FILES)
 	rm -f $@
