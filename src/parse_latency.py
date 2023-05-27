@@ -6,8 +6,7 @@ latency_headers=['critical_path_length', \
                  'num_violating_paths', \
                  'worst_hold_violation', \
                  'total_hold_violation', \
-                 'num_hold_violations', \
-                 'latency_unit']
+                 'num_hold_violations']
 
 # Returns [cpl,lvls_of_logic,cps,cpc,tns,nvp,whv,thv,nhv], latency_unit
 def parse_latency(fn):
