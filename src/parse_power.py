@@ -1,5 +1,11 @@
 fld_names=['internal_power','switching_power','leakage_power','total_power']
 cat_names=['io_pad','memory','black_box','clock_network','register','sequential','combinational']
+power_headers=[]
+
+for ctn in cat_names:
+    for fdn in fld_names:
+        power_headers.append(ctn+"_"+fdn)
+
 
 # Returns:
 # - float list of [switch power, int power, leak power, total power]
@@ -17,7 +23,12 @@ def parse_power(fn):
         for ln in lns:
 
             if ('Total' in ln) and found_divider:
-                return breakdown, cat_names, dyn_power_unit, leak_power_unit
+                breakdown_flat={}
+                for ctn in cat_names:
+                    for fdn in fld_names:
+                        breakdown_flat[ctn+"_"+fdn]=breakdown[ctn][fdn]
+
+                return breakdown_flat, power_headers, dyn_power_unit, leak_power_unit
 
             if 'Dynamic Power Units' in ln:
                 flds_str=ln.split()

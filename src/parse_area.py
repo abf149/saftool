@@ -1,6 +1,10 @@
 # Returns:
 # - float list of [absolute total area, combinational area, non-combinational area, black-box area]
 # - area unit
+
+area_headers=['Combinational_Area','Noncombinational_Area','Buf/Inv_Area','Total_Buffer_Area', \
+                  'Total_Inverter_Area','Macro/Black_Box_Area','Net_Area']
+
 def parse_area(fn):
     area_unit='um2'
 
@@ -17,7 +21,7 @@ def parse_area(fn):
             if found_area:
                 if found_divider:
                     if "----" in ln:
-                        return res
+                        return res, area_unit
                     else:
                         ln_strip=ln.strip()
                         field_value=ln_strip.split(":") #(field,value)
