@@ -57,7 +57,7 @@ $(CHAR_AREA_FILES): $(CHAR_LOG_FILES)
 
 $(CHAR_LATENCY_FILES): $(CHAR_LOG_FILES)
 	rm -f $@
-	sed -n -e '/^  Area/,/^ Design Area:/p' $(basename $@).log > $@
+	sed -n -e "/Report : qor/,/  Cell Count/ p" $(basename $@).log | sed -e '1d;$d' > $@
 
 logmetricbreakouts: $(CHAR_POWER_FILES) $(CHAR_AREA_FILES) $(CHAR_LATENCY_FILES)
 
