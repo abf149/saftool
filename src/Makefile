@@ -111,7 +111,7 @@ examples: $(ACCELERGY_DATA_PATH)$(notdir $(PRIMITIVES_TABLE_FILE))
 # Clean
 
 clean_actions:
-	rm -rf $(ACCELERGY_DATA_PATH)*
+	rm -rf $(ACCELERGY_DATA_PATH)*.csv
 
 clean_summary:
 	rm -rf $(SIM_DATA_DEST_PATH)*.summary
