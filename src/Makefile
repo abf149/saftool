@@ -123,6 +123,9 @@ clean_log:
 	rm -rf $(SIM_DATA_DEST_PATH)*.area
 	rm -rf $(SIM_DATA_DEST_PATH)*.latency	
 
+clean_latency_dirs:
+	find hw/sim_data/* -type d -exec rm -r {} \;
+
 clean_hw:
 	rm -rf $(VERILOG_OUTPUT_PATH)*
 	rm -rf $(SIM_DATA_OUTPUT_PATH)
