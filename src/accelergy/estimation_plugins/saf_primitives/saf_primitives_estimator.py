@@ -24,7 +24,8 @@ class SAFPrimitives(object):
             for row in csvreader:
                 self.primitives_table.append(row)
 
-    def find_in_table(self,baseComponentName,paramList,paramValues):
+    def find_row_in_table(self,baseComponentName,paramList,paramValues):
+        # Use baseComponentName as a key to look up a row of the Primitive Data Table
         suffix_str = "_"
         for idx in range(len(paramList)):
             suffix_str = suffix_str + paramList[idx]
@@ -35,6 +36,39 @@ class SAFPrimitives(object):
                 return row
 
         return None
+
+    def find_val_in_row(self,row,field_name):
+        # Use field_name as a key to look up a value in a row of 
+        # the Primitive Data Table
+        return row[self.primitives_table[0].indexof(field_name)]
+
+    def find_val_in_row_by_compound_key(self,row,key_group,key_category):
+        # Use key_group and key_category as a compound key
+        # (<key_group>_<key_category>) to look up a value in
+        # a row of the Primitive Data Table
+        # 
+        # Example:
+        # - key_group: io_pad
+        # - key_category: switching_power
+        # - compound key: io_pad_switching_power
+        compound_key=key_group+"_"+key_category
+        return self.find_val_in_row(row,compound_key)
+
+    def accumulate_vals_in_row_by_compound_keys(self,row,key_groups,key_categories):
+        # Use the caresian product of key_groups and key_categories
+        # to define a set of compound keys (<key_group>_<key_category>)
+        # to look up and sum a set of values in a row of the Primitive Data Table.
+        # 
+        # Example:
+        # - key_groups: ["io_pad","memory"]
+        # - key_category: ["internal_power","switching_power"]
+        # - accumulate values assoc. with following keys: 
+        #   io_pad_internal_power+io_pad_switching_power+memory_internal_power+memory_switching_power
+        res=0.0
+        for kg in key_groups:
+            for kc in key_categories:
+                res+=self.find_val_in_row_by_compound_key(row,kg,kc)
+        return res
 
     def primitive_action_supported(self, interface):
         """
@@ -77,20 +111,25 @@ class SAFPrimitives(object):
                 '''if interface["class_name"] == "SRAM" and interface["attributes"]["depth"] == 0:
                 return 0 # zero depth SRAM has zero energy'''
             elif 'format_uarch' in interface['class_name']:
+                # TODO: model format uarch
                 return 0
             elif 'intersect' in interface['class_name']:
                 if interface['attributes']['metadataformat']=='B':
                     baseComponentName='BidirectionalBitmaskIntersectDecoupled'
                     paramList=['metaDataWidth']
                     paramValues={'metaDataWidth':interface['attributes']['metadatawidth']}
-                    targetTableRow = self.find_in_table(baseComponentName,paramList,paramValues)
+                    targetTableRow = self.find_row_in_table(baseComponentName,paramList,paramValues)
                     assert(targetTableRow is not None)
+                    #f=float(self.find_val_in_row_by_compound_key(targetTableRow, \
+                    #                                        key_group, \
+                    #                                        key_category))
+
                     return float(targetTableRow[ACTION_ENERGY_IDX])
                 elif interface['attributes']['metadataformat']=='C':
                     baseComponentName='BidirectionalCoordinatePayloadIntersectDecoupled'
                     paramList=['metaDataWidth']
                     paramValues={'metaDataWidth':interface['attributes']['metadatawidth']}
-                    targetTableRow = self.find_in_table(baseComponentName,paramList,paramValues)
+                    targetTableRow = self.find_row_in_table(baseComponentName,paramList,paramValues)
                     assert(targetTableRow is not None)
                     return float(targetTableRow[ACTION_ENERGY_IDX])
             elif 'pgen' in interface['class_name']:
@@ -98,13 +137,13 @@ class SAFPrimitives(object):
                     baseComponentName='ParallelDec2PriorityEncoderRegistered'
                     paramList=['inputbits']
                     paramValues={'inputbits':128}#interface['attributes']['metadatawidth']}
-                    targetTableRowPenc = self.find_in_table(baseComponentName,paramList,paramValues)
+                    targetTableRowPenc = self.find_row_in_table(baseComponentName,paramList,paramValues)
                     PencAreaAmortizationOverMemories=0.5
                     baseComponentName='RippleParallelPrefixSumRegistered'#'ParallelKoggeStonePrefixSumRegistered'
                     PfsumAreaAmortizationOverCycles=1.0/float(paramValues['inputbits'])
                     paramList=['bitwidth']
                     paramValues={'bitwidth':128}#interface['attributes']['metadatawidth']}
-                    targetTableRowPfsum = self.find_in_table(baseComponentName,paramList,paramValues)                    
+                    targetTableRowPfsum = self.find_row_in_table(baseComponentName,paramList,paramValues)                    
                     assert((targetTableRowPenc is not None) and (targetTableRowPfsum is not None))
                     print("targetTableRowPfsum[ACTION_ENERGY_IDX]:",targetTableRowPfsum[ACTION_ENERGY_IDX])
                     print("PfsumAreaAmortizationOverCycles",PfsumAreaAmortizationOverCycles)
@@ -157,14 +196,14 @@ class SAFPrimitives(object):
                     baseComponentName='BidirectionalBitmaskIntersectDecoupled'
                     paramList=['metaDataWidth']
                     paramValues={'metaDataWidth':128} #interface['attributes']['metadatawidth']}
-                    targetTableRow = self.find_in_table(baseComponentName,paramList,paramValues)
+                    targetTableRow = self.find_row_in_table(baseComponentName,paramList,paramValues)
                     assert(targetTableRow is not None)
                     return float(targetTableRow[TOTAL_AREA_IDX])
                 elif interface['attributes']['metadataformat']=='C':
                     baseComponentName='BidirectionalCoordinatePayloadIntersectDecoupled'
                     paramList=['metaDataWidth']
                     paramValues={'metaDataWidth':interface['attributes']['metadatawidth']}
-                    targetTableRow = self.find_in_table(baseComponentName,paramList,paramValues)
+                    targetTableRow = self.find_row_in_table(baseComponentName,paramList,paramValues)
                     assert(targetTableRow is not None)
                     return float(targetTableRow[TOTAL_AREA_IDX])
             elif 'pgen' in interface['class_name']:
@@ -172,13 +211,13 @@ class SAFPrimitives(object):
                     baseComponentName='ParallelDec2PriorityEncoderRegistered'
                     paramList=['inputbits']
                     paramValues={'inputbits':128}#interface['attributes']['metadatawidth']}
-                    targetTableRowPenc = self.find_in_table(baseComponentName,paramList,paramValues)
+                    targetTableRowPenc = self.find_row_in_table(baseComponentName,paramList,paramValues)
                     PencAreaAmortizationOverMemories=0.5
                     baseComponentName='RippleParallelPrefixSumRegistered'#'RippleParallelPrefixSumRegistered'#'ParallelKoggeStonePrefixSumRegistered'
                     PfsumAreaAmortizationOverCycles=1.0 #/paramValues['inputbits']
                     paramList=['bitwidth']
                     paramValues={'bitwidth':128}#interface['attributes']['metadatawidth']}
-                    targetTableRowPfsum = self.find_in_table(baseComponentName,paramList,paramValues)                    
+                    targetTableRowPfsum = self.find_row_in_table(baseComponentName,paramList,paramValues)                    
                     assert((targetTableRowPenc is not None) and (targetTableRowPfsum is not None))
                     print("comb area:",float(float(targetTableRowPenc[COMBINATIONAL_AREA_IDX])*PencAreaAmortizationOverMemories + \
                                  float(targetTableRowPfsum[COMBINATIONAL_AREA_IDX])*PfsumAreaAmortizationOverCycles)  )
