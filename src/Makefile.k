@@ -61,14 +61,15 @@ $(CHAR_LATENCY_FILES): $(CHAR_LOG_FILES)
 
 logmetricbreakouts: $(CHAR_POWER_FILES) $(CHAR_AREA_FILES) $(CHAR_LATENCY_FILES)
 
-$(CHAR_SUMMARY_FILES): $(CHAR_POWER_FILES) $(CHAR_AREA_FILES) $(CHAR_LATENCY_FILES)
+$(CHAR_SUMMARY_FILES):
 	echo $@
-	echo $(basename $@) | python3 parse_summary.py > $@
+	echo $(SIM_DATA_DEST_PATH)$(CLOCK_PERIOD)/$(basename $(shell basename $(@)))
+	echo $(SIM_DATA_DEST_PATH)$(CLOCK_PERIOD)/$(basename $(shell basename $(@))) | python3 parse_summary.py > $@
 
+# 	echo header | python3 parse_summary.py >> $@
 $(PRIMITIVES_TABLE_FILE): $(CHAR_SUMMARY_FILES)
 	rm -f $@
 	touch $@
-	echo header | python3 parse_summary.py >> $@
 	cat $(wildcard $(SIM_DATA_DEST_PATH)*.summary) >> $@
 
 characterize: $(PRIMITIVES_TABLE_FILE)
