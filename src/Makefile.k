@@ -116,7 +116,7 @@ clean_actions:
 
 clean_summary:
 	rm -rf $(SIM_DATA_DEST_PATH)*.summary
-	rm -rf $(SIM_DATA_DEST_PATH)*.csv
+	rm -rf primitives_table.csv
 
 clean_log:
 	rm -rf $(SIM_DATA_DEST_PATH)*.log
