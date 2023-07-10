@@ -2,10 +2,13 @@ import yaml
 import copy
 
 def load_config_yaml(config_filename):
-    """Load a Sparseloop YAML-format config file
-    
+    """YAML load wrapper
+
     Keyword arguments:
-    config_filename -- the absolute or relative filepath
+    config_filename -- the absolute or relative YAML filepath
+
+    Returns:
+    dict
     """
     config=[]
 

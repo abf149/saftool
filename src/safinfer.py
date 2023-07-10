@@ -243,9 +243,15 @@ if __name__=="__main__":
 
     print("\nComputing bindings.")
 
+    # data_space_dict_list, prob_coeff_list, prob_instance_rank_sizes, prob_instance_densities=sl_config.data_space_dict_list_from_sl_prob(prob)    
+    # fmt_iface_bindings, pgens, buffer_loop_binding, loop_to_iface_map=sl_config.bind_format_iface(arch, mapping, prob, sparseopts)
+    # skip_bindings=sl_config.bind_action_optimization(arch, mapping, prob, sparseopts, fmt_iface_bindings, loop_to_iface_map)
+
     data_space_dict_list, prob_coeff_list, prob_instance_rank_sizes, prob_instance_densities=sl_config.data_space_dict_list_from_sl_prob(prob)    
     fmt_iface_bindings, pgens, buffer_loop_binding, loop_to_iface_map=sl_config.bind_format_iface(arch, mapping, prob, sparseopts)
-    skip_bindings=sl_config.bind_action_optimization(arch, mapping, prob, sparseopts, fmt_iface_bindings, loop_to_iface_map)
+    skip_bindings=sl_config.bind_action_optimization(arch, mapping, prob, sparseopts, fmt_iface_bindings, loop_to_iface_map)    
+
+
     bind_out_path=args.binding_out
     topo_out_path=args.topology_out
 
