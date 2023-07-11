@@ -247,8 +247,23 @@ if __name__=="__main__":
     # fmt_iface_bindings, pgens, buffer_loop_binding, loop_to_iface_map=sl_config.bind_format_iface(arch, mapping, prob, sparseopts)
     # skip_bindings=sl_config.bind_action_optimization(arch, mapping, prob, sparseopts, fmt_iface_bindings, loop_to_iface_map)
 
+    # Parse the dense problem
+    # - data_space_dict_list
+    # - prob_coeff_list
+    # - prob_instance_rank_sizes
+    # - prob_instance_densities
     data_space_dict_list, prob_coeff_list, prob_instance_rank_sizes, prob_instance_densities=sl_config.data_space_dict_list_from_sl_prob(prob)    
+    
+    # Bind representation-format processing interfaces to architectural buffers
+    # (mapping- and problem-dependent approach)
+    # - fmt_iface_bindings
+    # - pgens
+    # - buffer_loop_binding
+    # - loop_to_iface_map
     fmt_iface_bindings, pgens, buffer_loop_binding, loop_to_iface_map=sl_config.bind_format_iface(arch, mapping, prob, sparseopts)
+
+    # Bind action-optimization SAFs to archtiectural buffers
+    # - skip_bindings
     skip_bindings=sl_config.bind_action_optimization(arch, mapping, prob, sparseopts, fmt_iface_bindings, loop_to_iface_map)    
 
 
@@ -263,6 +278,9 @@ if __name__=="__main__":
     with open(bind_out_path, 'w') as fp:
         yaml.dump(fmt_iface_bindings,fp, default_flow_style=False)
 
+    # Create a data structure to represent architectural buffers and SAF microarchitectures
+    # Problem- and mapping-independent, given fmt_iface_bindings, skip_bindings
+    # and data_space_dict_list have already been computed
     print("\nRealizing microarchitecture with topological holes, based on bindings.\n")
     taxo_arch=topology_with_holes_from_bindings(arch, fmt_iface_bindings, skip_bindings, data_space_dict_list)
 

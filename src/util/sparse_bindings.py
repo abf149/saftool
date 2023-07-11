@@ -1,29 +1,26 @@
 import copy
 from util.dense_bindings import *
 
-''' Walk Sparseopts
-    (fiber,dtype)->
-
-Convert Sparseopts fiber->(dtype,buff-where-resident) bindings to
-    
-
-Generate buffer/datapsace/format-access bindings
-
-buffer/datapsace/format-access bindings
-
+''' 
 Sparseloop's sparseopts spec binds a fiber to a datatype and buffer-level.
-A sparseopts binding r memory level will reside in that memory level,
+A sparseopts binding or memory level will reside in that memory level,
 but the buffer's address generaters will only *traverse* a subset of fibers
 at that buffer-level. Untraversed fibers residing at some buffer level
 comprise a tile which will be filled into lower memory where it will be traversed.
-This function consumes sparseopts-style fiber bindings and re-binds fibers to the memory levels where they are traversed.
+
+This function consumes sparseopts-style fiber bindings and re-binds fibers 
+to the memory levels where they are traversed.
 '''
 def get_buffer_dataspace_to_fmt_access_bindings_from_buffer_dataspace_to_fmt_layout_bindings(buffer_dataspace_to_fmt_layout_binding, data_space_dict_list, flat_arch, buffer_loop_binding):
-    ''' Generate buffer/datapsace/format-access bindings from buffer/dataspace/format-layout bindings.
+    ''' 
+    Sparseloop's sparseopts spec binds a fiber to a datatype and buffer-level.
+    A sparseopts binding or memory level will reside in that memory level,
+    but the buffer's address generaters will only *traverse* a subset of fibers
+    at that buffer-level. Untraversed fibers residing at some buffer level
+    comprise a tile which will be filled into lower memory where it will be traversed.
 
-    Sparseloop sparseopts spec binds a fibertree memory layout to a datatype and buffer-level.
-    Not all fibers resident at a buffer-level are traversed at that buffer-level; some fibers are part of a tile which will be filled into lower memory.
-    This function consumes sparseopts-style fiber bindings and re-binds fibers to the memory levels where they are traversed.
+    This function consumes sparseopts-style fiber bindings and re-binds fibers 
+    to the memory levels where they are traversed.
     '''
     
     buffer_dataspace_to_fmt_access_binding=copy.deepcopy(buffer_dataspace_to_fmt_layout_binding)
