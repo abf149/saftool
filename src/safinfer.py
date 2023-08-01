@@ -215,6 +215,7 @@ if __name__=="__main__":
     parser.add_argument('-o','--dir-out',default='')
     parser.add_argument('-b','--binding-out',default='ref_output/bindings.yaml')
     parser.add_argument('-t','--topology-out',default='ref_output/new_arch.yaml')
+    parser.add_argument('-r','--reconfigurable-arch',default=False)    
     args = parser.parse_args()
 
     print("SAFinfer.\n")
@@ -239,6 +240,13 @@ if __name__=="__main__":
         prob=sl_config.load_config_yaml(args.prob)
         print("- sparseopts:",args.sparseopts)
         sparseopts=sl_config.load_config_yaml(args.sparseopts)
+
+    if not args.reconfigurable_arch:
+        print("- fixed arch (reconfigurable-arch == False)")
+    else:
+        print("- ERROR reconfigurable arch not yet supported")
+        assert(False)
+
     #arch, saf_spec=loadSparseloopArchitecture(args.in_yaml)
 
     print("\nComputing bindings.")
