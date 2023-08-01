@@ -1,6 +1,31 @@
 import copy
 from util.dense_bindings import *
 
+def compute_fixed_arch_bindings(arch,sparseopts):
+    pass
+
+def compute_reconfigurable_arch_bindings(arch,sparseopts,prob,mapping):
+    # Parse the dense problem
+    # - data_space_dict_list
+    # - (omitted) prob_coeff_list
+    # - (omitted) prob_instance_rank_sizes
+    # - (omitted) prob_instance_densities
+    data_space_dict_list, _, _, _=data_space_dict_list_from_sl_prob(prob)    
+    
+    # Bind representation-format processing interfaces to architectural buffers
+    # (mapping- and problem-dependent approach)
+    # - fmt_iface_bindings
+    # - (omitted) pgens
+    # - (omitted) buffer_loop_binding
+    # - loop_to_iface_map
+    fmt_iface_bindings, _, _, loop_to_iface_map=bind_format_iface(arch, mapping, prob, sparseopts)
+
+    # Bind action-optimization SAFs to archtiectural buffers
+    # - skip_bindings
+    skip_bindings=bind_action_optimization(arch, mapping, prob, sparseopts, fmt_iface_bindings, loop_to_iface_map)
+
+    return fmt_iface_bindings, skip_bindings, data_space_dict_list
+
 ''' 
 Sparseloop's sparseopts spec binds a fiber to a datatype and buffer-level.
 A sparseopts binding or memory level will reside in that memory level,

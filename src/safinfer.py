@@ -241,38 +241,20 @@ if __name__=="__main__":
         print("- sparseopts:",args.sparseopts)
         sparseopts=sl_config.load_config_yaml(args.sparseopts)
 
+    # Check reconfigurable-arch so we know whether to crash (if True)
     if not args.reconfigurable_arch:
         print("- fixed arch (reconfigurable-arch == False)")
     else:
         print("- ERROR reconfigurable arch not yet supported")
         assert(False)
 
-    #arch, saf_spec=loadSparseloopArchitecture(args.in_yaml)
+    # Check reconfigurable-arch again so we know how to compute bindings
 
     print("\nComputing bindings.")
 
-    # data_space_dict_list, prob_coeff_list, prob_instance_rank_sizes, prob_instance_densities=sl_config.data_space_dict_list_from_sl_prob(prob)    
-    # fmt_iface_bindings, pgens, buffer_loop_binding, loop_to_iface_map=sl_config.bind_format_iface(arch, mapping, prob, sparseopts)
-    # skip_bindings=sl_config.bind_action_optimization(arch, mapping, prob, sparseopts, fmt_iface_bindings, loop_to_iface_map)
-
-    # Parse the dense problem
-    # - data_space_dict_list
-    # - prob_coeff_list
-    # - prob_instance_rank_sizes
-    # - prob_instance_densities
-    data_space_dict_list, prob_coeff_list, prob_instance_rank_sizes, prob_instance_densities=sl_config.data_space_dict_list_from_sl_prob(prob)    
-    
-    # Bind representation-format processing interfaces to architectural buffers
-    # (mapping- and problem-dependent approach)
-    # - fmt_iface_bindings
-    # - pgens
-    # - buffer_loop_binding
-    # - loop_to_iface_map
-    fmt_iface_bindings, pgens, buffer_loop_binding, loop_to_iface_map=sl_config.bind_format_iface(arch, mapping, prob, sparseopts)
-
-    # Bind action-optimization SAFs to archtiectural buffers
-    # - skip_bindings
-    skip_bindings=sl_config.bind_action_optimization(arch, mapping, prob, sparseopts, fmt_iface_bindings, loop_to_iface_map)    
+    fmt_iface_bindings, \
+    skip_bindings, \
+    data_space_dict_list = sl_config.compute_reconfigurable_arch_bindings(arch,sparseopts,prob,mapping)
 
 
     bind_out_path=args.binding_out
