@@ -246,15 +246,22 @@ if __name__=="__main__":
         print("- fixed arch (reconfigurable-arch == False)")
     else:
         print("- ERROR reconfigurable arch not yet supported")
-        assert(False)
+        #assert(False)
 
     # Check reconfigurable-arch again so we know how to compute bindings
 
     print("\nComputing bindings.")
-
-    fmt_iface_bindings, \
-    skip_bindings, \
-    data_space_dict_list = sl_config.compute_reconfigurable_arch_bindings(arch,sparseopts,prob,mapping)
+    fmt_iface_bindings=[]
+    skip_bindings=[]
+    data_space_dict_list=[]
+    if not args.reconfigurable_arch:
+        # "Typical" case: fixed architecture with sparseopts
+        pass
+    else:
+        # "Special" case: reconfigurable architecture tuned for problem and mapping
+        fmt_iface_bindings, \
+        skip_bindings, \
+        data_space_dict_list = sl_config.compute_reconfigurable_arch_bindings(arch,sparseopts,prob,mapping)
 
 
     bind_out_path=args.binding_out
@@ -266,7 +273,9 @@ if __name__=="__main__":
 
     print("- Saving to",bind_out_path)
     with open(bind_out_path, 'w') as fp:
-        yaml.dump(fmt_iface_bindings,fp, default_flow_style=False)
+        bindings_data_structure={"fmt_iface_bindings":fmt_iface_bindings, \
+                                 "skip_bindings":skip_bindings}
+        yaml.dump(bindings_data_structure,fp, default_flow_style=False)
 
     # Create a data structure to represent architectural buffers and SAF microarchitectures
     # Problem- and mapping-independent, given fmt_iface_bindings, skip_bindings
