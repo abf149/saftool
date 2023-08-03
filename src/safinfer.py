@@ -10,7 +10,7 @@ import argparse
 
 yaml.Dumper.ignore_aliases = lambda *args : True
 
-def dump_bindings_and_topology(bind_out_path,topo_out_path,fmt_iface_bindings,skip_bindings):
+def dump_bindings(bind_out_path,fmt_iface_bindings,skip_bindings):
     print("- Saving to",bind_out_path)
     with open(bind_out_path, 'w') as fp:
         bindings_data_structure={"fmt_iface_bindings":fmt_iface_bindings, \
@@ -31,10 +31,8 @@ if __name__=="__main__":
     parser.add_argument('-r','--reconfigurable-arch',default=False)    
     args = parser.parse_args()
 
-    # Headline
-    print("SAFinfer.\n")
-
-    # CLI arg parse
+    # Parse the CLI arguments
+    print("SAFinfer.\n")    
     print("Parsing input files:")    
     if len(args.dir_in)>0:
         print("- arch:",args.dir_in+'arch.yaml')
@@ -62,8 +60,10 @@ if __name__=="__main__":
         print("- ERROR reconfigurable arch not yet supported")
         #assert(False)
 
-    # Bindings
-    print("\nComputing bindings.")
+    # Build the microarchitecture inference problem:
+    # - Compute SAF microarchitecture bindings to architectural buffers
+    print("\nBuilding the SAF microarchitecture inference problem.")
+    print("- Computing SAF microarchitecture bindings to architectural buffers.")
     fmt_iface_bindings=[]
     skip_bindings=[]
     data_space_dict_list=[]
@@ -76,37 +76,41 @@ if __name__=="__main__":
         skip_bindings, \
         data_space_dict_list = sl_config.compute_reconfigurable_arch_bindings(arch,sparseopts,prob,mapping)
 
-    # Dump bindings and topology
+    # - Dump bindings
     bind_out_path=args.binding_out
-    topo_out_path=args.topology_out
+    print("  => Done. Dumping bindings to",bind_out_path)    
     if len(args.dir_out) > 0:
         bind_out_path=args.dir_out+'bindings.yaml'
         topo_out_path=args.dir_out+'new_arch.yaml'
-    dump_bindings_and_topology(bind_out_path,topo_out_path,fmt_iface_bindings,skip_bindings)
+    dump_bindings(bind_out_path,fmt_iface_bindings,skip_bindings)
 
-    # Create architecture topology with dummy buffers interfaced to SAF microarchitectures which contain holes
+    # - Create microarchitecture topology with dummy buffers interfaced to SAF microarchitectures which contain holes
+
     # Create a data structure to represent architectural buffers and SAF microarchitectures
     # Problem- and mapping-independent, given fmt_iface_bindings, skip_bindings
     # and data_space_dict_list have already been computed
-    print("\nRealizing microarchitecture with topological holes, based on bindings.\n")
+    print("- Realizing microarchitecture with topological holes, based on bindings.\n")
     taxo_arch=topology_with_holes_from_bindings(arch, fmt_iface_bindings, skip_bindings, data_space_dict_list)
 
-    # Infer microarchitecture
-    print("Performing microarchitecture inference...")
+    # Solve the SAF microarchitecture inference problem
+    print("\nSolving the SAF microarchitecture inference problem.\n")    
+    print("- Loading rules engine.")
     rules_engine = RulesEngine([args.saftaxolib+'base_ruleset', \
                                 args.saftaxolib+'primitive_md_parser_ruleset', \
                                 args.saftaxolib+'format_uarch_ruleset'])
-                                #args.saftaxolib+'skipping_uarch_ruleset'])
+                                #args.saftaxolib+'skipping_uarch_ruleset']) # No longer needed
     rules_engine.preloadRules()
+    print("- Solving.")    
     result=rules_engine.run(taxo_arch)
     outcome=result[0]
 
     # Success: dump
     # Fail: exit
+    topo_out_path=args.topology_out
     if outcome:
-        print("SUCCESS")
-        print("Saving to",topo_out_path,"...")
+        print("  => SUCCESS")
+        print("- Dumping inferred SAF microarchitecture topology to",topo_out_path,"...")
         inferred_arch=result[-1][-1]
         inferred_arch.dump(topo_out_path)
     else:
-        print("FAILURE")
+        print("  => FAILURE")
