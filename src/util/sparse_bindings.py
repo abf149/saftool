@@ -59,7 +59,7 @@ def compute_fixed_arch_bindings(arch,sparseopts):
     dtype_list=extract_dtypes(sparseopts)
 
     fmt_iface_bindings = bind_format_iface_to_fixed_arch(arch, sparseopts, dtype_list)
-    
+
     print("fmt_iface_bindings:",fmt_iface_bindings)
 
     assert(False)
@@ -85,6 +85,10 @@ def compute_reconfigurable_arch_bindings(arch,sparseopts,prob,mapping):
     # Bind action-optimization SAFs to archtiectural buffers
     # - skip_bindings
     skip_bindings=bind_action_optimization(arch, mapping, prob, sparseopts, fmt_iface_bindings, loop_to_iface_map)
+
+    print("skip_bindings:",skip_bindings)
+
+    assert(False)
 
     return fmt_iface_bindings, skip_bindings, data_space_dict_list
 
@@ -121,17 +125,47 @@ def get_buffer_dataspace_to_fmt_access_bindings_from_buffer_dataspace_to_fmt_lay
                         buffer_dtype_tile=buffer_dataspace_to_fmt_layout_binding[buffer]['representation-format'][dtype]['ranks']                        
                         upper_buffer_dtype_tile=copy.deepcopy(buffer_dataspace_to_fmt_layout_binding[upper_buffer]['representation-format'][dtype]['ranks'])
                         
-                        # TODO: more efficient approach to suffix pruning
-                        num_buffer_dtype_tile_fibers=len(buffer_dtype_tile)
-                        num_upper_buffer_dtype_tile_fibers=len(upper_buffer_dtype_tile)
-                        num_traversed_upper_buffer_dtype_tile_fibers=num_upper_buffer_dtype_tile_fibers-num_buffer_dtype_tile_fibers
-                        traversed_upper_buffer_dtype_tile_fibers=upper_buffer_dtype_tile[0:num_traversed_upper_buffer_dtype_tile_fibers]
+                        
+                        buffer_data_storage_depth=flat_arch[buffer]['attributes']['data_storage_depth']
+                        buffer_data_storage_width=flat_arch[buffer]['attributes']['data_storage_width']
+                        buffer_datawidth=flat_arch[buffer]['attributes']['datawidth']
+                        if buffer_data_storage_width==buffer_datawidth and buffer_data_storage_depth==1:
+                            # If buffer holds only a singleton data word, do not 
+                            # suffix-prune upper_buffer
+                            assert(len(buffer_dtype_tile)==1) # For now - singleton registers must be singleton rank
+                            print("- For dtype =",dtype,", detected single-word buffer",buffer,"=> canceling", \
+                                  upper_buffer,"suffix pruning")                            
+                            fiber_layout=[]
+                            buffer_singleton_rank=buffer_dtype_tile[0]
+                            upper_buffer_singleton_rank=upper_buffer_dtype_tile[-1]
+                            if 'flattened-rankIDs' in upper_buffer_singleton_rank:
+                                fiber_layout=upper_buffer_singleton_rank['flattened-rankIDs']
+                                buffer_dataspace_to_fmt_access_binding \
+                                    [buffer]['representation-format'][dtype]['ranks'][-1]['flattened-rankIDs']=fiber_layout
+                                print("-- Upper-buffer constrains flattened-rankIDs =",fiber_layout)                                
+                            elif 'flattened-rankIDs' in buffer_singleton_rank:
+                                fiber_layout=buffer_singleton_rank['flattened-rankIDs']
+                                upper_buffer_dtype_tile[-1]['flattened-rankIDs']=fiber_layout   
+                                print("-- Buffer-constrains flattened-rankIDs =",fiber_layout)                                    
 
-                        buffer_dataspace_to_fmt_access_binding[upper_buffer]['representation-format'][dtype]['ranks']=traversed_upper_buffer_dtype_tile_fibers
+                            print("--",dtype,"@ upper-buffer:",upper_buffer_dtype_tile)
+                            print("--",dtype,"@ buffer:",buffer_dtype_tile)
+                            buffer_dataspace_to_fmt_access_binding[upper_buffer]['representation-format'][dtype]['ranks'] = \
+                                upper_buffer_dtype_tile
+                        else:
+                            # Otherwise, suffix-prune the fiber subtree at upper_buffer, 
+                            # TODO: more efficient approach to suffix pruning
+                            num_buffer_dtype_tile_fibers=len(buffer_dtype_tile)
+                            num_upper_buffer_dtype_tile_fibers=len(upper_buffer_dtype_tile)
+                            num_traversed_upper_buffer_dtype_tile_fibers= \
+                                num_upper_buffer_dtype_tile_fibers-num_buffer_dtype_tile_fibers
+                            traversed_upper_buffer_dtype_tile_fibers= \
+                                upper_buffer_dtype_tile[0:num_traversed_upper_buffer_dtype_tile_fibers]
+
+                            buffer_dataspace_to_fmt_access_binding[upper_buffer]['representation-format'][dtype]['ranks']= \
+                                traversed_upper_buffer_dtype_tile_fibers
 
                 last_resident_buffer[dtype]=buffer
-
-        
 
     return buffer_dataspace_to_fmt_access_binding
 
