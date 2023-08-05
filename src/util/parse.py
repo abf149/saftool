@@ -66,9 +66,47 @@ def data_space_rank_list_from_projection(projection, prob_coeff_list):
 
 
 def data_space_dict_list_from_sl_prob(prob):
-    """ Extract a list of data-space representations from the sparseloop prob dict
-    Keyword arguments:
-    prob -- the Sparseloop prob config
+    """ Extract a list of data-space representations from the sparseloop prob dict\n
+    Keyword arguments:\n
+    prob -- the Sparseloop problem config\n\n
+
+    return:\n
+    data_space_dict_list -- Enumerate prob datatypes, include metadata regarding ranks, projects, & read/write support.\n
+    - Example:\n
+    - {'Weights': \n
+        {'idx': 0, \n
+        'projection': [[['C']], [['M']], [['G']], [['R']], [['S']]], \n
+        'rank-list': ['C', 'M', 'G', 'R', 'S'], \n
+        'read-write': False}, \n
+       'Inputs': \n
+        {'idx': 1,\n
+       ... \n
+        } \n
+       'Outputs': \n
+        {'idx': 2, \n
+        ... \n
+         'read-write': True \n
+        } \n
+       } \n
+
+    prob_coeff_list -- dict of coefficients in the projection formula, to distinguish from ranks.\n
+    - TODO: refactor name to be _dict not _list\n
+    - Example:\n
+    - {'Wstride': 1, 'Hstride': 1, 'Wdilation': 1, 'Hdilation': 1}\n
+    prob_instance_rank_sizes -- number of elements (words) along each problem rank\n
+    - Example:\n
+    - {'M': 64, 'E': 32, 'F': 32, 'R': 1, 'S': 1, 'N': 1, 'G': 1, 'C': 64} \n
+    prob_instance_densities -- \n
+    - Example:\n
+    - {'Inputs': \n
+       {'distribution': 'hypergeometric', \n
+        'density': 0.73\n
+       }, \n
+       'Weights': \n
+       {'distribution': 'hypergeometric', \n
+        'density': 0.52\n
+       }\n
+      } \n
     """
 
     data_space_types_dict={}

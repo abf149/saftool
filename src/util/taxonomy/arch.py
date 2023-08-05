@@ -58,7 +58,7 @@ def genBufferStubByName(buffer_stub_id, rank_format_list_str):
 
     return Primitive.fromIdCategoryAttributesInterface(buffer_stub_id, primitive_category, primitive_attributes, primitive_interface)
 
-def topology_with_holes_from_bindings(arch, fmt_iface_bindings, skip_bindings, data_space_dict_list):
+def topology_with_holes_from_bindings(arch, fmt_iface_bindings, skip_bindings, dtype_list):
 
     # Fix mismatch in conventions
     fmt_str_convert={"UOP":"U", "RLE":"R", "C":"C","B":"B"}
@@ -67,10 +67,10 @@ def topology_with_holes_from_bindings(arch, fmt_iface_bindings, skip_bindings, d
     buffer_hierarchy=[buffer for buffer in list(sl_config.flatten_arch_wrapper(arch).keys()) if buffer != 'MAC']
 
     # Compute flattened port indices
-    port_idx={buffer:{dtype:[0 for fmt_iface in fmt_iface_bindings[buffer][dtype]] for dtype in data_space_dict_list} for buffer in buffer_hierarchy}
+    port_idx={buffer:{dtype:[0 for fmt_iface in fmt_iface_bindings[buffer][dtype]] for dtype in dtype_list} for buffer in buffer_hierarchy}
     for buffer in buffer_hierarchy:
         idx=0
-        for dtype in data_space_dict_list:
+        for dtype in dtype_list:
             for jdx in range(len(port_idx[buffer][dtype])):
                 port_idx[buffer][dtype][jdx]=idx
                 idx+=1

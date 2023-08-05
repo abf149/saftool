@@ -6,12 +6,14 @@ from util.taxonomy.designelement import *
 from util.taxonomy.rulesengine import *
 from util.taxonomy.arch import *
 import argparse
+
 '''Config - condition the format of YAML file dumps'''
 yaml.Dumper.ignore_aliases = lambda *args : True
 '''Constants - default list of ruleset names to apply to SAF microarchitecture topology inference'''
 default_ruleset_list = ['base_ruleset', \
                         'primitive_md_parser_ruleset', \
                         'format_uarch_ruleset'] # 'skipping_uarch_ruleset'
+
 '''Routines - CLI, YAML file IO'''
 def parse_args():
     '''
@@ -40,7 +42,7 @@ def parse_args():
     parser.add_argument('-o','--dir-out',default='')
     parser.add_argument('-b','--binding-out',default='ref_output/bindings.yaml')
     parser.add_argument('-t','--topology-out',default='ref_output/new_arch.yaml')
-    parser.add_argument('-r','--reconfigurable-arch',default=False)    
+    parser.add_argument('-r', '--reconfigurable-arch', action='store_true')
     args = parser.parse_args()
 
     # Parse the CLI arguments
@@ -147,12 +149,16 @@ def build_saf_uarch_inference_problem(arch, sparseopts, prob, mapping, reconfigu
     data_space_dict_list=[]
     if not reconfigurable_arch:
         # "Typical" case: fixed architecture with sparseopts
-        pass
+
+        fmt_iface_bindings, \
+        skip_bindings, \
+        dtype_list = sl_config.compute_fixed_arch_bindings(arch,sparseopts)
     else:
         # "Special" case: reconfigurable architecture tuned for problem and mapping
         fmt_iface_bindings, \
         skip_bindings, \
         data_space_dict_list = sl_config.compute_reconfigurable_arch_bindings(arch,sparseopts,prob,mapping)
+        dtype_list=list(data_space_dict_list.keys())
 
     # - Dump bindings
     print("  => Done. Dumping bindings to",bind_out_path)
@@ -164,7 +170,7 @@ def build_saf_uarch_inference_problem(arch, sparseopts, prob, mapping, reconfigu
     # Problem- and mapping-independent, given fmt_iface_bindings, skip_bindings
     # and data_space_dict_list have already been computed
     print("- Realizing microarchitecture with topological holes, based on bindings.\n")
-    taxo_arch=topology_with_holes_from_bindings(arch, fmt_iface_bindings, skip_bindings, data_space_dict_list)
+    taxo_arch=topology_with_holes_from_bindings(arch, fmt_iface_bindings, skip_bindings, dtype_list)
 
     return taxo_arch
 def solve_saf_uarch_inference_problem(taxo_arch, saftaxolib, ruleset_names=default_ruleset_list):
@@ -210,6 +216,8 @@ if __name__=="__main__":
     topo_out_path, \
     saftaxolib = parse_args()
 
+    print("reconfigurable_arch:",reconfigurable_arch)
+
     # Build and solve the SAF microarchitecture inference problem:
     taxo_arch = build_saf_uarch_inference_problem(arch, \
                                                   sparseopts, \
@@ -217,6 +225,7 @@ if __name__=="__main__":
                                                   mapping, \
                                                   reconfigurable_arch, \
                                                   bind_out_path)
+
     result = solve_saf_uarch_inference_problem(taxo_arch, saftaxolib)
 
     # Success: dump

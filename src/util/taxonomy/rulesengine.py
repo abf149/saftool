@@ -1,7 +1,7 @@
 from util.taxonomy.serializableobject import SerializableObject
 from util.taxonomy.expressions import *
 from util.helper import dirpath_to_import_expression
-import os, sys
+import os
 
 class Rule(SerializableObject):
     '''Base class for a Rule (conditional expression which is evaluated when a predicate is true)'''
