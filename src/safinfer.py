@@ -1,5 +1,4 @@
-'''SAFinfer tool infers microarchitecture topology from Sparseloop configuration files'''
-
+'''SAFinfer - tool to build and solve SAF microarchitecture inference problem from Sparseloop inputs'''
 import util.sparseloop_config_processor as sl_config
 from util.taxonomy.serializableobject import *
 from util.taxonomy.expressions import *
@@ -7,7 +6,10 @@ from util.taxonomy.designelement import *
 from util.taxonomy.rulesengine import *
 from util.taxonomy.arch import *
 import argparse
+
+'''Condition the format of YAML file dumps'''
 yaml.Dumper.ignore_aliases = lambda *args : True
+'''List of ruleset names to apply to SAF microarchitecture topology inference'''
 default_ruleset_list = ['base_ruleset', \
                         'primitive_md_parser_ruleset', \
                         'format_uarch_ruleset'] # 'skipping_uarch_ruleset'
