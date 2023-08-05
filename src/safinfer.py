@@ -6,15 +6,13 @@ from util.taxonomy.designelement import *
 from util.taxonomy.rulesengine import *
 from util.taxonomy.arch import *
 import argparse
-
-'''Condition the format of YAML file dumps'''
+'''Config - condition the format of YAML file dumps'''
 yaml.Dumper.ignore_aliases = lambda *args : True
-'''List of ruleset names to apply to SAF microarchitecture topology inference'''
+'''Constants - default list of ruleset names to apply to SAF microarchitecture topology inference'''
 default_ruleset_list = ['base_ruleset', \
                         'primitive_md_parser_ruleset', \
                         'format_uarch_ruleset'] # 'skipping_uarch_ruleset'
-
-'''CLI and file dump routines'''
+'''Routines - CLI, YAML file IO'''
 def parse_args():
     '''
     Parse CLI arguments.\n\n
@@ -122,7 +120,7 @@ def dump_saf_uarch_topology(inferred_arch,topo_out_path):
     '''
     print("- Dumping inferred SAF microarchitecture topology to",topo_out_path,"...")
     inferred_arch.dump(topo_out_path)
-'''Routines to build and solve SAF uarch inference problem'''
+'''Routines - build and solve SAF microarchitecture inference problem'''
 def build_saf_uarch_inference_problem(arch, sparseopts, prob, mapping, reconfigurable_arch, bind_out_path):
     '''
     Consume the raw Sparseloop arch/sparseopts/prob/mapping, and use the abstractions defined in 
@@ -196,8 +194,7 @@ def solve_saf_uarch_inference_problem(taxo_arch, saftaxolib, ruleset_names=defau
     
     return result
 
-'''
-main() - build and solve SAF microarchitecture inference problem
+''' main() - build and solve SAF microarchitecture inference problem
 based on CLI arguments and dump the inferred SAF microarchitecture
 topology to the YAML file at --topology-out
 '''
