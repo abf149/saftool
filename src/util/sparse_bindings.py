@@ -28,6 +28,76 @@ def extract_dtypes(sparseopts):
 
 #print(extract_targets(sparseopts))
 
+# Get buffer list for each datatype
+def transpose_bindings(fmt_iface_bindings):
+    transposed_bindings = {}
+
+    for buffer, data in fmt_iface_bindings.items():
+        for dtype in data.keys():
+            if dtype not in transposed_bindings:
+                transposed_bindings[dtype] = []
+            transposed_bindings[dtype].append(buffer)
+
+    return transposed_bindings
+
+# sparseopts=copy.deepcopy(sparseopts['sparse_optimizations'])
+def compute_action_bindings(sparseopts, fmt_iface_bindings, dtype_buffer_list):
+    action_bindings = []
+    compute_optimization = None
+
+    sparseopts=copy.deepcopy(sparseopts['sparse_optimizations'])
+
+    # First, find compute optimization
+    for target in sparseopts['targets']:
+        if 'compute-optimization' in target:
+            compute_optimization = target['compute-optimization'][0]['type']
+
+    # Then, process action optimizations
+    for target in sparseopts['targets']:
+        if 'action-optimization' in target:
+            for action in target['action-optimization']:
+                for option in action['options']:
+                    if len(option['condition-on']) > 1:
+                        continue  # Skip if more than one condition
+                    condition_dtype = option['condition-on'][0] if option['condition-on'] else None
+                    # Find the next buffer that holds the condition datatype prior to the target buffer
+                    condition_buffer = None
+                    print("condition_dtype:",condition_dtype)
+                    for buffer in dtype_buffer_list[condition_dtype]:
+                        print("buffer:",buffer)
+                        print("fmt_iface_bindings[buffer]:",fmt_iface_bindings[buffer])
+                        if buffer == target['name']:
+                            if condition_buffer is None:
+                                condition_buffer = buffer
+                            break
+                        if condition_dtype in fmt_iface_bindings[buffer]:
+                            condition_buffer = buffer
+                    must_discard = compute_optimization == 'skipping' and condition_buffer == dtype_buffer_list[condition_dtype][-1]
+                    must_post_gate = compute_optimization == 'gating' and condition_buffer == dtype_buffer_list[condition_dtype][-1]
+                    action_bindings.append({
+                        'type': action['type'],
+                        'bidirectional': False,
+                        'target': {'buffer': target['name'], 'dtype': option['target']},
+                        'condition': {'buffer': condition_buffer, 'dtype': condition_dtype},
+                        'must_discard': must_discard,
+                        'must_post_gate': must_post_gate
+                    })
+
+    # Finally, check for bidirectional actions
+    bidirectional_actions = []
+    for i in range(len(action_bindings)):
+        for j in range(i+1, len(action_bindings)):
+            if action_bindings[i]['target'] == action_bindings[j]['condition'] and action_bindings[i]['condition'] == action_bindings[j]['target'] and action_bindings[i]['type'] == action_bindings[j]['type']:
+                action_bindings[i]['bidirectional'] = True
+                bidirectional_actions.append(action_bindings[i])
+
+    # Filter out the unidirectional counterparts of bidirectional actions
+    action_bindings = [action for action in action_bindings if not (action['bidirectional'] and action not in bidirectional_actions)]
+
+    return action_bindings
+
+
+
 def compute_fmt_iface_bindings(buffer_dataspace_to_fmt_access_binding, dtype_list):
     dummy_rank_idx=0
 
@@ -60,11 +130,13 @@ def compute_fixed_arch_bindings(arch,sparseopts):
 
     fmt_iface_bindings = bind_format_iface_to_fixed_arch(arch, sparseopts, dtype_list)
 
-    print("fmt_iface_bindings:",fmt_iface_bindings)
+    dtype_buffer_list=transpose_bindings(fmt_iface_bindings)
 
-    assert(False)
+    action_bindings=compute_action_bindings(sparseopts, fmt_iface_bindings, dtype_buffer_list)
 
-    return fmt_iface_bindings, skip_bindings, dtype_list
+    print("action_bindings:",action_bindings)
+
+    return fmt_iface_bindings, action_bindings, dtype_list
 
 def compute_reconfigurable_arch_bindings(arch,sparseopts,prob,mapping):
     # Parse the dense problem
@@ -87,8 +159,6 @@ def compute_reconfigurable_arch_bindings(arch,sparseopts,prob,mapping):
     skip_bindings=bind_action_optimization(arch, mapping, prob, sparseopts, fmt_iface_bindings, loop_to_iface_map)
 
     print("skip_bindings:",skip_bindings)
-
-    assert(False)
 
     return fmt_iface_bindings, skip_bindings, data_space_dict_list
 

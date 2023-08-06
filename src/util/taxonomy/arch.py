@@ -98,18 +98,19 @@ def topology_with_holes_from_bindings(arch, fmt_iface_bindings, skip_bindings, d
     for bdx in range(len(skip_bindings)):
         skip_binding=skip_bindings[bdx]
         # First, transform skip binding to use flattened port indices
+        # TODO: format interfaces don't need to be determined here
         target_buffer=skip_binding['target']['buffer']
         target_dtype=skip_binding['target']['dtype']
-        target_fmt_iface=skip_binding['target']['fmt_iface']
+        target_fmt_iface=-1 #skip_binding['target']['fmt_iface']
         condition_buffer=skip_binding['condition']['buffer']
         condition_dtype=skip_binding['condition']['dtype']
-        condition_fmt_iface=skip_binding['condition']['fmt_iface']        
+        condition_fmt_iface=-1 #skip_binding['condition']['fmt_iface']        
 
-        target_fmt_iface_flat=port_idx[target_buffer][target_dtype][target_fmt_iface]
-        condition_fmt_iface_flat=port_idx[condition_buffer][condition_dtype][condition_fmt_iface]
+        target_fmt_iface_flat=port_idx[target_buffer][target_dtype][0] #target_fmt_iface
+        condition_fmt_iface_flat=port_idx[condition_buffer][condition_dtype][0] #condition_fmt_iface
 
-        skip_binding['target']['fmt_iface']=target_fmt_iface_flat
-        skip_binding['condition']['fmt_iface']=condition_fmt_iface_flat
+        skip_binding['target']['fmt_iface']=-1 #target_fmt_iface_flat
+        skip_binding['condition']['fmt_iface']=-1 #condition_fmt_iface_flat
         skip_bindings[bdx]=skip_binding
 
         # Second, create skipping SAF
