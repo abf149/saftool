@@ -3,7 +3,7 @@
 from util.taxonomy.serializableobject import SerializableObject
 from util.taxonomy.expressions import *
 from util.taxonomy.designelement import *
-from util.taxonomy.rulesengine import *
+from solver.solve import *
 
 def genPrimitiveMetadataParserWithUnknownAttributeAndInterfaceType(primitive_id):
     '''Helper function for format uarch testbench. Generate a MetadataParser primitive.'''

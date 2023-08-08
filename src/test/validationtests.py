@@ -1,7 +1,7 @@
 from util.taxonomy.serializableobject import SerializableObject
 from util.taxonomy.expressions import *
 from util.taxonomy.designelement import *
-from util.taxonomy.rulesengine import *
+from solver.solve import *
 
 def genDummyComponent(break_net_type=False, break_format_type=False):
     '''Helper function for the validation testbench. Generate a dummy component. Optionally introduce invalidate NetType or FormatType.'''

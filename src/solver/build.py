@@ -1,9 +1,6 @@
-import util.sparseloop_config_processor as sl_config
-from util.taxonomy.serializableobject import *
-from util.taxonomy.expressions import *
-from util.taxonomy.designelement import *
-from util.taxonomy.rulesengine import *
-import copy
+'''Library for constructing a SAF microrarchitecture inference problem'''
+import util.sparseloop_config_processor as sl_config, copy
+from util.taxonomy.designelement import Topology,Architecture,NetType,FormatType,Port,Primitive, SAF
 
 def genArch(buffer_stub_list, buffer_hierarchy, arch_saf_list):
 

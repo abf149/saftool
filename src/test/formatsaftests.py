@@ -4,7 +4,7 @@
 from util.taxonomy.serializableobject import SerializableObject
 from util.taxonomy.expressions import *
 from util.taxonomy.designelement import *
-from util.taxonomy.rulesengine import *
+from solver.solve import *
 
 def genArch(buffer_stub, arch_saf_list):
 

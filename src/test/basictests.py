@@ -1,7 +1,7 @@
 from util.taxonomy.serializableobject import SerializableObject
 from util.taxonomy.expressions import *
 from util.taxonomy.designelement import *
-from util.taxonomy.rulesengine import *
+from solver.solve import *
 import importlib
 
 def do_tests():
