@@ -1,3 +1,6 @@
+# zips
+*.zip
+
 # metals
 .metals/
 
