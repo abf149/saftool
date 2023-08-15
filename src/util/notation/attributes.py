@@ -1,0 +1,21 @@
+'''Nets'''
+def getNetType(x,x_type="port"):
+    if x_type=="port":
+        return x.getNetType().getValue()
+    else:
+        print("Unknown x_type in getNetType()")
+        assert(False)
+
+'''Ports'''
+def getFormat(x,x_type="port"):
+    if x_type=="port":
+        return x.getFormatType().getValue()
+    else:
+        print("Unknown x_type in getFormatType()")
+        assert(False)
+
+def portInObjInterface(port,obj):
+    return port.getId() in [port.getId() for port in obj.getInterface()]
+
+def portInNet(port,net):
+    return port.getId() in net.getPortIdList()

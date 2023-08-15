@@ -13,24 +13,24 @@ validation_rule_set:
     conditionally_evaluated_expression:
       classtype: FunctionReference
       id: assertion
-      value: assertNetsHaveConsistentPortNetTypes
+      value: assertHasConsistentPortNetTypes
     id: AssertNetHasConsistentPortNetType
     predicate:
       classtype: FunctionReference
       id: predicate
-      value: predicateIsComponentOrArchitectureHasNets
+      value: predicateHasConsistentPortNetTypes
 
   # - NetHasConsistentPortFormatType: all ports connected by a Net should have a consistent FormatType
   - classtype: ValidationRule
     conditionally_evaluated_expression:
       classtype: FunctionReference
       id: assertion
-      value: assertNetsHaveConsistentPortFormatTypes
+      value: assertNetHasConsistentPortFormatType
     id: AssertNetHasConsistentPortFormatType
     predicate:
       classtype: FunctionReference
       id: predicate
-      value: predicateIsComponentOrArchitectureHasNets
+      value: predicateNetHasConsistentPortFormatType
 
 # Format uarch rewrite rules
 
@@ -50,7 +50,7 @@ rewrite_rule_set:
     predicate:
       classtype: FunctionReference
       id: predicate
-      value: predicateIsComponentOrArchitectureAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes
+      value: predicateUnknownPortTypesOnNetsWithKnownTypesToKnownType
 
   # - Infer unknown child port types on nets where some port types are known
   - classtype: RewriteRule
@@ -62,18 +62,18 @@ rewrite_rule_set:
     predicate:
       classtype: FunctionReference
       id: predicate
-      value: predicateIsComponentHasNetsHasUnknownChildComponentPortTypesOnNetsWithKnownTypes  
+      value: predicateUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType  
 
-  - classtype: RewriteRule
-    conditionally_evaluated_expression:
-      classtype: FunctionReference
-      id: transform
-      value: transformUnknownPortTypesOnNetsWithKnownTypesToKnownType
-    id: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType
-    predicate:
-      classtype: FunctionReference
-      id: predicate
-      value: predicateIsComponentOrArchitectureAndHasNetsHasUnknownPortTypesOnNetsWithKnownTypes      
+#  - classtype: RewriteRule
+#    conditionally_evaluated_expression:
+#      classtype: FunctionReference
+#      id: transform
+#      value: transformUnknownPortTypesOnNetsWithKnownTypesToKnownType
+#    id: TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType
+#    predicate:
+#      classtype: FunctionReference
+#      id: predicate
+#      value: predicateUnknownPortTypesOnNetsWithKnownTypesToKnownType      
 
 
 # Topology completion rules
@@ -93,7 +93,7 @@ completion_rule_set:
     predicate:
       classtype: FunctionReference
       id: predicate
-      value: predicateIsComponent
+      value: predicateComponentHasNoTopologicalHoles
 
   # - CheckComponentHasNoUnknownInterfaceTypes: the component's interface ports should all have known types
   - classtype: CompletionRule
@@ -105,7 +105,7 @@ completion_rule_set:
     predicate:
       classtype: FunctionReference
       id: predicate
-      value: predicateIsComponentOrPrimitive
+      value: predicateComponentHasNoUnknownInterfaceTypes
 
   # - CheckComponentHasNoUnknownAttributes: the component's attributes should all have known types
   - classtype: CompletionRule
@@ -117,4 +117,4 @@ completion_rule_set:
     predicate:
       classtype: FunctionReference
       id: predicate
-      value: predicateIsComponentOrPrimitive        
+      value: predicateComponentHasNoUnknownAttributeTypes        
