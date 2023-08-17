@@ -1,6 +1,6 @@
 '''Create microarchitecture subcategories and subcategory instances'''
 
-from util.taxonomy.designelement import Primitive, Component, Architecture
+from util.taxonomy.designelement import Primitive, Component, Architecture, Net, FormatType, Topology, NetType
 import copy
 
 class Variable:
@@ -19,6 +19,54 @@ class Variable:
   target: weight_spad
 '''
 
+class NetWrapper:
+    def __init__(self,fmt="",net_type="",port_list=[]):
+        self.fmt=fmt
+        self.net_type_=net_type
+        self.port_list=port_list
+
+    def format(self,fmt):
+        self.fmt=fmt
+        return self
+
+    def net_type(self,net_type):
+        self.net_type_=net_type
+        return self
+
+    def port(self,port_name):
+        self.port_list.append(port_name)
+        return self
+
+    def build(self, id, net_type_name="TestNetType", format_type_name="TestFormatType"):
+        net_type=NetType.fromIdValue(net_type_name,self.net_type)
+        format_type=FormatType.fromIdValue(format_type_name,self.format)
+        net=Net.fromIdAttributes(id, net_type, format_type, self.port_list)
+        return net        
+
+class TopologyWrapper:
+    def __init__(self,component_list=[],net_list=[],generator_type=None):
+        self.component_list=component_list
+        self.net_list=net_list
+        self.generator_type=generator_type
+        if self.generator_type is not None:
+            print("Topology does not yet support generator_type")
+            assert(False)
+
+    def generator(self,generator_type):
+        self.generator_type=generator_type
+        return self
+
+    def component(self,component):
+        self.component_list.append(component)
+        return self
+
+    def net(self,net):
+        self.net_list.append(net)
+        return self
+
+    def build(self,id):
+        pass
+
 class PrimitiveCategory:
 
     def __init__(self):
@@ -28,6 +76,7 @@ class PrimitiveCategory:
         self.attribute_vals=[]
         self.default_attributes_=[]
         self.ports_=[]
+        self.generator_type=None
 
     def copy(self):
         return copy.deepcopy(self)
@@ -71,17 +120,33 @@ class PrimitiveCategory:
         self.ports_.append(("none",port_name,"in",port_net_type,port_fmt))
         return self
 
+    '''
     def port_in_generator(self,port_name,port_net_type,port_fmt,gen_type="fibertree",gen_metadata="fibertree"):
         self.ports_.append((gen_type,port_name,"in",port_net_type,port_fmt,gen_metadata))
         return self
+    '''
 
     def port_out(self,port_name,port_net_type,port_fmt):
         self.ports_.append(("explicit",port_name,"out",port_net_type,port_fmt))
         return self
 
+    def generator(self,generator_type):
+        self.generator_type=generator_type
+        return self
+
+    def generate_ports(self):
+        if self.generator_type is None:
+            # Ports don't contain variables and don't need to be expanded
+            return self
+        else:
+            print("Unrecognized generator type in Primitive")
+            assert(False)
+
+    '''
     def port_out_generator(self,port_name,port_net_type,port_fmt,gen_type="fibertree",gen_metadata="fibertree"):
         self.ports_.append((gen_type,port_name,"out",port_net_type,port_fmt,gen_metadata))
         return self
+    '''
 
     def build(self):
         pass
