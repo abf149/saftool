@@ -106,6 +106,10 @@ class ComponentCategory(PrimitiveCategory):
         self.topology=None
         return self
 
+    def topology_definition(self,topology_):
+        self.topology=topology_
+        return self
+
 class ArchitectureCategory(ComponentCategory):
 
     def __init__(self):
@@ -147,5 +151,6 @@ class ArchitectureCategory(ComponentCategory):
         self.saf_list.append(saf_wrapper)
         return self
 
+ArchitectureBase = ArchitectureCategory()
 SAFSkipping = SAFCategory().name("skipping") \
                            .attribute("bindings",["string","int","string","int"],[None,-1,None,-1])
