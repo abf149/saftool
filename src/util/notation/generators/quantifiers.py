@@ -30,6 +30,7 @@ def sameForNetPorts(attr_, comparator=lambda x,y:x==y):
     - lambda(x,obj) -> bool, x is net
     '''
     def check_all_ports_for_net(net,loop_state):
+
         net_type = None
         for port_id in net.getPortIdList():
             port = loop_state['obj'].getPortById(port_id)  # Assuming this method exists in the net object

@@ -1,6 +1,7 @@
 '''Library for constructing a SAF microrarchitecture inference problem'''
-import util.sparseloop_config_processor as sl_config, copy
+from util.notation.microarchitecture import SAFFormat, SAFSkipping, BufferStub, fmt_str_convert
 from util.taxonomy.designelement import Topology,Architecture,NetType,FormatType,Port,Primitive, SAF
+import util.sparseloop_config_processor as sl_config, copy
 
 def genArch(buffer_stub_list, buffer_hierarchy, arch_saf_list):
 
@@ -22,43 +23,10 @@ def genArch(buffer_stub_list, buffer_hierarchy, arch_saf_list):
 
     return arch
 
-def genBufferStubByName(buffer_stub_id, rank_format_list_str):
-    '''Helper function for generating an architectural buffer stub. Generate a BufferStub primitive.'''
-
-    # Category
-    primitive_category='BufferStub'
-    # Attributes
-    primitive_attributes=[]
-    # Interface
-    # - build interface
-    primitive_interface=[]    
-    for idx in range(len(rank_format_list_str)):
-
-        # -- md_out ports
-        net_type=NetType.fromIdValue('TestNetType','md')
-        format_type=FormatType.fromIdValue('TestFormatType','?')    
-        port_md_out=Port.fromIdDirectionNetTypeFormatType('md_out'+str(idx), 'out', net_type, format_type)   
-
-        # -- pos_in ports
-        net_type=NetType.fromIdValue('TestNetType','pos')
-        format_type=FormatType.fromIdValue('TestFormatType','addr')    
-        port_pos_in=Port.fromIdDirectionNetTypeFormatType('pos_in'+str(idx), 'in', net_type, format_type)   
-
-        # -- at_bound_in ports
-        net_type=NetType.fromIdValue('TestNetType','pos')
-        format_type=FormatType.fromIdValue('TestFormatType','?')    
-        port_at_bound_in=Port.fromIdDirectionNetTypeFormatType('at_bound_in'+str(idx), 'in', net_type, format_type)   
-
-        primitive_interface.append(port_md_out)
-        primitive_interface.append(port_pos_in)
-        primitive_interface.append(port_at_bound_in)
-
-    return Primitive.fromIdCategoryAttributesInterface(buffer_stub_id, primitive_category, primitive_attributes, primitive_interface)
-
 def topology_with_holes_from_bindings(arch, fmt_iface_bindings, skip_bindings, dtype_list):
 
     # Fix mismatch in conventions
-    fmt_str_convert={"UOP":"U", "RLE":"R", "C":"C","B":"B"}
+    #fmt_str_convert={"UOP":"U", "RLE":"R", "C":"C","B":"B"}
 
     # Extract buffer hierarchy
     buffer_hierarchy=[buffer for buffer in list(sl_config.flatten_arch_wrapper(arch).keys()) if buffer != 'MAC']
@@ -77,17 +45,19 @@ def topology_with_holes_from_bindings(arch, fmt_iface_bindings, skip_bindings, d
     saf_list=[]
     for buffer in buffer_hierarchy:
         datatype_fmt_ifaces=fmt_iface_bindings[buffer]
-        # - Flatten the interface formats associated with this buffer stub
-        flat_rank_fmts=[]
-        for dtype in datatype_fmt_ifaces:
-            flat_rank_fmts.extend([fmt_str_convert[fmt_iface['format']] for fmt_iface in datatype_fmt_ifaces[dtype]])
-        flat_rank_fmts=[FormatType.fromIdValue('format',fmt_str) for fmt_str in flat_rank_fmts]
-        # - Create the buffer stub
-        buffer_stub=genBufferStubByName(buffer, flat_rank_fmts)
-        buffer_stub_list.append(buffer_stub)
-        # - Create the Format SAF if sparse traversal support is required
-        if len(flat_rank_fmts)>0:
-            fmt_saf=SAF.fromIdCategoryAttributesTarget('format_saf', 'format', [flat_rank_fmts], buffer)
+
+        if sum([len(datatype_fmt_ifaces[dtype]) for dtype in datatype_fmt_ifaces])>0:
+            fmt_saf=SAFFormat.copy() \
+                             .target(buffer) \
+                             .set_attribute("fibertree",datatype_fmt_ifaces,"fibertree") \
+                             .build('format_saf')
+
+            buffer_stub=BufferStub.copy() \
+                                  .set_attribute("fibertree",datatype_fmt_ifaces,"fibertree") \
+                                  .generate_ports("fibertree","fibertree") \
+                                  .build(buffer)
+
+            buffer_stub_list.append(buffer_stub)
             saf_list.append(fmt_saf)
 
     # Generate action-optimization SAFs
@@ -111,7 +81,15 @@ def topology_with_holes_from_bindings(arch, fmt_iface_bindings, skip_bindings, d
         skip_bindings[bdx]=skip_binding
 
         # Second, create skipping SAF
-        skipping_saf=SAF.fromIdCategoryAttributesTarget('skipping_saf', 'skipping', [[target_buffer,target_fmt_iface_flat,condition_buffer,condition_fmt_iface_flat]], target_buffer)
+        skipping_saf=SAFSkipping.copy() \
+                                .target(target_buffer) \
+                                .set_attribute("bindings",[target_buffer, \
+                                                           target_fmt_iface_flat, \
+                                                           condition_buffer, \
+                                                           condition_fmt_iface_flat] \
+                                              )\
+                                .build("skipping_saf")
+
         saf_list.append(skipping_saf)
 
     [print(saf) for saf in saf_list]
