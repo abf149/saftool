@@ -2,7 +2,7 @@
 
 import yaml,logging,os
 
-
+do_log=False
 log_path="./safinfer.log"
 
 try:
@@ -14,11 +14,14 @@ logging.basicConfig(filename=log_path, level=logging.INFO)
 def log_concat(*args):
     return ' '.join(map(str, args))
 def info(*args):
-    logging.info(log_concat(*args))
+    if do_log:
+        logging.info(log_concat(*args))
 def warn(*args):
-    logging.warn(log_concat(*args))
+    if do_log:
+        logging.warn(log_concat(*args))
 def error(*args):
-    logging.error(log_concat(*args))
+    if do_log:
+        logging.error(log_concat(*args))
 
 def dirpath_to_importpath(dirpath):
     '''Directory path must be relative to pwd'''
