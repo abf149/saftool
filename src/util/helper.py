@@ -2,6 +2,8 @@
 
 import yaml
 
+log_path="./safinfer.log"
+
 def dirpath_to_importpath(dirpath):
     '''Directory path must be relative to pwd'''
     linux_dirpath=dirpath.replace('\\','/')
