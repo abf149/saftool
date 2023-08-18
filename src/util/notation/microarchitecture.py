@@ -77,6 +77,12 @@ class TopologyWrapper:
         self.component_list.append((id,component))
         return self
 
+    def components(self,id_component_list):
+        self.topological_hole_=False
+        for id,component in id_component_list:
+            self.component_list.append((id,component))
+        return self
+
     def net(self,net):
         assert(False)
         self.topological_hole_=False
@@ -91,7 +97,7 @@ class TopologyWrapper:
         return self
 
     def generate_topology(self,generator_type=None,generator_config_arg=None):
-        if self.generator_type is None:
+        if generator_type is None:
             pass
         else:
             assert(False)
@@ -286,7 +292,7 @@ class ArchitectureCategory(ComponentCategory):
 
     def __init__(self):
         super().__init__()
-        self.topology=None
+        self.topology_=None
         self.buffer_hierarchy=[]
         self.saf_list=[]
         self.name_="ArchitectureCategory" # Only one architecture category
@@ -323,15 +329,21 @@ class ArchitectureCategory(ComponentCategory):
         self.buffer_hierarchy.append(buffer)
         return self
 
-    def SAF(self,saf_wrapper):
-        self.saf_list.append(saf_wrapper)
+    def SAF(self,id,saf_wrapper):
+        self.saf_list.append((id,saf_wrapper))
+        return self
+
+    def SAFs(self,id_saf_wrapper_list):
+        for id,saf_wrapper in id_saf_wrapper_list:
+            self.saf_list.append((id,saf_wrapper))
+
         return self
 
     def buildSAFs(self):
         saf_list=[]
         idx=0
-        for saf in self.saf_list:
-            saf_list.append(saf.build("Test"+saf.name_+str(idx)))
+        for id,saf in self.saf_list:
+            saf_list.append(saf.build(id))
             idx+=1
         return saf_list
 

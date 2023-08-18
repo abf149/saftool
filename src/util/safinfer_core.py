@@ -1,7 +1,7 @@
 '''SAFinfer core library - build and solve SAF microarchitecture inference problem from Sparseloop inputs'''
 from util import sparseloop_config_processor as sl_config, safinfer_io as safio
 from solver.solve import Solver
-from solver.build import topology_with_holes_from_bindings
+from solver.build import build_taxonomic_arch_and_safs_from_bindings
 
 '''Constants - default list of ruleset names to apply to SAF microarchitecture topology inference'''
 default_ruleset_list = ['base_ruleset', \
@@ -56,9 +56,8 @@ def build_saf_uarch_inference_problem(arch, sparseopts, prob, mapping, reconfigu
     # Problem- and mapping-independent, given fmt_iface_bindings, skip_bindings
     # and data_space_dict_list have already been computed
     print("- Realizing microarchitecture with topological holes, based on bindings.\n")
-    taxo_arch=topology_with_holes_from_bindings(arch, fmt_iface_bindings, skip_bindings, dtype_list)
+    return build_taxonomic_arch_and_safs_from_bindings(arch, fmt_iface_bindings, skip_bindings, dtype_list)
 
-    return taxo_arch
 def solve_saf_uarch_inference_problem(taxo_arch, saftaxolib, ruleset_names=default_ruleset_list):
     '''
     Trigger SAF microarchitecture solver against an input

@@ -1,65 +1,53 @@
 '''Library for constructing a SAF microrarchitecture inference problem'''
-from util.notation.microarchitecture import SAFFormat, SAFSkipping, BufferStub, fmt_str_convert
-from util.taxonomy.designelement import Topology,Architecture,NetType,FormatType,Port,Primitive, SAF
+from util.notation.microarchitecture import SAFFormat, SAFSkipping, BufferStub, ArchitectureBase, TopologyWrapper
 import util.sparseloop_config_processor as sl_config, copy
 
-def genArch(buffer_stub_list, buffer_hierarchy, arch_saf_list):
-
-    # Architecture id
-    arch_id="TestArchitecture"
-    # Topology
-    # - Topology ID
-    topology_id='TestTopology'
-    # - Component list setup
-    component_list=buffer_stub_list
-    # - Net list setup
-    # -- build Net list
-    net_list=[]
-    # - build topology
-    architecture_topology=Topology.fromIdNetlistComponentList(topology_id,net_list,component_list)
-    # Buffer hierarchy
-    #buffer_hierarchy=[buffer_stub.getId()]
-    arch=Architecture.fromIdSAFListTopologyBufferHierarchy(arch_id,arch_saf_list,architecture_topology,buffer_hierarchy)
-
-    return arch
-
-def topology_with_holes_from_bindings(arch, fmt_iface_bindings, skip_bindings, dtype_list):
-
-    # Fix mismatch in conventions
-    #fmt_str_convert={"UOP":"U", "RLE":"R", "C":"C","B":"B"}
-
+def get_buffer_hierarchy(arch):
+    return [buffer for buffer in list(sl_config.flatten_arch_wrapper(arch).keys()) if buffer != 'MAC']
+def get_port_mappings_to_flattened_indices(arch,dtype_list,fmt_iface_bindings):
     # Extract buffer hierarchy
-    buffer_hierarchy=[buffer for buffer in list(sl_config.flatten_arch_wrapper(arch).keys()) if buffer != 'MAC']
+    buffer_hierarchy=get_buffer_hierarchy(arch)
 
     # Compute flattened port indices
-    port_idx={buffer:{dtype:[0 for fmt_iface in fmt_iface_bindings[buffer][dtype]] for dtype in dtype_list} for buffer in buffer_hierarchy}
+    port_idx={buffer:{dtype:[0 \
+                    for fmt_iface in fmt_iface_bindings[buffer][dtype]] \
+                            for dtype in dtype_list} \
+                                    for buffer in buffer_hierarchy}
+
     for buffer in buffer_hierarchy:
+        # buff0_dtype0_fmt_iface{0,1,2,...}, buff0_dtype1_fmt_iface{0,1,2,...}, 
+        # ..., buff1_dtype0_fmt_iface{0,1,2,...}, ...
         idx=0
         for dtype in dtype_list:
             for jdx in range(len(port_idx[buffer][dtype])):
                 port_idx[buffer][dtype][jdx]=idx
                 idx+=1
 
-    # Generate buffer stubs
+    return port_idx
+def get_buffer_stubs_and_format_safs(arch, fmt_iface_bindings, buffer_stub_list=[], saf_list=[]):
     buffer_stub_list=[]
     saf_list=[]
+    buffer_hierarchy=get_buffer_hierarchy(arch)    
     for buffer in buffer_hierarchy:
         datatype_fmt_ifaces=fmt_iface_bindings[buffer]
 
         if sum([len(datatype_fmt_ifaces[dtype]) for dtype in datatype_fmt_ifaces])>0:
             fmt_saf=SAFFormat.copy() \
                              .target(buffer) \
-                             .set_attribute("fibertree",datatype_fmt_ifaces,"fibertree") \
-                             .build('format_saf')
+                             .set_attribute("fibertree",datatype_fmt_ifaces,"fibertree")
+                             #.build('format_saf')
 
             buffer_stub=BufferStub.copy() \
                                   .set_attribute("fibertree",datatype_fmt_ifaces,"fibertree") \
-                                  .generate_ports("fibertree","fibertree") \
-                                  .build(buffer)
-
-            buffer_stub_list.append(buffer_stub)
-            saf_list.append(fmt_saf)
-
+                                  .generate_ports("fibertree","fibertree")
+            buffer_stub_list.append((buffer,buffer_stub))
+            saf_list.append(("format_saf",fmt_saf))    
+    return buffer_stub_list, saf_list
+def get_skipping_SAFs_from_skip_bindings(arch, fmt_iface_bindings, skip_bindings, dtype_list, saf_list=[]):
+    port_idx = get_port_mappings_to_flattened_indices(arch, \
+                                                              dtype_list, \
+                                                              fmt_iface_bindings \
+                                                             )
     # Generate action-optimization SAFs
     skip_bindings=copy.deepcopy(skip_bindings)
     for bdx in range(len(skip_bindings)):
@@ -86,13 +74,65 @@ def topology_with_holes_from_bindings(arch, fmt_iface_bindings, skip_bindings, d
                                 .set_attribute("bindings",[target_buffer, \
                                                            target_fmt_iface_flat, \
                                                            condition_buffer, \
-                                                           condition_fmt_iface_flat] \
-                                              )\
-                                .build("skipping_saf")
+                                                           condition_fmt_iface_flat])
+        saf_list.append(("skipping_saf",skipping_saf))
 
-        saf_list.append(skipping_saf)
+    return saf_list
+def get_buffer_stubs_and_SAFs_from_bindings(arch, fmt_iface_bindings, skip_bindings, dtype_list):
+    # Generate buffer stubs and format SAFs
+    buffer_stub_list, \
+    saf_list = get_buffer_stubs_and_format_safs(arch, fmt_iface_bindings)
+    saf_list = get_skipping_SAFs_from_skip_bindings(arch, fmt_iface_bindings, skip_bindings, dtype_list, saf_list)
+    return buffer_stub_list, saf_list
+def build_taxonomic_arch_and_safs_from_bindings(arch, fmt_iface_bindings, skip_bindings, dtype_list):
+    '''
+    Generate taxonomic representation of topology and SAF optimizations\n\n
 
-    [print(saf) for saf in saf_list]
-    taxo_arch=genArch(buffer_stub_list, buffer_hierarchy, saf_list)
+    Arguments:\n
+    - arch -- Sparseloop architecture YAML object\n
+    - fmt_iface_bindings -- inferred bindings of rank representation format parsing interfaces to buffer stubs\n
+        - Example:\n\n
+        
+        {'BackingStorage': \n
+            {'Outputs': [], \n
+             'Inputs': [{'format': 'UOP', 'fiber_layout': [['!0']]}, \n
+                        ...\n
+                        {'format': 'UOP', 'fiber_layout': [['R', 'E']]}\n
+                       ],\n
+             'Weights': ...},\n
+         'iact_spad': ...,\n
+         ...,\n
+         'MAC': {'Outputs': [], 'Inputs': [], 'Weights': []}\n
+        }\n\n
 
-    return taxo_arch   
+    - skip_bindings -- inferred bindings of skipping SAFs to buffers\n
+        - Example:\n\n
+
+        [
+            {'type': 'skipping', \n
+             'bidirectional': False, \n
+             'target': {'buffer': 'weight_spad', \n
+                        'dtype': 'Weights'\n
+                       }, 
+             'condition': {'buffer': 'iact_spad', \n
+                           'dtype': 'Inputs' \n
+                          }, 
+             'must_discard': False, \n
+             'must_post_gate': False\n
+            }\n
+        ]\n\n
+    - dtype_list -- inferred datatypes in the tensor problems addressable by this accelerator\n
+        - Example: ['Weights', 'Outputs', 'Inputs']\n\n
+
+    Returns:\n
+    - Taxonomic "Architecture" object with SAF annotations and netless topology consisting of buffer stubs
+    ''' 
+    buffer_stub_list, saf_list = get_buffer_stubs_and_SAFs_from_bindings(arch, \
+                                                                         fmt_iface_bindings, \
+                                                                         skip_bindings, \
+                                                                         dtype_list)
+    return ArchitectureBase.copy() \
+                           .topology(TopologyWrapper().components(buffer_stub_list)) \
+                           .SAFs(saf_list) \
+                           .buffers(get_buffer_hierarchy(arch)) \
+                           .build()  
