@@ -121,8 +121,6 @@ def concretizeArchitectureSkippingSAFsToSkippingUarches(obj):
     # Delete skipping SAFs
     obj.setSAFList(arch_non_skipping_saf_list)
 
-    print("\nobj:\n\n",obj,'\n\n')
-
     return obj
 
 
@@ -131,7 +129,6 @@ def concretizeArchitectureSkippingSAFsToSkippingUarches(obj):
 
 def predicateIsArchitectureHasSkippingSAF(obj):
     '''Object is an architecture with at least one skipping SAF'''
-    print(obj.getId())
     return type(obj).__name__ == 'Architecture' and ('skipping' in [saf.getCategory() for saf in obj.getSAFList()])
 
 # -- TransformTopologicalHoleToSkippingUarchTopology

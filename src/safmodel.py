@@ -1,11 +1,6 @@
 import util.sparseloop_config_processor as sl_config
 from util.taxonomy import designelement as de
-import os
-import argparse
-import test_data as td
-import copy
-import yaml
-import re
+import os, argparse, test_data as td, copy, yaml, re
 
 def get_primitive_with_name(name,primitive_classes):
     '''Get primitive class declaration from Accelergy primitives structure'''

@@ -74,9 +74,6 @@ def concretizeArchitectureFormatSAFsToFormatUarches(obj):
 
     for idx in range(len(arch_format_saf_list)):
         # Concretize format SAF to format uarch
-        #print(arch_format_saf_ranks_list[idx])
-        print(arch_target_buffer_interface_list[idx])
-        print(obj.getSAFList()[0].getAttributes())
         buffer_id=arch_format_saf_target_list[idx]        
         format_uarch = genFormatUarchWithHole(buffer_id+"_datatype_format_uarch",arch_format_saf_ranks_list[idx])
 
@@ -91,12 +88,9 @@ def concretizeArchitectureFormatSAFsToFormatUarches(obj):
         for format_uarch_port in format_uarch_interface_list:
             format_uarch_port_id=format_uarch_port.getId()
             buffer_port_id=formatUarchPortIdToBufferPortIdMapping(format_uarch_port_id)
-            print(buffer_port_id)
-            print(buffer_port_id_list)
             assert(buffer_port_id in buffer_port_id_list) # Assert mapped buffer port exists
             format_uarch_port_id=format_uarch_id+'.'+format_uarch_port_id
             buffer_port_id=buffer_id+'.'+buffer_port_id
-            print('\nformat_uarch_port_id:',format_uarch_port_id,'buffer_port_id:',buffer_port_id,'\n')
 
             net_type=format_uarch_port.getNetType()
             format_type=FormatType.fromIdValue('TestFormatType','?')
@@ -112,8 +106,6 @@ def concretizeArchitectureFormatSAFsToFormatUarches(obj):
     # Delete format SAFs
     obj.setSAFList(arch_non_format_saf_list)
 
-    print("\nobj:\n\n",obj,'\n\n')
-
     return obj
 
 
@@ -122,7 +114,6 @@ def concretizeArchitectureFormatSAFsToFormatUarches(obj):
 
 def predicateIsArchitectureHasFormatSAF(obj):
     '''Object is an architecture with at least one format SAF'''
-    print(obj.getId())
     return type(obj).__name__ == 'Architecture' and ('format' in [saf.getCategory() for saf in obj.getSAFList()])
 
 # - Format uarch rewrite rules

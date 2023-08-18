@@ -22,12 +22,7 @@ def data_space_rank_list_from_product(product, prob_coeff_list):
 
     data_space_rank_list=[]
 
-    #print("PRODUCT")
-    #print(product)
-    #print(prob_coeff_list)
     for fact in product:
-        #print("FACT")
-        #print(fact)
         if fact not in prob_coeff_list:
             data_space_rank_list.append(fact)    
 

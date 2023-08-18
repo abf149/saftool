@@ -1,9 +1,15 @@
 ''' Helper functions '''
 
-import yaml
-import logging
+import yaml,logging,os
+
 
 log_path="./safinfer.log"
+
+try:
+    os.remove(log_path)
+except:
+    pass
+
 logging.basicConfig(filename=log_path, level=logging.INFO)
 def log_concat(*args):
     return ' '.join(map(str, args))

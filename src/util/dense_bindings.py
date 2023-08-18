@@ -36,15 +36,9 @@ def bind_pgens(arch, mapping, prob):
             dtype_projection_ranks=data_space_dict_list[dtype]['rank-list']
             pgens[pgen_buffer][dtype].extend([{'rank':rank,'loop_buffer':loop_buffer} for rank in loop_factors if rank in dtype_projection_ranks])
 
-    #print("Delegation table",delegation_table)
-
     return pgens, delegation_table
 
 def first_unbound_nontrival_pgen_idx_by_rank(target_rank, buffer_dtype_pgens, nontrivial_pgen_ptrs, nontrivial_pgen_is_bound, update_is_bound=True):
-    #print(target_rank)
-    #print(buffer_dtype_pgens)
-    #print(nontrivial_pgen_ptrs)
-    #print(nontrivial_pgen_is_bound)
 
     '''Find the index of the outer-most (highest-level) non-trivial pgen which is not yet bound to a format interface'''
     for jdx in range(len(nontrivial_pgen_ptrs)):

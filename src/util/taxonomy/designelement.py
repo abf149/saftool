@@ -4,7 +4,6 @@ from util.taxonomy.expressions import *
 
 
 def dictToObjByClassAttr(dictParam):
-    #print('dictParam:',dictParam)
     '''Convert a dict to an object, choosing the class type by the class attribute value. Strings, ints and lists are returned as-is'''
 
     if type(dictParam).__name__=='list':
@@ -14,7 +13,6 @@ def dictToObjByClassAttr(dictParam):
     if type(dictParam).__name__=='int' or type(dictParam).__name__=='str':
         return dictParam
 
-    #print(type(dictParam).__name__)
     obj=globals()[dictParam['classtype']].fromDict(dictParam)
     return obj
 

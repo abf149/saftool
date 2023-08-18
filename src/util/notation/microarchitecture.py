@@ -1,6 +1,7 @@
 '''Create microarchitecture subcategories and subcategory instances'''
 
 from util.taxonomy.designelement import Primitive, Component, Architecture, Net, FormatType, Topology, NetType, Port, SAF
+from util.helper import info,warn,error
 import copy
 
 fmt_str_convert={"UOP":"U", "RLE":"R", "C":"C","B":"B"}
@@ -61,7 +62,7 @@ class TopologyWrapper:
         else:
             self.topological_hole_=topological_hole
         if self.generator_type is not None:
-            print("Topology does not yet support generator_type")
+            error("Topology does not yet support generator_type")
             assert(False)
 
     def topological_hole(self):
@@ -221,7 +222,7 @@ class PrimitiveCategory:
                     self.ports_.append((port_name,port_dir,port_net_type,port_net_fmt))
                 idx+=1
         else:
-            print("Unrecognized generator type in Primitive")
+            error("Unrecognized generator type in Primitive")
             assert(False)
 
         return self
@@ -263,7 +264,7 @@ class SAFCategory(PrimitiveCategory):
         if id is None:
             # Default id: Test<category name>
             id="Test"+self.name_
-        print("Attribute values:",self.attribute_vals)
+        error("Attribute values:",self.attribute_vals)
         saf=SAF.fromIdCategoryAttributesTarget(id, self.name_, self.attribute_vals, self.target_)
         return saf
 
@@ -298,28 +299,16 @@ class ArchitectureCategory(ComponentCategory):
         self.name_="ArchitectureCategory" # Only one architecture category
 
     def attribute(self):
-        print("ArchitectureCategory does not support attribute()")
+        error("ArchitectureCategory does not support attribute()")
         assert(False)
 
     def port_in(self,port_name,port_net_type,port_fmt):
-        print("ArchitectureCategory does not support port_in()")
+        error("ArchitectureCategory does not support port_in()")
         assert(False)
-
-    '''
-    def port_in_generator(self,port_name,port_net_type,port_fmt,gen_type="fibertree",gen_metadata="fibertree"):
-        print("ArchitectureCategory does not support port_in_generator()")
-        assert(False)
-    '''
 
     def port_out(self,port_name,port_net_type,port_fmt):
-        print("ArchitectureCategory does not support port_out()")
+        error("ArchitectureCategory does not support port_out()")
         assert(False)
-
-    '''
-    def port_out_generator(self,port_name,port_net_type,port_fmt,gen_type="fibertree",gen_metadata="fibertree"):
-        print("ArchitectureCategory does not support port_out_generator()")
-        assert(False)
-    '''
 
     def buffers(self,buffer_list):
         self.buffer_hierarchy=buffer_list
@@ -367,8 +356,6 @@ BufferStub = PrimitiveCategory().name("BufferStub") \
 
 SAFFormat = SAFCategory().name("format") \
                          .attribute("fibertree",["fibertree"],[None])
-
-print("SAFFormat:",SAFFormat)
                          
 SAFSkipping = SAFCategory().name("skipping") \
                            .attribute("bindings",["string","int","string","int"],[None,-1,None,-1])

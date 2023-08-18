@@ -1,5 +1,6 @@
 '''Logical quantifiers and comparators over object and sub-object fields'''
 from itertools import groupby
+from util.helper import info, warn, error
 
 '''For loop lambdas'''
 
@@ -188,7 +189,7 @@ def forObjNetsForNetPorts(outer,inner,func,comparator=lambda x,y:x==y):
         # Generate inner-loop predicate
         func_inner=sameForNetPorts(func,comparator)
     else:
-        print("Invalid inner loop condition generator",inner,"in forObjNetsForNetPorts()")
+        error("Invalid inner loop condition generator",inner,"in forObjNetsForNetPorts()")
         assert(False)
 
     if outer=="all":
@@ -198,7 +199,7 @@ def forObjNetsForNetPorts(outer,inner,func,comparator=lambda x,y:x==y):
         # Return predicate
         return anyForObjNets(func_inner,passObj=True)        
     else:
-        print("Invalid outer loop condition generator",outer,"in forObjNetsForNetPorts()")
+        error("Invalid outer loop condition generator",outer,"in forObjNetsForNetPorts()")
         assert(False)
 
 def forObjNetsForObjPorts(outer,inner,func,cond_outer=True,cond_inner=True,comparator=lambda x,y:x==y):
@@ -209,14 +210,14 @@ def forObjNetsForObjPorts(outer,inner,func,cond_outer=True,cond_inner=True,compa
         # Generate inner-loop predicate
         func_inner=anyForObjPorts(func,passObj=True)
     else:
-        print("Invalid inner loop condition generator",inner,"in forObjNetsForObjPorts()")
+        error("Invalid inner loop condition generator",inner,"in forObjNetsForObjPorts()")
         assert(False)
 
     if outer=="any":
         # Return predicate
         return anyForObjNets(func_inner,passObj=True)        
     else:
-        print("Invalid outer loop condition generator",outer,"in forObjNetsForObjPorts()")
+        error("Invalid outer loop condition generator",outer,"in forObjNetsForObjPorts()")
         assert(False)
 
 

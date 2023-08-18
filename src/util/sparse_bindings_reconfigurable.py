@@ -21,8 +21,6 @@ def compute_reconfigurable_arch_bindings(arch,sparseopts,prob,mapping):
     # - skip_bindings
     skip_bindings=bind_action_optimization(arch, mapping, prob, sparseopts, fmt_iface_bindings, loop_to_iface_map)
 
-    print("skip_bindings:",skip_bindings)
-
     return fmt_iface_bindings, skip_bindings, data_space_dict_list
 
 def get_buffer_dataspace_to_fmt_access_bindings_from_buffer_dataspace_to_fmt_layout_bindings(buffer_dataspace_to_fmt_layout_binding, data_space_dict_list, flat_arch, buffer_loop_binding):
@@ -83,20 +81,14 @@ def bind_format_iface(arch, mapping, prob, sparseopts):
     buffer_dataspace_to_fmt_access_binding=get_buffer_dataspace_to_fmt_access_bindings_from_buffer_dataspace_to_fmt_layout_bindings(buffer_dataspace_to_fmt_layout_binding, data_space_dict_list, flat_arch, buffer_loop_binding)
 
     loop_to_iface_map={buffer:{dtype:{} for dtype in data_space_dict_list} for buffer in flat_arch}
-
-    #print(buffer_loop_binding)
-
     fmt_ifaces={buffer:{dtype:[] for dtype in data_space_dict_list} for buffer in flat_arch}
 
     for buffer in flat_arch:
-        #print("Entering", buffer)
         # For each buffer, get 
         #loop_order=copy.deepcopy(buffer_loop_binding[buffer]['loops']['permutation'])
         #loop_order.reverse()
         loop_buffer_kept_data_spaces=buffer_loop_binding[buffer]['data-spaces']
         for dtype in data_space_dict_list:
-            #print("Entering",dtype)
-            #print(loop_buffer_kept_data_spaces)
             if dtype in loop_buffer_kept_data_spaces:
                 # For each combination of buffer and kept datatype,
                 # - Compute pointers to pgens bound to non-trivial loops
@@ -110,7 +102,6 @@ def bind_format_iface(arch, mapping, prob, sparseopts):
                 for idx in range(len(buffer_dtype_pgens)):
                     # Initialize pgen binding tracking
                     loop_ptr=buffer_dtype_pgens[idx]
-                    #print(buffer_loop_binding[loop_ptr['loop_buffer']]['loops']['non-trivial'][loop_ptr['rank']])
                     if buffer_loop_binding[loop_ptr['loop_buffer']]['loops']['non-trivial'][loop_ptr['rank']]:
                         nontrivial_pgen_ptrs.append(idx)
                         nontrivial_pgen_is_bound.append(False)
@@ -125,7 +116,6 @@ def bind_format_iface(arch, mapping, prob, sparseopts):
                             fmt_access_rank_is_bound[fdx]=True
                             # -- Pass 1a: create a format interface for each fiber which comprises flattened rank IDs
                             fiber_layout=fiber['flattened-rankIDs']
-                            #print(prob_coeff_list)
                             fmt=fiber['format']
                             ranks=data_space_rank_list_from_SOP(fiber_layout, prob_coeff_list)
                             pgen_idxs=[]
@@ -138,18 +128,12 @@ def bind_format_iface(arch, mapping, prob, sparseopts):
 
                             # -- Pass 1b: select for dataspace projection expressions which project onto this format interface
                             dataspace_proj_onto_fmt_iface=[]
-                            #print("DICT:",data_space_dict_list[dtype]['projection'])
                             for idx in range(len(data_space_projection)):
                                 expr=data_space_projection[idx]
-                                #print("EXPR",expr)
                                 expr_ranks=data_space_rank_list_from_SOP(expr, prob_coeff_list)
-                                #print("EXPR_RANKS",expr_ranks)
-
                                 flat_fiber_ranks_contain_expr_ranks=False #TODO: var name is no longer correct
-                                #print("RANKS",ranks)
                                 for rank in expr_ranks:
                                     # Determine whether a dataspace projection expression projects onto this format interface
-                                    #print(rank,ranks,rank not in ranks)
                                     if rank in ranks:
                                         flat_fiber_ranks_contain_expr_ranks=True
                                 
@@ -158,11 +142,8 @@ def bind_format_iface(arch, mapping, prob, sparseopts):
                                     data_space_sop_is_bound[idx]=True
 
                             # Construct format interface
-                            #print("PROJECTION_ISSUE:",dataspace_proj_onto_fmt_iface)
                             fmt_ifaces_temp.append({'fiber_layout':fiber_layout,'format':fmt,'ranks':ranks,'pgens':pgen_idxs,'projection':dataspace_proj_onto_fmt_iface})
-                            #print("FORMAT:",fmt)
 
-                    
                     # - Second-pass binding: bind dataspace projection SOPs (the ones not bound in the first-pass) to pgens and format interfaces; infer formats
                     for idx in range(len(data_space_projection)):
                         if not data_space_sop_is_bound[idx]:
@@ -188,16 +169,11 @@ def bind_format_iface(arch, mapping, prob, sparseopts):
                             data_space_sop_is_bound[idx]=True
 
                     # -- Pass 2b: infer formats
-
-                    #print("fmt_access_rank_is_bound (PRE)",fmt_access_rank_is_bound)
-                    #print("data_space_sop_is_bound (PRE)",data_space_sop_is_bound)
                     for idx in range(len(fmt_access_binding)):
-                        #print("idx:",idx)
                         if not fmt_access_rank_is_bound[idx]:
                             seek_fmt_iface=True
                             jdx=0
                             while(seek_fmt_iface and jdx < len(fmt_ifaces_temp)):
-                                #print("jdx:",jdx)
                                 if not 'format' in fmt_ifaces_temp[jdx]:
                                     seek_fmt_iface=False
                                     fmt_ifaces_temp[jdx]['format']=fmt_access_binding[idx]['format']
@@ -220,23 +196,13 @@ def bind_format_iface(arch, mapping, prob, sparseopts):
 
                 fmt_ifaces[buffer][dtype].extend(fmt_ifaces_temp)
 
-            #print("buffer",buffer)
-            #print("dtype",dtype)
             for idx in range(len(fmt_ifaces[buffer][dtype])):
                 fmt_iface=fmt_ifaces[buffer][dtype][idx]
                 for pgen_idx in fmt_iface['pgens']:
                     loop_rank=pgens[buffer][dtype][pgen_idx]['rank']
                     loop_buffer=pgens[buffer][dtype][pgen_idx]['loop_buffer']
-                    #print("loop_buffer",loop_buffer)
                     loop_to_iface_map[loop_buffer][dtype][loop_rank]={'fmt_iface':idx, 'buffer':buffer, 'dtype':dtype}
-                    
-                #print("data_space_sop_is_bound (POST)",data_space_sop_is_bound)
-                #print("fmt_access_rank_is_bound (POST)",fmt_access_rank_is_bound)
-                #print("nontrivial_pgen_is_bound",nontrivial_pgen_is_bound)
-
-    #print(loop_to_iface_map)
-
-    #print(fmt_ifaces)   
+ 
     return copy.deepcopy(fmt_ifaces), pgens, buffer_loop_binding, loop_to_iface_map
 
 def get_skip_format_interface_bindings(target_buffer, target_dtype, condition_buffer, condition_dtype, loop_to_iface_map):
@@ -285,5 +251,4 @@ def bind_action_optimization(arch, mapping, prob, sparseopts, fmt_ifaces, loop_t
                             fmt_iface_list=get_skip_format_interface_bindings(target_buffer, target_dtype, condition_buffer, condition_dtype, loop_to_iface_map)
                             raw_skips.extend(fmt_iface_list)
 
-    print(raw_skips)
     return raw_skips

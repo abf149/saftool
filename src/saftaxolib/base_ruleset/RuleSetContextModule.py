@@ -43,10 +43,6 @@ checkComponentHasNoTopologicalHoles = b_.NOT(p_.hasTopologicalHole)
 ''' - CheckComponentHasNoUnknownInterfaceTypes: the component's interface ports should all have known types'''
 predicateComponentHasNoUnknownInterfaceTypes = p_.isComponentOrPrimitive
 checkComponentHasNoUnknownInterfaceTypes = b_.NOT(q_.anyForObjPorts(p_.isPortWithUnknownFormat))
-# print('\nFailed',checkComponentHasNoUnknownInterfaceTypes,'details:')
-# print('- Component id:',component.getId())
-# print('- Port id:',port.getId())
-# print('- Port format:',port.getFormatType())
 ''' - CheckComponentHasNoUnknownAttributeTypes: the component's attributes should all have known types'''
 predicateComponentHasNoUnknownAttributeTypes = p_.isComponentOrPrimitive
 checkComponentHasNoUnknownAttributeTypes = b_.NOT(q_.anyForObjAttributes(p_.isUnknownFormatAttribute))

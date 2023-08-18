@@ -1,5 +1,6 @@
 '''SAFinfer IO library - CLI argparse and YAML dump routines'''
 import util.sparseloop_config_processor as sl_config, yaml, argparse
+from util.helper import info,warn,error
 
 '''Config - condition the format of YAML file dumps'''
 yaml.Dumper.ignore_aliases = lambda *args : True
@@ -36,32 +37,32 @@ def parse_args():
     args = parser.parse_args()
 
     # Parse the CLI arguments
-    print("SAFinfer.\n")    
-    print("Parsing input files:")    
+    info("SAFinfer.\n")    
+    info("Parsing input files:")    
     if len(args.dir_in)>0:
-        print("- arch:",args.dir_in+'arch.yaml')
+        info("- arch:",args.dir_in+'arch.yaml')
         arch=sl_config.load_config_yaml(args.dir_in+'arch.yaml')
-        print("- map:",args.dir_in+'map.yaml')
+        info("- map:",args.dir_in+'map.yaml')
         mapping=sl_config.load_config_yaml(args.dir_in+'map.yaml')
-        print("- prob:",args.dir_in+'prob.yaml')
+        info("- prob:",args.dir_in+'prob.yaml')
         prob=sl_config.load_config_yaml(args.dir_in+'prob.yaml')
-        print("- sparseopts:",args.dir_in+'sparseopts.yaml')
+        info("- sparseopts:",args.dir_in+'sparseopts.yaml')
         sparseopts=sl_config.load_config_yaml(args.dir_in+'sparseopts.yaml')        
     else:    
-        print("- arch:",args.arch)
+        info("- arch:",args.arch)
         arch=sl_config.load_config_yaml(args.arch)
-        print("- map:",args.map)
+        info("- map:",args.map)
         mapping=sl_config.load_config_yaml(args.map)
-        print("- prob:",args.prob)
+        info("- prob:",args.prob)
         prob=sl_config.load_config_yaml(args.prob)
-        print("- sparseopts:",args.sparseopts)
+        info("- sparseopts:",args.sparseopts)
         sparseopts=sl_config.load_config_yaml(args.sparseopts)
 
     # Check reconfigurable-arch so we know whether to crash (if True)
     if not args.reconfigurable_arch:
-        print("- fixed arch (reconfigurable-arch == False)")
+        info("- fixed arch (reconfigurable-arch == False)")
     else:
-        print("- ERROR reconfigurable arch not yet supported")
+        error("- ERROR reconfigurable arch not yet supported")
         #assert(False)
 
     bind_out_path=args.binding_out
@@ -95,9 +96,7 @@ def dump_bindings(bind_out_path,fmt_iface_bindings,skip_bindings):
     Returns: None
     '''
 
-    print('fmt_iface_bindings:',fmt_iface_bindings)
-    print('skip_bindings:',skip_bindings)
-    print("- Saving to",bind_out_path)
+    info("- Saving to",bind_out_path)
     with open(bind_out_path, 'w') as fp:
         bindings_data_structure={"fmt_iface_bindings":fmt_iface_bindings, \
                                  "skip_bindings":skip_bindings}
@@ -112,5 +111,5 @@ def dump_saf_uarch_topology(inferred_arch,topo_out_path):
 
     Returns: None
     '''
-    print("- Dumping inferred SAF microarchitecture topology to",topo_out_path,"...")
+    info("- Dumping inferred SAF microarchitecture topology to",topo_out_path,"...")
     inferred_arch.dump(topo_out_path)

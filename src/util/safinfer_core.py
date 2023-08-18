@@ -2,6 +2,7 @@
 from util import sparseloop_config_processor as sl_config, safinfer_io as safio
 from solver.solve import Solver
 from solver.build import build_taxonomic_arch_and_safs_from_bindings
+from util.helper import info,warn,error
 
 '''Constants - default list of ruleset names to apply to SAF microarchitecture topology inference'''
 default_ruleset_list = ['base_ruleset', \
@@ -28,8 +29,8 @@ def build_saf_uarch_inference_problem(arch, sparseopts, prob, mapping, reconfigu
     - taxo_arch: SAF microarchitecture topology with holes (problem description for solver)
     '''
     # - Compute SAF microarchitecture bindings to architectural buffers    
-    print("\nBuilding the SAF microarchitecture inference problem.")
-    print("- Computing SAF microarchitecture bindings to architectural buffers.")
+    info("\nBuilding the SAF microarchitecture inference problem.")
+    info("- Computing SAF microarchitecture bindings to architectural buffers.")
     fmt_iface_bindings=[]
     skip_bindings=[]
     data_space_dict_list=[]
@@ -47,7 +48,7 @@ def build_saf_uarch_inference_problem(arch, sparseopts, prob, mapping, reconfigu
         dtype_list=list(data_space_dict_list.keys())
 
     # - Dump bindings
-    print("  => Done. Dumping bindings to",bind_out_path)
+    info("  => Done. Dumping bindings to",bind_out_path)
     safio.dump_bindings(bind_out_path,fmt_iface_bindings,skip_bindings)
 
     # - Create microarchitecture topology with dummy buffers interfaced to SAF microarchitectures which contain holes
@@ -55,7 +56,7 @@ def build_saf_uarch_inference_problem(arch, sparseopts, prob, mapping, reconfigu
     # Create a data structure to represent architectural buffers and SAF microarchitectures
     # Problem- and mapping-independent, given fmt_iface_bindings, skip_bindings
     # and data_space_dict_list have already been computed
-    print("- Realizing microarchitecture with topological holes, based on bindings.\n")
+    info("- Realizing microarchitecture with topological holes, based on bindings.\n")
     return build_taxonomic_arch_and_safs_from_bindings(arch, fmt_iface_bindings, skip_bindings, dtype_list)
 def solve_saf_uarch_inference_problem(taxo_arch, saftaxolib, ruleset_names=default_ruleset_list):
     '''
@@ -71,15 +72,15 @@ def solve_saf_uarch_inference_problem(taxo_arch, saftaxolib, ruleset_names=defau
     - result -- solver results structure, including success/failure and SAF microarchitecture taxonomy.
     '''
 
-    print("\nSolving the SAF microarchitecture inference problem.\n")    
-    print("- Loading rules engine.")
+    info("\nSolving the SAF microarchitecture inference problem.\n")    
+    info("- Loading rules engine.")
     # Extend rulesnames with SAF taxonomic ruleset library directory path
     # prefix to get list of ruleset paths, then load rulesets into RulesEngine
     # and solve for SAF microarchitecture topology
     ruleset_full_paths=[saftaxolib+ruleset for ruleset in ruleset_names]
     rules_engine = Solver(ruleset_full_paths)
     rules_engine.preloadRules()
-    print("- Solving.")    
+    info("- Solving.")    
     result=rules_engine.run(taxo_arch)
     
     return result

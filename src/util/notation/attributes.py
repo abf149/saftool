@@ -1,9 +1,11 @@
+from util.helper import info, warn, error
+
 '''Nets'''
 def getNetType(x,x_type="port"):
     if x_type=="port":
         return x.getNetType().getValue()
     else:
-        print("Unknown x_type in getNetType()")
+        error("Unknown x_type in getNetType()")
         assert(False)
 
 '''Ports'''
@@ -11,7 +13,7 @@ def getFormat(x,x_type="port"):
     if x_type=="port":
         return x.getFormatType().getValue()
     else:
-        print("Unknown x_type in getFormatType()")
+        error("Unknown x_type in getFormatType()")
         assert(False)
 
 def portInObjInterface(port,obj):
