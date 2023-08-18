@@ -1,8 +1,18 @@
 ''' Helper functions '''
 
 import yaml
+import logging
 
 log_path="./safinfer.log"
+logging.basicConfig(filename=log_path, level=logging.INFO)
+def log_concat(*args):
+    return ' '.join(map(str, args))
+def info(*args):
+    logging.info(log_concat(*args))
+def warn(*args):
+    logging.warn(log_concat(*args))
+def error(*args):
+    logging.error(log_concat(*args))
 
 def dirpath_to_importpath(dirpath):
     '''Directory path must be relative to pwd'''
