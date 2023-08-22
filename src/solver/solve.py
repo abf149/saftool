@@ -117,10 +117,14 @@ class Solver:
             rule_engine_sm_pass_count += 1            
 
         if next_sm_state=='complete':
-            info('- COMPLETE: microarchitecture inference')
+            info('- COMPLETE: microarchitecture inference',also_stdout=True)
             res=True
         else:
-            error('- ERROR: could not infer microarchitecture')
+            error('- ERROR: could not infer microarchitecture',also_stdout=True)
+            error("-- Component:",component.getId(),"category:",component.getCategory())
+            error(str(component))
+            info("- Terminating. Check logs for details.")
+
             res=False
 
         info('DONE: rule engine ')

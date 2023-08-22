@@ -117,4 +117,16 @@ completion_rule_set:
     predicate:
       classtype: FunctionReference
       id: predicate
-      value: predicateComponentHasNoUnknownAttributeTypes        
+      value: predicateComponentHasNoUnknownAttributeTypes
+
+  # - IsComponentOrArchitectureHasTopology: no topological holes in the design
+  - classtype: CompletionRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: criterion
+      value: checkIsComponentOrArchitectureHasTopology
+    id: IsComponentOrArchitectureHasTopology
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsComponentOrArchitectureHasTopology   

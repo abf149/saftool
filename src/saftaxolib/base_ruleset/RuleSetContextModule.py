@@ -14,6 +14,9 @@ assertNetHasConsistentPortFormatType = q_.forObjNetsForNetPorts("all", \
                                                                 a_.getFormat, \
                                                                 comparator = FormatType.compareFormatTypes
                                                                )
+'''- AssertIsComponentOrArchitectureHasTopology: no topological holes in design'''
+predicateIsComponentOrArchitectureHasTopology = p_.isComponentOrArchitecture
+checkIsComponentOrArchitectureHasTopology = b_.NOT(p_.hasTopologicalHole)
 
 ''' Topology rewrite rules'''
 ''' - TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType: infer unknown port types on nets where some port types are known'''

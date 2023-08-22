@@ -11,15 +11,21 @@ except:
 logging.basicConfig(filename=log_path, level=logging.INFO)
 def log_concat(*args):
     return ' '.join(map(str, args))
-def info(*args):
+def info(*args,also_stdout=False):
     if do_log:
         logging.info(log_concat(*args))
-def warn(*args):
+    if also_stdout:
+        print(*args)
+def warn(*args,also_stdout=False):
     if do_log:
         logging.warn(log_concat(*args))
-def error(*args):
+    if also_stdout:
+        print(*args)
+def error(*args,also_stdout=False):
     if do_log:
         logging.error(log_concat(*args))
+    if also_stdout:
+        print(*args)
 
 def dirpath_to_importpath(dirpath):
     '''Directory path must be relative to pwd'''

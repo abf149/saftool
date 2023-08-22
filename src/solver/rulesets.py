@@ -163,8 +163,17 @@ class ValidationRuleSet(RuleSet):
             if result_predicate:
                 # Predicate True; assert
                 info("---- Asserting:",validation_rule.getAssertion().getValue())
-                assert(result_assertion)
-                info("---- => ok.")
+                if result_assertion:
+                    info("---- => ok.")                    
+                else:
+                    error("---- => Validation rule FAILED!:",validation_rule.id,also_stdout=True)
+                    error("----- Component:",component.getId(),"category:",component.getCategory(),also_stdout=True)
+                    error(str(component),also_stdout=True)
+                    error("-- Validation ruleset FAILED!:",self.getId(),"",also_stdout=True)
+                    error("-- Exiting completion rule set: ",self.getId(),"",also_stdout=True)
+                    error("- Terminating.",also_stdout=True)
+                    assert(False)
+     
 
         info("-- Exiting validation rule set: ",self.id,"")
 class CompletionRuleSet(RuleSet):
@@ -205,8 +214,10 @@ class CompletionRuleSet(RuleSet):
                 if result_criterion:
                     info("---- => Completion rule PASSED.")
                 else:
-                    warn("---- => Completion rule FAILED!")
-                    warn("-- Completion ruleset FAILED:",self.getId(),"")
+                    error("---- => Completion rule FAILED!",completion_rule.id)
+                    error("----- Component:",component.getId(),"category:",component.getCategory())
+                    #error(str(component))
+                    error("-- Completion ruleset FAILED:",self.getId(),"")
                     info("-- Exiting completion rule set: ",self.getId(),"")
                     return False
                 
