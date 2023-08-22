@@ -1,4 +1,16 @@
 # MetadataParser (primitive component) RuleSet
+import util.notation.predicates as p_
+import util.notation.generators.boolean_operators as b_
+import util.notation.generators.comparison as c_
+import util.notation.microarchitecture as m_
+import util.notation.attributes as a_
+from util.taxonomy.expressions import FormatType
+
+MetadataParser = m_.PrimitiveCategory().name("MetadataParser") \
+                   .port_in("md_in","md","?") \
+                   .port_out("at_bound_out","pos","addr") \
+                   .attribute("format","format",FormatType.fromIdValue("format","?")) \
+                   .generator(None)
 
 # - MetadataParser validation rules
 
@@ -9,9 +21,7 @@ def assertPrimitiveMetadataParserAttributesAreSupported(obj):
     fmt=obj.getAttributeById('format').getValue()
     return fmt in ['C','B','R','U','?']
 
-
-def predicateIsPrimitiveMetadataParser(obj):
-    return type(obj).__name__ == 'Primitive' and obj.getCategory() == 'MetadataParser'
+predicateIsPrimitiveMetadataParser=b_.AND(p_.isPrimitive,c_.equals(MetadataParser.name_,a_.getCategory))
 
 # - MetadataParser rewrite rules
 

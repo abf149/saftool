@@ -35,7 +35,6 @@ def get_buffer_stubs_and_format_safs(arch, fmt_iface_bindings, buffer_stub_list=
             fmt_saf=SAFFormat.copy() \
                              .target(buffer) \
                              .set_attribute("fibertree",datatype_fmt_ifaces,"fibertree")
-                             #.build('format_saf')
 
             buffer_stub=BufferStub.copy() \
                                   .set_attribute("fibertree",datatype_fmt_ifaces,"fibertree") \

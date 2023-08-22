@@ -53,14 +53,16 @@ class NetWrapper:
 
 class TopologyWrapper:
     def __init__(self,component_list=[],net_list=[],generator_type=None,topological_hole=True):
-        self.component_list=component_list
-        self.net_list=net_list
         self.generator_type=generator_type
         self.net_class=False
-        if len(component_list)>0 or len(net_list) >0:
-            self.topological_hole_=False
+        if topological_hole:
+            self.topological_hole_=True
+            self.component_list=[]
+            self.net_list=[]
         else:
-            self.topological_hole_=topological_hole
+            self.topological_hole_=False
+            self.component_list=component_list
+            self.net_list=net_list          
         if self.generator_type is not None:
             error("Topology does not yet support generator_type")
             assert(False)
@@ -145,6 +147,9 @@ class PrimitiveCategory:
         self.name_=name_param
         return self
 
+    def getName(self):
+        return self.name_
+
     def attribute(self,attr_name,attr_type,attr_default="?"):
         '''
         Add an attribute\n\n
@@ -166,6 +171,7 @@ class PrimitiveCategory:
         Arguments:\n
         - attr_name -- Primitive category attribute name\n
         - val -- Updated attribute value
+        - att_type -- None==typical setter behavior, or fibertree, or rank_list
         '''        
         if att_type is None:
             attr_names=[att[0] for att in self.attributes_]
@@ -177,6 +183,9 @@ class PrimitiveCategory:
                 flat_rank_fmts.extend([fmt_str_convert[fmt_iface['format']] for fmt_iface in val[dtype]])
             flat_rank_fmts=[FormatType.fromIdValue('format',fmt_str) for fmt_str in flat_rank_fmts]
             self.set_attribute(attr_name,flat_rank_fmts)
+        elif att_type == "rank_list":
+            # Assume val is a list of flattened rank formats
+            self.set_attribute(attr_name,val)
         else:
             assert(False)
         return self
@@ -264,7 +273,6 @@ class SAFCategory(PrimitiveCategory):
         if id is None:
             # Default id: Test<category name>
             id="Test"+self.name_
-        error("Attribute values:",self.attribute_vals)
         saf=SAF.fromIdCategoryAttributesTarget(id, self.name_, self.attribute_vals, self.target_)
         return saf
 
@@ -272,14 +280,14 @@ class ComponentCategory(PrimitiveCategory):
 
     def __init__(self):
         super().__init__()
-        self.topology_=TopologyWrapper(topological_hole=True)
+        self.topology_=TopologyWrapper(component_list=[],net_list=[],topological_hole=True)
 
     def topological_hole(self):
-        self.topology_=TopologyWrapper(topological_hole=True)
+        self.topology_=TopologyWrapper(component_list=[],net_list=[],topological_hole=True)
         return self
 
-    def topology(self,topology):
-        self.topology_=topology
+    def topology(self,topology_):
+        self.topology_=topology_
         return self
 
     def build(self,id):
@@ -346,10 +354,10 @@ class ArchitectureCategory(ComponentCategory):
 
 ArchitectureBase = ArchitectureCategory()
 
+#.port_in("pos_in$x","pos","addr") \
 BufferStub = PrimitiveCategory().name("BufferStub") \
                                 .port_out("md_out$x","md","$v") \
-                                .port_in("pos_in$x","pos","addr") \
-                                .port_in("at_bound_in$x","pos","?") \
+                                .port_in("at_bound_in$x","pos","addr") \
                                 .attribute("fibertree",["fibertree"],[None]) \
                                 .generator("fibertree")
 

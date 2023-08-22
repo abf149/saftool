@@ -80,7 +80,7 @@ def solve_saf_uarch_inference_problem(taxo_arch, saftaxolib, ruleset_names=defau
     ruleset_full_paths=[saftaxolib+ruleset for ruleset in ruleset_names]
     rules_engine = Solver(ruleset_full_paths)
     rules_engine.preloadRules()
-    info("- Solving.")    
+    info("\n\n- Solving.")    
     result=rules_engine.run(taxo_arch)
     
     return result

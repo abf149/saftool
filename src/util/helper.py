@@ -1,15 +1,13 @@
 ''' Helper functions '''
-
 import yaml,logging,os
 
+'''Logging'''
 do_log=False
 log_path="./safinfer.log"
-
 try:
     os.remove(log_path)
 except:
     pass
-
 logging.basicConfig(filename=log_path, level=logging.INFO)
 def log_concat(*args):
     return ' '.join(map(str, args))

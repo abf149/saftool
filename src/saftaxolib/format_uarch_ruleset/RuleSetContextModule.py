@@ -2,50 +2,26 @@
 
 from util.taxonomy.expressions import *
 from util.taxonomy.designelement import *
+import util.notation.predicates as p_
+import util.notation.generators.boolean_operators as b_
+import util.notation.generators.quantifiers as q_
+import util.notation.generators.comparison as c_
+import util.notation.attributes as a_
+import util.notation.microarchitecture as m_
+from saftaxolib.primitive_md_parser_ruleset.RuleSetContextModule import MetadataParser
+
+# - Format microarchitecture
+
+FormatUarch = m_.ComponentCategory().name("FormatUarch") \
+                                    .port_in("md_in$x","md","$v") \
+                                    .port_out("at_bound_out$x","pos","addr") \
+                                    .attribute("fibertree",["fibertree"],[None]) \
+                                    .generator("fibertree")
 
 # - Format SAF rewrite rules
 
 # -- ConcretizeArchitectureFormatSAFsToFormatUarches
 # --- concretization rule
-
-def genFormatUarchWithHole(format_uarch_id, rank_format_list):
-    '''Helper function for incomplete format uarch testbench. Generate an example format uarch with either a topological hole, or a mix of unknown port and attribute types'''
-
-    # Category
-    component_category='FormatUarch'
-
-    # Attributes
-    #rank_format_list=[FormatType.fromIdValue('format','C'),FormatType.fromIdValue('format','B')]
-    component_attributes=[rank_format_list]
-
-    # Interface
-    component_interface=[]
-
-    # - build interface
-    for idx in range(len(rank_format_list)):
-
-        # -- md_in port
-        format_type=rank_format_list[idx]
-        net_type=NetType.fromIdValue('TestNetType','md')
-        port_md_in=Port.fromIdDirectionNetTypeFormatType('md_in'+str(idx), 'in', net_type, format_type)          
-
-        # -- at_bound_out port
-        net_type=NetType.fromIdValue('TestNetType','pos')
-        format_type=FormatType.fromIdValue('TestFormatType','addr')    
-        port_at_bound_out=Port.fromIdDirectionNetTypeFormatType('at_bound_out'+str(idx), 'out', net_type, format_type)   
-
-        component_interface.append(port_md_in)
-        component_interface.append(port_at_bound_out)
-
-    # Create topological hole
-    component_topology=[]
-    topology_id='TestTopologyHole'
-    component_topology=Topology.holeFromId(id)
-
-    # build component
-    component=Component.fromIdCategoryAttributesInterfaceTopology(format_uarch_id,component_category,component_attributes,component_interface,component_topology)
-
-    return component
 
 def formatUarchPortIdToBufferPortIdMapping(format_uarch_port_id):
     format_uarch_port_prefix_list=['md_in','at_bound_out']
@@ -74,8 +50,12 @@ def concretizeArchitectureFormatSAFsToFormatUarches(obj):
 
     for idx in range(len(arch_format_saf_list)):
         # Concretize format SAF to format uarch
-        buffer_id=arch_format_saf_target_list[idx]        
-        format_uarch = genFormatUarchWithHole(buffer_id+"_datatype_format_uarch",arch_format_saf_ranks_list[idx])
+        buffer_id=arch_format_saf_target_list[idx]     
+
+        format_uarch=FormatUarch.copy() \
+                            .set_attribute("fibertree",arch_format_saf_ranks_list[idx],"rank_list") \
+                            .generate_ports("fibertree","fibertree") \
+                            .build(buffer_id+"_datatype_format_uarch")
 
         # Add format uarch to architecture
         arch_topology_component_list.append(format_uarch)
@@ -110,40 +90,20 @@ def concretizeArchitectureFormatSAFsToFormatUarches(obj):
 
 
 
-# --- predicate
-
-def predicateIsArchitectureHasFormatSAF(obj):
-    '''Object is an architecture with at least one format SAF'''
-    return type(obj).__name__ == 'Architecture' and ('format' in [saf.getCategory() for saf in obj.getSAFList()])
+''' --- predicate '''
+'''Object is an architecture with at least one format SAF'''
+predicateIsArchitectureHasFormatSAF=b_.AND(p_.isArchitecture, \
+                                           q_.anyForObjSAFs( \
+                                                c_.equals( \
+                                                    m_.SAFFormat.name_, \
+                                                    a_.getCategory \
+                                                )
+                                            )
+                                    )
 
 # - Format uarch rewrite rules
 
 # -- TransformTopologicalHoleToPerRankMdParserTopology: For a format uarch with a topological hole, fill the hole with a topology comprising one MetadataParser primitive per traversed tensor rank at this buffer level
-
-def genPrimitiveMetadataParser(primitive_id, fmt):
-    '''Helper function for format uarch testbench. Generate a MetadataParser primitive.'''
-
-    # Category
-    primitive_category='MetadataParser'
-
-    # Attributes
-    primitive_attributes=[FormatType.fromIdValue('format',fmt)]
-
-    # Interface
-    # - md_in
-    net_type=NetType.fromIdValue('TestNetType','md')
-    format_type=FormatType.fromIdValue('TestFormatType',fmt)    
-    port_md_in=Port.fromIdDirectionNetTypeFormatType('md_in', 'in', net_type, format_type)    
-
-    # - at_bound_out
-    net_type=NetType.fromIdValue('TestNetType','pos')
-    format_type=FormatType.fromIdValue('TestFormatType','addr')
-    at_bound_out=Port.fromIdDirectionNetTypeFormatType('at_bound_out', 'out', net_type, format_type)
-
-    # - build interface
-    primitive_interface=[port_md_in,at_bound_out]
-
-    return Primitive.fromIdCategoryAttributesInterface(primitive_id, primitive_category, primitive_attributes, primitive_interface)
 
 def generateFormatUarchTopology(rank_format_strs):
    # Topology ID
@@ -153,8 +113,9 @@ def generateFormatUarchTopology(rank_format_strs):
     component_list=[]
     for idx in range(len(rank_format_strs)):
         fmt_str=rank_format_strs[idx]
-        component_list.append(genPrimitiveMetadataParser('TestMetadataParser'+str(idx), fmt_str))
-        
+        component_list.append(MetadataParser.copy().set_attribute('format', \
+                                               FormatType.fromIdValue('format',fmt_str)
+                                              ).build('TestMetadataParser'+str(idx)))
 
     # Net list setup
 
@@ -180,11 +141,8 @@ def generateFormatUarchTopology(rank_format_strs):
 
 def transformTopologicalHoleToPerRankMdParserTopology(obj):
     '''Fill the topological hole with a topology comprising one MetadataParser primitive per traversed tensor rank at this buffer level'''
-
     rank_format_strs = [fmt_type['value'] for fmt_type in obj.attributes[0]]
-
     obj.setTopology(generateFormatUarchTopology(rank_format_strs))
-
     return obj
 
 def predicateIsComponent(obj):
@@ -198,3 +156,4 @@ def predicateHasTopologicalHole(obj):
 
 def predicateIsComponentIsFormatUarchHasTopologicalHole(obj):
     return predicateIsComponent(obj) and predicateIsFormatUarch(obj) and predicateHasTopologicalHole(obj)
+

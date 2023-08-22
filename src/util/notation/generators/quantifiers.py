@@ -167,6 +167,19 @@ def anyForObjComponents(predicate):
 
     return any_lmbd
 
+'''Quantifiers over object SAFs'''
+def anyForObjSAFs(predicate):
+    '''
+    '''
+    def any_lmbd(obj):
+        for saf in obj.getSAFList():
+            if predicate(saf):
+                # Break if predicate==True for any SAF
+                return True
+        return False
+
+    return any_lmbd
+
 '''Convenient compound quantifiers'''
 def forObjNetsForNetPorts(outer,inner,func,comparator=lambda x,y:x==y):
     '''

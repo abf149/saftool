@@ -1,5 +1,6 @@
 '''SAFinfer - tool to build and solve SAF microarchitecture inference problem from Sparseloop inputs'''
 from util import safinfer_core as safcore, safinfer_io as safio
+import util.helper as helper
 
 ''' main() - build and solve SAF microarchitecture inference problem
 based on CLI arguments and dump the inferred SAF microarchitecture
@@ -15,8 +16,11 @@ if __name__=="__main__":
     reconfigurable_arch, \
     bind_out_path, \
     topo_out_path, \
-    saftaxolib = safio.parse_args()
+    saftaxolib, \
+    do_logging = safio.parse_args()
 
+    print("logging:",do_logging)
+    helper.do_log=do_logging
     print("reconfigurable_arch:",reconfigurable_arch)
 
     # Build and solve the SAF microarchitecture inference problem:

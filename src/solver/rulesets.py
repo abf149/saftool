@@ -28,15 +28,15 @@ class RuleSet(SerializableObject):
         '''Detect a rule set in the provided directory, load the rule set & predicate/conditional code'''
         rule_set_filename=os.path.join(rule_set_path,"rule_set.yaml")
 
-        info('\n- Detecting rule set at',rule_set_path,'\n')
-        info('\n-- Importing rule set from',rule_set_filename,'\n')
+        info('- Detecting rule set at',rule_set_path)
+        info('-- Importing rule set from',rule_set_filename,'')
         rule_set_obj=RuleSet.fromYamlFilename(rule_set_filename)
 
-        info('\n-- Importing rule set context module',os.path.join(rule_set_path,"RuleSetContextModule.py"),'\n')
+        info('-- Importing rule set context module',os.path.join(rule_set_path,"RuleSetContextModule.py"),'')
         exec_import_command=dirpath_to_import_expression(rule_set_path,'RuleSetContextModule','rule_set_context_module')
         info('--- Performing generated import command: ',exec_import_command)
         exec(exec_import_command)
-        info('\n-- Done importing.\n')
+        info('-- Done importing.')
         return rule_set_obj, rule_set_context_module #rule_set_context_module is loaded by exec() above
 
     def setValidationRuleSet(self, validation_rule_set):
@@ -89,44 +89,44 @@ class RuleSet(SerializableObject):
         result_rewrite_component=component
         result_check_complete=True
 
-        info("\n- Stepping into rule set:",self.id,"\n")  
+        info("- Stepping into rule set:",self.id,"")  
 
         # Optionally evaluate validate rules
         if validate:
             if self.hasValidationRuleSet():
-                info("\n-- Test validate rule set. \n")
+                info("-- Test validate rule set. ")
                 validate_rule_set=self.getValidationRuleSet()
                 validate_rule_set.evaluateAssertionsInModuleContext(component,context_module)
             else:
-                info("\n-- No validate rule set. \n")
+                info("-- No validate rule set. ")
         else:
-            warn("\n-- Skipping validate rule set, if any.\n")
+            warn("-- Skipping validate rule set, if any.")
 
         # Optionally evaluate rewrite rules
         # TODO
 
         if rewrite:
             if self.hasRewriteRuleSet():
-                info("\n-- Evaluate rewrite rule set.\n")
+                info("-- Evaluate rewrite rule set.")
                 rewrite_rule_set=self.getRewriteRuleSet()
                 result_rewrite_modify,result_rewrite_component = rewrite_rule_set.evaluateTransformsInModuleContext(component,context_module)             
             else:
-                info("\n-- No rewrite rule set. \n")
+                info("-- No rewrite rule set. ")
         else:
-            warn("\n-- Skipping rewrite rule set, if any.\n")
+            warn("-- Skipping rewrite rule set, if any.")
 
         # Optionally evaluate check_complete rules
         if check_complete:
             if self.hasCompletionRuleSet():
-                info("\n-- Test completion rule set. \n")
+                info("-- Test completion rule set. ")
                 completion_rule_set=self.getCompletionRuleSet()
                 result_check_complete=completion_rule_set.evaluateCriteriaInModuleContext(component,context_module)
             else:
-                info("\n-- No check_complete rule set. \n")
+                info("-- No check_complete rule set. ")
         else:
-            warn("\n-- Skipping check_complete rule set, if any.\n")        
+            warn("-- Skipping check_complete rule set, if any.")        
 
-        info("\n- Exiting rule set: ",self.id,"\n") 
+        info("- Exiting rule set: ",self.id,"") 
         return {"result_validate":result_validate,"result_rewrite_modify":result_rewrite_modify,"result_rewrite_component":result_rewrite_component,"result_check_complete":result_check_complete}
 class ValidationRuleSet(RuleSet):
     '''Rule engine ValidationRule set, comprising a list of ValidationRule's '''
@@ -152,7 +152,7 @@ class ValidationRuleSet(RuleSet):
     def evaluateAssertionsInModuleContext(self, component, context_module):
         '''Return the results of evaluating the ValidationRule's in this ValidationRuleSet'''
         
-        info("\n-- Stepping into validation rule set: ",self.id,"\n")        
+        info("-- Stepping into validation rule set: ",self.id,"")        
         validation_rule_obj_list=self.getValidationRules()
 
         for validation_rule in validation_rule_obj_list:
@@ -166,7 +166,7 @@ class ValidationRuleSet(RuleSet):
                 assert(result_assertion)
                 info("---- => ok.")
 
-        info("\n-- Exiting validation rule set: ",self.id,"\n")
+        info("-- Exiting validation rule set: ",self.id,"")
 class CompletionRuleSet(RuleSet):
     '''Rule engine CompletionRule set, comprising a list of CompletionRule's '''
 
@@ -191,7 +191,7 @@ class CompletionRuleSet(RuleSet):
     def evaluateCriteriaInModuleContext(self, component, context_module):
         '''Return the results of evaluating the CompletionRule's in this CompletionRuleSet'''
         
-        info("\n-- Stepping into completion rule set: ",self.getId(),"\n")        
+        info("-- Stepping into completion rule set: ",self.getId(),"")        
         completion_rule_obj_list=self.getCompletionRules()
 
         for completion_rule in completion_rule_obj_list:
@@ -206,13 +206,13 @@ class CompletionRuleSet(RuleSet):
                     info("---- => Completion rule PASSED.")
                 else:
                     warn("---- => Completion rule FAILED!")
-                    warn("\n-- Completion ruleset FAILED:",self.getId(),"\n")
-                    info("\n-- Exiting completion rule set: ",self.getId(),"\n")
+                    warn("-- Completion ruleset FAILED:",self.getId(),"")
+                    info("-- Exiting completion rule set: ",self.getId(),"")
                     return False
                 
 
-        info("\n-- Completion ruleset PASSED:",self.getId(),"\n")
-        info("\n-- Exiting completion rule set: ",self.getId(),"\n")    
+        info("-- Completion ruleset PASSED:",self.getId(),"")
+        info("-- Exiting completion rule set: ",self.getId(),"")    
 
         return True
 class RewriteRuleSet(RuleSet):
@@ -224,12 +224,13 @@ class RewriteRuleSet(RuleSet):
     @classmethod
     def fromIdRewriteRules(cls, id, rewrite_rule_obj_list):
         '''Init from id and a list of RewriteRule's '''
+        print("rewrite_rule_obj_list:",rewrite_rule_obj_list)
         obj=cls.fromId(id)
         obj.setRewriteRules(rewrite_rule_obj_list)
         return obj
 
     def setRewriteRules(self, rewrite_rule_obj_list):
-        '''Consumes a list of CompletionRule objects, converts to a list of dicts and sets the completion_rules attribute'''
+        '''Consumes a list of RewriteRule objects, converts to a list of dicts and sets the rewrite_rules attribute'''
         self.setAttrAsDictList('rewrite_rules', rewrite_rule_obj_list)
 
     def getRewriteRules(self):
@@ -239,7 +240,7 @@ class RewriteRuleSet(RuleSet):
     def evaluateTransformsInModuleContext(self, component, context_module):
         '''Return the results of evaluating the RewriteRule's in this RewriteRuleSet'''
         
-        info("\n-- Stepping into rewrite rule set: ",self.getId(),"\n")        
+        info("-- Stepping into rewrite rule set: ",self.getId(),"")        
         rewrite_rule_obj_list=self.getRewriteRules()
 
         rewrite_modify=False
@@ -256,14 +257,14 @@ class RewriteRuleSet(RuleSet):
                 info("---- Evaluating:",rewrite_rule.getTransform().getValue())
 
                 if rewrite_modify:
-                    info("---- => did REWRITE!")
-                    info("\n-- Rewrite ruleset evaluated WITH rewrites:",self.getId(),"\n")
-                    info("\n-- Exiting rewrite rule set: ",self.getId(),"\n")
+                    info("\n\n---- => did REWRITE!\n\n")
+                    info("-- Rewrite ruleset evaluated WITH rewrites:",self.getId(),"")
+                    info("-- Exiting rewrite rule set: ",self.getId(),"")
                     return True, rewrite_component                    
                 else:
                     info("---- => No rewrite.")                    
 
-        info("\n-- Rewrite ruleset evaluated with NO rewrites:",self.getId(),"\n")
-        info("\n-- Exiting rewrite rule set: ",self.getId(),"\n")    
+        info("-- Rewrite ruleset evaluated with NO rewrites:",self.getId(),"")
+        info("-- Exiting rewrite rule set: ",self.getId(),"")    
 
         return False, component

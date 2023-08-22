@@ -12,7 +12,7 @@ class Solver:
         '''Rule engine is intialized with a list of paths to rule set directory paths'''
         self.rule_set_dir_path_list=rule_set_dir_path_list
 
-    def preloadRules(self):
+    def preloadRules(self): 
         '''From the rule set dir paths provided at initialization, load the rule sets'''
         info('Pre-loading rule sets...')
         self.rule_sets={}
@@ -35,7 +35,7 @@ class Solver:
 
         result_dict={'result_validate':True,'result_rewrite_modify':False,"result_rewrite_component":component,'result_check_complete':True}
 
-        info('- Evaluating',rule_type,'tests against component',component.getId(),'...')
+        info('\n- Evaluating',rule_type,'tests against component',component.getId(),'...')
         for rule_set_name in self.rule_sets:
             # Evaluate RuleSet in context
             rule_set_result_dict=self.rule_sets[rule_set_name]['rule_set_obj'].evaluateInModuleContext(component, self.rule_sets[rule_set_name]['context_module'], validate=validate, rewrite=rewrite, check_complete=check_complete)
@@ -50,12 +50,12 @@ class Solver:
 
         if component.getClassType()!='Primitive' and recurse and not(rule_type=='check_complete' and not result_dict['result_check_complete']):
             # Recurse against all subcomponents (unless this component is a primitive!)
-            info('\n- STARTING: recurse against subcomponents of',component.getId(),'\n')
+            info('- STARTING: recurse against subcomponents of',component.getId(),'')
             topology=component.getTopology()
             comp_list=topology.getComponentList()
             for idx in range(len(comp_list)):
                 subcomponent=comp_list[idx]
-                info('\n-- STARTING: recurse against subcomponent',subcomponent.getId(),'\n')
+                info('\n-- STARTING: recurse against subcomponent',subcomponent.getId(),'')
                 recursive_result_dict=self.evaluateRuleSet(subcomponent, rule_type=rule_type, recurse=recurse)
                 result_dict['result_validate']=result_dict['result_validate'] and recursive_result_dict['result_validate']
                 result_dict['result_check_complete']=result_dict['result_check_complete'] and recursive_result_dict['result_check_complete']   
@@ -68,7 +68,7 @@ class Solver:
                     component.setTopology(topology)
                     result_dict['result_rewrite_component']=component
                     return result_dict                                         
-            info('\n- DONE: recurse against subcomponents of',component.getId(),'\n')
+            info('- DONE: recurse against subcomponents of',component.getId(),'')
         return result_dict
 
     def runSMPass(self, component, recurse=True):
@@ -107,21 +107,21 @@ class Solver:
         component_iterations=[component]
         res=False
 
-        info('\nSTARTING: rule engine  \n')
+        info('STARTING: rule engine  ')
 
         while(next_sm_state=='doValidate' and rule_engine_sm_pass_count < max_sm_passes):
-            info('\n- STARTING: state-machine pass',rule_engine_sm_pass_count,'\n')
+            info('\n\n- STARTING: state-machine pass',rule_engine_sm_pass_count,'')
             next_sm_state, component=self.runSMPass(component, recurse=recurse)
             component_iterations.append(component)
-            info('\n- DONE: state-machine pass',rule_engine_sm_pass_count,'\n')
+            info('- DONE: state-machine pass',rule_engine_sm_pass_count,'')
             rule_engine_sm_pass_count += 1            
 
         if next_sm_state=='complete':
-            info('\n- COMPLETE: microarchitecture inference\n')
+            info('- COMPLETE: microarchitecture inference')
             res=True
         else:
-            error('\n- ERROR: could not infer microarchitecture\n')
+            error('- ERROR: could not infer microarchitecture')
             res=False
 
-        info('\nDONE: rule engine \n')
+        info('DONE: rule engine ')
         return res, component_iterations

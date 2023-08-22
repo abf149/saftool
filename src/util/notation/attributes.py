@@ -21,3 +21,11 @@ def portInObjInterface(port,obj):
 
 def portInNet(port,net):
     return port.getId() in net.getPortIdList()
+
+'''Types and identifiers'''
+def getCategory(obj):
+    return obj.getCategory()
+
+'''Interacting with the underlying serializable object representation'''
+def getSerializableObjAttribute(obj, attr_name):
+    return obj.toDict()[attr_name]
