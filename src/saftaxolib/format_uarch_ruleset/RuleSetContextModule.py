@@ -9,6 +9,51 @@ import util.notation.generators.comparison as c_
 import util.notation.attributes as a_
 import util.notation.microarchitecture as m_
 from saftaxolib.primitive_md_parser_ruleset.RuleSetContextModule import MetadataParser
+from functools import reduce
+
+def net_zip(port_name_expressions,port_net_type_strs,component_names,gen_type='rank_list',gen_attr=[]):
+    net_list=[]
+
+    idx=0
+    for fiber in gen_attr:
+        # Repeat the same pattern of ports for each fiber format
+        # $v = fiber format
+        # $x = fiber index
+        for pn_exps,net_type_str in zip(port_name_expressions,port_net_type_strs):
+            full_port_ids=[component_name+'.'+pn_exp.replace("$x",str(idx)).replace("$v",fiber.getValue()) \
+                            for component_name,pn_exp in zip(component_names,pn_exps)]
+
+            net_type=NetType.fromIdValue("TestNetType",net_type_str)
+            format_type=FormatType.fromIdValue('TestFormatType','?')
+            net_name=full_port_ids[0]
+            for kdx in range(1,len(full_port_ids)):
+                net_name += '_' + full_port_ids[kdx]
+            net_list.append(Net.fromIdAttributes(net_name, net_type, format_type, full_port_ids))
+
+        idx+=1   
+
+    return net_list 
+
+def transformTopology(obj,new_component_list,new_net_list,append=True):
+
+    arch_topology=obj.getTopology()
+    if append:
+        arch_topology.setComponentList(arch_topology.getComponentList()+list(new_component_list))
+        arch_topology.setNetList(arch_topology.getNetList()+list(new_net_list))
+    else:
+        arch_topology.setComponentList(list(new_component_list))
+        arch_topology.setNetList(list(new_net_list))
+
+    obj.setTopology(arch_topology)    
+    return obj
+
+def transformSAFs(obj,new_saf_list,append=True):
+    if append:
+        obj.setSAFList(obj.getSAFList()+list(new_saf_list))
+    else:
+        obj.setSAFList(list(new_saf_list))
+    return obj
+
 
 # - Format microarchitecture
 
@@ -23,25 +68,36 @@ FormatUarch = m_.ComponentCategory().name("FormatUarch") \
 # -- ConcretizeArchitectureFormatSAFsToFormatUarches
 # --- concretization rule
 
-def formatUarchPortIdToBufferPortIdMapping(format_uarch_port_id):
-    format_uarch_port_prefix_list=['md_in','at_bound_out']
-    buffer_port_prefix_list=['md_out','at_bound_in']
+newFMTUarchFromFMTSAF= \
+    lambda fs: FormatUarch.copy().set_attribute("fibertree",fs.getAttributes()[0],"rank_list") \
+                                 .generate_ports("fibertree", "fibertree").build(fs.getTarget()+"_datatype_format_uarch")
+newFMTUarchBufferStubNetlistFromFMTSAF= \
+    lambda fs: net_zip([['md_out$x','md_in$x'],['at_bound_in$x','at_bound_out$x']], ['md','pos'], \
+                       [fs.getTarget(),fs.getTarget()+"_datatype_format_uarch"], \
+                       gen_type='rank_list',gen_attr=fs.getAttributes()[0])
+isFMTSAF=lambda fs: fs.getCategory()=='format'
+SAFfilter=lambda pred:(lambda obj: [fs for fs in obj.getSAFList() if pred(fs)])
+concretizeArchitectureFormatSAFsToFormatUarches = \
+    lambda obj: transformSAFs(
+                    transformTopology(obj, \
+                                      map(newFMTUarchFromFMTSAF, SAFfilter(isFMTSAF)(obj)), \
+                                      reduce(lambda x,y: x+y, map( \
+                                              newFMTUarchBufferStubNetlistFromFMTSAF, \
+                                              SAFfilter(isFMTSAF)(obj)),[]), \
+                                      append=True), \
+                    SAFfilter(b_.NOT(isFMTSAF))(obj), append=False \
+                )
 
-    for format_uarch_port_prefix,buffer_port_prefix in zip(format_uarch_port_prefix_list,buffer_port_prefix_list):
-        if format_uarch_port_id.startswith(format_uarch_port_prefix):
-            port_idx=format_uarch_port_id.split(format_uarch_port_prefix)[1]
-            buffer_port_id=buffer_port_prefix+port_idx
-            return buffer_port_id
-
+'''
 def concretizeArchitectureFormatSAFsToFormatUarches(obj):
-    '''Object is an architecture with at least one format SAF; concretize format SAF(s) to format uarch(es) and critically, DELETE THE FORMAT SAFS'''
+    #Object is an architecture with at least one format SAF; concretize format SAF(s) to format uarch(es) and critically, DELETE THE FORMAT SAFS
     
     arch_saf_list=obj.getSAFList()
 
     arch_format_saf_list=[format_saf for format_saf in arch_saf_list if format_saf.getCategory() == 'format']
     arch_non_format_saf_list=[format_saf for format_saf in arch_saf_list if format_saf.getCategory() != 'format']
     arch_format_saf_target_list=[format_saf.getTarget() for format_saf in arch_format_saf_list]
-    arch_target_buffer_interface_list=[obj.getSubcomponentById(target_id).getInterface() for target_id in arch_format_saf_target_list]
+    #arch_target_buffer_interface_list=[obj.getSubcomponentById(target_id).getInterface() for target_id in arch_format_saf_target_list]
     arch_format_saf_ranks_list=[format_saf.getAttributes()[0] for format_saf in arch_format_saf_list]
 
     arch_topology=obj.getTopology()
@@ -52,32 +108,16 @@ def concretizeArchitectureFormatSAFsToFormatUarches(obj):
         # Concretize format SAF to format uarch
         buffer_id=arch_format_saf_target_list[idx]     
 
+        format_uarch_name = buffer_id+"_datatype_format_uarch"
         format_uarch=FormatUarch.copy() \
                             .set_attribute("fibertree",arch_format_saf_ranks_list[idx],"rank_list") \
                             .generate_ports("fibertree","fibertree") \
-                            .build(buffer_id+"_datatype_format_uarch")
+                            .build(format_uarch_name)
 
         # Add format uarch to architecture
         arch_topology_component_list.append(format_uarch)
 
-        # Net list setup
-        format_uarch_id=format_uarch.getId()
-        format_uarch_interface_list=format_uarch.getInterface()
-        buffer_port_id_list=[port.getId() for port in arch_target_buffer_interface_list[idx]]
-
-        for format_uarch_port in format_uarch_interface_list:
-            format_uarch_port_id=format_uarch_port.getId()
-            buffer_port_id=formatUarchPortIdToBufferPortIdMapping(format_uarch_port_id)
-            assert(buffer_port_id in buffer_port_id_list) # Assert mapped buffer port exists
-            format_uarch_port_id=format_uarch_id+'.'+format_uarch_port_id
-            buffer_port_id=buffer_id+'.'+buffer_port_id
-
-            net_type=format_uarch_port.getNetType()
-            format_type=FormatType.fromIdValue('TestFormatType','?')
-            port_id_list=[format_uarch_port_id,buffer_port_id]
-            net=Net.fromIdAttributes('net_'+format_uarch_port_id+'_'+buffer_port_id, net_type, format_type, port_id_list)
-
-            arch_topology_net_list.append(net)
+        arch_topology_net_list.extend(net_zip([['md_out$x','md_in$x'],['at_bound_in$x','at_bound_out$x']],['md','pos'],[buffer_id,format_uarch_name],gen_type='rank_list',gen_attr=arch_format_saf_ranks_list[idx]))
 
     arch_topology.setComponentList(arch_topology_component_list)
     arch_topology.setNetList(arch_topology_net_list)
@@ -87,6 +127,7 @@ def concretizeArchitectureFormatSAFsToFormatUarches(obj):
     obj.setSAFList(arch_non_format_saf_list)
 
     return obj
+'''
 
 
 
