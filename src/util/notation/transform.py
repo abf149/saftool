@@ -1,4 +1,29 @@
 '''Useful transformations against design elements'''
+from util.taxonomy.expressions import *
+from util.taxonomy.designelement import *
+
+def net_zip(port_name_expressions,port_net_type_strs,component_names,gen_type='rank_list',gen_attr=[]):
+    net_list=[]
+
+    idx=0
+    for fiber in gen_attr:
+        # Repeat the same pattern of ports for each fiber format
+        # $v = fiber format
+        # $x = fiber index
+        for pn_exps,net_type_str in zip(port_name_expressions,port_net_type_strs):
+            full_port_ids=[component_name+'.'+pn_exp.replace("$x",str(idx)).replace("$v",fiber.getValue()) \
+                            for component_name,pn_exp in zip(component_names,pn_exps)]
+
+            net_type=NetType.fromIdValue("TestNetType",net_type_str)
+            format_type=FormatType.fromIdValue('TestFormatType','?')
+            net_name=full_port_ids[0]
+            for kdx in range(1,len(full_port_ids)):
+                net_name += '_' + full_port_ids[kdx]
+            net_list.append(Net.fromIdAttributes(net_name, net_type, format_type, full_port_ids))
+
+        idx+=1   
+
+    return net_list 
 
 def transformFloodNetFormatToObjPorts(obj):
     net_list=obj.getTopology().getNetList()
@@ -58,4 +83,23 @@ def transformFloodNetFormatToChildPorts(obj):
     topology=obj.getTopology()
     topology.setComponentList(comp_list)
     obj.setTopology(topology)
+    return obj
+
+def transformTopology(obj,new_component_list,new_net_list,append=True):
+    arch_topology=obj.getTopology()
+    if append:
+        arch_topology.setComponentList(arch_topology.getComponentList()+list(new_component_list))
+        arch_topology.setNetList(arch_topology.getNetList()+list(new_net_list))
+    else:
+        arch_topology.setComponentList(list(new_component_list))
+        arch_topology.setNetList(list(new_net_list))
+
+    obj.setTopology(arch_topology)    
+    return obj
+
+def transformSAFs(obj,new_saf_list,append=True):
+    if append:
+        obj.setSAFList(obj.getSAFList()+list(new_saf_list))
+    else:
+        obj.setSAFList(list(new_saf_list))
     return obj

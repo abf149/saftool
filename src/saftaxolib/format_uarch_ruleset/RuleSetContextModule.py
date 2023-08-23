@@ -1,135 +1,26 @@
 # Format uarch RuleSet
-
 from util.taxonomy.expressions import *
 from util.taxonomy.designelement import *
-import util.notation.predicates as p_
-import util.notation.generators.boolean_operators as b_
-import util.notation.generators.quantifiers as q_
-import util.notation.generators.comparison as c_
-import util.notation.attributes as a_
-import util.notation.microarchitecture as m_
-from saftaxolib.primitive_md_parser_ruleset.RuleSetContextModule import MetadataParser
+from util.notation import predicates as p_, attributes as a_, microarchitecture as m_, transform as t_
+from util.notation.generators import boolean_operators as b_, quantifiers as q_, comparison as c_
+#from ..primitive_md_parser_ruleset.RuleSetContextModule import MetadataParser
+from .microarchitecture import newFMTUarchBufferStubNetlistFromFMTSAF, MetadataParser
+from .saf import isFMTSAF, FMTSAFtoUarch
 from functools import reduce
 
-def net_zip(port_name_expressions,port_net_type_strs,component_names,gen_type='rank_list',gen_attr=[]):
-    net_list=[]
-
-    idx=0
-    for fiber in gen_attr:
-        # Repeat the same pattern of ports for each fiber format
-        # $v = fiber format
-        # $x = fiber index
-        for pn_exps,net_type_str in zip(port_name_expressions,port_net_type_strs):
-            full_port_ids=[component_name+'.'+pn_exp.replace("$x",str(idx)).replace("$v",fiber.getValue()) \
-                            for component_name,pn_exp in zip(component_names,pn_exps)]
-
-            net_type=NetType.fromIdValue("TestNetType",net_type_str)
-            format_type=FormatType.fromIdValue('TestFormatType','?')
-            net_name=full_port_ids[0]
-            for kdx in range(1,len(full_port_ids)):
-                net_name += '_' + full_port_ids[kdx]
-            net_list.append(Net.fromIdAttributes(net_name, net_type, format_type, full_port_ids))
-
-        idx+=1   
-
-    return net_list 
-
-def transformTopology(obj,new_component_list,new_net_list,append=True):
-
-    arch_topology=obj.getTopology()
-    if append:
-        arch_topology.setComponentList(arch_topology.getComponentList()+list(new_component_list))
-        arch_topology.setNetList(arch_topology.getNetList()+list(new_net_list))
-    else:
-        arch_topology.setComponentList(list(new_component_list))
-        arch_topology.setNetList(list(new_net_list))
-
-    obj.setTopology(arch_topology)    
-    return obj
-
-def transformSAFs(obj,new_saf_list,append=True):
-    if append:
-        obj.setSAFList(obj.getSAFList()+list(new_saf_list))
-    else:
-        obj.setSAFList(list(new_saf_list))
-    return obj
-
-
-# - Format microarchitecture
-
-FormatUarch = m_.ComponentCategory().name("FormatUarch") \
-                                    .port_in("md_in$x","md","$v") \
-                                    .port_out("at_bound_out$x","pos","addr") \
-                                    .attribute("fibertree",["fibertree"],[None]) \
-                                    .generator("fibertree")
-
-# - Format SAF rewrite rules
-
-# -- ConcretizeArchitectureFormatSAFsToFormatUarches
-# --- concretization rule
-
-newFMTUarchFromFMTSAF= \
-    lambda fs: FormatUarch.copy().set_attribute("fibertree",fs.getAttributes()[0],"rank_list") \
-                                 .generate_ports("fibertree", "fibertree").build(fs.getTarget()+"_datatype_format_uarch")
-newFMTUarchBufferStubNetlistFromFMTSAF= \
-    lambda fs: net_zip([['md_out$x','md_in$x'],['at_bound_in$x','at_bound_out$x']], ['md','pos'], \
-                       [fs.getTarget(),fs.getTarget()+"_datatype_format_uarch"], \
-                       gen_type='rank_list',gen_attr=fs.getAttributes()[0])
-isFMTSAF=lambda fs: fs.getCategory()=='format'
-SAFfilter=lambda pred:(lambda obj: [fs for fs in obj.getSAFList() if pred(fs)])
+''' - Format SAF rewrite rules'''
+''' -- ConcretizeArchitectureFormatSAFsToFormatUarches'''
+''' --- concretization rule'''
 concretizeArchitectureFormatSAFsToFormatUarches = \
-    lambda obj: transformSAFs(
-                    transformTopology(obj, \
-                                      map(newFMTUarchFromFMTSAF, SAFfilter(isFMTSAF)(obj)), \
-                                      reduce(lambda x,y: x+y, map( \
-                                              newFMTUarchBufferStubNetlistFromFMTSAF, \
-                                              SAFfilter(isFMTSAF)(obj)),[]), \
-                                      append=True), \
-                    SAFfilter(b_.NOT(isFMTSAF))(obj), append=False \
+    lambda obj: t_.transformSAFs(
+                    t_.transformTopology(obj, \
+                                         map(FMTSAFtoUarch, filter(isFMTSAF,obj.getSAFList())), \
+                                         reduce(lambda x,y: x+y, map( \
+                                                 newFMTUarchBufferStubNetlistFromFMTSAF, \
+                                                 filter(isFMTSAF,obj.getSAFList())),[]), \
+                                         append=True), \
+                    filter(b_.NOT(isFMTSAF),obj.getSAFList()), append=False \
                 )
-
-'''
-def concretizeArchitectureFormatSAFsToFormatUarches(obj):
-    #Object is an architecture with at least one format SAF; concretize format SAF(s) to format uarch(es) and critically, DELETE THE FORMAT SAFS
-    
-    arch_saf_list=obj.getSAFList()
-
-    arch_format_saf_list=[format_saf for format_saf in arch_saf_list if format_saf.getCategory() == 'format']
-    arch_non_format_saf_list=[format_saf for format_saf in arch_saf_list if format_saf.getCategory() != 'format']
-    arch_format_saf_target_list=[format_saf.getTarget() for format_saf in arch_format_saf_list]
-    #arch_target_buffer_interface_list=[obj.getSubcomponentById(target_id).getInterface() for target_id in arch_format_saf_target_list]
-    arch_format_saf_ranks_list=[format_saf.getAttributes()[0] for format_saf in arch_format_saf_list]
-
-    arch_topology=obj.getTopology()
-    arch_topology_component_list=arch_topology.getComponentList()
-    arch_topology_net_list=arch_topology.getNetList()
-
-    for idx in range(len(arch_format_saf_list)):
-        # Concretize format SAF to format uarch
-        buffer_id=arch_format_saf_target_list[idx]     
-
-        format_uarch_name = buffer_id+"_datatype_format_uarch"
-        format_uarch=FormatUarch.copy() \
-                            .set_attribute("fibertree",arch_format_saf_ranks_list[idx],"rank_list") \
-                            .generate_ports("fibertree","fibertree") \
-                            .build(format_uarch_name)
-
-        # Add format uarch to architecture
-        arch_topology_component_list.append(format_uarch)
-
-        arch_topology_net_list.extend(net_zip([['md_out$x','md_in$x'],['at_bound_in$x','at_bound_out$x']],['md','pos'],[buffer_id,format_uarch_name],gen_type='rank_list',gen_attr=arch_format_saf_ranks_list[idx]))
-
-    arch_topology.setComponentList(arch_topology_component_list)
-    arch_topology.setNetList(arch_topology_net_list)
-    obj.setTopology(arch_topology)
-
-    # Delete format SAFs
-    obj.setSAFList(arch_non_format_saf_list)
-
-    return obj
-'''
-
-
 
 ''' --- predicate '''
 '''Object is an architecture with at least one format SAF'''
@@ -143,9 +34,7 @@ predicateIsArchitectureHasFormatSAF=b_.AND(p_.isArchitecture, \
                                     )
 
 # - Format uarch rewrite rules
-
 # -- TransformTopologicalHoleToPerRankMdParserTopology: For a format uarch with a topological hole, fill the hole with a topology comprising one MetadataParser primitive per traversed tensor rank at this buffer level
-
 def generateFormatUarchTopology(rank_format_strs):
    # Topology ID
     topology_id='TestTopology'
@@ -197,4 +86,35 @@ def predicateHasTopologicalHole(obj):
 
 def predicateIsComponentIsFormatUarchHasTopologicalHole(obj):
     return predicateIsComponent(obj) and predicateIsFormatUarch(obj) and predicateHasTopologicalHole(obj)
+
+# - MetadataParser validation rules
+
+# -- AssertPrimitiveMetadataParserSupportedInstantiation: MetadataParser instance must be supported
+
+def assertPrimitiveMetadataParserAttributesAreSupported(obj):
+    '''Assert that MetadataParser primitive instance is supported. Format must be in ['C','B'] or unknown'''
+    fmt=obj.getAttributeById('format').getValue()
+    return fmt in ['C','B','R','U','?']
+
+predicateIsPrimitiveMetadataParser=b_.AND(p_.isPrimitive,c_.equals(MetadataParser.name_,a_.getCategory))
+
+# - MetadataParser rewrite rules
+
+def transformUnknownAttributeTypeFromInterfaceType(obj):
+    attribute_unknown=obj.getAttributeById('format').isUnknown()
+
+    interface_type=obj.getPortById('md_in').getFormatType().getValue()
+
+    # TODO: make a real read/modify/write for attributes
+    atts=obj.getAttributes()
+    for idx in range(len(atts)):
+        if type(atts[idx]).__name__=='FormatType' and atts[idx].getId()=='format':
+            atts[idx].setValue(interface_type)
+    obj.setAttributes(atts)
+    return obj
+
+
+
+def predicateIsPrimitiveMetadataParserHasUnknownAttributeTypeAndKnownInterfaceType(obj):
+    return predicateIsPrimitiveMetadataParser(obj) and (not obj.getPortById('md_in').getFormatType().isUnknown()) and obj.getAttributeById('format').isUnknown()
 

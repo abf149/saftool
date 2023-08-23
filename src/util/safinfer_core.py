@@ -6,7 +6,6 @@ from util.helper import info,warn,error
 
 '''Constants - default list of ruleset names to apply to SAF microarchitecture topology inference'''
 default_ruleset_list = ['base_ruleset', \
-                        'primitive_md_parser_ruleset', \
                         'format_uarch_ruleset'] # 'skipping_uarch_ruleset'
 
 '''Routines - build and solve SAF microarchitecture inference problem'''
