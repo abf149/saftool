@@ -3,9 +3,8 @@ from util.taxonomy.expressions import *
 from util.taxonomy.designelement import *
 from util.notation import predicates as p_, attributes as a_, microarchitecture as m_, transform as t_
 from util.notation.generators import boolean_operators as b_, quantifiers as q_, comparison as c_
-#from ..primitive_md_parser_ruleset.RuleSetContextModule import MetadataParser
-from .microarchitecture import newFMTUarchBufferStubNetlistFromFMTSAF, MetadataParser
 from .saf import isFMTSAF, FMTSAFtoUarch
+from .microarchitecture import newFMTUarchBufferStubNetlistFromFMTSAF, MetadataParser
 from functools import reduce
 
 ''' - Format SAF rewrite rules'''

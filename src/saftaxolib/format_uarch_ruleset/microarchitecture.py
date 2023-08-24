@@ -35,7 +35,6 @@ newFMTUarchBufferStubNetlistFromFMTSAF= \
                           gen_type='rank_list',gen_attr=getFMTSAFRankList(fs))
 
 '''Format microarchitecture supported instance topology'''
-
 fmt_uarch_topologies=( \
     { \
 
