@@ -41,15 +41,6 @@ class TopologyWrapper:
             self.component_list.append((id,component))
         return self
 
-    '''
-    def net(self,net):
-        assert(False)
-        self.topological_hole_=False
-        self.net_class=True
-        self.net_list.append(net)
-        return self
-    '''
-
     def net(self,net):
         self.topological_hole_=False
         self.net_class=False
@@ -93,6 +84,7 @@ class PrimitiveCategory:
         self.attributes_=[]
         self.attribute_vals=[]
         self.default_attributes_=[]
+        self.port_attribute_refs=[]
         self.ports_=[]
         self.generator_type=None
 
@@ -119,7 +111,7 @@ class PrimitiveCategory:
         Arguments:\n
         - attr_name -- Primitive category attribute name\n
         - attr_type -- Primitive category attribute type ("fibertree","format","net_type","buffer","int","string","any","list(<type>)","list(*)",[<type>,type,...])
-        - attr_default -- Primitive category attribute default value (can be "?")
+        - attr_default -- Primitive category attribute default value (can be specific value, or "?")
         '''
         self.attributes_.append((attr_name,attr_type))
         self.default_attributes_.append((attr_name,attr_default))
@@ -152,12 +144,12 @@ class PrimitiveCategory:
             assert(False)
         return self
 
-    def port_in(self,port_name,port_net_type,port_fmt):
-        self.ports_.append((port_name,"in",port_net_type,port_fmt))
+    def port_in(self,port_name,port_net_type,port_fmt,attr_reference=None):
+        self.ports_.append((port_name,"in",port_net_type,port_fmt,attr_reference))
         return self
 
-    def port_out(self,port_name,port_net_type,port_fmt):
-        self.ports_.append((port_name,"out",port_net_type,port_fmt))
+    def port_out(self,port_name,port_net_type,port_fmt,attr_reference=None):
+        self.ports_.append((port_name,"out",port_net_type,port_fmt,attr_reference))
         return self
 
     def generator(self,generator_type):
@@ -184,7 +176,8 @@ class PrimitiveCategory:
                     port_dir=port[1]
                     port_net_type=port[2]
                     port_net_fmt=port[3].replace("$v",fiber.getValue())
-                    self.ports_.append((port_name,port_dir,port_net_type,port_net_fmt))
+                    port_attr_ref=port[4]
+                    self.ports_.append((port_name,port_dir,port_net_type,port_net_fmt,port_attr_ref))
                 idx+=1
         else:
             error("Unrecognized generator type in Primitive")
@@ -196,8 +189,14 @@ class PrimitiveCategory:
         iface=[]
         for port in self.ports_:
             net_type=NetType.fromIdValue(net_type_id,port[2])
-            format_type=FormatType.fromIdValue(format_type_id,port[3])  
-            iface.append(Port.fromIdDirectionNetTypeFormatType(port[0], port[1], net_type, format_type))
+            format_type=FormatType.fromIdValue(format_type_id,port[3])
+            attr_names = [attr_[0] for attr_ in self.attributes_]
+            if port[4] is None:
+                iface.append(Port.fromIdDirectionNetTypeFormatType(port[0], port[1], net_type, format_type))
+            else:
+                attr_ref_idx = attr_names.index(port[4])
+                assert(attr_ref_idx >= 0)
+                iface.append(Port.fromIdDirectionNetTypeFormatType(port[0], port[1], net_type, format_type, attr_ref=attr_ref_idx))
 
         return iface
 

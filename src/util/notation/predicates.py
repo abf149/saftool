@@ -1,5 +1,6 @@
 '''Logical predicate primitives for SAF inference rules'''
 import util.notation.generators.boolean_operators as b_
+import util.notation.attributes as a_
 
 '''Type checks'''
 def isComponent(obj):
@@ -57,6 +58,8 @@ def isFormatAttribute(att):
     return type(att).__name__ == 'FormatType'
 def isUnknownFormatAttribute(att):
     return b_.AND(isFormatAttribute,lambda x: x.isUnknown())(att)
+def hasKnownInterfaceTypeReferencingUnknownAttribute(obj):
+    return a_.getKnownInterfaceTypeReferencingUnknownAttribute(obj)[0]
 
 '''Port checks'''
 def isPortWithUnknownFormat(port):

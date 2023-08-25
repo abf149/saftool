@@ -46,7 +46,6 @@ def transformFloodNetFormatToObjPorts(obj):
                         new_format_type=port.getFormatType()
                         new_format_type.setValue(net_type_str)
                         port.setFormatType(new_format_type)
-                    
 
     obj.setInterface(iface)
     return obj
@@ -102,4 +101,8 @@ def transformSAFs(obj,new_saf_list,append=True):
         obj.setSAFList(obj.getSAFList()+list(new_saf_list))
     else:
         obj.setSAFList(list(new_saf_list))
+    return obj
+
+def transformObjAttribute(obj,value,idx):
+    obj.setAttributeByIndex(value,idx)
     return obj

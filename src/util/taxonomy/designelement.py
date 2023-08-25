@@ -38,12 +38,13 @@ class Port(DesignElement):
         pass
 
     @classmethod
-    def fromIdDirectionNetTypeFormatType(cls, id, direction, net_type, format_type):
+    def fromIdDirectionNetTypeFormatType(cls, id, direction, net_type, format_type, attr_ref=None):
         '''Port from id, port direction (in/out), port net_type (data/MD/pos), port format_type (sparse repr.)'''
         obj=cls.fromId(id)
         obj.setDirection(direction)
         obj.setNetType(net_type)
         obj.setFormatType(format_type)
+        obj.setComponentAttributeReference(attr_ref)
         return obj
 
     def setDirection(self, direction):
@@ -70,7 +71,19 @@ class Port(DesignElement):
         '''Get the format type (sparse repr.) which characterizes this port'''
         return FormatType.fromDict(self.format_type)
 
+    def setComponentAttributeReference(self, attribute_name):
+        '''Set the name of the component attribute to which this port's format type maps'''
+        if attribute_name is None:
+            self.attr_ref=-1
+        else:
+            self.attr_ref=attribute_name
 
+    def getComponentAttributeReference(self):
+        '''Get the name of the component attribute to which this port's format type maps'''
+        if self.attr_ref == -1:
+            return None
+        else:
+            return self.attr_ref
 
 class Net(DesignElement):
     '''Nets are design elements which represent port interconnections'''
@@ -213,6 +226,12 @@ class Component(DesignElement):
         '''Get the microarchitectural topology'''
         return Topology.fromDict(self.topology)
 
+    def getSubcomponentOwningPort(self, full_port_id):
+        if '.' in full_port_id:
+            return [subcomp for subcomp in self.getTopology().getComponentList() if subcomp.getId()==subcomp_id][0] 
+        else:
+            return self
+
     def getPortById(self, id):
         '''Look up a port in this component's interface by id; an id of the form xxx.portid causes a lookup for portid against subcomponent xxx in this component's topology'''
 
@@ -233,6 +252,15 @@ class Component(DesignElement):
         # Return subcomponent from topology
 
         return self.getTopology().getComponentById(id)
+
+    def setAttributeByIndex(self, value, idx):
+        # Set component attribute at specified index
+        attrs=self.getAttributes()
+        attrs[idx]=value
+        self.setAttributes(attrs)
+
+    def getAttributeByIndex(self, idx):
+        return self.getAttributes()[idx]
 
 class Primitive(Component):
     '''A "black box" functional unit with no lower-level topology; from a microarchitectural synthesis perspective, a primitive is a terminal'''

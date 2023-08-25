@@ -4,9 +4,9 @@ from util.taxonomy.expressions import FormatType
 
 '''Metadata parser microarchitecture primitive definition'''
 MetadataParser = m_.PrimitiveCategory().name("MetadataParser") \
-                   .port_in("md_in","md","?") \
-                   .port_out("at_bound_out","pos","addr") \
                    .attribute("format","format",FormatType.fromIdValue("format","?")) \
+                   .port_in("md_in","md","?",attr_reference="format") \
+                   .port_out("at_bound_out","pos","addr") \
                    .generator(None)
 buildMetadataParser = \
     lambda fmt_str: MetadataParser.copy().set_attribute('format', \
@@ -39,7 +39,7 @@ fmt_uarch_topologies=( \
     { \
 
         "all": (\
-            [(buildMetadataParser,'TestMetadataParser$x',('$v',))],
+            [(buildMetadataParser,'TestMetadataParser$x',('?',))],
             [('md','md_in$x','TestMetadataParser$x.md_in'),('pos','at_bound_out$x','TestMetadataParser$x.at_bound_out')],
             "fibertree", # Generator type
             "fibertree" # Generator argument from this component attribute
