@@ -6,51 +6,6 @@ import copy
 
 fmt_str_convert={"UOP":"U", "RLE":"R", "C":"C","B":"B"}
 
-'''
-class Variable:
-    def __init__(self,name,value):
-        self.name=name
-        self.value=value
-'''
-
-'''
-- attributes:
-  - - weight_spad
-    - 0
-    - iact_spad
-    - 0
-  category: skipping
-  classtype: SAF
-  id: skipping_saf
-  target: weight_spad
-'''
-
-'''
-class NetWrapper:
-    def __init__(self,fmt="",net_type="",port_list=[]):
-        self.fmt=fmt
-        self.net_type_=net_type
-        self.port_list=port_list
-
-    def format(self,fmt):
-        self.fmt=fmt
-        return self
-
-    def net_type(self,net_type):
-        self.net_type_=net_type
-        return self
-
-    def port(self,port_name):
-        self.port_list.append(port_name)
-        return self
-
-    def build(self, id, net_type_name="TestNetType", format_type_name="TestFormatType"):
-        net_type=NetType.fromIdValue(net_type_name,self.net_type)
-        format_type=FormatType.fromIdValue(format_type_name,self.format)
-        net=Net.fromIdAttributes(id, net_type, format_type, self.port_list)
-        return net        
-'''
-
 class TopologyWrapper:
     def __init__(self,component_list=[],net_list=[],generator_type=None,topological_hole=True):
         self.generator_type=generator_type
@@ -86,17 +41,24 @@ class TopologyWrapper:
             self.component_list.append((id,component))
         return self
 
+    '''
     def net(self,net):
         assert(False)
         self.topological_hole_=False
         self.net_class=True
         self.net_list.append(net)
         return self
+    '''
 
-    def n_(self,net):
+    def net(self,net):
         self.topological_hole_=False
         self.net_class=False
         self.net_list.append(net)
+        return self
+
+    def nets(self,net_list_):
+        self.topological_hole_=False
+        self.net_list.extend(net_list_)
         return self
 
     def generate_topology(self,generator_type=None,generator_config_arg=None):
@@ -110,7 +72,7 @@ class TopologyWrapper:
         if self.topological_hole_:
             topology=Topology.holeFromId(id)
         else:
-            component_list=[comp.build(id) for id,comp in self.component_list]
+            component_list=[comp.build(cid) for cid,comp in self.component_list]
             net_list=[Net.fromIdAttributes("net" + str(id), \
                                         self.net_list[idx][0], \
                                         self.net_list[idx][1], \
@@ -194,12 +156,6 @@ class PrimitiveCategory:
         self.ports_.append((port_name,"in",port_net_type,port_fmt))
         return self
 
-    '''
-    def port_in_generator(self,port_name,port_net_type,port_fmt,gen_type="fibertree",gen_metadata="fibertree"):
-        self.ports_.append((gen_type,port_name,"in",port_net_type,port_fmt,gen_metadata))
-        return self
-    '''
-
     def port_out(self,port_name,port_net_type,port_fmt):
         self.ports_.append((port_name,"out",port_net_type,port_fmt))
         return self
@@ -235,12 +191,6 @@ class PrimitiveCategory:
             assert(False)
 
         return self
-
-    '''
-    def port_out_generator(self,port_name,port_net_type,port_fmt,gen_type="fibertree",gen_metadata="fibertree"):
-        self.ports_.append((gen_type,port_name,"out",port_net_type,port_fmt,gen_metadata))
-        return self
-    '''
 
     def buildInterface(self,net_type_id="TestNetType",format_type_id="TestFormatType"):
         iface=[]
@@ -291,7 +241,6 @@ class ComponentCategory(PrimitiveCategory):
         return self
 
     def build(self,id):
-        #comp=super().build(id)
         iface=self.buildInterface()
         topology=self.topology_.build()
         comp=Component.fromIdCategoryAttributesInterfaceTopology(id,self.name_,self.attribute_vals,iface,topology)

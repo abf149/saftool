@@ -9,9 +9,9 @@ MetadataParser = m_.PrimitiveCategory().name("MetadataParser") \
                    .attribute("format","format",FormatType.fromIdValue("format","?")) \
                    .generator(None)
 buildMetadataParser = \
-    lambda id,fmt_str: MetadataParser.copy().set_attribute('format', \
+    lambda fmt_str: MetadataParser.copy().set_attribute('format', \
                                                            FormatType.fromIdValue('format',fmt_str)
-                                           ).build(id) #'TestMetadataParser'+str(idx)
+                                           )
 
 '''Format microarchitecture component definition'''
 FormatUarch = m_.ComponentCategory().name("FormatUarch") \
@@ -39,11 +39,11 @@ fmt_uarch_topologies=( \
     { \
 
         "all": (\
-            [(buildMetadataParser,('TestMetadataParser$x','$v'))],
-            [('md_in$x','TestMetadataParser$x.md_in$x'),('at_bound_out$x','TestMetadataParser$x.at_bound_out$x')]
+            [(buildMetadataParser,'TestMetadataParser$x',('$v',))],
+            [('md','md_in$x','TestMetadataParser$x.md_in'),('pos','at_bound_out$x','TestMetadataParser$x.at_bound_out')],
+            "fibertree", # Generator type
+            "fibertree" # Generator argument from this component attribute
         )
 
-    }, \
-    "fibertree",
-    "fibertree"
+    }
 )

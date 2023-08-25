@@ -21,6 +21,26 @@ validation_rule_set:
       id: predicate
       value: predicateIsPrimitiveMetadataParser
 
+# Component FormatUarch validation rules
+
+validation_rule_set:
+  classtype: ValidationRuleSet
+  id: ComponentFormatUarchValidationRuleSet
+  validation_rules:
+
+  # - Supported-instantiation validation rules
+
+  - classtype: ValidationRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: assertion
+      value: assertComponentFormatUarchAttributesAreSupported
+    id: AssertComponentFormatUarchSupportedInstantiation
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsComponentFormatUarch
+
 # Format uarch rewrite rules
 
 rewrite_rule_set:

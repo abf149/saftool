@@ -2,9 +2,10 @@
 from util.taxonomy.expressions import *
 from util.taxonomy.designelement import *
 from util.notation import predicates as p_, attributes as a_, microarchitecture as m_, transform as t_
-from util.notation.generators import boolean_operators as b_, quantifiers as q_, comparison as c_
+from util.notation.generators import boolean_operators as b_, quantifiers as q_, comparison as c_, rules as r_
 from .saf import isFMTSAF, FMTSAFtoUarch
-from .microarchitecture import newFMTUarchBufferStubNetlistFromFMTSAF, MetadataParser
+from .microarchitecture import newFMTUarchBufferStubNetlistFromFMTSAF, FormatUarch, MetadataParser, fmt_uarch_topologies
+from .instances import fmt_uarch_instances, md_parser_instances
 from functools import reduce
 
 ''' - Format SAF rewrite rules'''
@@ -32,8 +33,23 @@ predicateIsArchitectureHasFormatSAF=b_.AND(p_.isArchitecture, \
                                             )
                                     )
 
-# - Format uarch rewrite rules
-# -- TransformTopologicalHoleToPerRankMdParserTopology: For a format uarch with a topological hole, fill the hole with a topology comprising one MetadataParser primitive per traversed tensor rank at this buffer level
+''' - Format uarch'''
+
+''' - Format uarch validation rules'''
+''' -- AssertComponentFormatUarchSupportedInstantiation: Format uarch instance must be supported'''
+predicateIsComponentFormatUarch, \
+assertComponentFormatUarchAttributesAreSupported = \
+    r_.isValidComponentOrPrimitiveMatchingCategoryRule(fmt_uarch_instances,FormatUarch)
+
+''' - Format uarch rewrite rules'''
+''' -- TransformTopologicalHoleToPerRankMdParserTopology: For a format uarch with a topological hole, fill the hole with a topology comprising one MetadataParser primitive per traversed tensor rank at this buffer level'''
+
+predicateIsComponentIsFormatUarchHasTopologicalHole, \
+transformTopologicalHoleToPerRankMdParserTopology = \
+    r_.transformFillTopologyOfValidComponentOrPrimitiveMatchingCategoryRule(fmt_uarch_instances, \
+                                                                            fmt_uarch_topologies, \
+                                                                            FormatUarch)
+
 def generateFormatUarchTopology(rank_format_strs):
    # Topology ID
     topology_id='TestTopology'
@@ -68,11 +84,13 @@ def generateFormatUarchTopology(rank_format_strs):
     # build topology
     return Topology.fromIdNetlistComponentList(topology_id,net_list,component_list)
 
+'''
 def transformTopologicalHoleToPerRankMdParserTopology(obj):
-    '''Fill the topological hole with a topology comprising one MetadataParser primitive per traversed tensor rank at this buffer level'''
+    #Fill the topological hole with a topology comprising one MetadataParser primitive per traversed tensor rank at this buffer level
     rank_format_strs = [fmt_type['value'] for fmt_type in obj.attributes[0]]
     obj.setTopology(generateFormatUarchTopology(rank_format_strs))
     return obj
+'''
 
 def predicateIsComponent(obj):
     return type(obj).__name__ == 'Component'
@@ -83,19 +101,18 @@ def predicateIsFormatUarch(obj):
 def predicateHasTopologicalHole(obj):
     return obj.getTopology().isHole()
 
+'''
 def predicateIsComponentIsFormatUarchHasTopologicalHole(obj):
     return predicateIsComponent(obj) and predicateIsFormatUarch(obj) and predicateHasTopologicalHole(obj)
+'''
 
 # - MetadataParser validation rules
-
 # -- AssertPrimitiveMetadataParserSupportedInstantiation: MetadataParser instance must be supported
+predicateIsPrimitiveMetadataParser, \
+assertPrimitiveMetadataParserAttributesAreSupported = \
+    r_.isValidComponentOrPrimitiveMatchingCategoryRule(md_parser_instances,MetadataParser)
 
-def assertPrimitiveMetadataParserAttributesAreSupported(obj):
-    '''Assert that MetadataParser primitive instance is supported. Format must be in ['C','B'] or unknown'''
-    fmt=obj.getAttributeById('format').getValue()
-    return fmt in ['C','B','R','U','?']
-
-predicateIsPrimitiveMetadataParser=b_.AND(p_.isPrimitive,c_.equals(MetadataParser.name_,a_.getCategory))
+#predicateIsPrimitiveMetadataParser=b_.AND(p_.isPrimitive,c_.equals(MetadataParser.name_,a_.getCategory))
 
 # - MetadataParser rewrite rules
 

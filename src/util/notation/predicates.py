@@ -29,6 +29,8 @@ def isPrimitive(obj):
     - True if Primitive
     '''    
     return type(obj).__name__ == 'Primitive'
+def isCategory(obj,category):
+    return obj.getCategory()==category
 
 '''Topology checks'''
 def hasNets(obj):
@@ -67,3 +69,5 @@ def isComponentOrArchitecture(obj):
     return b_.OR(isComponent,isArchitecture)(obj)
 def isComponentOrArchitectureHasNets(obj):
     return b_.AND(b_.OR(isComponent,isArchitecture),hasNets)(obj)
+def isComponentOrPrimitiveIsCategory(obj,category):
+    return isComponentOrPrimitive(obj) and isCategory(obj,category)
