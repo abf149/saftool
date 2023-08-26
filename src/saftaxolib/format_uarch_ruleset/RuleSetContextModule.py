@@ -1,16 +1,32 @@
-# Format uarch RuleSet
+'''Format uarch RuleSet'''
+from functools import reduce
 from util.taxonomy.expressions import *
 from util.taxonomy.designelement import *
-from util.notation import predicates as p_, attributes as a_, microarchitecture as m_, transform as t_
-from util.notation.generators import boolean_operators as b_, quantifiers as q_, comparison as c_, rules as r_
-from .saf import isFMTSAF, FMTSAFtoUarch
-from .microarchitecture import newFMTUarchBufferStubNetlistFromFMTSAF, FormatUarch, MetadataParser, fmt_uarch_topologies
-from .instances import fmt_uarch_instances, md_parser_instances
-from functools import reduce
+from util.notation import predicates as p_, \
+                          attributes as a_, \
+                          microarchitecture as m_, \
+                          transform as t_                    
+from util.notation.generators import boolean_operators as b_, \
+                                     quantifiers as q_, \
+                                     comparison as c_, \
+                                     rules as r_
 
-''' - Format SAF rewrite rules'''
+'''SAF, component and primitive imports'''
+from .FormatSAF import isFMTSAF
+
+from .FormatUarch import FMTSAFtoUarch, \
+                         newFMTUarchBufferStubNetlistFromFMTSAF, \
+                         FormatUarch, \
+                         fmt_uarch_instances, \
+                         fmt_uarch_topologies
+
+from .MetadataParser import MetadataParser, md_parser_instances
+
+''' Format microarchitecture'''
+
+'''- SAF rewrite rules'''
 ''' -- ConcretizeArchitectureFormatSAFsToFormatUarches'''
-''' --- concretization rule'''
+''' --- concretize'''
 concretizeArchitectureFormatSAFsToFormatUarches = \
     lambda obj: t_.transformSAFs(
                     t_.transformTopology(obj, \
@@ -22,8 +38,7 @@ concretizeArchitectureFormatSAFsToFormatUarches = \
                     filter(b_.NOT(isFMTSAF),obj.getSAFList()), append=False \
                 )
 
-''' --- predicate '''
-'''Object is an architecture with at least one format SAF'''
+''' --- predicate: object is an architecture with at least one format SAF'''
 predicateIsArchitectureHasFormatSAF=b_.AND(p_.isArchitecture, \
                                            q_.anyForObjSAFs( \
                                                 c_.equals( \
@@ -33,25 +48,27 @@ predicateIsArchitectureHasFormatSAF=b_.AND(p_.isArchitecture, \
                                             )
                                     )
 
-''' - Format uarch'''
-
-''' - Format uarch validation rules'''
-''' -- AssertComponentFormatUarchSupportedInstantiation: Format uarch instance must be supported'''
+''' - Validation rules'''
+''' -- AssertComponentFormatUarchAttributesAreSupported'''
+''' --- assert supported instance '''
 predicateIsComponentFormatUarch, \
 assertComponentFormatUarchAttributesAreSupported = \
     r_.isValidComponentOrPrimitiveMatchingCategoryRule(fmt_uarch_instances,FormatUarch)
 
-''' - Format uarch rewrite rules'''
-''' -- TransformTopologicalHoleToPerRankMdParserTopology: For a format uarch with a topological hole, fill the hole with a topology comprising one MetadataParser primitive per traversed tensor rank at this buffer level'''
-
+''' - Rewrite rules'''
+''' -- TransformTopologicalHoleToPerRankMdParserTopology'''
+''' --- transform supported instance topological hole to instance topology'''
 predicateIsComponentIsFormatUarchHasTopologicalHole, \
 transformTopologicalHoleToPerRankMdParserTopology = \
     r_.transformFillTopologyOfValidComponentOrPrimitiveMatchingCategoryRule(fmt_uarch_instances, \
                                                                             fmt_uarch_topologies, \
                                                                             FormatUarch)
 
-# - MetadataParser validation rules
-# -- AssertPrimitiveMetadataParserSupportedInstantiation: MetadataParser instance must be supported
+'''MetadataParser microarchitecture primitive'''
+
+''' - Validation rules'''
+''' -- AssertPrimitiveMetadataParserAttributesAreSupported'''
+''' --- assert supported instance'''
 predicateIsPrimitiveMetadataParser, \
 assertPrimitiveMetadataParserAttributesAreSupported = \
     r_.isValidComponentOrPrimitiveMatchingCategoryRule(md_parser_instances,MetadataParser)
