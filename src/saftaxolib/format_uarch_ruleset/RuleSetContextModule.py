@@ -12,15 +12,15 @@ from util.notation.generators import boolean_operators as b_, \
                                      rules as r_
 
 '''SAF, component and primitive imports'''
-from .FormatSAF import isFMTSAF
+from saftaxolib.saf.FormatSAF import FormatSAF, isFMTSAF
 
-from ..microarchitecture.format.FormatUarch import FMTSAFtoUarch, \
+from saftaxolib.microarchitecture.format.FormatUarch import FMTSAFtoUarch, \
                          newFMTUarchBufferStubNetlistFromFMTSAF, \
                          FormatUarch, \
                          fmt_uarch_instances, \
                          fmt_uarch_topologies
 
-from ..microarchitecture.format.MetadataParser import MetadataParser, md_parser_instances
+from saftaxolib.microarchitecture.format.MetadataParser import MetadataParser, md_parser_instances
 
 ''' Format microarchitecture'''
 
@@ -42,7 +42,7 @@ concretizeArchitectureFormatSAFsToFormatUarches = \
 predicateIsArchitectureHasFormatSAF=b_.AND(p_.isArchitecture, \
                                            q_.anyForObjSAFs( \
                                                 c_.equals( \
-                                                    m_.SAFFormat.name_, \
+                                                    FormatSAF.name_, \
                                                     a_.getCategory \
                                                 )
                                             )

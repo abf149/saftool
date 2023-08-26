@@ -297,21 +297,3 @@ class ArchitectureCategory(ComponentCategory):
         saf_list=self.buildSAFs()
         arch=Architecture.fromIdSAFListTopologyBufferHierarchy(id,saf_list,topology,self.buffer_hierarchy)
         return arch
-
-'''Define a baseline of SAF, primitive and component categories'''
-
-ArchitectureBase = ArchitectureCategory()
-
-#.port_in("pos_in$x","pos","addr") \
-BufferStub = PrimitiveCategory().name("BufferStub") \
-                                .port_out("md_out$x","md","$v") \
-                                .port_in("at_bound_in$x","pos","addr") \
-                                .attribute("fibertree",["fibertree"],[None]) \
-                                .generator("fibertree")
-
-
-SAFFormat = SAFCategory().name("format") \
-                         .attribute("fibertree",["fibertree"],[None])
-                         
-SAFSkipping = SAFCategory().name("skipping") \
-                           .attribute("bindings",["string","int","string","int"],[None,-1,None,-1])

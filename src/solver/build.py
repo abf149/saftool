@@ -1,5 +1,9 @@
 '''Library for constructing a SAF microrarchitecture inference problem'''
-from util.notation.microarchitecture import SAFFormat, SAFSkipping, BufferStub, ArchitectureBase, TopologyWrapper
+from saftaxolib.architecture.stub_primitives.BufferStub import BufferStub
+from saftaxolib.saf.FormatSAF import FormatSAF
+from saftaxolib.saf.SkippingSAF import SkippingSAF
+from util.notation.microarchitecture import TopologyWrapper
+from saftaxolib.architecture.Architecture import ArchitectureBase
 import util.sparseloop_config_processor as sl_config, copy
 
 def get_buffer_hierarchy(arch):
@@ -32,7 +36,7 @@ def get_buffer_stubs_and_format_safs(arch, fmt_iface_bindings, buffer_stub_list=
         datatype_fmt_ifaces=fmt_iface_bindings[buffer]
 
         if sum([len(datatype_fmt_ifaces[dtype]) for dtype in datatype_fmt_ifaces])>0:
-            fmt_saf=SAFFormat.copy() \
+            fmt_saf=FormatSAF.copy() \
                              .target(buffer) \
                              .set_attribute("fibertree",datatype_fmt_ifaces,"fibertree")
 
@@ -68,7 +72,7 @@ def get_skipping_SAFs_from_skip_bindings(arch, fmt_iface_bindings, skip_bindings
         skip_bindings[bdx]=skip_binding
 
         # Second, create skipping SAF
-        skipping_saf=SAFSkipping.copy() \
+        skipping_saf=SkippingSAF.copy() \
                                 .target(target_buffer) \
                                 .set_attribute("bindings",[target_buffer, \
                                                            target_fmt_iface_flat, \
