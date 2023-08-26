@@ -14,13 +14,13 @@ from util.notation.generators import boolean_operators as b_, \
 '''SAF, component and primitive imports'''
 from .FormatSAF import isFMTSAF
 
-from .FormatUarch import FMTSAFtoUarch, \
+from ..microarchitecture.format.FormatUarch import FMTSAFtoUarch, \
                          newFMTUarchBufferStubNetlistFromFMTSAF, \
                          FormatUarch, \
                          fmt_uarch_instances, \
                          fmt_uarch_topologies
 
-from .MetadataParser import MetadataParser, md_parser_instances
+from ..microarchitecture.format.MetadataParser import MetadataParser, md_parser_instances
 
 ''' Format microarchitecture'''
 
