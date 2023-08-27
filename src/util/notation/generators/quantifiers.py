@@ -83,11 +83,15 @@ def allForObjNets(predicate, passObj=False):
     '''
     def check_all_nets_for_obj(obj,loop_state={}):
         net_list = obj.getTopology().getNetList()
+        #print("\n\n\n\n\n")
+        #[print(net) for net in net_list]
         return all(predicate(net) for net in net_list)
     def check_all_nets_for_obj_pass_obj(obj,loop_state={}):
         net_list = obj.getTopology().getNetList()
         new_loop_state={**loop_state}
-        new_loop_state['obj']=obj       
+        new_loop_state['obj']=obj    
+        #print("\n\n\n\n\n")   
+        #[print(net) for net in net_list]
         return all(predicate(net,{'net':net,**new_loop_state}) for net in net_list)
     if passObj:
         return check_all_nets_for_obj_pass_obj

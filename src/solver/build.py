@@ -51,6 +51,9 @@ def get_skipping_SAFs_from_skip_bindings(arch, fmt_iface_bindings, skip_bindings
                                                               dtype_list, \
                                                               fmt_iface_bindings \
                                                              )
+
+    print(skip_bindings)
+
     # Generate action-optimization SAFs
     skip_bindings=copy.deepcopy(skip_bindings)
     for bdx in range(len(skip_bindings)):
@@ -78,6 +81,11 @@ def get_skipping_SAFs_from_skip_bindings(arch, fmt_iface_bindings, skip_bindings
                                                            target_fmt_iface_flat, \
                                                            condition_buffer, \
                                                            condition_fmt_iface_flat])
+        if skip_binding["bidirectional"]:
+            skipping_saf.set_attribute("direction","bidirectional")
+        else:
+            skipping_saf.set_attribute("direction","leader_follower")
+
         saf_list.append(("skipping_saf",skipping_saf))
 
     return saf_list

@@ -50,16 +50,16 @@ rewrite_rule_set:
 
   # - Skipping SAF to Skipping uarch rewrite rule
 
-  #- id: ConcretizeArchitectureFormatSAFsToFormatUarches
-  #  classtype: RewriteRule
-  #  predicate:
-  #    id: predicate
-  #    classtype: FunctionReference
-  #    value: predicateIsArchitectureHasFormatSAF
-  #  conditionally_evaluated_expression:
-  #    id: concretization
-  #    classtype: FunctionReference
-  #    value: concretizeArchitectureFormatSAFsToFormatUarches
+  - id: ConcretizeArchitectureSkippingSAFsToSkippingUarches
+    classtype: RewriteRule
+    predicate:
+      id: predicate
+      classtype: FunctionReference
+      value: predicateIsArchitectureHasSkippingSAF
+    conditionally_evaluated_expression:
+      id: concretization
+      classtype: FunctionReference
+      value: concretizeArchitectureSkippingSAFsToSkippingUarches
 
 
   # - Topological hole rewrite
