@@ -1,5 +1,5 @@
 '''Position generator microarchitecture'''
-from util.notation import microarchitecture as m_, transform as t_
+from util.notation import microarchitecture as m_
 from util.taxonomy.expressions import FormatType
 
 '''Primitive definition'''
