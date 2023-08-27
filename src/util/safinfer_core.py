@@ -6,7 +6,10 @@ from util.helper import info,warn,error
 
 '''Constants - default list of ruleset names to apply to SAF microarchitecture topology inference'''
 default_ruleset_list = ['base_ruleset', \
-                        'format_uarch_ruleset'] # 'skipping_uarch_ruleset'
+                        'format_uarch_ruleset', \
+                        'address_primitives_ruleset', \
+                        'gating_ruleset', \
+                        'skipping_uarch_ruleset']
 
 '''Routines - build and solve SAF microarchitecture inference problem'''
 def build_saf_uarch_inference_problem(arch, sparseopts, prob, mapping, reconfigurable_arch, bind_out_path):

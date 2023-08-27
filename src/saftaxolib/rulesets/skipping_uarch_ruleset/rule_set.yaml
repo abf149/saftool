@@ -1,6 +1,46 @@
 classtype: RuleSet
 id: SkippingUarchRuleSet
 
+# Primitive Intersection validation rules
+
+validation_rule_set:
+  classtype: ValidationRuleSet
+  id: PrimitiveIntersectionValidationRuleSet
+  validation_rules:
+
+  # - Supported-instantiation validation rules
+
+  - classtype: ValidationRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: assertion
+      value: assertPrimitiveIntersectionAttributesAreSupported
+    id: AssertPrimitiveIntersectionAttributesAreSupported
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsIntersectionParser
+
+# Component SkippingUarch validation rules
+
+validation_rule_set:
+  classtype: ValidationRuleSet
+  id: ComponentSkippingUarchValidationRuleSet
+  validation_rules:
+
+  # - Supported-instantiation validation rules
+
+  - classtype: ValidationRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: assertion
+      value: assertComponentSkippingUarchAttributesAreSupported
+    id: AssertComponentSkippingUarchAttributesAreSupported
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsComponentSkippingUarch
+
 # Skipping uarch rewrite rules
 
 rewrite_rule_set:
@@ -8,28 +48,28 @@ rewrite_rule_set:
   id: SkippingUarchRewriteRuleSet
   rewrite_rules:
 
-  # - Skipping SAF to Skipping uarch rewrite rule (concretization)
+  # - Skipping SAF to Skipping uarch rewrite rule
 
-  - id: ConcretizeArchitectureSkippingSAFsToSkippingUarches
-    classtype: RewriteRule
-    predicate:
-      id: predicate
-      classtype: FunctionReference
-      value: predicateIsArchitectureHasSkippingSAF
-    conditionally_evaluated_expression:
-      id: concretization
-      classtype: FunctionReference
-      value: concretizeArchitectureSkippingSAFsToSkippingUarches
+  #- id: ConcretizeArchitectureFormatSAFsToFormatUarches
+  #  classtype: RewriteRule
+  #  predicate:
+  #    id: predicate
+  #    classtype: FunctionReference
+  #    value: predicateIsArchitectureHasFormatSAF
+  #  conditionally_evaluated_expression:
+  #    id: concretization
+  #    classtype: FunctionReference
+  #    value: concretizeArchitectureFormatSAFsToFormatUarches
 
 
-  - Topological hole rewrite
+  # - Topological hole rewrite
 
   - classtype: RewriteRule
     conditionally_evaluated_expression:
       classtype: FunctionReference
       id: transform
-      value: transformTopologicalHoleToSkippingUarchTopology
-    id: TransformTopologicalHoleToSkippingUarchTopology
+      value: transformTopologicalHoleToIntersectionTopology
+    id: TransformTopologicalHoleToIntersectionTopology
     predicate:
       classtype: FunctionReference
       id: predicate

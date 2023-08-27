@@ -74,16 +74,3 @@ rewrite_rule_set:
       classtype: FunctionReference
       id: predicate
       value: predicateIsComponentIsFormatUarchHasTopologicalHole
-
-  # - Unknown attribute type from known interface type
-
-  #- classtype: RewriteRule
-  #  conditionally_evaluated_expression:
-  #    classtype: FunctionReference
-  #    id: transform
-  #    value: transformUnknownAttributeTypeFromInterfaceType
-  #  id: TransformUnknownAttributeTypeFromInterfaceType
-  #  predicate:
-  #    classtype: FunctionReference
-  #    id: predicate
-  #    value: predicateIsPrimitiveMetadataParserHasUnknownAttributeTypeAndKnownInterfaceType 

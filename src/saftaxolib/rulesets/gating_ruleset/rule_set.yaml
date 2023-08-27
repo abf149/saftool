@@ -1,11 +1,11 @@
 classtype: RuleSet
-id: AddressPrimitivesRuleSet
+id: GatingUarchRuleSet
 
-# Primitive PositionGenerator validation rules
+# Primitive FillGate validation rules
 
 validation_rule_set:
   classtype: ValidationRuleSet
-  id: PrimitivePositionGeneratorValidationRuleSet
+  id: PrimitiveFillGateValidationRuleSet
   validation_rules:
 
   # - Supported-instantiation validation rules
@@ -14,9 +14,9 @@ validation_rule_set:
     conditionally_evaluated_expression:
       classtype: FunctionReference
       id: assertion
-      value: assertPrimitivePgenAttributesAreSupported
-    id: AssertPrimitivePgenAttributesAreSupported
+      value: assertPrimitiveFillGateAttributesAreSupported
+    id: AssertPrimitiveFillGateAttributesAreSupported
     predicate:
       classtype: FunctionReference
       id: predicate
-      value: predicateIsPgen
+      value: predicateIsFillGate
