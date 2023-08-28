@@ -42,13 +42,13 @@ buildSkippingUarch = \
 skipping_uarch_instances={ \
     "cp_bd_none_none":["C","C","bidirectional","none","none"], \
     "cp_bd_opskip_none":["C","C","bidirectional","operand_skip","none"], \
-    "cp_lf_none_none":["C","C","leader_follower","none","none"], \
-    "cp_lf_none_pbubble":["C","C","leader_follower","none","pipeline_bubble"], \
-    "cp_lf_none_lut":["C","C","leader_follower","none","lut"], \
+    "cp_lf_none_none":["C","U","leader_follower","none","none"], \
+    "cp_lf_none_pbubble":["C","U","leader_follower","none","pipeline_bubble"], \
+    "cp_lf_none_lut":["C","U","leader_follower","none","lut"], \
     "b_bd_none_none":["B","B","bidirectional","none","none"], \
-    "b_lf_none_none":["B","B","leader_follower","none","none"], \
-    "b_lf_none_pbubble":["B","B","leader_follower","none","pipeline_bubble"], \
-    "b_lf_none_lut":["B","B","leader_follower","none","lut"]
+    "b_lf_none_none":["B","U","leader_follower","none","none"], \
+    "b_lf_none_pbubble":["B","U","leader_follower","none","pipeline_bubble"], \
+    "b_lf_none_lut":["B","U","leader_follower","none","lut"]
 }
 
 '''Supported instance topologies'''
@@ -187,13 +187,13 @@ get_leader_buffer=lambda saf: saf.getAttributes()[0][2]
 get_leader_fmt_iface=lambda saf: saf.getAttributes()[0][3]
 
 SkipSAFtoUarch = \
-    lambda sks:buildSkippingUarch("Intersection_" + \
+    lambda sks:buildSkippingUarch("Skipping_" + \
                                     get_leader_buffer(sks) + \
                                     str(get_leader_fmt_iface(sks)) + \
                                     "_"+get_follower_buffer(sks) + \
                                     str(get_follower_fmt_iface(sks)), \
-                                  FormatType.fromIdValue("TestFormat","?"), \
-                                  FormatType.fromIdValue("TestFormat","?"), \
+                                  "?", \
+                                  "?", \
                                   sks.getAttributes()[1],"none","none")
 
 
@@ -218,7 +218,7 @@ def newSkipUarchBufferStubNetlistFromSkipSAF(saf):
     leader_buffer=get_leader_buffer(saf)
     leader_fmt_iface=get_leader_fmt_iface(saf)
 
-    new_intersect_name="Intersection_" + \
+    new_intersect_name="Skipping_" + \
                        leader_buffer + \
                        str(leader_fmt_iface) + \
                        "_"+follower_buffer + \
@@ -236,36 +236,36 @@ def newSkipUarchBufferStubNetlistFromSkipSAF(saf):
     net_list=[]
 
     # md: leader buffer <=> intersection leader md in
-    net_list.append(Net.fromIdAttributes("TestNet_"+leader_buffer_md_port+"_"+ \
-                                            leader_intersect_md_port, \
+    net_list.append(Net.fromIdAttributes("TestNet_"+leader_buffer_md_port.replace(".","_")+"_"+ \
+                                            leader_intersect_md_port.replace(".","_"), \
                                          NetType.fromIdValue("TestNetType","md"), \
                                          FormatType.fromIdValue("TestFormatType","?"), \
                                          [leader_buffer_md_port, \
                                           leader_intersect_md_port]))
 
     # pos: leader buffer <=> intersection leader pos out
-    net_list.append(Net.fromIdAttributes("TestNet_"+leader_buffer_pos_port+"_"+ \
-                                            leader_intersect_pos_port, \
+    net_list.append(Net.fromIdAttributes("TestNet_"+leader_buffer_pos_port.replace(".","_")+"_"+ \
+                                            leader_intersect_pos_port.replace(".","_"), \
                                          NetType.fromIdValue("TestNetType","pos"), \
                                          FormatType.fromIdValue("TestFormatType","addr"), \
                                          [leader_buffer_pos_port, \
                                           leader_intersect_pos_port]))
 
     # md: follower buffer <=> intersection follower md in
-    net_list.append(Net.fromIdAttributes("TestNet_"+follower_buffer_md_port+"_"+ \
-                                            follower_intersect_md_port, \
+    net_list.append(Net.fromIdAttributes("TestNet_"+follower_buffer_md_port.replace(".","_")+"_"+ \
+                                            follower_intersect_md_port.replace(".","_"), \
                                          NetType.fromIdValue("TestNetType","md"), \
                                          FormatType.fromIdValue("TestFormatType","?"), \
                                          [follower_buffer_md_port, \
                                           follower_intersect_md_port]))
 
     # pos: follower buffer <=> intersection follower pos out
-    net_list.append(Net.fromIdAttributes("TestNet_"+follower_buffer_pos_port+"_"+ \
-                                            follower_intersect_pos_port, \
+    net_list.append(Net.fromIdAttributes("TestNet_"+follower_buffer_pos_port.replace(".","_")+"_"+ \
+                                            follower_intersect_pos_port.replace(".","_"), \
                                          NetType.fromIdValue("TestNetType","pos"), \
                                          FormatType.fromIdValue("TestFormatType","addr"), \
                                          [follower_buffer_pos_port, \
-                                          follower_intersect_md_port]))
+                                          follower_intersect_pos_port]))
 
     return net_list
 

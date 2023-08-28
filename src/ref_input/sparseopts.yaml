@@ -22,12 +22,12 @@ sparse_optimizations:
               payload-word-bits:  0
             - format: UOP             
               flattened-rankIDs: [ [ R, E] ]
-              payload-word-bits:  0 # Don't care because CSR
+              payload-word-bits:  0
             - format: UOP             
-              payload-word-bits:  4 # 4 bits for level of indirection
+              payload-word-bits:  4
               flattened-rankIDs: [ [ R ] ] 
-            - format: B            
-              metadata-word-bits: 4 # Inner-most level - payload is just the data, no need to specify bits for degree of indirection. BITS PER "NODE" (ABSTRACT VALUE); SIZE FOR MAX INDEX
+            - format: C      
+              metadata-word-bits: 4
               flattened-rankIDs: [ [ C ] ] 
           rank-application-order: inner-to-outer
         - name: Weights
@@ -43,7 +43,7 @@ sparse_optimizations:
             - format: UOP
               payload-word-bits:  7
               flattened-rankIDs: [ [ C, R ] ] 
-            - format: B
+            - format: C
               metadata-word-bits: 4
               flattened-rankIDs: [ [ M  ] ]
           rank-application-order: inner-to-outer
@@ -56,7 +56,7 @@ sparse_optimizations:
             - format: UOP             
               payload-word-bits:  4
               flattened-rankIDs: [ [ R ] ] 
-            - format: B            # C0
+            - format: C         # C0
               metadata-word-bits: 4
               flattened-rankIDs: [ [ C ] ] 
           rank-application-order: inner-to-outer
@@ -69,7 +69,7 @@ sparse_optimizations:
             - format: UOP
               payload-word-bits:  7
               flattened-rankIDs: [ [ C, R ] ] 
-            - format: B
+            - format: C
               metadata-word-bits: 4
               flattened-rankIDs: [ [ M  ] ]
           rank-application-order: inner-to-outer
@@ -91,7 +91,7 @@ sparse_optimizations:
       data-spaces:
         - name: Inputs
           ranks: 
-            - format: B
+            - format: C
               metadata-word-bits: 4
           rank-application-order: inner-to-outer
 

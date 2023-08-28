@@ -126,7 +126,7 @@ class PrimitiveCategory:
         - attr_name -- Primitive category attribute name\n
         - val -- Updated attribute value
         - att_type -- None==typical setter behavior, or fibertree, or rank_list
-        '''        
+        '''
         if att_type is None:
             attr_names=[att[0] for att in self.attributes_]
             self.attribute_vals[attr_names.index(attr_name)]=val

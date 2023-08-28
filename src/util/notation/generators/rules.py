@@ -6,7 +6,7 @@ from util.taxonomy.designelement import Net
 
 def attrCompareTo(obj_attr,inst_attr,attr_info=(None,"string"),wildcard="/",unknown="?"):
     if attr_info[1]=='format':
-        return FormatType.compareFormatTypes(obj_attr,inst_attr)
+        return FormatType.compareFormatTypes(obj_attr,FormatType.fromIdValue("TestFormat",inst_attr))
     
     return obj_attr==inst_attr
 
