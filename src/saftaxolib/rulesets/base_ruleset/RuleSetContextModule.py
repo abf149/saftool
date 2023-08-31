@@ -20,11 +20,14 @@ checkIsComponentOrArchitectureHasTopology = b_.NOT(p_.hasTopologicalHole)
 
 ''' Topology rewrite rules'''
 ''' - TransformUnknownPortTypesOnNetsWithKnownTypesToKnownType: infer unknown port types on nets where some port types are known'''
+'''
 predicateUnknownPortTypesOnNetsWithKnownTypesToKnownType = b_.AND(
                                                                   p_.isComponentOrArchitectureHasNets,
                                                                   q_.anyForObjPorts(p_.isPortWithUnknownFormat)
                                                                  )
 transformUnknownPortTypesOnNetsWithKnownTypesToKnownType = t_.transformFloodNetFormatToObjPorts
+'''
+
 ''' 
     - TransformUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType: infer unknown child component port types on nets 
       where some port types are known
