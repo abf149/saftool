@@ -11,7 +11,9 @@ def isComponent(obj):
     Returns:
     - True if Component
     '''
-    return type(obj).__name__ == 'Component'
+    x=type(obj).__name__ == 'Component'
+    #print("isComponent:",x)
+    return x
 def isArchitecture(obj):
     '''
     Arguments:\n
@@ -29,7 +31,9 @@ def isPrimitive(obj):
     Returns:
     - True if Primitive
     '''    
-    return type(obj).__name__ == 'Primitive'
+    x=type(obj).__name__ == 'Primitive'
+    #print("isPrimitive:",x)
+    return x
 def isCategory(obj,category):
     return obj.getCategory()==category
 
@@ -58,8 +62,12 @@ def isFormatAttribute(att):
     return type(att).__name__ == 'FormatType'
 def isUnknownFormatAttribute(att):
     return b_.AND(isFormatAttribute,lambda x: x.isUnknown())(att)
+def isKnownFormatAttribute(att):
+    return b_.AND(isFormatAttribute,lambda x: not x.isUnknown())(att)
 def hasKnownInterfaceTypeReferencingUnknownAttribute(obj):
     return a_.getKnownInterfaceTypeReferencingUnknownAttribute(obj)[0]
+def hasKnownAttributeTypeReferencedByPortWithUnknownAttribute(obj):
+    return a_.getKnownAttributeTypeReferencedByPortWithUnknownAttribute(obj)[0]
 
 '''Port checks'''
 def isPortWithUnknownFormat(port):
@@ -74,3 +82,44 @@ def isComponentOrArchitectureHasNets(obj):
     return b_.AND(b_.OR(isComponent,isArchitecture),hasNets)(obj)
 def isComponentOrPrimitiveIsCategory(obj,category):
     return isComponentOrPrimitive(obj) and isCategory(obj,category)
+
+def canFloodNetFormatToObjPorts(obj):
+    net_list=obj.getTopology().getNetList()
+    iface=obj.getInterface() # TODO: hack for not having a good port read/modify/write
+
+    for port in iface:
+        # Look for unknown port types on nets with known port types. 
+        if port.getFormatType().isUnknown():
+            # For each port of unknown type in the component interface,
+            for net in net_list:
+                if port.getId() in net.getPortIdList():
+                    # find any connected net(s) with ports of known type
+                    for connected_port_id in net.getPortIdList():
+                        if not obj.getPortById(connected_port_id).getFormatType().isUnknown():
+                            return True
+
+    return False
+
+def canFloodNetFormatToChildPorts(obj):
+    net_list=obj.getTopology().getNetList()
+    comp_list=obj.getTopology().getComponentList() # TODO: hack for not having a good component read/modify/write     
+
+    for subcomponent in comp_list:
+        # Examine all subcomponents.
+        subcomponent_id=subcomponent.getId() 
+        iface=subcomponent.getInterface() # TODO: hack for not having a good port read/modify/write       
+        for port in iface:
+            # Look for unknown port types on nets with known port types. 
+            if port.getFormatType().isUnknown():
+                # For each port of unknown type in the subcomponent interface,
+                full_port_id=subcomponent_id+'.'+port.getId()
+                for net in net_list:
+                    if full_port_id in net.getPortIdList():
+                        # find any connected net(s) with ports of known type
+                        for connected_port_id in net.getPortIdList():
+                            if not obj.getPortById(connected_port_id).getFormatType().isUnknown():
+                                return True
+
+        subcomponent.setInterface(iface)
+    
+    return False

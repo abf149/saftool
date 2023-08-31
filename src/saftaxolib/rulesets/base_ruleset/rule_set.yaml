@@ -75,6 +75,17 @@ rewrite_rule_set:
       id: predicate
       value: predicateIsPrimitiveOrComponentHasUnknownAttributeTypeAndKnownInterfaceTypeReferencingAttribute  
 
+  - classtype: RewriteRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: transform
+      value: transformSetUnknownInterfaceTypeFromReferencedKnownAttribute
+    id: TransformSetUnknownInterfaceTypeFromReferencedKnownAttribute
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsPrimitiveOrComponentHasUnknownInterfaceTypeReferencingKnownAttribute
+
 # Topology completion rules
 completion_rule_set:
   classtype: CompletionRuleSet

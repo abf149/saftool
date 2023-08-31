@@ -22,7 +22,7 @@ from saftaxolib.microarchitecture.skipping.SkippingUarch import SkipSAFtoUarch, 
 
 #from saftaxolib.microarchitecture.format.MetadataParser import MetadataParser, md_parser_instances
 
-from saftaxolib.microarchitecture.skipping.Intersection import Intersection, intersection_instances
+from saftaxolib.microarchitecture.skipping.IntersectionLeaderFollower import IntersectionLeaderFollower, intersection_instances
 
 ''' Skipping microarchitecture'''
 
@@ -74,5 +74,5 @@ transformTopologicalHoleToIntersectionTopology = \
 ''' --- assert supported instance'''
 predicateIsIntersectionParser, \
 assertPrimitiveIntersectionAttributesAreSupported = \
-    r_.isValidComponentOrPrimitiveMatchingCategoryRule(intersection_instances,Intersection)
+    r_.isValidComponentOrPrimitiveMatchingCategoryRule(intersection_instances,IntersectionLeaderFollower)
 

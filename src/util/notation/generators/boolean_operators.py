@@ -8,7 +8,12 @@ def AND(*funcs):
     Returns:\n
     - lambda(x) -> bool = lambda1(x) AND lambda2(x) AND ...
     '''
-    return lambda x: all(f(x) for f in funcs)
+    def lmbda(x):
+        x=all(f(x) for f in funcs)
+        #print("AND:",x)
+        return x
+    return lmbda
+    #return lambda x: all(f(x) for f in funcs)
 def OR(*funcs):
     '''
     Arguments\n
@@ -17,7 +22,13 @@ def OR(*funcs):
     Returns:\n
     - lambda(x) -> bool = lambda1(x) OR lambda2(x) OR ...
     '''
-    return lambda x: any(f(x) for f in funcs)
+    def lmbda(x):
+        x=any(f(x) for f in funcs)
+        #print("OR:",x)
+        return x
+
+    return lmbda
+    #return lambda x: any(f(x) for f in funcs)
 def NOT(func):
     '''
     Arguments\n

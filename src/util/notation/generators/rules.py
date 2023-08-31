@@ -70,7 +70,7 @@ def isValidComponentOrPrimitiveMatchingCategoryRule(supported_instances,category
                 anyInstanceMatchesObjectAttributes(obj.getAttributes(),supported_instances,category_template.attributes_)
 
 def expandComponentsSpec(components_spec, obj, generator_type, generator_arg, component_template):
-    if generator_type==None:
+    if (generator_type is None) or generator_type=='none' or generator_type=='None':
         # No generator; no expansion
         return components_spec
     elif generator_type=="fibertree":
@@ -96,7 +96,7 @@ def expandComponentsSpec(components_spec, obj, generator_type, generator_arg, co
         return expanded_components_spec
 
 def expandNetlistSpec(netlist_spec, obj, generator_type, generator_arg, category_template):
-    if generator_type==None:
+    if (generator_type is None) or generator_type=='none' or generator_type=='None':
         # No generator; no expansion
         return netlist_spec
     elif generator_type=="fibertree":

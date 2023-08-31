@@ -31,11 +31,7 @@ transformUnknownPortTypesOnNetsWithKnownTypesToKnownType = t_.transformFloodNetF
 '''
 predicateUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType = b_.AND( \
                                                                             p_.isComponentOrArchitectureHasNets, \
-                                                                            q_.anyForObjComponents( \
-                                                                                q_.anyForObjPorts( \
-                                                                                p_.isPortWithUnknownFormat
-                                                                                )
-                                                                            )
+                                                                            p_.canFloodNetFormatToChildPorts
                                                                         )
 transformUnknownChildComponentPortTypesOnNetsWithKnownTypesToKnownType = t_.transformFloodNetFormatToChildPorts
 
@@ -50,6 +46,9 @@ checkComponentHasNoUnknownInterfaceTypes = b_.NOT(q_.anyForObjPorts(p_.isPortWit
 predicateComponentHasNoUnknownAttributeTypes = p_.isComponentOrPrimitive
 checkComponentHasNoUnknownAttributeTypes = b_.NOT(q_.anyForObjAttributes(p_.isUnknownFormatAttribute))
 
+''' - TransformSetUnknownAttributeFromKnownInterfaceTypeReferencingAttribute:
+      Allow component attributes to be inferred from interface type
+'''
 transformSetUnknownAttributeFromKnownInterfaceTypeReferencingAttribute = \
     lambda obj: t_.transformObjAttribute(obj, \
         *(a_.getKnownInterfaceTypeReferencingUnknownAttribute(obj)[1:]))
@@ -58,3 +57,15 @@ predicateIsPrimitiveOrComponentHasUnknownAttributeTypeAndKnownInterfaceTypeRefer
     b_.AND(b_.OR(p_.isPrimitive, \
                  p_.isComponent), \
            p_.hasKnownInterfaceTypeReferencingUnknownAttribute)
+
+''' - TransformSetUnknownInterfaceTypeFromReferencedKnownAttribute:
+      Allow interface type to be inferred from component attribute
+'''
+transformSetUnknownInterfaceTypeFromReferencedKnownAttribute = \
+    lambda obj: t_.transformObjInterfacePort(obj, \
+        *(a_.getKnownAttributeTypeReferencedByPortWithUnknownAttribute(obj)[1:]))
+
+predicateIsPrimitiveOrComponentHasUnknownInterfaceTypeReferencingKnownAttribute = \
+    b_.AND(b_.OR(p_.isPrimitive, \
+                 p_.isComponent), \
+           p_.hasKnownAttributeTypeReferencedByPortWithUnknownAttribute)

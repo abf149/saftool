@@ -123,7 +123,7 @@ class Solver:
             error('- ERROR: could not infer microarchitecture',also_stdout=True)
             error("-- Component:",component.getId(),"category:",component.getCategory())
             error(str(component))
-            info("- Terminating. Check logs for details.")
+            #info("- Terminating. Check logs for details.")
 
             res=False
 

@@ -5,12 +5,13 @@ from util.notation import microarchitecture as m_, transform as t_
 from util.taxonomy.expressions import FormatType
 
 '''Microarchitecture primitive imports'''
-from .Intersection import buildIntersection
+from .IntersectionLeaderFollower import buildIntersectionLeaderFollower
+from .IntersectionBidirectional import buildIntersectionBidirectional
 from ..address_primitives.PositionGenerator import buildPositionGenerator as buildPgen
 from ..gating.FillGate import buildFillGate
 
 '''Component definition'''
-SkippingUarch = m_.PrimitiveCategory().name("SkippingUarch") \
+SkippingUarch = m_.ComponentCategory().name("SkippingUarch") \
                                       .attribute("format_leader","format",FormatType.fromIdValue("format","?")) \
                                       .attribute("format_follower","format",FormatType.fromIdValue("format","?")) \
                                       .attribute("direction","string","bidirectional") \
@@ -56,13 +57,13 @@ skipping_uarch_topologies=( \
     { \
 
         "cp_bd_none_none": (\
-            [(buildIntersection,'Intersection',('C','C','bidirectional','none')), \
-             (buildPgen),'PgenLeader',('C',), \
-             (buildPgen),'PgenFollower',('C',)],\
-            [('md','md_in_leader','Intersection.md_in_leader'), \
-             ('md','md_in_follower','Intersection.md_in_follower'), \
-             ('md','Intersection.md_out','PgenLeader.md_in'), \
-             ('md','Intersection.md_out','PgenFollower.md_in'), \
+            [(buildIntersectionBidirectional,'IntersectionBD',('C','C','none')), \
+             (buildPgen,'PgenLeader',('C',)), \
+             (buildPgen,'PgenFollower',('C',))],\
+            [('md','md_in_leader','IntersectionBD.md_in_0'), \
+             ('md','md_in_follower','IntersectionBD.md_in_1'), \
+             ('md','IntersectionBD.md_out','PgenLeader.md_in'), \
+             ('md','IntersectionBD.md_out','PgenFollower.md_in'), \
              ('pos','PgenLeader.pos_out','pos_out_leader'), \
              ('pos','PgenFollower.pos_out','pos_out_follower')],
             "none", # Generator type
@@ -70,13 +71,13 @@ skipping_uarch_topologies=( \
         ),
 
         "cp_bd_opskip_none": (\
-            [(buildIntersection,'Intersection',('C','C','bidirectional','opskip')), \
-             (buildPgen),'PgenLeader',('C',), \
-             (buildPgen),'PgenFollower',('C',)],\
-            [('md','md_in_leader','Intersection.md_in_leader'), \
-             ('md','md_in_follower','Intersection.md_in_follower'), \
-             ('md','Intersection.md_out','PgenLeader.md_in'), \
-             ('md','Intersection.md_out','PgenFollower.md_in'), \
+            [(buildIntersectionBidirectional,'IntersectionBD',('C','C','opskip')), \
+             (buildPgen,'PgenLeader',('C',)), \
+             (buildPgen,'PgenFollower',('C',))],\
+            [('md','md_in_leader','IntersectionBD.md_in_0'), \
+             ('md','md_in_follower','IntersectionBD.md_in_1'), \
+             ('md','IntersectionBD.md_out','PgenLeader.md_in'), \
+             ('md','IntersectionBD.md_out','PgenFollower.md_in'), \
              ('pos','PgenLeader.pos_out','pos_out_leader'), \
              ('pos','PgenFollower.pos_out','pos_out_follower')],
             "none", # Generator type
@@ -84,52 +85,45 @@ skipping_uarch_topologies=( \
         ),
 
         "cp_lf_none_none": (\
-            [(buildIntersection,'Intersection',('C','C','leader_follower','none')), \
-             (buildPgen),'PgenLeader',('C',), \
-             (buildPgen),'PgenFollower',('C',)],\
-            [('md','md_in_leader','Intersection.md_in_leader'), \
-             ('md','Intersection.md_out','PgenFollower.md_in'), \
+            [(buildIntersectionLeaderFollower,'IntersectionLF',('C','none')), \
+             (buildPgen,'PgenFollower',('C',))],\
+            [('md','md_in_leader','IntersectionLF.md_in_leader'), \
+             ('md','IntersectionLF.md_out','PgenFollower.md_in'), \
              ('pos','PgenFollower.pos_out','pos_out_follower')],
             "none", # Generator type
             "" # Generator argument from this component attribute
         ),
 
         "cp_lf_none_pbubble": (\
-            [(buildIntersection,'Intersection',('C','C','leader_follower','none')), \
-             (buildPgen),'PgenLeader',('C',), \
-             (buildPgen),'PgenFollower',('C',), \
-             (buildFillGate),'FillGateLeader',('pipeline_bubble')],\
-            [('md','md_in_leader','Intersection.md_in_leader'), \
-             ('md','Intersection.md_out','PgenLeader.md_in'), \
-             ('md','Intersection.md_out','PgenFollower.md_in'), \
-             ('pos','PgenFollower.pos_out','pos_out_follower'), \
-             ('pos','PgenLeader.pos_out','FillGateLeader.pos_in')],
+            [(buildIntersectionLeaderFollower,'IntersectionLF',('C','none')), \
+             (buildPgen,'PgenFollower',('C',)),\
+             (buildFillGate,'FillGateLeader',('pipeline_bubble'))],\
+            [('md','md_in_leader','IntersectionLF.md_in_leader'), \
+             ('md','IntersectionLF.md_out','PgenFollower.md_in'), \
+             ('pos','PgenFollower.pos_out','pos_out_follower')],
             "none", # Generator type
             "" # Generator argument from this component attribute
         ),
 
         "cp_lf_none_pbubble": (\
-            [(buildIntersection,'Intersection',('C','C','leader_follower','none')), \
-             (buildPgen),'PgenLeader',('C',), \
-             (buildPgen),'PgenFollower',('C',), \
-             (buildFillGate),'FillGateLeader',('lut')],\
-            [('md','md_in_leader','Intersection.md_in_leader'), \
-             ('md','Intersection.md_out','PgenLeader.md_in'), \
-             ('md','Intersection.md_out','PgenFollower.md_in'), \
-             ('pos','PgenFollower.pos_out','pos_out_follower'), \
-             ('pos','PgenLeader.pos_out','FillGateLeader.pos_in')],
+            [(buildIntersectionLeaderFollower,'IntersectionLF',('C','none')), \
+             (buildPgen,'PgenFollower',('C',)),\
+             ((buildFillGate),'FillGateLeader',('lut'))],\
+            [('md','md_in_leader','IntersectionLF.md_in_leader'), \
+             ('md','IntersectionLF.md_out','PgenFollower.md_in'), \
+             ('pos','PgenFollower.pos_out','pos_out_follower')],
             "none", # Generator type
             "" # Generator argument from this component attribute
         ),
 
         "b_bd_none_none": (\
-            [(buildIntersection,'Intersection',('B','B','bidirectional','none')), \
-             (buildPgen),'PgenLeader',('B',), \
-             (buildPgen),'PgenFollower',('B',)],\
-            [('md','md_in_leader','Intersection.md_in_leader'), \
-             ('md','md_in_follower','Intersection.md_in_follower'), \
-             ('md','Intersection.md_out','PgenLeader.md_in'), \
-             ('md','Intersection.md_out','PgenFollower.md_in'), \
+            [(buildIntersectionBidirectional,'IntersectionBD',('B','B','none')), \
+             (buildPgen,'PgenLeader',('B',)), \
+             (buildPgen,'PgenFollower',('B',))],\
+            [('md','md_in_leader','IntersectionBD.md_in_0'), \
+             ('md','md_in_follower','IntersectionBD.md_in_1'), \
+             ('md','IntersectionBD.md_out','PgenLeader.md_in'), \
+             ('md','IntersectionBD.md_out','PgenFollower.md_in'), \
              ('pos','PgenLeader.pos_out','pos_out_leader'), \
              ('pos','PgenFollower.pos_out','pos_out_follower')],
             "none", # Generator type
@@ -137,24 +131,21 @@ skipping_uarch_topologies=( \
         ),
 
         "b_lf_none_none": (\
-            [(buildIntersection,'Intersection',('B','B','leader_follower','none')), \
-             (buildPgen),'PgenLeader',('B',), \
-             (buildPgen),'PgenFollower',('B',)],\
-            [('md','md_in_leader','Intersection.md_in_leader'), \
-             ('md','Intersection.md_out','PgenFollower.md_in'), \
+            [(buildIntersectionLeaderFollower,'IntersectionLF',('B','none')), \
+             (buildPgen,'PgenFollower',('B',))],\
+            [('md','md_in_leader','IntersectionLF.md_in_leader'), \
+             ('md','IntersectionLF.md_out','PgenFollower.md_in'), \
              ('pos','PgenFollower.pos_out','pos_out_follower')],
             "none", # Generator type
             "" # Generator argument from this component attribute
         ),
 
         "b_lf_none_pbubble": (\
-            [(buildIntersection,'Intersection',('B','B','leader_follower','none')), \
-             (buildPgen),'PgenLeader',('B',), \
-             (buildPgen),'PgenFollower',('B',), \
-             (buildFillGate),'FillGateLeader',('pipeline_bubble')],\
-            [('md','md_in_leader','Intersection.md_in_leader'), \
-             ('md','Intersection.md_out','PgenLeader.md_in'), \
-             ('md','Intersection.md_out','PgenFollower.md_in'), \
+            [(buildIntersectionLeaderFollower,'IntersectionLF',('B','none')), \
+             (buildPgen,'PgenFollower',('B',)),\
+             (buildFillGate,'FillGateLeader',('pipeline_bubble'))],\
+            [('md','md_in_leader','IntersectionLF.md_in_leader'), \
+             ('md','IntersectionLF.md_out','PgenFollower.md_in'), \
              ('pos','PgenFollower.pos_out','pos_out_follower'), \
              ('pos','PgenLeader.pos_out','FillGateLeader.pos_in')],
             "none", # Generator type
@@ -162,13 +153,11 @@ skipping_uarch_topologies=( \
         ),
 
         "b_lf_none_lut": (\
-            [(buildIntersection,'Intersection',('B','B','leader_follower','none')), \
-             (buildPgen),'PgenLeader',('B',), \
-             (buildPgen),'PgenFollower',('B',), \
-             (buildFillGate),'FillGateLeader',('lut')],\
-            [('md','md_in_leader','Intersection.md_in_leader'), \
-             ('md','Intersection.md_out','PgenLeader.md_in'), \
-             ('md','Intersection.md_out','PgenFollower.md_in'), \
+            [(buildIntersectionLeaderFollower,'IntersectionLF',('B','none')), \
+             (buildPgen,'PgenFollower',('B',)), \
+             (buildFillGate,'FillGateLeader',('lut'))],\
+            [('md','md_in_leader','IntersectionLF.md_in_leader'), \
+             ('md','IntersectionLF.md_out','PgenFollower.md_in'), \
              ('pos','PgenFollower.pos_out','pos_out_follower'), \
              ('pos','PgenLeader.pos_out','FillGateLeader.pos_in')],
             "none", # Generator type

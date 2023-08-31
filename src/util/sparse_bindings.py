@@ -60,7 +60,6 @@ def compute_action_bindings(sparseopts, fmt_iface_bindings, dtype_buffer_list):
 
     # Then, process action optimizations
     for target in sparseopts['targets']:
-        print("target:",target)
         if 'action-optimization' in target:
             for action in target['action-optimization']:
                 for option in action['options']:

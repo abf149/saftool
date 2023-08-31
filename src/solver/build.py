@@ -52,8 +52,6 @@ def get_skipping_SAFs_from_skip_bindings(arch, fmt_iface_bindings, skip_bindings
                                                               fmt_iface_bindings \
                                                              )
 
-    print(skip_bindings)
-
     # Generate action-optimization SAFs
     skip_bindings=copy.deepcopy(skip_bindings)
     for bdx in range(len(skip_bindings)):
@@ -67,10 +65,8 @@ def get_skipping_SAFs_from_skip_bindings(arch, fmt_iface_bindings, skip_bindings
         condition_dtype=skip_binding['condition']['dtype']
         condition_fmt_iface=-1 #skip_binding['condition']['fmt_iface']        
 
-        print(skip_binding)
-
         target_fmt_iface_flat=port_idx[target_buffer][target_dtype][0] #target_fmt_iface
-        condition_fmt_iface_flat=port_idx[condition_buffer][condition_dtype][0] #condition_fmt_iface
+        condition_fmt_iface_flat=port_idx[condition_buffer][condition_dtype][1] #condition_fmt_iface
 
         skip_binding['target']['fmt_iface']=-1 #target_fmt_iface_flat
         skip_binding['condition']['fmt_iface']=-1 #condition_fmt_iface_flat

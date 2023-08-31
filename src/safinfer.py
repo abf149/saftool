@@ -1,6 +1,7 @@
 '''SAFinfer - tool to build and solve SAF microarchitecture inference problem from Sparseloop inputs'''
 from util import safinfer_core as safcore, safinfer_io as safio
 import util.helper as helper
+import os
 
 ''' main() - build and solve SAF microarchitecture inference problem
 based on CLI arguments and dump the inferred SAF microarchitecture
@@ -42,3 +43,4 @@ if __name__=="__main__":
         safio.dump_saf_uarch_topology(inferred_arch,topo_out_path)
     else:
         print("  => FAILURE")
+        safio.dump_saf_uarch_topology(inferred_arch,topo_out_path + ".fail")

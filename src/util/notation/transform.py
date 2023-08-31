@@ -62,7 +62,7 @@ def transformFloodNetFormatToChildPorts(obj):
             # Look for unknown port types on nets with known port types. 
             if port.getFormatType().isUnknown():
                 # For each port of unknown type in the subcomponent interface,
-                full_port_id=subcomponent_id+'.'+port.getId()
+                full_port_id=subcomponent_id+'.'+port.getId()        
                 for net in net_list:
                     if full_port_id in net.getPortIdList():
                         # find any connected net(s) and attempt to infer net type from a connected port of known type.
@@ -103,6 +103,21 @@ def transformSAFs(obj,new_saf_list,append=True):
         obj.setSAFList(list(new_saf_list))
     return obj
 
-def transformObjAttribute(obj,value,idx):
-    obj.setAttributeByIndex(value,idx)
+def transformObjAttribute(obj,fmt,idx):
+    obj.setAttributeByIndex(fmt,idx)
+    return obj
+
+def transformObjInterfacePort(obj,fmt,idx):
+    #print(obj.getId())
+    #print(fmt)
+    #print(idx)
+    iface=obj.getInterface()
+    port=iface[idx]
+    #print(port)    
+    port.setFormatType(fmt)
+    #print(port)
+    iface[idx]=port
+    #print([pt.getFormatType().getValue() for pt in iface])
+    obj.setInterface(iface)
+    #print(obj)
     return obj
