@@ -14,6 +14,6 @@ pwd
 
 ${PYTHON} -m cProfile -o test.pstats safinfer.py "$@"
 gprof2dot -f pstats test.pstats | dot -Tpng -o safinfer_prof.png
-
+echo "Profiling metrics output to safinfer_prof.png"
 echo "cd ${EXEC_DIR}"
 cd ${EXEC_DIR}
