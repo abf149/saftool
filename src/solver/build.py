@@ -1,9 +1,9 @@
 '''Library for constructing a SAF microrarchitecture inference problem'''
-from saftaxolib.architecture.stub_primitives.BufferStub import BufferStub
-from saftaxolib.saf.FormatSAF import FormatSAF
-from saftaxolib.saf.SkippingSAF import SkippingSAF
+from saflib.architecture.stub_primitives.BufferStub import BufferStub
+from saflib.saf.FormatSAF import FormatSAF
+from saflib.saf.SkippingSAF import SkippingSAF
+from saflib.architecture.Architecture import ArchitectureBase
 from util.notation.microarchitecture import TopologyWrapper
-from saftaxolib.architecture.Architecture import ArchitectureBase
 import util.sparseloop_config_processor as sl_config, copy
 
 def get_buffer_hierarchy(arch):

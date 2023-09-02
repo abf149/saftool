@@ -2,7 +2,7 @@
 from util.notation.generators import rules as r_
 
 '''Primitive imports'''
-from saftaxolib.microarchitecture.address_primitives.PositionGenerator \
+from saflib.microarchitecture.address_primitives.PositionGenerator \
     import PositionGenerator as Pgen, pgen_instances
 
 '''Position generator microarchitecture primitive'''

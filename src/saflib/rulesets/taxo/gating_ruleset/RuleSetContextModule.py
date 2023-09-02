@@ -2,7 +2,7 @@
 from util.notation.generators import rules as r_
 
 '''Primitive imports'''
-from saftaxolib.microarchitecture.gating.FillGate import FillGate, fill_gate_instances
+from saflib.microarchitecture.gating.FillGate import FillGate, fill_gate_instances
 
 '''FillGate microarchitecture primitive'''
 

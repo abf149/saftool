@@ -12,17 +12,15 @@ from util.notation.generators import boolean_operators as b_, \
                                      rules as r_
 
 '''SAF, component and primitive imports'''
-from saftaxolib.saf.SkippingSAF import SkippingSAF, isSkipSAF
+from saflib.saf.SkippingSAF import SkippingSAF, isSkipSAF
 
-from saftaxolib.microarchitecture.skipping.SkippingUarch import SkipSAFtoUarch, \
+from saflib.microarchitecture.skipping.SkippingUarch import SkipSAFtoUarch, \
                                                                 newSkipUarchBufferStubNetlistFromSkipSAF, \
                                                                 SkippingUarch, \
                                                                 skipping_uarch_instances, \
                                                                 skipping_uarch_topologies
 
-#from saftaxolib.microarchitecture.format.MetadataParser import MetadataParser, md_parser_instances
-
-from saftaxolib.microarchitecture.skipping.IntersectionLeaderFollower import IntersectionLeaderFollower, intersection_instances
+from saflib.microarchitecture.skipping.IntersectionLeaderFollower import IntersectionLeaderFollower, intersection_instances
 
 ''' Skipping microarchitecture'''
 

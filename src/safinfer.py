@@ -17,7 +17,7 @@ if __name__=="__main__":
     reconfigurable_arch, \
     bind_out_path, \
     topo_out_path, \
-    saftaxolib, \
+    saflib, \
     do_logging = safio.parse_args()
 
     print("logging:",do_logging)
@@ -32,7 +32,7 @@ if __name__=="__main__":
                                                   reconfigurable_arch, \
                                                   bind_out_path)
 
-    result = safcore.solve_saf_uarch_inference_problem(taxo_arch, saftaxolib)
+    result = safcore.solve_saf_uarch_inference_problem(taxo_arch, saflib)
 
     # Success: dump
     # Fail: exit

@@ -12,15 +12,15 @@ from util.notation.generators import boolean_operators as b_, \
                                      rules as r_
 
 '''SAF, component and primitive imports'''
-from saftaxolib.saf.FormatSAF import FormatSAF, isFMTSAF
+from saflib.saf.FormatSAF import FormatSAF, isFMTSAF
 
-from saftaxolib.microarchitecture.format.FormatUarch import FMTSAFtoUarch, \
+from saflib.microarchitecture.format.FormatUarch import FMTSAFtoUarch, \
                          newFMTUarchBufferStubNetlistFromFMTSAF, \
                          FormatUarch, \
                          fmt_uarch_instances, \
                          fmt_uarch_topologies
 
-from saftaxolib.microarchitecture.format.MetadataParser import MetadataParser, md_parser_instances
+from saflib.microarchitecture.format.MetadataParser import MetadataParser, md_parser_instances
 
 ''' Format microarchitecture'''
 
