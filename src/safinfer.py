@@ -18,10 +18,13 @@ if __name__=="__main__":
     bind_out_path, \
     topo_out_path, \
     saflib, \
-    do_logging = safio.parse_args()
+    do_logging,\
+    log_fn = safio.parse_args()
 
     print("logging:",do_logging)
     helper.do_log=do_logging
+    if do_logging:
+        helper.log_init(log_fn)    
     print("reconfigurable_arch:",reconfigurable_arch)
 
     # Build and solve the SAF microarchitecture inference problem:

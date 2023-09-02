@@ -35,6 +35,7 @@ def parse_args():
     parser.add_argument('-t','--topology-out',default='ref_output/new_arch.yaml')
     parser.add_argument('-r', '--reconfigurable-arch', action='store_true')
     parser.add_argument('-L','--log', action='store_true')
+    parser.add_argument('-f','--log-file',default='./safinfer.log')
     args = parser.parse_args()
 
     # Parse the CLI arguments
@@ -81,7 +82,8 @@ def parse_args():
            bind_out_path, \
            topo_out_path, \
            args.saftaxolib, \
-           do_logging 
+           do_logging, \
+           args.log_file
 
 '''Binding & SAF microarchitecture topology YAML dumps'''
 def dump_bindings(bind_out_path,fmt_iface_bindings,skip_bindings):

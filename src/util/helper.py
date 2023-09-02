@@ -2,27 +2,46 @@
 import yaml,logging,os
 
 '''Logging'''
+log_configured=False
 do_log=False
 log_path="./safinfer.log"
-try:
-    os.remove(log_path)
-except:
-    pass
-logging.basicConfig(filename=log_path, level=logging.INFO)
+
+def log_init(log_path_):
+    global log_path
+    global log_configured
+    
+    log_path=log_path_
+
+    try:
+        os.remove(log_path)
+    except:
+        pass
+
+    logging.basicConfig(filename=log_path, level=logging.INFO)
+    log_configured=True
+
 def log_concat(*args):
     return ' '.join(map(str, args))
+def crash_if_log_not_configured():
+    global log_configured
+    if not log_configured:
+        print("=> Log not configured. Terminating.")
+        assert(False)
 def info(*args,also_stdout=False):
     if do_log:
+        crash_if_log_not_configured()
         logging.info(log_concat(*args))
     if also_stdout:
         print(*args)
 def warn(*args,also_stdout=False):
     if do_log:
+        crash_if_log_not_configured()
         logging.warn(log_concat(*args))
     if also_stdout:
         print(*args)
 def error(*args,also_stdout=False):
     if do_log:
+        crash_if_log_not_configured()
         logging.error(log_concat(*args))
     if also_stdout:
         print(*args)

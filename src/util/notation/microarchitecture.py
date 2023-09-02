@@ -1,6 +1,7 @@
 '''Create microarchitecture subcategories and subcategory instances'''
 
-from util.taxonomy.designelement import Primitive, Component, Architecture, Net, FormatType, Topology, NetType, Port, SAF
+from util.taxonomy.designelement import Primitive, Component, Architecture, Net, FormatType, \
+                                        Topology, NetType, Port, SAF
 from util.helper import info,warn,error
 import copy
 
