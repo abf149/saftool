@@ -1,8 +1,8 @@
 '''Library for constructing a SAF microrarchitecture inference problem'''
-from saflib.architecture.stub_primitives.BufferStub import BufferStub
+from saflib.architecture.taxo.stub_primitives.BufferStub import BufferStub
 from saflib.saf.FormatSAF import FormatSAF
 from saflib.saf.SkippingSAF import SkippingSAF
-from saflib.architecture.Architecture import ArchitectureBase
+from saflib.architecture.taxo.Architecture import ArchitectureBase
 from util.notation.microarchitecture import TopologyWrapper
 import util.sparseloop_config_processor as sl_config, copy
 

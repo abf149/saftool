@@ -14,13 +14,13 @@ from util.notation.generators import boolean_operators as b_, \
 '''SAF, component and primitive imports'''
 from saflib.saf.SkippingSAF import SkippingSAF, isSkipSAF
 
-from saflib.microarchitecture.skipping.SkippingUarch import SkipSAFtoUarch, \
+from saflib.microarchitecture.taxo.skipping.SkippingUarch import SkipSAFtoUarch, \
                                                                 newSkipUarchBufferStubNetlistFromSkipSAF, \
                                                                 SkippingUarch, \
                                                                 skipping_uarch_instances, \
                                                                 skipping_uarch_topologies
 
-from saflib.microarchitecture.skipping.IntersectionLeaderFollower import IntersectionLeaderFollower, intersection_instances
+from saflib.microarchitecture.taxo.skipping.IntersectionLeaderFollower import IntersectionLeaderFollower, intersection_instances
 
 ''' Skipping microarchitecture'''
 
