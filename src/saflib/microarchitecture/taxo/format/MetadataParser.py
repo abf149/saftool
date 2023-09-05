@@ -6,7 +6,7 @@ from util.taxonomy.expressions import FormatType
 MetadataParser = m_.PrimitiveCategory().name("MetadataParser") \
                    .attribute("format","format",FormatType.fromIdValue("format","?")) \
                    .port_in("md_in","md","?",attr_reference="format") \
-                   .port_out("at_bound_out","pos","addr") \
+                   .port_out("at_bound_out","flag","none") \
                    .generator(None)
 
 '''Constructor'''

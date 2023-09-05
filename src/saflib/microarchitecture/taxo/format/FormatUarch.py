@@ -7,7 +7,7 @@ from .MetadataParser import buildMetadataParser
 '''Component definition'''
 FormatUarch = m_.ComponentCategory().name("FormatUarch") \
                                     .port_in("md_in$x","md","$v") \
-                                    .port_out("at_bound_out$x","pos","addr") \
+                                    .port_out("at_bound_out$x","flag","none") \
                                     .attribute("fibertree",["fibertree"],[None]) \
                                     .generator("fibertree")
 
@@ -27,7 +27,7 @@ fmt_uarch_topologies=( \
 
         "all": (\
             [(buildMetadataParser,'TestMetadataParser$x',('?',))],
-            [('md','md_in$x','TestMetadataParser$x.md_in'),('pos','at_bound_out$x','TestMetadataParser$x.at_bound_out')],
+            [('md','md_in$x','TestMetadataParser$x.md_in'),('flag','at_bound_out$x','TestMetadataParser$x.at_bound_out')],
             "fibertree", # Generator type
             "fibertree" # Generator argument from this component attribute
         )
@@ -40,7 +40,7 @@ fmt_uarch_topologies=( \
 getFMTSAFRankList=lambda fs:fs.getAttributes()[0]
 FMTSAFUarchBuffer=lambda fs:[fs.getTarget(),fs.getTarget()+"_datatype_format_uarch"]
 FMTUarchBufferWiringEndpts = [['md_out$x','md_in$x'],['at_bound_in$x','at_bound_out$x']]
-FMTUarchBufferWiringNetTypes = ['md','pos']
+FMTUarchBufferWiringNetTypes = ['md','flag']
 '''- Wire to BufferStub'''
 newFMTUarchBufferStubNetlistFromFMTSAF= \
     lambda fs: t_.net_zip(FMTUarchBufferWiringEndpts, FMTUarchBufferWiringNetTypes, \

@@ -1,6 +1,6 @@
 import util.sparseloop_config_processor as sl_config
-import test_data as td, copy, yaml, re
-import util.safmodel_io as safio
+from util.taxonomy import designelement as de
+import os, argparse, test_data as td, copy, yaml, re
 
 def get_primitive_with_name(name,primitive_classes):
     '''Get primitive class declaration from Accelergy primitives structure'''
@@ -271,16 +271,61 @@ def gen_unary_safmodels(netlist, arch, comp_in, prim_const):
     return arch_w_SAF, comp_out
 
 if __name__=="__main__":
-    arch, \
-    netlist, \
-    comp_in, \
-    arch_out_path, \
-    comp_out_path = safio.parse_args()
+    parser = argparse.ArgumentParser()
+    #parser.add_argument('-l','--saftaxolib',default='saftaxolib/')
+    parser.add_argument('-i','--dir-in',default='')
+    parser.add_argument('-n','--netlist',default='ref_output/new_arch.yaml')
+    parser.add_argument('-a','--arch',default='ref_input/arch.yaml')
+    parser.add_argument('-c','--comp-in',default='ref_input/compound_components.yaml')
+    #parser.add_argument('-m','--map',default='ref_input/map.yaml')
+    #parser.add_argument('-p','--prob',default='ref_input/prob.yaml')
+    #parser.add_argument('-s','--sparseopts',default='ref_input/sparseopts.yaml')
+    parser.add_argument('-o','--dir-out',default='')
+    #parser.add_argument('-b','--binding-out',default='ref_output/bindings.yaml')
+    parser.add_argument('-r','--arch-out',default='ref_output/arch_w_SAF.yaml')
+    parser.add_argument('-k','--comp-out',default='ref_output/compound_components.yaml')
+    args = parser.parse_args()
+
+    print("SAFmodel.\n")
+
+    print("Parsing input files:")
+
+    if len(args.dir_in)>0:
+        # Not yet supported
+        assert(False)
+        """         print("- arch:",args.dir_in+'arch.yaml')
+                arch=sl_config.load_config_yaml(args.dir_in+'arch.yaml')
+                print("- map:",args.dir_in+'map.yaml')
+                mapping=sl_config.load_config_yaml(args.dir_in+'map.yaml')
+                print("- prob:",args.dir_in+'prob.yaml')
+                prob=sl_config.load_config_yaml(args.dir_in+'prob.yaml')
+                print("- sparseopts:",args.dir_in+'sparseopts.yaml')
+                sparseopts=sl_config.load_config_yaml(args.dir_in+'sparseopts.yaml')     """    
+    else:    
+        print("- netlist:",args.netlist)
+        #netlist=sl_config.load_config_yaml(args.netlist)
+        netlist=de.Architecture.fromYamlFilename(args.netlist)
+        print("- arch:",args.arch)
+        arch=sl_config.load_config_yaml(args.arch)
+        print("- compound components (input):",args.comp_in)
+        comp_in=sl_config.load_config_yaml(args.comp_in)
+        print("- arch output path:",args.arch_out)
+        arch_out_path=args.arch_out
+        print("- compound components path (output):",args.comp_out)
+        comp_out_path=args.comp_out
+        #comp_out=sl_config.load_config_yaml(args.comp_out)
+        
+        #print("- compound components (output):",args.comp_out)
+        #arch=sl_config.load_config_yaml(args.comp_out)
 
     print("\nLoading primitive component constitutive relations.")
     primitive_constitutive_properties=td.get_test_data()
 
-    arch_w_SAF,comp_out = gen_unary_safmodels(netlist, arch, comp_in, primitive_constitutive_properties)
+    arch_w_SAF,comp_out = gen_unary_safmodels(netlist, arch, comp_in, primitive_constitutive_properties)    
+
+    if len(args.dir_out) > 0:
+        # Not yet supported
+        assert(False)
 
     print("Saving arch to",arch_out_path,"new components file to",comp_out_path,"...")
     with open(arch_out_path, 'w') as arch_file:
