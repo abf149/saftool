@@ -1,5 +1,6 @@
 '''Parse Sparseloop YAML files'''
 
+'''SAFInfer parsing routines'''
 # Data-space parsing routines
 # Terminology for dataspace projections
 # - Projection expression: a collection of SOP expressions projecting the problem dimensions onto each rank of a dataspace's
@@ -200,7 +201,29 @@ def flatten_arch_recursive(hierarchical_arch):
     return res
 
 def flatten_arch_wrapper(arch):
-    '''Wrapper for recursive flattening of Sparseloop architecture config'''
+    '''
+    Wrapper for recursive flattening of Sparseloop architecture config.\n\n
+
+    Arguments:\n
+    - arch -- Sparseloop-format architecture object\n\n
+
+    Returns:\n
+    - Flattened architecture dictionary. Example:\n\n
+
+    {'BackingStorage': \n
+        {'attributes': \n
+            {'block_size': 8, \n
+             'data_storage_depth': 15000, \n
+             'data_storage_width': 64, \n
+             'datawidth': 8, \n
+             'metadata_storage_depth': 368640, \n
+             'metadata_storage_width': 14}, \n
+         'class': 'storage', \n
+         'subclass': 'DUMMY_SRAM_MD_BackingStorage_SAF'}, \n
+     'iact_spad': ...,\n
+     ...
+    }
+    '''
     return flatten_arch_recursive(arch['architecture']['subtree'])
 
 def buffer_loop_binding_from_sl_arch_and_map(arch, mapping, prob_instance_rank_sizes, data_space_dict_list):
@@ -231,3 +254,7 @@ def get_buffer_dataspace_to_fmt_layout_bindings_from_sparseopts(sparseopts):
             buffer_dataspace_to_fmt_layout_binding[target_buffer]['action-optimization']=target_buffer_dict['action-optimization']
 
     return buffer_dataspace_to_fmt_layout_binding
+
+#'''SAFmodel parsing routines'''
+#def get_buffer_bandwidth_info(arch):
+#    flat_arch = flatten_arch_wrapper(arch)

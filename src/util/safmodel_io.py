@@ -14,6 +14,7 @@ def parse_args():
     parser.add_argument('-i','--dir-in',default='')
     parser.add_argument('-n','--netlist',default='ref_output/new_arch.yaml')
     parser.add_argument('-a','--arch',default='ref_input/arch.yaml')
+    parser.add_argument('-s','--sparseopts',default='ref_input/sparseopts.yaml')
     parser.add_argument('-c','--comp-in',default='ref_input/compound_components.yaml')
     parser.add_argument('-o','--dir-out',default='')
     parser.add_argument('-r','--arch-out',default='ref_output/arch_w_SAF.yaml')
@@ -26,7 +27,7 @@ def parse_args():
     print("SAFmodel.\n")
     print("Parsing input files:")
 
-    if len(args.dir_out) > 0 and len(args.dir_in)>0:
+    if len(args.dir_out) > 0 or len(args.dir_in)>0:
         # Not yet supported
         assert(False) 
  
@@ -34,6 +35,8 @@ def parse_args():
     netlist=de.Architecture.fromYamlFilename(args.netlist)
     print("- arch:",args.arch)
     arch=sl_config.load_config_yaml(args.arch)
+    print("- sparseopts:",args.sparseopts)
+    sparseopts=sl_config.load_config_yaml(args.sparseopts)
     print("- compound components (input):",args.comp_in)
     comp_in=sl_config.load_config_yaml(args.comp_in)
     print("- arch output path:",args.arch_out)
@@ -43,6 +46,7 @@ def parse_args():
 
     return arch, \
            netlist, \
+           sparseopts, \
            comp_in, \
            arch_out_path, \
            comp_out_path

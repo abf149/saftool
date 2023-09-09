@@ -28,6 +28,7 @@ def get_port_mappings_to_flattened_indices(arch,dtype_list,fmt_iface_bindings):
                 idx+=1
 
     return port_idx
+
 def get_buffer_stubs_and_format_safs(arch, fmt_iface_bindings, buffer_stub_list=[], saf_list=[]):
     buffer_stub_list=[]
     saf_list=[]

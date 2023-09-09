@@ -47,6 +47,7 @@ class Port(DesignElement):
         obj.setComponentAttributeReference(attr_ref)
         return obj
 
+    '''Taxonomic attributes'''
     def setDirection(self, direction):
         '''Set the port direction ("in"/"out") which characterizes this port'''
         self.direction=direction
@@ -84,6 +85,23 @@ class Port(DesignElement):
             return None
         else:
             return self.attr_ref
+
+    '''Modeling attributes'''
+
+    def getWordwidth(self):
+        '''Get the word datawidth at this port'''
+        return self.wordwidth
+
+    def setWordwidth(self,wordwidth_):
+        '''Set the word datawidth at this port'''
+        self.wordwidth=wordwidth_
+
+    def getWordsPerCycle(self):
+        '''Get the rate of words transiting this port'''
+        return self.wordrate
+
+    def setWordPerCycle(self,wordrate_):
+        self.wordrate=wordrate_
 
 class Net(DesignElement):
     '''Nets are design elements which represent port interconnections'''

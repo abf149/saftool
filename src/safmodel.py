@@ -1,6 +1,9 @@
 import util.sparseloop_config_processor as sl_config
+from util.taxonomy.designelement import Architecture
 import test_data as td, copy, yaml, re
 import util.safmodel_io as safio
+from solver.build import get_buffer_hierarchy
+import solver.model.build as build
 
 def get_primitive_with_name(name,primitive_classes):
     '''Get primitive class declaration from Accelergy primitives structure'''
@@ -273,10 +276,42 @@ def gen_unary_safmodels(netlist, arch, comp_in, prim_const):
 if __name__=="__main__":
     arch, \
     netlist, \
+    sparseopts, \
     comp_in, \
     arch_out_path, \
     comp_out_path = safio.parse_args()
 
+    fmt_iface_bindings, \
+    skip_bindings, \
+    dtype_list = sl_config.compute_fixed_arch_bindings(arch,sparseopts)
+
+    buffer_hierarchy=get_buffer_hierarchy(arch)
+
+    # Compute flattened port indices
+    flat_port_idx_to_dtype={}
+    for buffer in buffer_hierarchy:
+        flat_port_idx_to_dtype[buffer]=[]
+        for dtype in dtype_list:
+            flat_port_idx_to_dtype[buffer].extend([dtype]*len(fmt_iface_bindings[buffer][dtype]))
+
+    #print(flat_port_idx_to_dtype)
+
+
+    taxo_uarch=Architecture.fromDict(sl_config.load_config_yaml('ref_output/new_arch.yaml'))
+    
+    port_list, \
+    port_attr_dict, \
+    net_list, \
+    out_port_net_dict=build.get_port_uris_and_attributes_and_nets_wrapper(taxo_uarch)
+
+    #print("comp_in:",comp_in)
+
+    print("port_list:",port_list,"\n")
+    print("port_attr_dict:",port_attr_dict,"\n")
+    print("net_list:",net_list,"\n")
+    print("out_port_net_dict:",out_port_net_dict,"\n")
+
+    '''
     print("\nLoading primitive component constitutive relations.")
     primitive_constitutive_properties=td.get_test_data()
 
@@ -287,3 +322,4 @@ if __name__=="__main__":
         yaml.dump(arch_w_SAF, arch_file, default_flow_style=False)
     with open(comp_out_path, 'w') as comp_file:
         yaml.dump(comp_out, comp_file, default_flow_style=False)
+    '''

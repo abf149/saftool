@@ -1,4 +1,4 @@
-import copy
+import copy, numpy as np
 from util.dense_bindings import *
 from util.sparse_bindings_reconfigurable import compute_reconfigurable_arch_bindings
 
@@ -141,15 +141,39 @@ def get_buffer_dataspace_to_fmt_access_bindings_from_buffer_dataspace_to_fmt_lay
     top_lvl_buffer=list(flat_arch.keys())[0]
     last_resident_buffer={dtype:top_lvl_buffer for dtype in dtype_list}
 
+    idx_to_buffer=[buffer for buffer in flat_arch]
+    idx_to_buffer.append("sentinel")    
+    num_arch_lvls=len(idx_to_buffer)
+    buff_used_by_dtype={dtype:(([False]*(num_arch_lvls-1))+[True]) for dtype in dtype_list}
+    buffer_to_idx={buffer:idx_to_buffer.index(buffer) for buffer in idx_to_buffer}
+
+    buff_dags={dtype: [[False for _ in idx_to_buffer] for _ in idx_to_buffer] \
+                       for dtype in dtype_list}
+
+    print(idx_to_buffer)
+
+    buffer_kept_dataspace_by_buffer={buffer:list(buffer_dataspace_to_fmt_layout_binding[buffer] \
+                                                                                      ['representation-format'] \
+                                                                                      .keys()) \
+                                        for buffer in flat_arch}
+
     # Re-bind fibers to the buffer levels at which they are accessed
-    for buffer in flat_arch:
+    for bdx,buffer in enumerate(flat_arch):
         buffer_kept_data_spaces = \
-            list(buffer_dataspace_to_fmt_layout_binding[buffer]['representation-format'].keys())
+            buffer_kept_dataspace_by_buffer[buffer]
         for dtype in dtype_list:
             if dtype in buffer_kept_data_spaces:
                 # For each datatype resident in this buffer level,
                 upper_buffer=last_resident_buffer[dtype]
                 if upper_buffer != buffer:
+
+                    print(upper_buffer,buffer,buffer_to_idx[upper_buffer])
+
+                    buff_dags[dtype] \
+                             [buffer_to_idx[upper_buffer]][bdx]=True
+
+                    buff_used_by_dtype[dtype][buffer_to_idx[upper_buffer]]=True
+
                     #if this buffer level is **not** top-level memory,
                     if dtype in buffer_dataspace_to_fmt_layout_binding[upper_buffer]['representation-format']:
                         # and if there are any sparse fibers at this buffer level for this datatype,
@@ -193,7 +217,14 @@ def get_buffer_dataspace_to_fmt_access_bindings_from_buffer_dataspace_to_fmt_lay
 
                 last_resident_buffer[dtype]=buffer
 
-    return buffer_dataspace_to_fmt_access_binding
+    for dtype in dtype_list:     
+        for idx in range(num_arch_lvls-1):
+            if (not buff_used_by_dtype[dtype][idx]) and \
+               (dtype in buffer_kept_dataspace_by_buffer[idx_to_buffer[idx]]):
+
+                buff_dags[dtype][idx][num_arch_lvls-1]=True
+
+    return buffer_dataspace_to_fmt_access_binding, buff_dags
 
 def bind_format_iface_to_fixed_arch(arch, sparseopts, dtype_list):
     '''Bind format interfaces to buffers, loops, ranks, formats & address arithmetic'''
@@ -203,7 +234,7 @@ def bind_format_iface_to_fixed_arch(arch, sparseopts, dtype_list):
     buffer_dataspace_to_fmt_layout_binding=get_buffer_dataspace_to_fmt_layout_bindings_from_sparseopts(sparseopts)
     
 
-    buffer_dataspace_to_fmt_access_binding = \
+    buffer_dataspace_to_fmt_access_binding, _ = \
         get_buffer_dataspace_to_fmt_access_bindings_from_buffer_dataspace_to_fmt_layout_bindings_fixed_arch \
             (buffer_dataspace_to_fmt_layout_binding, flat_arch, dtype_list)
 
