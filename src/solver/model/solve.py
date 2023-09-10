@@ -10,8 +10,12 @@ import solver.model.solve_phases.solve1 as solve1
 def solve(sclp):
     rlns=sclp['reln_list']
     port_list=sclp['port_list']
+    port_attr_dict=sclp['port_attr_dict']
     net_list=sclp['net_list']
     out_port_net_dict=sclp['out_port_net_dict']
 
     transitive_closure_relns = \
-           solve1.solve1_transitive_closure_dfs(port_list,net_list,out_port_net_dict)
+           solve1.solve1_transitive_closure_dfs(port_list,net_list,out_port_net_dict,port_attr_dict,rlns)
+
+
+    print(len(transitive_closure_relns["eq"])+len(transitive_closure_relns["ineq"]))

@@ -39,13 +39,14 @@ def get_object_port_uris_and_attributes(obj,port_list,port_attr_dict,flat_arch,b
             for port_obj in obj_port_objlist:
                 port_uri=uri(obj_uri,port_obj.getId())
                 port_list.append(port_uri)
-                port_attr_dict[port_uri]={"obj":obj_uri,"ww":md_storage_width,"pw":md_storage_width,"microarchitecture":False}
+                port_attr_dict[port_uri]={"obj":obj_uri,"ww":md_storage_width,"pw":md_storage_width, \
+                                          "microarchitecture":False,"primitive":True}
     else:
         # Microarchitectural component or primitive
         for port_obj in obj_port_objlist:
             port_uri=uri(obj_uri,port_obj.getId())
             port_list.append(port_uri)
-            port_attr_dict[port_uri]={"obj":obj_uri,"microarchitecture":True}
+            port_attr_dict[port_uri]={"obj":obj_uri,"microarchitecture":True,"primitive":p_.isPrimitive(obj)}
 
 def port_is_out_in_context(port_relative_uri,obj):
     '''

@@ -26,7 +26,7 @@ if __name__=="__main__":
     taxo_uarch=Architecture.fromDict(sl_config.load_config_yaml('ref_output/new_arch.yaml'))
 
     constraints=[
-        ('TestArchitecture.weight_spad',0,'nc','<=',4)
+        #('TestArchitecture.weight_spad',0,'nc','<=',4)
     ]
 
     '''Build scale inference problem'''
@@ -37,8 +37,6 @@ if __name__=="__main__":
     solve.solve(scale_prob)
 
     #comp_list=taxo_uarch_monolithic_to_modular(taxo_uarch)
-    res=sprettyprint_taxo_uarch(taxo_uarch)
-    print(res)
 
     #print(scale_prob['reln_list'])
     #print(len(scale_prob['reln_list']))
