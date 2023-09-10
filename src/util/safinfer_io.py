@@ -168,9 +168,10 @@ def taxo_uarch_monolithic_to_modular(taxo_uarch):
 def sprettyprint_taxo_uarch(taxo_uarch):
     res=""
     modular_uarch=taxo_uarch_monolithic_to_modular(taxo_uarch)
+    comp_categories={tum.getId():tum.getCategory()for tum in modular_uarch}
 
-    def spp_taxo_uarch_module(tum,res):
-        res+=tum.getId()+":\n"
+    def spp_taxo_uarch_module(tum,res,comp_categories):
+        res+=tum.getId()+"("+tum.getCategory()+"):\n"
         attrs=tum.getAttributes()
         if len(attrs)>0:
             res+="- Attributes:\n"
@@ -188,7 +189,7 @@ def sprettyprint_taxo_uarch(taxo_uarch):
             if len(comp_list)>0:
                 res+="- Components:\n"
                 for comp in comp_list:
-                    res+="  - "+comp+"\n"
+                    res+="  - "+comp+"("+comp_categories[ab.uri(tum.getId(),comp)]+")\n"
             if len(net_list)>0:
                 res+="- Nets:\n"
                 for net in net_list:
@@ -196,9 +197,9 @@ def sprettyprint_taxo_uarch(taxo_uarch):
 
         return res
 
-
+    
     for taxo_uarch_module in modular_uarch:
-        res=spp_taxo_uarch_module(taxo_uarch_module,res)
+        res=spp_taxo_uarch_module(taxo_uarch_module,res,comp_categories)
         res+="\n\n"
 
     return res
