@@ -41,7 +41,7 @@ def build_saf_uarch_inference_problem(arch, sparseopts, prob, mapping, reconfigu
 
         fmt_iface_bindings, \
         skip_bindings, \
-        dtype_list = sl_config.compute_fixed_arch_bindings(arch,sparseopts)
+        dtype_list, _, _ = sl_config.compute_fixed_arch_bindings(arch,sparseopts)
     else:
         # "Special" case: reconfigurable architecture tuned for problem and mapping
         fmt_iface_bindings, \

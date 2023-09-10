@@ -1,3 +1,4 @@
+import numpy as np
 import util.sparseloop_config_processor as sl_config
 from util.taxonomy.designelement import Architecture
 import test_data as td, copy, yaml, re
@@ -273,6 +274,12 @@ def gen_unary_safmodels(netlist, arch, comp_in, prim_const):
 
     return arch_w_SAF, comp_out
 
+'''
+Divider
+'''
+
+
+
 if __name__=="__main__":
     arch, \
     netlist, \
@@ -283,33 +290,24 @@ if __name__=="__main__":
 
     fmt_iface_bindings, \
     skip_bindings, \
-    dtype_list = sl_config.compute_fixed_arch_bindings(arch,sparseopts)
-
-    buffer_hierarchy=get_buffer_hierarchy(arch)
-
-    # Compute flattened port indices
-    flat_port_idx_to_dtype={}
-    for buffer in buffer_hierarchy:
-        flat_port_idx_to_dtype[buffer]=[]
-        for dtype in dtype_list:
-            flat_port_idx_to_dtype[buffer].extend([dtype]*len(fmt_iface_bindings[buffer][dtype]))
-
-    #print(flat_port_idx_to_dtype)
-
+    dtype_list, \
+    buff_dags, \
+    buffer_kept_dataspace_by_buffer = sl_config.compute_fixed_arch_bindings(arch,sparseopts)
 
     taxo_uarch=Architecture.fromDict(sl_config.load_config_yaml('ref_output/new_arch.yaml'))
-    
-    port_list, \
-    port_attr_dict, \
-    net_list, \
-    out_port_net_dict=build.get_port_uris_and_attributes_and_nets_wrapper(taxo_uarch)
 
+    scale_prob=build.build_scale_inference_problem(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
+                                                   buffer_kept_dataspace_by_buffer,buff_dags)
+
+    print(len(scale_prob['reln_list']))
+    print(len(scale_prob['symbol_list']))
+    print(len(scale_prob['uarch_symbol_list']))
     #print("comp_in:",comp_in)
 
-    print("port_list:",port_list,"\n")
-    print("port_attr_dict:",port_attr_dict,"\n")
-    print("net_list:",net_list,"\n")
-    print("out_port_net_dict:",out_port_net_dict,"\n")
+    #print("port_list:",port_list,"\n")
+    #print("port_attr_dict:",port_attr_dict,"\n")
+    #print("net_list:",net_list,"\n")
+    #print("out_port_net_dict:",out_port_net_dict,"\n")
 
     '''
     print("\nLoading primitive component constitutive relations.")
