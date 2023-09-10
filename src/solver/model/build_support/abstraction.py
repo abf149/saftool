@@ -118,10 +118,12 @@ def get_port_uris_and_attributes_and_nets_wrapper(taxo_uarch,flat_arch):
     # - cr - coordinate rate
     # - ww - word width
     # - pw - position width
-    symbol_list=[port_uri+"_"+sym for port_uri in port_list for sym in ["rw","pr","cr","ww","pw"]]
+    # - nc - num coordinates in rank
+    sym_suffixes=["rw","pr","cr","ww","pw","nc"]
+    symbol_list=[port_uri+"_"+sym for port_uri in port_list for sym in sym_suffixes]
 
     uarch_symbol_list=[port_uri+"_"+sym \
-        for sym in ["rw","pr","cr","ww","pw"] for port_uri in port_list if port_attr_dict[port_uri]['microarchitecture']]
+        for sym in sym_suffixes for port_uri in port_list if port_attr_dict[port_uri]['microarchitecture']]
 
     # Generate mapping from objects to ports
     obj_to_ports={}

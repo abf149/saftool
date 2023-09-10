@@ -296,9 +296,15 @@ if __name__=="__main__":
 
     taxo_uarch=Architecture.fromDict(sl_config.load_config_yaml('ref_output/new_arch.yaml'))
 
-    scale_prob=build.build_scale_inference_problem(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
-                                                   buffer_kept_dataspace_by_buffer,buff_dags)
+    constraints=[
+        ('TestArchitecture.weight_spad',0,'nc','<=',4)
+    ]
 
+    scale_prob=build.build_scale_inference_problem(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
+                                                   buffer_kept_dataspace_by_buffer,buff_dags,constraints=constraints)
+
+
+    print(scale_prob['reln_list'])
     print(len(scale_prob['reln_list']))
     print(len(scale_prob['symbol_list']))
     print(len(scale_prob['uarch_symbol_list']))

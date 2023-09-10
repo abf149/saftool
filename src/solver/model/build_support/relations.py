@@ -9,7 +9,7 @@ def make_port_uri_attribute(arch_name,buffer_name,port_prefix,direction,idx,attr
     return ab.make_port_uri(arch_name,buffer_name,port_prefix,direction,idx)+"_"+attribute
 
 def reln(lhs,reln,rhs):
-    return lhs+" "+reln+" "+rhs
+    return lhs+" "+reln+" "+str(rhs)
 
 def make_read_width_relations(arch_name,buffer_name,idx,oper,rw):
     relation_list=[
@@ -45,7 +45,31 @@ def make_payloadwidth_relations(arch_name,buffer_name,idx,oper,mod_out_pw):
 
     return relation_list
 
-def get_scale_boundary_conditions(gpthrpt,port_attr_dict,fmt_iface_bindings,flat_arch,buff_dags,dtype_list):
+def make_constraint_relations(constraints):
+    relation_list=[]
+    #('TestArchitecture.weight_spad',0,'nc','<=',4)
+    for cnst in constraints:
+        uri_prefix=cnst[0]
+        fmt_iface=cnst[1]
+        sym_suffix=cnst[2]
+        comparison=cnst[3]
+        val=cnst[4]
+
+        port_types=[]
+        if sym_suffix in 'nc':
+            # Number of coordinates in rank
+            port_types=['md_out','pos_in','at_bound_in']
+
+        for port_type in port_types:
+            relation_list.append( \
+                reln(ab.uri(uri_prefix,port_type+str(fmt_iface))+"_"+sym_suffix, \
+                     comparison,val) \
+            )
+
+    return relation_list
+
+def get_scale_boundary_conditions(gpthrpt,port_attr_dict,fmt_iface_bindings,flat_arch, \
+                                  buff_dags,dtype_list,constraints=[]):
     relation_list=[]
 
     for bdx,buffer in enumerate(flat_arch):
@@ -93,5 +117,8 @@ def get_scale_boundary_conditions(gpthrpt,port_attr_dict,fmt_iface_bindings,flat
                             relation_list.extend(make_pos_rate_relations("TestArchitecture",buffer,rdx,">",0.0))
         else:
             pass
+
+    # Include relations provided as user-specified constraints
+    relation_list.extend(make_constraint_relations(constraints))
 
     return relation_list
