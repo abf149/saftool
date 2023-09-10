@@ -39,5 +39,5 @@ def build_scale_inference_problem(taxo_uarch,arch,fmt_iface_bindings,dtype_list,
                                                flat_arch,buff_dags,dtype_list,constraints=constraints)
 
     return {'reln_list':reln_list,'port_list':port_list,'port_attr_dict':port_attr_dict,'net_list':net_list, \
-            'out_port_net_dict':out_port_net_dict,'symbol_list':symbol_list,'uarch_symbol_list':uarch_symbol_list, \
+            'out_port_net_dict':out_port_net_dict,'in_port_net_dict':in_port_net_dict,'symbol_list':symbol_list,'uarch_symbol_list':uarch_symbol_list, \
             'obj_to_ports':obj_to_ports,'gpthrpt':gpthrpt}

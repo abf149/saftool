@@ -3,6 +3,8 @@ Extract or synthesize key metrics for scale inference
 '''
 import numpy as np
 
+sym_suffixes=["rw","pr","cr","ww","pw","nc"]
+
 def get_buff_md_storage_width(buffer,flat_arch):
     if 'metadata_storage_width' in flat_arch[buffer]['attributes']:
         return flat_arch[buffer]['attributes']['metadata_storage_width']

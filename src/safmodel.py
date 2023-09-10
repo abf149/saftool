@@ -5,30 +5,84 @@ import test_data as td, copy, yaml, re
 import util.safmodel_io as safio
 from solver.build import get_buffer_hierarchy
 import solver.model.build as build
+import solver.model.solve as solve
 
+if __name__=="__main__":
+    arch, \
+    netlist, \
+    sparseopts, \
+    comp_in, \
+    arch_out_path, \
+    comp_out_path = safio.parse_args()
+
+    fmt_iface_bindings, \
+    skip_bindings, \
+    dtype_list, \
+    buff_dags, \
+    buffer_kept_dataspace_by_buffer = sl_config.compute_fixed_arch_bindings(arch,sparseopts)
+
+    '''Load taxonomic description of SAF microarchitecture'''
+    taxo_uarch=Architecture.fromDict(sl_config.load_config_yaml('ref_output/new_arch.yaml'))
+
+    constraints=[
+        ('TestArchitecture.weight_spad',0,'nc','<=',4)
+    ]
+
+    '''Build scale inference problem'''
+    scale_prob=build.build_scale_inference_problem(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
+                                                   buffer_kept_dataspace_by_buffer,buff_dags,constraints=constraints)
+
+    '''Solve scale inference problem'''
+    solve.solve(scale_prob)
+
+    #print(scale_prob['reln_list'])
+    #print(len(scale_prob['reln_list']))
+    #print(len(scale_prob['symbol_list']))
+    #print(len(scale_prob['uarch_symbol_list']))
+    #print("comp_in:",comp_in)
+
+    #print("port_list:",port_list,"\n")
+    #print("port_attr_dict:",port_attr_dict,"\n")
+    #print("net_list:",net_list,"\n")
+    #print("out_port_net_dict:",out_port_net_dict,"\n")
+
+'''
+print("\nLoading primitive component constitutive relations.")
+primitive_constitutive_properties=td.get_test_data()
+
+arch_w_SAF,comp_out = gen_unary_safmodels(netlist, arch, comp_in, primitive_constitutive_properties)
+
+print("Saving arch to",arch_out_path,"new components file to",comp_out_path,"...")
+with open(arch_out_path, 'w') as arch_file:
+    yaml.dump(arch_w_SAF, arch_file, default_flow_style=False)
+with open(comp_out_path, 'w') as comp_file:
+    yaml.dump(comp_out, comp_file, default_flow_style=False)
+'''
+
+'''
 def get_primitive_with_name(name,primitive_classes):
-    '''Get primitive class declaration from Accelergy primitives structure'''
+    #Get primitive class declaration from Accelergy primitives structure
     search_for_class=[clss for clss in primitive_classes['classes'] if clss['name']==name]
     if len(search_for_class)==0:
         return False
     return search_for_class[0]
 
 def get_component_with_name(name,component_classes):
-    '''Get component class declaration from Sparseloop components structure'''
+    #Get component class declaration from Sparseloop components structure
     search_for_class=[clss for clss in component_classes['compound_components']['classes'] if clss['name']==name]
     if len(search_for_class)==0:
         return False
     return search_for_class[0]
     
 def set_component(new_component,component_classes):
-    '''Add the specified component to the existing Sparseloop components structure'''
+    #Add the specified component to the existing Sparseloop components structure
     component_classes['compound_components']['classes'].append(new_component)
 
 def build_md_parser_primitive_model(name, topo_md_parser,thrpt):
     pass
 
 def build_format_SAF_model(name, topo_format_uarch,max_thrpt):
-    # Get format uarch templates
+    ## Get format uarch templates
     saf_primitives=copy.deepcopy(sl_config.load_config_yaml('accelergy/primitive_component_libs/saf_primitives.lib.yaml'))
     saf_model_templates=copy.deepcopy(sl_config.load_config_yaml('accelergy/compound_components_template.yaml'))
     fmt_model_template=get_component_with_name('format_uarch',saf_model_templates)
@@ -197,7 +251,7 @@ def add_format_SAF_uarch(buffer,buffer_class,netlist,aggregate_attributes,prim_c
     #print(taxo_buffer)
 
 def arch_add_SAF_recursive(hierarchical_arch,flat_arch,component_classes_w_SAF, prefix_, aggregate_attributes_, netlist, prim_const):
-    '''Recursive relabeling of buffer subclasses to point to models w/ SAF'''
+    #Recursive relabeling of buffer subclasses to point to models w/ SAF
 
     prefix=copy.deepcopy(prefix_)
 
@@ -244,7 +298,7 @@ def arch_add_SAF_recursive(hierarchical_arch,flat_arch,component_classes_w_SAF, 
             arch_add_SAF_recursive(parent['subtree'], flat_arch,component_classes_w_SAF, prefix, aggregate_attributes_, netlist, prim_const)
 
 def arch_add_SAF_wrapper(arch_w_SAF, component_classes_w_SAF, netlist, prim_const):
-    '''Wrapper for recursive relabeling of buffer subclasses to point to models w/ SAF'''
+    #Wrapper for recursive relabeling of buffer subclasses to point to models w/ SAF
 
     flat_arch=sl_config.flatten_arch_wrapper(arch)
     for buffer in flat_arch:
@@ -273,57 +327,4 @@ def gen_unary_safmodels(netlist, arch, comp_in, prim_const):
     arch_add_SAF_wrapper(arch_w_SAF, comp_out, netlist, prim_const)
 
     return arch_w_SAF, comp_out
-
 '''
-Divider
-'''
-
-
-
-if __name__=="__main__":
-    arch, \
-    netlist, \
-    sparseopts, \
-    comp_in, \
-    arch_out_path, \
-    comp_out_path = safio.parse_args()
-
-    fmt_iface_bindings, \
-    skip_bindings, \
-    dtype_list, \
-    buff_dags, \
-    buffer_kept_dataspace_by_buffer = sl_config.compute_fixed_arch_bindings(arch,sparseopts)
-
-    taxo_uarch=Architecture.fromDict(sl_config.load_config_yaml('ref_output/new_arch.yaml'))
-
-    constraints=[
-        ('TestArchitecture.weight_spad',0,'nc','<=',4)
-    ]
-
-    scale_prob=build.build_scale_inference_problem(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
-                                                   buffer_kept_dataspace_by_buffer,buff_dags,constraints=constraints)
-
-
-    print(scale_prob['reln_list'])
-    print(len(scale_prob['reln_list']))
-    print(len(scale_prob['symbol_list']))
-    print(len(scale_prob['uarch_symbol_list']))
-    #print("comp_in:",comp_in)
-
-    #print("port_list:",port_list,"\n")
-    #print("port_attr_dict:",port_attr_dict,"\n")
-    #print("net_list:",net_list,"\n")
-    #print("out_port_net_dict:",out_port_net_dict,"\n")
-
-    '''
-    print("\nLoading primitive component constitutive relations.")
-    primitive_constitutive_properties=td.get_test_data()
-
-    arch_w_SAF,comp_out = gen_unary_safmodels(netlist, arch, comp_in, primitive_constitutive_properties)
-
-    print("Saving arch to",arch_out_path,"new components file to",comp_out_path,"...")
-    with open(arch_out_path, 'w') as arch_file:
-        yaml.dump(arch_w_SAF, arch_file, default_flow_style=False)
-    with open(comp_out_path, 'w') as comp_file:
-        yaml.dump(comp_out, comp_file, default_flow_style=False)
-    '''

@@ -2,6 +2,7 @@
 Consistent abstractions for representing microarchitecture as a graph of ports
 '''
 import util.notation.predicates as p_
+import solver.model.build_support.scale as sc
 
 def uri(prfx,sffx):
     '''Extend a uri with a suffix; semantics are similar to os.path'''
@@ -112,11 +113,10 @@ def get_port_uris_and_attributes_and_nets_wrapper(taxo_uarch,flat_arch):
     # - ww - word width
     # - pw - position width
     # - nc - num coordinates in rank
-    sym_suffixes=["rw","pr","cr","ww","pw","nc"]
-    symbol_list=[port_uri+"_"+sym for port_uri in port_list for sym in sym_suffixes]
+    symbol_list=[port_uri+"_"+sym for port_uri in port_list for sym in sc.sym_suffixes]
 
     uarch_symbol_list=[port_uri+"_"+sym \
-        for sym in sym_suffixes for port_uri in port_list if port_attr_dict[port_uri]['microarchitecture']]
+        for sym in sc.sym_suffixes for port_uri in port_list if port_attr_dict[port_uri]['microarchitecture']]
 
     # Generate mapping from objects to ports
     obj_to_ports={}
