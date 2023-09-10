@@ -23,13 +23,6 @@ def make_port_uri(arch_name,buffer_name,port_prefix,direction,idx):
     return uri(uri(arch_name,buffer_name),port_prefix+"_"+direction+str(idx))
 
 def out_port_net_dict_from_net_list(net_list):
-    '''
-    out_port_net_dict={out_port_uri:[] for out_port_uri in port_list}
-    for idx,net in enumerate(net_list):
-        out_port_net_dict[net["out_port"]].append(idx)
-
-    return out_port_net_dict
-    '''
     return {net["out_port"]:idx for idx,net in enumerate(net_list)}
 
 def in_port_net_dict_from_net_list(net_list):
