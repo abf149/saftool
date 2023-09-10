@@ -3,6 +3,7 @@ import util.sparseloop_config_processor as sl_config
 from util.taxonomy.designelement import Architecture
 import test_data as td, copy, yaml, re
 import util.safmodel_io as safio
+from util.safinfer_io import sprettyprint_taxo_uarch
 from solver.build import get_buffer_hierarchy
 import solver.model.build as build
 import solver.model.solve as solve
@@ -34,6 +35,10 @@ if __name__=="__main__":
 
     '''Solve scale inference problem'''
     solve.solve(scale_prob)
+
+    #comp_list=taxo_uarch_monolithic_to_modular(taxo_uarch)
+    res=sprettyprint_taxo_uarch(taxo_uarch)
+    print(res)
 
     #print(scale_prob['reln_list'])
     #print(len(scale_prob['reln_list']))

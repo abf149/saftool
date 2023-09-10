@@ -1,6 +1,9 @@
 '''SAFinfer IO library - CLI argparse and YAML dump routines'''
+from collections import deque
 import util.sparseloop_config_processor as sl_config, yaml, argparse
 from util.helper import info,warn,error
+import util.notation.predicates as p_
+import solver.model.build_support.abstraction as ab
 
 '''Config - condition the format of YAML file dumps'''
 yaml.Dumper.ignore_aliases = lambda *args : True
@@ -118,3 +121,84 @@ def dump_saf_uarch_topology(inferred_arch,topo_out_path):
     '''
     info("- Dumping inferred SAF microarchitecture topology to",topo_out_path,"...")
     inferred_arch.dump(topo_out_path)
+    with open(topo_out_path+".pretty","w") as fp:
+        fp.write(sprettyprint_taxo_uarch(inferred_arch))
+
+'''Transform between monolithic SAFinfer internal representation vs modular representation'''
+def taxo_uarch_monolithic_to_modular(taxo_uarch):
+    comp_list=[]
+    def refactor_bfs(obj, comp_list):
+        # Queue for BFS
+        # (Taxonomic microarchitecture object, object uri)
+        queue = deque([(obj,obj.getId())])
+        
+        # Set to keep track of visited nodes
+        visited = set()
+        
+        while queue:
+            # Dequeue a node from the front
+            current_obj,obj_uri = queue.popleft()
+            subcomponent_list=[]
+
+            # If the object is not a Primitive
+            if p_.isComponentOrArchitecture(current_obj):
+                for new_obj in current_obj.getTopology().getComponentList():
+                    new_obj_uri=ab.uri(obj_uri,new_obj.getId())
+                    # If the new_obj has not been visited
+                    if new_obj_uri not in visited:
+                        # Mark the node as visited and enqueue it
+                        visited.add(new_obj_uri)
+                        subcomponent_list.append(new_obj.getId())
+                        queue.append((new_obj,new_obj_uri))
+                        
+                # Replace subcomponents with references
+                topology=current_obj.getTopology()
+                topology.setComponentList(subcomponent_list)
+                current_obj.setTopology(topology)
+
+            current_obj.setId(obj_uri)
+            comp_list.append(current_obj)
+
+    refactor_bfs(taxo_uarch, comp_list)
+
+    return comp_list
+
+'''Pretty-print routines'''
+
+def sprettyprint_taxo_uarch(taxo_uarch):
+    res=""
+    modular_uarch=taxo_uarch_monolithic_to_modular(taxo_uarch)
+
+    def spp_taxo_uarch_module(tum,res):
+        res+=tum.getId()+":\n"
+        attrs=tum.getAttributes()
+        if len(attrs)>0:
+            res+="- Attributes:\n"
+            for attr_ in attrs:
+                if type(attr_).__name__ == "list" and type(attr_[0]).__name__ == "FormatType":
+                    res+="  - (fibertree) " + str([rank.getValue() for rank in attr_]) + "\n"
+                elif type(attr_).__name__ == "FormatType":
+                    res+="  - (format) " + str(attr_.getValue()) + "\n"
+                else:
+                    res+="  - " + str(attr_) + "\n"
+        if p_.isComponentOrArchitecture(tum):
+            topology=tum.getTopology()
+            comp_list=topology.getComponentList()
+            net_list=topology.getNetList()
+            if len(comp_list)>0:
+                res+="- Components:\n"
+                for comp in comp_list:
+                    res+="  - "+comp+"\n"
+            if len(net_list)>0:
+                res+="- Nets:\n"
+                for net in net_list:
+                    res+=" - "+str(net.getPortIdList())+"\n"
+
+        return res
+
+
+    for taxo_uarch_module in modular_uarch:
+        res=spp_taxo_uarch_module(taxo_uarch_module,res)
+        res+="\n\n"
+
+    return res
