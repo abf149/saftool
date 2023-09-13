@@ -1,1 +1,0 @@
-from ...model.format.FormatUarch import FormatUarch

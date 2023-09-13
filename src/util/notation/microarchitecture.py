@@ -2,6 +2,9 @@
 
 from util.taxonomy.designelement import Primitive, Component, Architecture, Net, FormatType, \
                                         Topology, NetType, Port, SAF
+import util.notation.model as mo_
+import solver.model.build_support.scale as sc_
+import solver.model.build_support.abstraction as ab_
 from util.helper import info,warn,error
 import copy
 
@@ -88,6 +91,20 @@ class PrimitiveCategory:
         self.port_attribute_refs=[]
         self.ports_=[]
         self.generator_type=None
+
+        # Scale-inference-related initialization
+        self.scale_attributes_=[]
+        self.scale_default_attributes_=[]
+        self.scale_attribute_vals=[]
+        self.taxonomic_instance_alias_list=[]
+        self.port_thrpt_attr_dict={}
+        self.instance_to_implementations={}
+        self.constraint_list=[]
+        self.final_constraint_list=[]
+        self.symbol_list=[]
+        self.scale_parameters=[]
+        self.scale_default_parameters=[]
+        self.scale_parameter_vals=[]
 
     def copy(self):
         return copy.deepcopy(self)
@@ -209,6 +226,144 @@ class PrimitiveCategory:
                                                          iface)
         return prim
     
+    '''Scale inference settings'''
+    def scale_parameter(self,param_name,param_type,param_default=None):
+        self.scale_parameters.append((param_name,param_type))
+        self.scale_default_parameters.append((param_name,param_default))
+        self.scale_parameter_vals=copy.deepcopy(self.scale_parameters)
+
+        return self
+
+    def set_scale_parameter(self,param_name,val,param_type=None):
+        if param_type is None:
+            scale_param_names=[att[0] for att in self.scale_parameters]
+            self.scale_attribute_vals[scale_param_names.index(param_name)]=val
+        return self
+
+    def scale_attribute(self,attr_name,attr_type,attr_default="?"):
+        '''
+        Add a scale inference attribute\n\n
+
+        Arguments:\n
+        - attr_name -- Scale inference attribute name\n
+        - attr_type -- Scale inference attribute type - most likely list of allowed values
+        - attr_default -- Primitive category attribute default value
+        '''
+        self.scale_attributes_.append((attr_name,attr_type))
+        self.scale_default_attributes_.append((attr_name,attr_default))
+        self.scale_attribute_vals=copy.deepcopy(self.scale_attributes_)
+        return self
+
+    def set_scale_attribute(self,attr_name,val,att_type=None):
+        '''
+        Set a scale inference attribute\n\n
+
+        Arguments:\n
+        - attr_name -- Scale inference attribute name\n
+        - val -- Updated attribute value
+        - att_type -- TBD
+        '''
+        if att_type is None:
+            scale_attr_names=[att[0] for att in self.scale_attributes_]
+            self.scale_attribute_vals[scale_attr_names.index(attr_name)]=val
+        
+        '''
+        elif att_type == "fibertree":
+            # - Flatten the interface formats associated with this buffer stub
+            flat_rank_fmts=[]
+            for dtype in val:
+                flat_rank_fmts.extend([fmt_str_convert[fmt_iface['format']] for fmt_iface in val[dtype]])
+            flat_rank_fmts=[FormatType.fromIdValue('format',fmt_str) for fmt_str in flat_rank_fmts]
+            self.set_attribute(attr_name,flat_rank_fmts)
+        elif att_type == "rank_list":
+            # Assume val is a list of flattened rank formats
+            self.set_attribute(attr_name,val)
+        else:
+            assert(False)
+        return self
+        '''
+
+        return self
+
+    def taxonomic_instance_alias(self,instance_list,alias_):
+        '''Define a convenient alias for referencing a taxonomic supported instance'''
+        self.taxonomic_instance_alias_list.append({"instance_list":instance_list,"alias":alias_})
+        self.instance_to_implementations[alias_]=[]
+        return self
+
+    def require_port_throughput_attributes(self,port_name,thrpt_attr_list=sc_.sym_suffixes):
+        '''
+        Require that information about the specified port throughput attributes be available
+        at the specified port.\n\n
+
+        Arguments:\n
+        - port_name -- Port for which to require specified throughput attributes
+        - thrpt_attr_list -- List of throughput attributes required at port
+        '''
+        self.port_thrpt_attr_dict["port_name"]=thrpt_attr_list
+        return self
+
+    def add_implementation(self,name,taxonomic_instance,energy_objective,area_objective,attributes=[],constraints=[]):
+        self.instance_to_implementations[taxonomic_instance].append({
+            "name":name,
+            "taxonomic_instance":taxonomic_instance,
+            "attributes":attributes,
+            "constraints":constraints,
+            "energy_objective":energy_objective,
+            "area_objective":area_objective,
+        })
+        return self
+
+    def get_taxo_instances(self):
+        return [taxo_instance for taxo_instance in self.instance_to_implementations]
+
+    def build_symbols(self,uri_prefix=""):
+        # Port attributes
+        self.symbol_list=[ab_.uri(uri_prefix,port_attr_ref["port_name"])+"_"+attr_ \
+            for port_attr_ref in self.port_attribute_refs for attr_ in port_attr_ref["thrpt_attr_list"]]
+        
+        # Top-level params
+        self.symbol_list.extend( \
+            [ab_.uri(uri_prefix,param[0]) for param in self.scale_parameters]
+        )
+
+        # Implementation attributes
+        taxo_instances=self.get_taxo_instances()
+        args={"port_thrpt_attrs":self.port_thrpt_attr_dict}
+        self.symbol_list.extend( \
+            [expr_ \
+                for taxo_inst in taxo_instances \
+                    for impl_ in self.instance_to_implementations[taxo_inst] \
+                        for expr_ in mo_.evalAttributeExpression(impl_,uri_prefix,args=args)]
+        )
+
+        return self
+
+    def build_constraints(self,uri_prefix=""):
+        # Top-level constraints - TODO
+        # Taxonomic-instance constraints - TODO
+        # Implementation-level constraints
+        for cnst in self.constraint_list:
+            self.final_constraint_list.extend( \
+                mo_.evalConstraintExpression(cnst,uri_prefix,args={"port_thrpt_attrs":self.port_thrpt_attr_dict}) \
+            )
+        return self
+
+    def build_objectives(self,uri_prefix=""):
+        return self
+
+    def build_symbols_constraints_objectives_attributes(self,uri_prefix=""):
+        self.build_symbols(uri_prefix)
+        self.build_constraints(uri_prefix)
+        self.build_objectives(uri_prefix)
+        return self
+    
+    def get_constraints(self):
+        return self.final_constraint_list
+
+    def get_symbols(self):
+        return self.symbol_list
+
 class SAFCategory(PrimitiveCategory):
 
     def __init__(self):
