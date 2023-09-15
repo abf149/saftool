@@ -98,13 +98,18 @@ class PrimitiveCategory:
         self.scale_attribute_vals=[]
         self.taxonomic_instance_alias_list=[]
         self.port_thrpt_attr_dict={}
+        self.port_thrpt_thresh_mode=None
         self.instance_to_implementations={}
         self.constraint_list=[]
         self.final_constraint_list=[]
         self.symbol_list=[]
+        self.yield_symbol_dict={}
+        self.yield_taxo_attributes=None
         self.scale_parameters=[]
         self.scale_default_parameters=[]
         self.scale_parameter_vals=[]
+        self.applicable_taxo_instance_alias=None
+        self.supported_instances=None
 
     def copy(self):
         return copy.deepcopy(self)
@@ -228,6 +233,9 @@ class PrimitiveCategory:
     
     '''Scale inference settings'''
     def scale_parameter(self,param_name,param_type,param_default=None):
+        '''
+        Add a global scale parameter
+        '''
         self.scale_parameters.append((param_name,param_type))
         self.scale_default_parameters.append((param_name,param_default))
         self.scale_parameter_vals=copy.deepcopy(self.scale_parameters)
@@ -240,18 +248,36 @@ class PrimitiveCategory:
             self.scale_attribute_vals[scale_param_names.index(param_name)]=val
         return self
 
-    def scale_attribute(self,attr_name,attr_type,attr_default="?"):
+    def scale_attribute(self,attr_name,attr_type,solution=False,attr_default="?"):
         '''
-        Add a scale inference attribute\n\n
+        Add a global scale inference attribute\n\n
 
         Arguments:\n
         - attr_name -- Scale inference attribute name\n
         - attr_type -- Scale inference attribute type - most likely list of allowed values
         - attr_default -- Primitive category attribute default value
         '''
-        self.scale_attributes_.append((attr_name,attr_type))
+        self.scale_attributes_.append((attr_name,attr_type,solution))
         self.scale_default_attributes_.append((attr_name,attr_default))
         self.scale_attribute_vals=copy.deepcopy(self.scale_attributes_)
+        return self
+
+    def yield_scale_attribute(self,attr_name,attr_type,attr_default="?"):
+        '''
+        Add a global scale inference attribute which should comprise part of the solution to scale inference
+        '''
+        self.scale_attribute(attr_name,attr_type,solution=True,attr_default=attr_default)
+
+    def yield_port_throughput_thresholds(self):
+        self.port_thrpt_thresh_mode="yield"
+
+        return self
+
+    def yield_taxonomic_attributes(self,attrs_=None):
+        if attrs_ is None:
+            self.yield_taxo_attributes="all"
+        else:
+            self.yield_taxo_attributes=attrs_
         return self
 
     def set_scale_attribute(self,attr_name,val,att_type=None):
@@ -300,7 +326,7 @@ class PrimitiveCategory:
         - port_name -- Port for which to require specified throughput attributes
         - thrpt_attr_list -- List of throughput attributes required at port
         '''
-        self.port_thrpt_attr_dict["port_name"]=thrpt_attr_list
+        self.port_thrpt_attr_dict[port_name]=thrpt_attr_list
         return self
 
     def add_implementation(self,name,taxonomic_instance,energy_objective,area_objective,attributes=[],constraints=[]):
@@ -314,14 +340,102 @@ class PrimitiveCategory:
         })
         return self
 
+    def register_supported_instances(self,insts):
+        self.supported_instances=insts
+        return self
+
+    def find_applicable_taxo_instance(self):
+        for inst_name in self.supported_instances:
+            inst_attrs=self.supported_instances[inst_name]
+            all_match=True
+            for inst_attr,attr_ in zip(inst_attrs,self.attribute_vals):
+                if type(attr_).__name__!='str':
+                    if attr_.getValue() != inst_attr:
+                        all_match=False
+                else:
+                    if attr_ != inst_attr:
+                        all_match=False
+
+            if all_match:
+                return inst_name
+
+        # Should be a match
+        assert(False)
+
+    def find_applicable_taxo_instance_alias(self):
+        inst_name=self.find_applicable_taxo_instance()
+        for alias_ in self.taxonomic_instance_alias_list:
+            if inst_name in alias_["instance_list"]:
+                self.applicable_taxo_instance_alias=alias_["alias"]
+                return
+
+        # Should be a match
+        assert(False)
+
+    def from_taxo_obj(self,obj):
+        '''
+        Instantiate new model instance from a taxonomic object of corresponding category,
+        i.e. pass in a MetadataParser taxonomic object to construct a MetadataParser model.
+        '''
+        for idx,val in enumerate(obj.getAttributes()):
+            self.attribute_vals[idx]=val
+
+        # Match attributes to a corresponding taxonomic instance alias
+        self.find_applicable_taxo_instance_alias()
+
+        return self
+
     def get_taxo_instances(self):
         return [taxo_instance for taxo_instance in self.instance_to_implementations]
 
     def build_symbols(self,uri_prefix=""):
         # Port attributes
-        self.symbol_list=[ab_.uri(uri_prefix,port_attr_ref["port_name"])+"_"+attr_ \
-            for port_attr_ref in self.port_attribute_refs for attr_ in port_attr_ref["thrpt_attr_list"]]
+        self.symbol_list.extend([ab_.uri(uri_prefix,port_attr_ref["port_name"])+"_"+attr_ \
+            for port_attr_ref in self.port_attribute_refs for attr_ in port_attr_ref["thrpt_attr_list"]])
+        # - Yield taxonomic attributes, if required
+        if self.yield_taxo_attributes=="all":
+            # yield all taxonomic attributes
+            for idx,attr_ in enumerate(self.attributes_):
+                self.yield_symbol_dict[attr_[0]]=(self.attribute_vals[idx],"val")
+        else:
+            if "include" in self.yield_taxo_attributes:
+                attrs_include=self.yield_taxo_attributes["include"]
+                # yield some taxonomic attributes
+                if type(attrs_include[0]).__name__ == 'int':
+                    # by index
+                    for idx in attrs_include:
+                        self.yield_symbol_dict[self.attributes_[idx][0]]=(self.attribute_vals[idx],"val")
+                elif type(attrs_include[0]).__name__ == 'str':
+                    # by name
+                    for idx,attr_ in enumerate(self.attributes_):
+                        if attr_ in attrs_include:
+                            self.yield_symbol_dict[attr_[0]]=(self.attribute_vals[idx],"val")
+            elif "exclude" in self.yield_taxo_attributes:
+                attrs_exclude=self.yield_taxo_attributes["exclude"]
+                # yield some taxonomic attributes
+                if type(attrs_exclude[0]).__name__ == 'int':
+                    # by index
+                    for idx,attr_ in enumerate(self.attributes_):
+                        if idx not in attrs_exclude:
+                            self.yield_symbol_dict[attr_[0]]=(self.attribute_vals[idx],"val")
+                elif type(attrs_exclude[0]).__name__ == 'str':
+                    # by name
+                    for idx,attr_ in enumerate(self.attributes_):
+                        if attr_ not in attrs_exclude:
+                            self.yield_symbol_dict[attr_[0]]=(self.attribute_vals[idx],"val")
+
+        # - Port throughput threshold attributes, if required
+        if self.yield_scale_attribute is not None:
+            self.symbol_list.extend([ab_.uri(uri_prefix,port_attr_ref["port_name"])+"_"+attr_+"_thresh"\
+                for port_attr_ref in self.port_attribute_refs for attr_ in port_attr_ref["thrpt_attr_list"]])
         
+            if self.port_thrpt_thresh_mode=="yield":
+                # - Yield port throughput threshold attributes, if required
+                for port_attr_ref in self.port_attribute_refs:
+                    for attr_ in port_attr_ref["thrpt_attr_list"]:
+                        self.yield_symbol_dict[port_attr_ref["port_name"]+"_"+attr_+"_thresh"]= \
+                            (ab_.uri(uri_prefix,port_attr_ref["port_name"])+"_"+attr_+"_thresh","sym")
+
         # Top-level params
         self.symbol_list.extend( \
             [ab_.uri(uri_prefix,param[0]) for param in self.scale_parameters]
@@ -340,6 +454,13 @@ class PrimitiveCategory:
         return self
 
     def build_constraints(self,uri_prefix=""):
+        # Port throughput threshold attributes, if required
+        if self.yield_scale_attribute is not None:
+            self.final_constraint_list.extend([ \
+                ab_.uri(uri_prefix,port_attr_ref["port_name"])+"_"+attr_+"_thresh >= " \
+                    + ab_.uri(uri_prefix,port_attr_ref["port_name"])+"_"+attr_ \
+                for port_attr_ref in self.port_attribute_refs \
+                    for attr_ in port_attr_ref["thrpt_attr_list"]])
         # Top-level constraints - TODO
         # Taxonomic-instance constraints - TODO
         # Implementation-level constraints
@@ -353,6 +474,9 @@ class PrimitiveCategory:
         return self
 
     def build_symbols_constraints_objectives_attributes(self,uri_prefix=""):
+        self.symbol_list=[]
+        self.final_constraint_list=[]
+        #self.yield_symbol_dict
         self.build_symbols(uri_prefix)
         self.build_constraints(uri_prefix)
         self.build_objectives(uri_prefix)

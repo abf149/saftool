@@ -19,6 +19,9 @@ def makeConstraint(expr,foralls=[]):
         cnst={"expression":expr,"foralls":foralls}
         return cnst
 
+def makePassthroughConstraint(port_a,port_b,foralls=[]):
+    return makeConstraint(port_a+" == "+port_b,foralls=foralls)
+
 def injectUriPrefix(str_,uri_prefix):
     return str_["expression"].replace("@",uri_prefix+".")
 
