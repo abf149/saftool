@@ -4,7 +4,7 @@ import solver.model.build_support.abstraction as ab_
 from util.helper import info,warn,error
 import copy
 
-#"clock",("real",(0.05, 10.0))
+'''Attribute construction'''
 def makeAttribute(expr,foralls=[]):
     if len(foralls)==0:
         return {"expression":expr}
@@ -12,6 +12,7 @@ def makeAttribute(expr,foralls=[]):
         attr_={"expression":expr,"foralls":foralls}
         return attr_
 
+'''Constraint construction'''
 def makeConstraint(expr,foralls=[]):
     if len(foralls)==0:
         return {"expression":expr}
@@ -22,6 +23,17 @@ def makeConstraint(expr,foralls=[]):
 def makePassthroughConstraint(port_a,port_b,foralls=[]):
     return makeConstraint(port_a+" == "+port_b,foralls=foralls)
 
+def makeValuesConstraint(expr,foralls=[],ranges=[]):
+    if len(foralls)==0:
+        return {"expression":expr}
+    else:
+        cnst={"expression":expr,"foralls":foralls,"ranges":ranges}
+        return cnst
+
+def makeCombosConstraint(attr_list,combos_list):
+    return {"attr_list":attr_list,"combos_list":combos_list}
+
+'''Expression evaluation'''
 def injectUriPrefix(str_,uri_prefix):
     return str_["expression"].replace("@",uri_prefix+".")
 
@@ -32,7 +44,7 @@ def extractForAllParams(foralls):
     return var_,expr_type,type_arg
 
 def evalAttributeExpression(attr_,uri_prefix="",args={}):
-    base_expr=injectUriPrefix(attr_,uri_prefix)
+    base_expr=injectUriPrefix(attr_["expression"],uri_prefix)
     res=[base_expr]
     if "foralls" in attr_:
         res=[]
@@ -47,7 +59,7 @@ def evalAttributeExpression(attr_,uri_prefix="",args={}):
     return res
 
 def evalConstraintExpression(cnst,uri_prefix="",args={}):
-    base_expr=injectUriPrefix(cnst,uri_prefix)
+    base_expr=injectUriPrefix(cnst["expression"],uri_prefix)
     res=[base_expr]
     if "foralls" in cnst:
         res=[]
@@ -59,6 +71,49 @@ def evalConstraintExpression(cnst,uri_prefix="",args={}):
             for attr_ in args["port_thrpt_attrs"][type_arg]:
                 res.append(base_expr.replace("$"+var_,attr_))
     return res
+
+def listToArgsString(lst):
+    res=""
+    for idx,elt in enumerate(lst):
+        res+=str(elt)
+        if idx<len(lst)-1:
+            res+=","
+    return res
+
+def evalAttributeRangeExpression(expr_,uri_prefix="",args={}):
+    base_expr=expr_["expression"] + " in FiniteSet($!)"
+    base_expr=injectUriPrefix(base_expr,uri_prefix)
+    res=[base_expr]
+    if "foralls" in expr_:
+        res=[]
+        var_,expr_type,type_arg=extractForAllParams(expr_["foralls"])
+        if expr_type=="attrs":
+            for idx,attr_ in enumerate(type_arg):
+                range_expr=expr_["ranges"][idx]
+                res.append(base_expr.replace("$"+var_,attr_).replace("$!",listToArgsString(range_expr)))
+        elif expr_type=="port_thrpt_attrs":
+            for idx,attr_ in enumerate(args["port_thrpt_attrs"][type_arg]):
+                range_expr=expr_["ranges"][idx]
+                res.append(base_expr.replace("$"+var_,attr_).replace("$!",listToArgsString(range_expr)))
+    else:
+        res=[base_expr.replace("$!",listToArgsString(expr_["ranges"]))]
+
+    return res
+
+def evalAttributeComboExpression(expr_,uri_prefix=""):
+    # {"attr_list":attr_list,"combos_list":combos_list}
+    attr_list=[injectUriPrefix(attr_,uri_prefix) for attr_ in expr_["attr_list"]]
+    combos_list=expr_["combos_list"]
+    res="Piecewise("
+    for combo_ in combos_list:
+        conds=listToArgsString([attr_ + " == " + val for attr_,val in zip(attr_list,combo_)])
+        res += "(True, And("+ conds +")),"
+    res+="(False,True))"
+
+    return res
+
+def evalObjectiveExpression(expr_,uri_prefix=""):
+    return injectUriPrefix(expr_,uri_prefix)
 
 '''
 class PrimitiveModel:

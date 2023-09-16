@@ -110,6 +110,8 @@ class PrimitiveCategory:
         self.scale_parameter_vals=[]
         self.applicable_taxo_instance_alias=None
         self.supported_instances=None
+        self.area_objective=""
+        self.energy_objective_dict={}
 
     def copy(self):
         return copy.deepcopy(self)
@@ -329,12 +331,15 @@ class PrimitiveCategory:
         self.port_thrpt_attr_dict[port_name]=thrpt_attr_list
         return self
 
-    def add_implementation(self,name,taxonomic_instance,energy_objective,area_objective,attributes=[],constraints=[]):
+    def add_implementation(self,name,taxonomic_instance,energy_objective,area_objective,attributes=[],constraints=[], \
+                           attr_range_specs=[], attr_combo_specs=[]):
         self.instance_to_implementations[taxonomic_instance].append({
             "name":name,
             "taxonomic_instance":taxonomic_instance,
             "attributes":attributes,
             "constraints":constraints,
+            "attr_range_specs":attr_range_specs,
+            "attr_combo_specs":attr_combo_specs,
             "energy_objective":energy_objective,
             "area_objective":area_objective,
         })
@@ -372,7 +377,7 @@ class PrimitiveCategory:
         # Should be a match
         assert(False)
 
-    def from_taxo_obj(self,obj):
+    def from_taxo_obj(self,obj,param_vals={}):
         '''
         Instantiate new model instance from a taxonomic object of corresponding category,
         i.e. pass in a MetadataParser taxonomic object to construct a MetadataParser model.
@@ -382,7 +387,6 @@ class PrimitiveCategory:
 
         # Match attributes to a corresponding taxonomic instance alias
         self.find_applicable_taxo_instance_alias()
-
         return self
 
     def get_taxo_instances(self):
@@ -442,13 +446,12 @@ class PrimitiveCategory:
         )
 
         # Implementation attributes
-        taxo_instances=self.get_taxo_instances()
         args={"port_thrpt_attrs":self.port_thrpt_attr_dict}
         self.symbol_list.extend( \
             [expr_ \
-                for taxo_inst in taxo_instances \
-                    for impl_ in self.instance_to_implementations[taxo_inst] \
-                        for expr_ in mo_.evalAttributeExpression(impl_,uri_prefix,args=args)]
+                for impl_ in self.instance_to_implementations[self.applicable_taxo_instance_alias] \
+                    for attr_ in impl_["attributes"] \
+                        for expr_ in mo_.evalAttributeExpression(attr_,uri_prefix,args=args)] \
         )
 
         return self
@@ -462,15 +465,38 @@ class PrimitiveCategory:
                 for port_attr_ref in self.port_attribute_refs \
                     for attr_ in port_attr_ref["thrpt_attr_list"]])
         # Top-level constraints - TODO
-        # Taxonomic-instance constraints - TODO
-        # Implementation-level constraints
         for cnst in self.constraint_list:
             self.final_constraint_list.extend( \
                 mo_.evalConstraintExpression(cnst,uri_prefix,args={"port_thrpt_attrs":self.port_thrpt_attr_dict}) \
-            )
+            )        
+        # Taxonomic-instance constraints - TODO
+        # Implementation-level constraints
+        # - Explicit constraints
+        for impl_ in self.instance_to_implementations[self.applicable_taxo_instance_alias]:
+            for cnst in impl_["constraints"]:
+                self.final_constraint_list.extend( \
+                    mo_.evalConstraintExpression(cnst,uri_prefix,args={"port_thrpt_attrs":self.port_thrpt_attr_dict}) \
+                )
+        # - Ranges of allowed values for attributes
+        for impl_ in self.instance_to_implementations[self.applicable_taxo_instance_alias]:
+            for spec_ in impl_["attr_range_specs"]:
+                self.final_constraint_list.extend( \
+                    mo_.evalAttributeRangeExpression(spec_,uri_prefix,args={"port_thrpt_attrs":self.port_thrpt_attr_dict}) \
+                )
+        # - Allowed combinations of attribute values
+        for impl_ in self.instance_to_implementations[self.applicable_taxo_instance_alias]:
+            for expr_ in impl_["attr_combo_specs"]:
+                self.final_constraint_list.extend( \
+                    mo_.evalAttributeComboExpression(expr_,uri_prefix) \
+                )
         return self
 
     def build_objectives(self,uri_prefix=""):
+        impl_=self.instance_to_implementations[self.applicable_taxo_instance_alias]
+        self.area_objective=mo_.evalObjectiveExpression(impl_["area_objective"],uri_prefix)
+        energy_obj=impl_["energy_objective"]
+        self.energy_objective_dict={action:mo_.evalObjectiveExpression(energy_obj[action],uri_prefix) for action in energy_obj}
+
         return self
 
     def build_symbols_constraints_objectives_attributes(self,uri_prefix=""):
@@ -487,6 +513,18 @@ class PrimitiveCategory:
 
     def get_symbols(self):
         return self.symbol_list
+
+    def get_area_objective(self):
+        return self.area_objective
+
+    def get_energy_objectives(self):
+        return self.energy_objective_dict
+
+    def get_scale_inference_problem(self):
+        return self.get_symbols(), \
+               self.get_constraints(), \
+               self.get_energy_objectives(), \
+               self.get_area_objective()
 
 class SAFCategory(PrimitiveCategory):
 
