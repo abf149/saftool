@@ -93,16 +93,20 @@ class PrimitiveCategory:
         self.generator_type=None
 
         # Scale-inference-related initialization
+        self.obj_id=None
         self.scale_attributes_=[]
         self.scale_default_attributes_=[]
         self.scale_attribute_vals=[]
         self.taxonomic_instance_alias_list=[]
         self.port_thrpt_attr_dict={}
         self.port_thrpt_thresh_mode=None
+        self.port_thrpt_thresh_attr_dict=None
         self.instance_to_implementations={}
         self.constraint_list=[]
         self.final_constraint_list=[]
         self.symbol_list=[]
+        self.symbol_types_dict={}
+        self.symbol_types_list=[]
         self.yield_symbol_dict={}
         self.yield_taxo_attributes=None
         self.scale_parameters=[]
@@ -262,6 +266,14 @@ class PrimitiveCategory:
         self.scale_attributes_.append((attr_name,attr_type,solution))
         self.scale_default_attributes_.append((attr_name,attr_default))
         self.scale_attribute_vals=copy.deepcopy(self.scale_attributes_)
+
+        if attr_type=="int":
+            self.symbol_types_dict[attr_name]="int"
+        elif attr_type=="float":
+            self.symbol_types_dict[attr_name]="float"
+        else:
+            assert(False)
+
         return self
 
     def yield_scale_attribute(self,attr_name,attr_type,attr_default="?"):
@@ -270,8 +282,9 @@ class PrimitiveCategory:
         '''
         self.scale_attribute(attr_name,attr_type,solution=True,attr_default=attr_default)
 
-    def yield_port_throughput_thresholds(self):
+    def yield_port_throughput_thresholds(self,port_attr_dict=None):
         self.port_thrpt_thresh_mode="yield"
+        self.port_thrpt_thresh_attr_dict=port_attr_dict
 
         return self
 
@@ -384,18 +397,24 @@ class PrimitiveCategory:
         '''
         for idx,val in enumerate(obj.getAttributes()):
             self.attribute_vals[idx]=val
+        self.obj_id=obj.getId()
 
         # Match attributes to a corresponding taxonomic instance alias
         self.find_applicable_taxo_instance_alias()
         return self
 
     def get_taxo_instances(self):
+        #   TODO: handle multiple-implementation scenario correctly
         return [taxo_instance for taxo_instance in self.instance_to_implementations]
 
     def build_symbols(self,uri_prefix=""):
+        # Top-level attributes - TODO
         # Port attributes
-        self.symbol_list.extend([ab_.uri(uri_prefix,port_attr_ref["port_name"])+"_"+attr_ \
-            for port_attr_ref in self.port_attribute_refs for attr_ in port_attr_ref["thrpt_attr_list"]])
+        self.symbol_list.extend([ab_.uri(uri_prefix,port_name)+"_"+attr_ \
+            for port_name in self.port_thrpt_attr_dict for attr_ in self.port_thrpt_attr_dict[port_name]])
+        self.symbol_types_list.extend(["float" \
+            for port_name in self.port_thrpt_attr_dict for attr_ in self.port_thrpt_attr_dict[port_name]])
+
         # - Yield taxonomic attributes, if required
         if self.yield_taxo_attributes=="all":
             # yield all taxonomic attributes
@@ -429,23 +448,45 @@ class PrimitiveCategory:
                             self.yield_symbol_dict[attr_[0]]=(self.attribute_vals[idx],"val")
 
         # - Port throughput threshold attributes, if required
-        if self.yield_scale_attribute is not None:
-            self.symbol_list.extend([ab_.uri(uri_prefix,port_attr_ref["port_name"])+"_"+attr_+"_thresh"\
-                for port_attr_ref in self.port_attribute_refs for attr_ in port_attr_ref["thrpt_attr_list"]])
-        
+        if self.port_thrpt_thresh_mode is not None:
+            if self.port_thrpt_thresh_attr_dict is None:
+                self.symbol_list.extend([ab_.uri(uri_prefix,port_name)+"_"+attr_+"_thresh"\
+                    for port_name in self.port_thrpt_attr_dict for attr_ in self.port_thrpt_attr_dict[port_name]])
+            
+                self.symbol_types_list.extend(["int"\
+                    for port_name in self.port_thrpt_attr_dict for _ in self.port_thrpt_attr_dict[port_name]])
+            else:
+                new_syms=[]
+                new_sym_types=[]
+
+                for port_name in self.port_thrpt_thresh_attr_dict:
+                    for attr_ in self.port_thrpt_thresh_attr_dict[port_name]:
+                        new_syms.append(ab_.uri(uri_prefix,port_name)+"_"+attr_+"_thresh")
+                        new_sym_types.append("int")
+
+                self.symbol_list.extend(new_syms)
+                self.symbol_types_list.extend(new_sym_types)
+
             if self.port_thrpt_thresh_mode=="yield":
                 # - Yield port throughput threshold attributes, if required
-                for port_attr_ref in self.port_attribute_refs:
-                    for attr_ in port_attr_ref["thrpt_attr_list"]:
-                        self.yield_symbol_dict[port_attr_ref["port_name"]+"_"+attr_+"_thresh"]= \
-                            (ab_.uri(uri_prefix,port_attr_ref["port_name"])+"_"+attr_+"_thresh","sym")
+                if self.port_thrpt_thresh_attr_dict is None:
+                    for port_name in self.port_thrpt_attr_dict:
+                        for attr_ in self.port_thrpt_attr_dict[port_name]:
+                            self.yield_symbol_dict[port_name+"_"+attr_+"_thresh"]= \
+                                (ab_.uri(uri_prefix,port_name)+"_"+attr_+"_thresh","sym")
+                else:
+                    for port_name in self.port_thrpt_thresh_attr_dict:
+                        for attr_ in self.port_thrpt_thresh_attr_dict[port_name]:
+                            self.yield_symbol_dict[port_name+"_"+attr_+"_thresh"]= \
+                                (ab_.uri(uri_prefix,port_name)+"_"+attr_+"_thresh","sym")
 
         # Top-level params
-        self.symbol_list.extend( \
-            [ab_.uri(uri_prefix,param[0]) for param in self.scale_parameters]
-        )
+        #self.symbol_list.extend( \
+        #    [ab_.uri(uri_prefix,param[0]) for param in self.scale_parameters]
+        #)
 
         # Implementation attributes
+        #   TODO: handle multiple-implementation scenario correctly
         args={"port_thrpt_attrs":self.port_thrpt_attr_dict}
         self.symbol_list.extend( \
             [expr_ \
@@ -454,16 +495,32 @@ class PrimitiveCategory:
                         for expr_ in mo_.evalAttributeExpression(attr_,uri_prefix,args=args)] \
         )
 
+        self.symbol_types_list.extend(["int" \
+                for impl_ in self.instance_to_implementations[self.applicable_taxo_instance_alias] \
+                    for attr_ in impl_["attributes"] \
+                        for expr_ in mo_.evalAttributeExpression(attr_,uri_prefix,args=args)])
+
         return self
 
     def build_constraints(self,uri_prefix=""):
         # Port throughput threshold attributes, if required
-        if self.yield_scale_attribute is not None:
-            self.final_constraint_list.extend([ \
-                ab_.uri(uri_prefix,port_attr_ref["port_name"])+"_"+attr_+"_thresh >= " \
-                    + ab_.uri(uri_prefix,port_attr_ref["port_name"])+"_"+attr_ \
-                for port_attr_ref in self.port_attribute_refs \
-                    for attr_ in port_attr_ref["thrpt_attr_list"]])
+        if self.port_thrpt_thresh_mode is not None:
+            if self.port_thrpt_thresh_attr_dict is None:
+                self.final_constraint_list.extend([ \
+                    ab_.uri(uri_prefix,port_name)+"_"+attr_+"_thresh >= " \
+                        + ab_.uri(uri_prefix,port_name)+"_"+attr_ \
+                    for port_name in self.port_thrpt_attr_dict \
+                        for attr_ in self.port_thrpt_attr_dict[port_name]])
+            else:
+                new_constraints=[]
+
+                for port_name in self.port_thrpt_thresh_attr_dict:
+                    for attr_ in self.port_thrpt_thresh_attr_dict[port_name]:
+                        new_constraints.append(ab_.uri(uri_prefix,port_name)+"_"+attr_+"_thresh >= " \
+                                               + ab_.uri(uri_prefix,port_name)+"_"+attr_)
+
+                self.final_constraint_list.extend(new_constraints)
+
         # Top-level constraints - TODO
         for cnst in self.constraint_list:
             self.final_constraint_list.extend( \
@@ -472,18 +529,21 @@ class PrimitiveCategory:
         # Taxonomic-instance constraints - TODO
         # Implementation-level constraints
         # - Explicit constraints
+        #   TODO: handle multiple-implementation scenario correctly
         for impl_ in self.instance_to_implementations[self.applicable_taxo_instance_alias]:
             for cnst in impl_["constraints"]:
                 self.final_constraint_list.extend( \
                     mo_.evalConstraintExpression(cnst,uri_prefix,args={"port_thrpt_attrs":self.port_thrpt_attr_dict}) \
                 )
         # - Ranges of allowed values for attributes
+        #   TODO: handle multiple-implementation scenario correctly
         for impl_ in self.instance_to_implementations[self.applicable_taxo_instance_alias]:
             for spec_ in impl_["attr_range_specs"]:
                 self.final_constraint_list.extend( \
                     mo_.evalAttributeRangeExpression(spec_,uri_prefix,args={"port_thrpt_attrs":self.port_thrpt_attr_dict}) \
                 )
         # - Allowed combinations of attribute values
+        #   TODO: handle multiple-implementation scenario correctly
         for impl_ in self.instance_to_implementations[self.applicable_taxo_instance_alias]:
             for expr_ in impl_["attr_combo_specs"]:
                 self.final_constraint_list.extend( \
@@ -492,7 +552,8 @@ class PrimitiveCategory:
         return self
 
     def build_objectives(self,uri_prefix=""):
-        impl_=self.instance_to_implementations[self.applicable_taxo_instance_alias]
+        #TODO: support multiple implementations
+        impl_=self.instance_to_implementations[self.applicable_taxo_instance_alias][0]
         self.area_objective=mo_.evalObjectiveExpression(impl_["area_objective"],uri_prefix)
         energy_obj=impl_["energy_objective"]
         self.energy_objective_dict={action:mo_.evalObjectiveExpression(energy_obj[action],uri_prefix) for action in energy_obj}
@@ -500,19 +561,23 @@ class PrimitiveCategory:
         return self
 
     def build_symbols_constraints_objectives_attributes(self,uri_prefix=""):
+        uri_prefix_with_self=ab_.uri(uri_prefix,self.obj_id)
         self.symbol_list=[]
         self.final_constraint_list=[]
         #self.yield_symbol_dict
-        self.build_symbols(uri_prefix)
-        self.build_constraints(uri_prefix)
-        self.build_objectives(uri_prefix)
+        self.build_symbols(uri_prefix_with_self)
+        self.build_constraints(uri_prefix_with_self)
+        self.build_objectives(uri_prefix_with_self)
         return self
     
     def get_constraints(self):
         return self.final_constraint_list
 
     def get_symbols(self):
-        return self.symbol_list
+        return self.symbol_list, self.symbol_types_list
+
+    def get_yields(self):
+        return self.yield_symbol_dict
 
     def get_area_objective(self):
         return self.area_objective
@@ -521,10 +586,13 @@ class PrimitiveCategory:
         return self.energy_objective_dict
 
     def get_scale_inference_problem(self):
-        return self.get_symbols(), \
+        symbol_list,symbol_types_list=self.get_symbols()
+        return symbol_list, \
+               symbol_types_list, \
                self.get_constraints(), \
                self.get_energy_objectives(), \
-               self.get_area_objective()
+               self.get_area_objective(), \
+               self.get_yields()
 
 class SAFCategory(PrimitiveCategory):
 

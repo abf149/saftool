@@ -9,8 +9,8 @@ PositionGeneratorModel=PositionGenerator \
     .require_port_throughput_attributes("md_in") \
     .require_port_throughput_attributes("pos_out") \
     .yield_taxonomic_attributes() \
-    .yield_port_throughput_thresholds() \
-    .taxonomic_instance_alias(["cp_lf_none"],"C") \
+    .yield_port_throughput_thresholds(port_attr_dict={"md_in":pgen_attr_list,"pos_out":pgen_attr_list}) \
+    .taxonomic_instance_alias(["coordinate_payload"],"C") \
     .register_supported_instances(pgen_instances) \
     .add_implementation( \
         name="C", \

@@ -35,7 +35,7 @@ def makeCombosConstraint(attr_list,combos_list):
 
 '''Expression evaluation'''
 def injectUriPrefix(str_,uri_prefix):
-    return str_["expression"].replace("@",uri_prefix+".")
+    return str_.replace("@",uri_prefix+".")
 
 def extractForAllParams(foralls):
     var_=foralls[0][0]
@@ -81,7 +81,7 @@ def listToArgsString(lst):
     return res
 
 def evalAttributeRangeExpression(expr_,uri_prefix="",args={}):
-    base_expr=expr_["expression"] + " in FiniteSet($!)"
+    base_expr="Contains("+expr_["expression"] + ",FiniteSet($!))"
     base_expr=injectUriPrefix(base_expr,uri_prefix)
     res=[base_expr]
     if "foralls" in expr_:
@@ -100,17 +100,32 @@ def evalAttributeRangeExpression(expr_,uri_prefix="",args={}):
 
     return res
 
+def evalAttributeComboExpression(expr_, uri_prefix=""):
+    attr_list = [injectUriPrefix(attr_, uri_prefix) for attr_ in expr_["attr_list"]]
+    combos_list = expr_["combos_list"]
+
+    and_clauses = []
+    for combo_ in combos_list:
+        conditions = ' & '.join(["Eq({}, {})".format(attr_, val) for attr_, val in zip(attr_list, combo_)])
+        and_clauses.append("And({})".format(conditions))
+
+    or_expr = "Or({})".format(', '.join(and_clauses))
+
+    return [or_expr]
+
+'''
 def evalAttributeComboExpression(expr_,uri_prefix=""):
     # {"attr_list":attr_list,"combos_list":combos_list}
     attr_list=[injectUriPrefix(attr_,uri_prefix) for attr_ in expr_["attr_list"]]
     combos_list=expr_["combos_list"]
     res="Piecewise("
     for combo_ in combos_list:
-        conds=listToArgsString([attr_ + " == " + val for attr_,val in zip(attr_list,combo_)])
+        conds=listToArgsString([attr_ + " == " + str(val) for attr_,val in zip(attr_list,combo_)])
         res += "(True, And("+ conds +")),"
     res+="(False,True))"
 
-    return res
+    return [res]
+'''
 
 def evalObjectiveExpression(expr_,uri_prefix=""):
     return injectUriPrefix(expr_,uri_prefix)
