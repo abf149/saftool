@@ -1,6 +1,8 @@
 '''Solver phase 1: DFS'''
+from util.helper import info, warn, error
 import solver.model.build_support.relations as rn
 import solver.model.build_support.scale as sc
+import saflib.microarchitecture.model.ModelRegistry as mr
 
 def subs_scale_param_boundary_conds(port_with_boundary_conds,subs_port,reln_dict,transitive_closure_relns):
     for partial_reln in reln_dict[port_with_boundary_conds]:
@@ -51,7 +53,7 @@ def transitive_dfs_from_primitive_port(root_port,src_port,port_list,net_list,por
         transitive_dfs_from_primitive_port(root_port,dst_port,port_list,net_list,port_net_dict,port_attr_dict, \
                                            port_visited,transitive_closure_relns,reln_dict)
 
-def solve1_transitive_closure_dfs(port_list,net_list,out_port_net_dict,port_attr_dict,reln_dict):
+def transitive_closure_dfs(port_list,net_list,out_port_net_dict,port_attr_dict,reln_dict):
     '''
     DFS algorithm to infer microarchitecture port scale parameters based on boundary conditions at
     architecture buffer ports
@@ -64,3 +66,69 @@ def solve1_transitive_closure_dfs(port_list,net_list,out_port_net_dict,port_attr
                                            port_visited,transitive_closure_relns,reln_dict)
 
     return transitive_closure_relns
+
+def primitive_relations(obj_dict):
+    '''
+    Assemble the key relations needed to apply scale inference to primitives
+    '''
+
+    symbols=[]
+    symbol_types=[]
+    constraints=[]
+    energy_objectives={}
+    area_objectives={}
+    yields={}
+
+    for comp_name in obj_dict:
+        dct=obj_dict[comp_name]
+        if dct["microarchitecture"] and dct["primitive"]:
+            comp=obj_dict[comp_name]["obj"]
+            uri_prefix=obj_dict[comp_name]["uri_prefix"]
+            modelBase=mr.getModel(comp.getCategory()+"Model")
+            compModel=modelBase.copy() \
+                               .from_taxo_obj(comp) \
+                               .build_symbols_constraints_objectives_attributes(uri_prefix)
+
+            # Get primitive characteristic relations
+            comp_symbols, \
+            comp_symbol_types, \
+            comp_constraints, \
+            comp_energy_objectives, \
+            comp_area_objectives, \
+            comp_yields = compModel.get_scale_inference_problem()
+
+            symbols.extend(comp_symbols)
+            symbol_types.extend(comp_symbol_types)
+            constraints.extend(comp_constraints)
+            energy_objectives[comp_name]=comp_energy_objectives
+            area_objectives[comp_name]=comp_area_objectives
+            yields[comp_name]=comp_yields
+
+    return symbols,symbol_types,constraints,energy_objectives,area_objectives,yields
+
+def build2_system_of_relations(sclp):
+    info("- build phase 2: system of relations")
+
+    rlns=sclp['reln_list']
+    port_list=sclp['port_list']
+    port_attr_dict=sclp['port_attr_dict']
+    net_list=sclp['net_list']
+    out_port_net_dict=sclp['out_port_net_dict']
+    obj_dict=sclp['obj_dict']
+
+    # Get system of relations describing supported primitive configurations
+    symbols, \
+    symbol_types, \
+    constraints, \
+    energy_objectives, \
+    area_objectives, \
+    yields = primitive_relations(obj_dict)
+
+    # Get additional relations which express connections between primitives
+    constraints.extend( \
+           transitive_closure_dfs(port_list,net_list,out_port_net_dict,port_attr_dict,rlns))  
+
+    info("- => Done, build phase 2.")
+
+    return {"symbols":symbols, "symbol_types":symbol_types, "constraints":constraints, \
+            "energy_objectives":energy_objectives, "area_objectives":area_objectives, "yields":yields}

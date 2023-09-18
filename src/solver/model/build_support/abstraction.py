@@ -129,3 +129,17 @@ def get_port_uris_and_attributes_and_nets_wrapper(taxo_uarch,flat_arch):
 
     return port_list,port_attr_dict,net_list,out_port_net_dict,in_port_net_dict,symbol_list,uarch_symbol_list,obj_to_ports
 
+def build_component_dict(obj,obj_dict={},uri_prefix=""):
+    if not p_.isArchitecture(obj):
+        obj_dict[uri(uri_prefix,obj.getId())]={"obj":obj, \
+                            "microarchitecture":obj.getCategory()!="BufferStub", \
+                            "primitive":(not p_.isComponentOrArchitecture(obj)), \
+                            "uri_prefix":uri_prefix}
+
+    #print(obj.getId())
+    if p_.isComponentOrArchitecture(obj):
+        # Recurse into child objects, only if this is not a primitive
+        new_prefix=uri(uri_prefix,obj.getId())
+        obj_component_objlist=obj.getTopology().getComponentList()
+        for comp in obj_component_objlist:
+            build_component_dict(comp,obj_dict,new_prefix)

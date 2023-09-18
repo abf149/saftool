@@ -1,43 +1,19 @@
 '''Build a SAFModel throughput inference problem'''
-from solver.build import get_buffer_hierarchy
-import util.sparseloop_config_processor as sl_config
-from util.taxonomy.designelement import Architecture
-
-import solver.model.build_support.abstraction as ab, \
-       solver.model.build_support.scale as sc, \
-       solver.model.build_support.relations as rn
+from util.helper import info, warn, error
+from .build_support.build1 import build1_graph_representation
+from .build_support.build2 import build2_system_of_relations
+from .build_support.build3 import build3_simplify_system
 
 def build_scale_inference_problem(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
                                   buffer_kept_dataspace_by_buffer,buff_dags,constraints=[]):
-    flat_arch=sl_config.flatten_arch_wrapper(arch)
 
-    buffer_hierarchy=get_buffer_hierarchy(arch)
+    info("Building scale inference problem...",also_stdout=True)
 
-    # Compute flattened port indices
-    flat_port_idx_to_dtype={}
-    for buffer in buffer_hierarchy:
-        flat_port_idx_to_dtype[buffer]=[]
-        for dtype in dtype_list:
-            flat_port_idx_to_dtype[buffer].extend([dtype]*len(fmt_iface_bindings[buffer][dtype]))
+    problem_as_graph=build1_graph_representation(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
+                                                 buffer_kept_dataspace_by_buffer,buff_dags,constraints)
 
-    taxo_uarch=Architecture.fromDict(sl_config.load_config_yaml('ref_output/new_arch.yaml'))
+    problem_as_system=build2_system_of_relations(problem_as_graph)
 
-    port_list, \
-    port_attr_dict, \
-    net_list, \
-    out_port_net_dict, \
-    in_port_net_dict, \
-    symbol_list, \
-    uarch_symbol_list, \
-    obj_to_ports=ab.get_port_uris_and_attributes_and_nets_wrapper(taxo_uarch,flat_arch)
+    simplified_system=build3_simplify_system(problem_as_system)
 
-    gpthrpt= \
-        sc.get_global_positional_throughput(flat_arch,buffer_hierarchy,buffer_kept_dataspace_by_buffer, \
-                                            buff_dags,dtype_list)
-
-    reln_list=rn.get_scale_boundary_conditions(gpthrpt,port_attr_dict,fmt_iface_bindings, \
-                                               flat_arch,buff_dags,dtype_list,constraints=constraints)
-
-    return {'reln_list':reln_list,'port_list':port_list,'port_attr_dict':port_attr_dict,'net_list':net_list, \
-            'out_port_net_dict':out_port_net_dict,'in_port_net_dict':in_port_net_dict,'symbol_list':symbol_list,'uarch_symbol_list':uarch_symbol_list, \
-            'obj_to_ports':obj_to_ports,'gpthrpt':gpthrpt}
+    info("=> Done, build.",also_stdout=True)

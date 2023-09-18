@@ -1,40 +1,29 @@
-import numpy as np
-import util.sparseloop_config_processor as sl_config
-from util.taxonomy.designelement import Architecture
-import test_data as td, copy, yaml, re
-import util.safmodel_io as safio
-from util.safinfer_io import sprettyprint_taxo_uarch
-from solver.build import get_buffer_hierarchy
-import solver.model.build as build
-import solver.model.solve as solve
+#from util.safinfer_io import sprettyprint_taxo_uarch
+#from solver.build import get_buffer_hierarchy
+#import solver.model.solve as solve
+import util.helper as helper
+from util import safmodel_core as safcore, safmodel_io as safio
 
 if __name__=="__main__":
     arch, \
-    netlist, \
+    taxo_uarch, \
     sparseopts, \
     comp_in, \
     arch_out_path, \
-    comp_out_path = safio.parse_args()
+    comp_out_path, \
+    do_logging,\
+    log_fn = safio.parse_args()
 
-    fmt_iface_bindings, \
-    skip_bindings, \
-    dtype_list, \
-    buff_dags, \
-    buffer_kept_dataspace_by_buffer = sl_config.compute_fixed_arch_bindings(arch,sparseopts)
-
-    '''Load taxonomic description of SAF microarchitecture'''
-    taxo_uarch=Architecture.fromDict(sl_config.load_config_yaml('ref_output/new_arch.yaml'))
-
-    constraints=[
-        #('TestArchitecture.weight_spad',0,'nc','<=',4)
-    ]
+    print("logging:",do_logging)
+    helper.do_log=do_logging
+    if do_logging:
+        helper.log_init(log_fn)  
 
     '''Build scale inference problem'''
-    scale_prob=build.build_scale_inference_problem(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
-                                                   buffer_kept_dataspace_by_buffer,buff_dags,constraints=constraints)
+    scale_prob=safcore.build_scale_inference_problem(arch, sparseopts, taxo_uarch)
 
     '''Solve scale inference problem'''
-    solve.solve(scale_prob)
+    #solve.solve(scale_prob)
 
     #comp_list=taxo_uarch_monolithic_to_modular(taxo_uarch)
 
