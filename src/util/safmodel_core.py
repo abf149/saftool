@@ -4,7 +4,7 @@ import util.sparseloop_config_processor as sl_config
 #from util.safinfer_io import sprettyprint_taxo_uarch
 #from solver.build import get_buffer_hierarchy
 import solver.model.build as build
-#import solver.model.solve as solve
+import solver.model.solve as solve
 #import util.helper as helper
 
 def build_scale_inference_problem(arch, sparseopts, taxo_uarch, constraints=[]):
@@ -18,4 +18,5 @@ def build_scale_inference_problem(arch, sparseopts, taxo_uarch, constraints=[]):
     return build.build_scale_inference_problem(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
                                                buffer_kept_dataspace_by_buffer,buff_dags,constraints=constraints)
 
-
+def solve_scale_inference_problem(scale_prob):
+    return solve.solve(scale_prob)

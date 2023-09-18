@@ -9,7 +9,7 @@ import solver.model.build_support.abstraction as ab, \
 
 def build1_graph_representation(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
            buffer_kept_dataspace_by_buffer,buff_dags,constraints=[]):
-    info("- build phase 1: graph representation")
+    info("- Build phase 1: graph representation")
 
     flat_arch=sl_config.flatten_arch_wrapper(arch)
 
@@ -43,7 +43,7 @@ def build1_graph_representation(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
     reln_list=rn.get_scale_boundary_conditions(gpthrpt,port_attr_dict,fmt_iface_bindings, \
                                                flat_arch,buff_dags,dtype_list,constraints=constraints)
 
-    info("- => Done, build phase 1.")
+    info("- => done, build phase 1.")
 
     return {'reln_list':reln_list,'port_list':port_list,'port_attr_dict':port_attr_dict,'net_list':net_list, \
             'out_port_net_dict':out_port_net_dict,'in_port_net_dict':in_port_net_dict,'symbol_list':symbol_list,'uarch_symbol_list':uarch_symbol_list, \

@@ -107,7 +107,7 @@ def primitive_relations(obj_dict):
     return symbols,symbol_types,constraints,energy_objectives,area_objectives,yields
 
 def build2_system_of_relations(sclp):
-    info("- build phase 2: system of relations")
+    info("- Build phase 2: system of relations")
 
     rlns=sclp['reln_list']
     port_list=sclp['port_list']
@@ -124,11 +124,20 @@ def build2_system_of_relations(sclp):
     area_objectives, \
     yields = primitive_relations(obj_dict)
 
-    # Get additional relations which express connections between primitives
-    constraints.extend( \
-           transitive_closure_dfs(port_list,net_list,out_port_net_dict,port_attr_dict,rlns))  
+    #print([x for x in constraints if "Eq" in x or "eq" in x])
+    #print(constraints.index("eq"),constraints.index("ineq"))
+    #print(constraints[constraints.index("eq")-1],constraints[constraints.index("eq")+1])
 
-    info("- => Done, build phase 2.")
+    # Get additional relations which express connections between primitives
+    transitive_relations = \
+           transitive_closure_dfs(port_list,net_list,out_port_net_dict,port_attr_dict,rlns) 
+
+    #print(transitive_relations)
+
+    constraints.extend(transitive_relations['eq'])
+    constraints.extend(transitive_relations['ineq'])
+
+    info("- => done, build phase 2.")
 
     return {"symbols":symbols, "symbol_types":symbol_types, "constraints":constraints, \
             "energy_objectives":energy_objectives, "area_objectives":area_objectives, "yields":yields}

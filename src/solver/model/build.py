@@ -17,3 +17,5 @@ def build_scale_inference_problem(taxo_uarch,arch,fmt_iface_bindings,dtype_list,
     simplified_system=build3_simplify_system(problem_as_system)
 
     info("=> Done, build.",also_stdout=True)
+
+    return simplified_system

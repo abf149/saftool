@@ -114,7 +114,7 @@ def get_scale_boundary_conditions(gpthrpt,port_attr_dict,fmt_iface_bindings,flat
                         make_payloadwidth_relations("TestArchitecture",buffer,rdx,"==",payloadwidth,relation_dict)
                         if rdx < last_rank:
                             make_read_width_relations("TestArchitecture",buffer,rdx,"<=",md_storage_width,relation_dict)
-                            make_read_width_relations("TestArchitecture",buffer,rdx,">",0.0,relation_dict)
+                            make_read_width_relations("TestArchitecture",buffer,rdx,">=",0.0000000001,relation_dict)
                             make_pos_rate_relations("TestArchitecture",buffer,rdx,">=",gpthrpt,relation_dict)
                         else: # last rank
                             make_read_width_relations("TestArchitecture",buffer,rdx,"==",md_storage_width,relation_dict)
@@ -136,10 +136,10 @@ def get_scale_boundary_conditions(gpthrpt,port_attr_dict,fmt_iface_bindings,flat
                         make_payloadwidth_relations("TestArchitecture",buffer,rdx,"==",payloadwidth,relation_dict)
                         if rdx < last_rank:
                             make_read_width_relations("TestArchitecture",buffer,rdx,"<=",md_storage_width,relation_dict)
-                            make_pos_rate_relations("TestArchitecture",buffer,rdx,">",0.0,relation_dict)
+                            make_pos_rate_relations("TestArchitecture",buffer,rdx,">=",0.0000000001,relation_dict)
                         else: # last rank
                             make_read_width_relations("TestArchitecture",buffer,rdx,"==",md_storage_width,relation_dict)
-                            make_pos_rate_relations("TestArchitecture",buffer,rdx,">",0.0,relation_dict)
+                            make_pos_rate_relations("TestArchitecture",buffer,rdx,">=",0.0000000001,relation_dict)
         else:
             pass
 

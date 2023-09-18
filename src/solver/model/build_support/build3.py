@@ -1,8 +1,30 @@
 from util.helper import info, warn, error
 import sympy as sp
 
+def create_safe_symbol(s):
+    return s.replace('.', '__')
+
+def recover_unsafe_symbol(s):
+    return s.replace('__','.')
+
+def adjust_set_membership_syntax(c):
+    return c.replace("Contains", "in")
+
+def create_safe_constraint(c):
+    c_splits=c.split(" ")
+    c_safe=""
+
+    for splt in c_splits:
+        try:
+            float(splt)
+            c_safe = c_safe + " " + splt + " "
+        except:
+            c_safe = c_safe + " " + create_safe_symbol(splt) + " "
+
+    return c_safe[0:-1]
+
 def build3_simplify_system(problem_as_system):
-    info("- build phase 3: simplify.")
+    info("- Build phase 3: simplify.")
 
     symbols=problem_as_system["symbols"]
     symbol_types=problem_as_system["symbol_types"]
@@ -11,8 +33,8 @@ def build3_simplify_system(problem_as_system):
     warn("-- input:",len(symbols),"symbols,",len(constraints),"constraints")
 
     # Replace periods with double-underscores
-    modified_symbols = [s.replace('.', '__') for s in symbols]
-    modified_constraints = [c.replace('.', '__') for c in constraints]
+    modified_symbols = [create_safe_symbol(s) for s in symbols]
+    modified_constraints = [create_safe_constraint(c) for c in constraints]
 
     # Convert modified symbols into sympy symbols
     sympy_symbols = {s: sp.Symbol(s) for s in modified_symbols}
@@ -50,7 +72,15 @@ def build3_simplify_system(problem_as_system):
     simplified_strings = [sp.sstr(c) for c in simplified_constraints]
 
     # Convert double-underscores back to periods
-    final_constraints = [s.replace('__', '.').replace("Contains", "in") for s in simplified_strings]
+    final_constraints = [adjust_set_membership_syntax(recover_unsafe_symbol(s)) \
+                            for s in simplified_strings]
+
+    final_constraints = [c for c in final_constraints if c != "True" and c != "False"]
+
+    #print([x for x in final_constraints if type(x).__name__=='bool' or x=='True' or x=='False'])
+    #print(str(others[final_constraints.index('True')].lhs))
+    #print(str(others[final_constraints.index('True')].lhs).replace("__",".") in symbols)
+    #print([key for key in substitutions if substitutions[key] == str(others[final_constraints.index('True')].lhs).replace("__",".")])
 
     # Remove duplicate constraints
     final_constraints = list(set(final_constraints))
@@ -64,7 +94,7 @@ def build3_simplify_system(problem_as_system):
     final_symbol_types = []
 
     for i, orig_sym in enumerate(symbols):
-        mod_sym = orig_sym.replace('.', '__')
+        mod_sym = create_safe_symbol(orig_sym)
         if sympy_symbols[mod_sym] in final_sympy_symbols_set:
             final_symbols.append(orig_sym)
             final_symbol_types.append(symbol_types[i])
@@ -78,6 +108,6 @@ def build3_simplify_system(problem_as_system):
 
     warn("-- output:",len(final_symbols),"symbols,",len(final_constraints),"constraints")
 
-    info("- => Done, build phase 3.")
+    info("- => done, build phase 3.")
 
     return simplified_problem

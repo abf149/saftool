@@ -23,6 +23,7 @@ if __name__=="__main__":
     scale_prob=safcore.build_scale_inference_problem(arch, sparseopts, taxo_uarch)
 
     '''Solve scale inference problem'''
+    x=safcore.solve_scale_inference_problem(scale_prob)
     #solve.solve(scale_prob)
 
     #comp_list=taxo_uarch_monolithic_to_modular(taxo_uarch)
