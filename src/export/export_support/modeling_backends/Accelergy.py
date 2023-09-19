@@ -1,8 +1,9 @@
 '''Accelergy compatibility layer'''
 from util.helper import info,warn,error
-import pickle
+import pickle, shutil, os
 
 ERTART_fn="primitives_ERT_ART.pkl"
+install_path="accelergy/estimation_plugins/saf_primitives/primitives_ERT_ART.pkl"
 
 def getAccelergyTables(abstract_analytical_models_dict,primitive_models):
     info("--- moving forward with Accelergy modeling backend...")
@@ -50,8 +51,16 @@ def getAccelergyTables(abstract_analytical_models_dict,primitive_models):
 
     return table_dict
 
-def exportAccelergyERTART(primitives_ERT_ART):
-    info("--- saving Accelergy ERT/ART to",ERTART_fn,"...")
-    with open(ERTART_fn,'wb') as fp:
+def exportAccelergyERTART(primitives_ERT_ART,ERTART_fn_=ERTART_fn):
+    info("--- saving Accelergy ERT/ART to",ERTART_fn_,"...")
+    with open(ERTART_fn_,'wb') as fp:
         pickle.dump(primitives_ERT_ART,fp)
     warn("--- done, saving ERT/ART")
+
+    return ERTART_fn_
+
+def installERTART(ERTART_fn_,install_path_=install_path):
+    info("--- installing: copying Accelergy ERT/ART from",ERTART_fn_,"to",install_path_,"...")
+    dest = shutil.copyfile(ERTART_fn_, install_path_)
+    warn("--- done, installing ERT/ART to backend")
+    return dest
