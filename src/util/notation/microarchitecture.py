@@ -6,7 +6,7 @@ import util.notation.model as mo_
 import solver.model.build_support.scale as sc_
 import solver.model.build_support.abstraction as ab_
 from util.helper import info,warn,error
-import copy
+import sympy as sp, copy
 
 fmt_str_convert={"UOP":"U", "RLE":"R", "C":"C","B":"B"}
 
@@ -119,6 +119,8 @@ class PrimitiveCategory:
         self.energy_objective_dict={}
         self.uri_prefix=None
         self.final_yield_values_dict={}
+        self.ART=None
+        self.ERT=None
 
     def copy(self):
         return copy.deepcopy(self)
@@ -634,6 +636,53 @@ class PrimitiveCategory:
 
     def get_analytical_modeling_attributes(self):
         return self.final_yield_values_dict
+
+    def build_ART(self):
+        #TODO: support multiple implementations
+        impl_=self.instance_to_implementations[self.applicable_taxo_instance_alias][0]
+        area_obj_str=mo_.evalObjectiveExpression(impl_["area_objective"],"")
+        target_attrs=[]
+        for y in self.final_yield_values_dict:
+            val=self.final_yield_values_dict[y]
+            try:
+                float(val)
+                target_attrs.append(y)
+            except:
+                pass
+        ART_fxn=lambda model_attr_dict: \
+                    sp.sympify(area_obj_str).subs({y:model_attr_dict[y] for y in target_attrs})
+
+        self.ART=ART_fxn(self.final_yield_values_dict)
+        return self
+
+    def get_ART(self):
+        return self.ART
+
+    def build_ERT(self):
+        #TODO: support multiple implementations
+        impl_=self.instance_to_implementations[self.applicable_taxo_instance_alias][0]
+        energy_obj=impl_["energy_objective"]
+        energy_obj_str_dict={action:mo_.evalObjectiveExpression(energy_obj[action],"") for action in energy_obj}
+        target_attrs=[]
+        for y in self.final_yield_values_dict:
+            val=self.final_yield_values_dict[y]
+            try:
+                float(val)
+                target_attrs.append(y)
+            except:
+                pass
+        ERT_fxn=lambda model_attr_dict: \
+                    { \
+                        action: \
+                            sp.sympify(energy_obj_str_dict[action]) \
+                                .subs({y:model_attr_dict[y] for y in target_attrs}) \
+                                    for action in energy_obj_str_dict
+                    }
+        self.ERT=ERT_fxn(self.final_yield_values_dict)
+        return self
+
+    def get_ERT(self):
+        return self.ERT
 
 class SAFCategory(PrimitiveCategory):
 
