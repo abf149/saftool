@@ -3,7 +3,11 @@ from util.helper import info,warn,error
 import pickle, shutil, os
 
 ERTART_fn="primitives_ERT_ART.pkl"
-install_path="accelergy/estimation_plugins/saf_primitives/primitives_ERT_ART.pkl"
+install_path="accelergy/data/primitives_ERT_ART.pkl"
+
+def getDefaultInstallPath():
+    global install_path
+    return install_path
 
 def getAccelergyTables(abstract_analytical_models_dict,primitive_models):
     info("--- moving forward with Accelergy modeling backend...")

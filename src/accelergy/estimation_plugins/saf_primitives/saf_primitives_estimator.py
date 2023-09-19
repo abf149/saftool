@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import csv, os, sys
+import csv, os, sys, pickle
+import export.export_support.modeling_backends.Accelergy as acc_
 #from accelergy.helper_functions import oneD_linear_interpolation
 
 NAME_IDX = 0
@@ -19,56 +20,42 @@ class SAFPrimitives(object):
     def __init__(self):
         self.estimator_name =  "saf_primitives_estimator"
         self.primitives_table=[]
-        with open('accelergy/data/primitives_table.csv', newline='') as csvfile: 
-            csvreader = csv.reader(csvfile, delimiter=',')
-            for row in csvreader:
-                self.primitives_table.append(row)
+        with open(acc_.getDefaultInstallPath(),'rb') as fp:
+            self.ERTART=pickle.load(fp)
+        #with open('accelergy/data/primitives_table.csv', newline='') as csvfile: 
+        #    csvreader = csv.reader(csvfile, delimiter=',')
+        #    for row in csvreader:
+        #        self.primitives_table.append(row)
 
-    def find_row_in_table(self,baseComponentName,paramList,paramValues):
-        # Use baseComponentName as a key to look up a row of the Primitive Data Table
-        suffix_str = "_"
-        for idx in range(len(paramList)):
-            suffix_str = suffix_str + paramList[idx]
-            suffix_str = suffix_str + str(paramValues[paramList[idx]])
-        targetComponentName=baseComponentName+suffix_str
-        for row in self.primitives_table:
-            if row[NAME_IDX] == targetComponentName:
-                return row
+    def category_supported(self,instance_category):
+        return instance_category in self.ERTART
+
+    def interface_breakout(self,interface,energy=True):
+        if energy:
+            return interface['class_name'],interface['attributes'], \
+                interface['action_name'],interface['arguments']
+        else: #area
+            return interface['class_name'],interface['attributes']
+
+    def match_interface_to_category_ERTART(self,instance_attributes_dict,instance_category):
+        if self.category_supported(instance_category):
+            cat_ERTART=self.ERTART[instance_category]
+            for attribute_values_tuple in cat_ERTART:
+                ERTART_=cat_ERTART[attribute_values_tuple]
+                attribute_names_tuple=ERTART_['attribute_names']
+                if all([str(instance_attributes_dict[attr_name])==str(attribute_values_tuple[idx]) \
+                            for idx,attr_name in enumerate(attribute_names_tuple)]):
+                    # Category & instance match!
+                    return {'ERT':ERTART_['ERT'],'ART':ERTART_['ART'], \
+                            'names':attribute_names_tuple, 'values':attribute_values_tuple}
+        else:
+            # No class_name match
+            return None
 
         return None
 
-    def find_val_in_row(self,row,field_name):
-        # Use field_name as a key to look up a value in a row of 
-        # the Primitive Data Table
-        return row[self.primitives_table[0].indexof(field_name)]
-
-    def find_val_in_row_by_compound_key(self,row,key_group,key_category):
-        # Use key_group and key_category as a compound key
-        # (<key_group>_<key_category>) to look up a value in
-        # a row of the Primitive Data Table
-        # 
-        # Example:
-        # - key_group: io_pad
-        # - key_category: switching_power
-        # - compound key: io_pad_switching_power
-        compound_key=key_group+"_"+key_category
-        return self.find_val_in_row(row,compound_key)
-
-    def accumulate_vals_in_row_by_compound_keys(self,row,key_groups,key_categories):
-        # Use the caresian product of key_groups and key_categories
-        # to define a set of compound keys (<key_group>_<key_category>)
-        # to look up and sum a set of values in a row of the Primitive Data Table.
-        # 
-        # Example:
-        # - key_groups: ["io_pad","memory"]
-        # - key_category: ["internal_power","switching_power"]
-        # - accumulate values assoc. with following keys: 
-        #   io_pad_internal_power+io_pad_switching_power+memory_internal_power+memory_switching_power
-        res=0.0
-        for kg in key_groups:
-            for kc in key_categories:
-                res+=self.find_val_in_row_by_compound_key(row,kg,kc)
-        return res
+    def getERTActionEnergy(self,ERT,action):
+        return float(ERT[action])
 
     def primitive_action_supported(self, interface):
         """
@@ -82,14 +69,25 @@ class SAFPrimitives(object):
         :return return the accuracy if supported, return 0 if not
         :rtype: int
         """
-        if 'regfile' in interface['class_name']:
-            return 1
+        category, \
+        attributes_dict, \
+        action_name, \
+        _ = self.interface_breakout(interface)
 
-        supported = 1 # dummy support everything
-        if ('format_uarch' not in interface['class_name']) and ('intersect' not in interface['class_name']) and ('pgen' not in interface['class_name']) and ('md_parser' not in interface['class_name']):
-            supported = 0        
-        return 0.1  if supported \
-                    else 0  # if not supported, accuracy is 0
+        instance_ERTART=self.match_interface_to_category_ERTART(attributes_dict,category)
+        if instance_ERTART is None:
+            # Instance mismatch
+            return 0
+        else:
+            ERT=instance_ERTART['ERT']
+            if action_name in ERT:
+                # Action match!
+                return 0.1
+            else:
+                # Action mismatch.
+                return 0
+
+        return 0
 
     def estimate_energy(self, interface):
         """
@@ -102,57 +100,21 @@ class SAFPrimitives(object):
        :return the estimated energy
        :rtype float
         """
-        supported = 1 # dummy support everything
-        if ('format_uarch' not in interface['class_name']) and ('intersect' not in interface['class_name']) and ('pgen' not in interface['class_name']) and ('md_parser' not in interface['class_name']):
-            supported = 0
-        if supported:        
-            if interface['action_name'] == 'idle':
-                return 0
-                '''if interface["class_name"] == "SRAM" and interface["attributes"]["depth"] == 0:
-                return 0 # zero depth SRAM has zero energy'''
-            elif 'format_uarch' in interface['class_name']:
-                # TODO: model format uarch
-                return 0
-            elif 'intersect' in interface['class_name']:
-                if interface['attributes']['metadataformat']=='B':
-                    baseComponentName='BidirectionalBitmaskIntersectDecoupled'
-                    paramList=['metaDataWidth']
-                    paramValues={'metaDataWidth':interface['attributes']['metadatawidth']}
-                    targetTableRow = self.find_row_in_table(baseComponentName,paramList,paramValues)
-                    assert(targetTableRow is not None)
-                    #f=float(self.find_val_in_row_by_compound_key(targetTableRow, \
-                    #                                        key_group, \
-                    #                                        key_category))
+        category, \
+        attributes_dict, \
+        action_name, \
+        _ = self.interface_breakout(interface)
 
-                    return float(targetTableRow[ACTION_ENERGY_IDX])
-                elif interface['attributes']['metadataformat']=='C':
-                    baseComponentName='BidirectionalCoordinatePayloadIntersectDecoupled'
-                    paramList=['metaDataWidth']
-                    paramValues={'metaDataWidth':interface['attributes']['metadatawidth']}
-                    targetTableRow = self.find_row_in_table(baseComponentName,paramList,paramValues)
-                    assert(targetTableRow is not None)
-                    return float(targetTableRow[ACTION_ENERGY_IDX])
-            elif 'pgen' in interface['class_name']:
-                if interface['attributes']['metadataformat']=='B':
-                    baseComponentName='ParallelDec2PriorityEncoderRegistered'
-                    paramList=['inputbits']
-                    paramValues={'inputbits':128}#interface['attributes']['metadatawidth']}
-                    targetTableRowPenc = self.find_row_in_table(baseComponentName,paramList,paramValues)
-                    PencAreaAmortizationOverMemories=0.5
-                    baseComponentName='RippleParallelPrefixSumRegistered'#'ParallelKoggeStonePrefixSumRegistered'
-                    PfsumAreaAmortizationOverCycles=1.0/float(paramValues['inputbits'])
-                    paramList=['bitwidth']
-                    paramValues={'bitwidth':128}#interface['attributes']['metadatawidth']}
-                    targetTableRowPfsum = self.find_row_in_table(baseComponentName,paramList,paramValues)                    
-                    assert((targetTableRowPenc is not None) and (targetTableRowPfsum is not None))
-                    print("targetTableRowPfsum[ACTION_ENERGY_IDX]:",targetTableRowPfsum[ACTION_ENERGY_IDX])
-                    print("PfsumAreaAmortizationOverCycles",PfsumAreaAmortizationOverCycles)
-                    print("targetTableRowPenc[ACTION_ENERGY_IDX]",targetTableRowPenc[ACTION_ENERGY_IDX])
-                    print("PencAreaAmortizationOverMemories",PencAreaAmortizationOverMemories)
-                    return float(float(targetTableRowPenc[ACTION_ENERGY_IDX])*PencAreaAmortizationOverMemories + \
-                                 float(targetTableRowPfsum[ACTION_ENERGY_IDX])*PfsumAreaAmortizationOverCycles)     
-                elif interface['attributes']['metadataformat']=='C':
-                    return 0.0
+        if self.category_supported(category):        
+            ERT=self.match_interface_to_category_ERTART(attributes_dict,category)['ERT']
+            if action_name in ERT:
+                return self.getERTActionEnergy(ERT,action_name)
+            else:
+                assert(False)
+                return 0.0
+
+        # Unsupported
+        assert(False)
         return 0.0
 
     def primitive_area_supported(self, interface):
@@ -165,14 +127,25 @@ class SAFPrimitives(object):
         :return return the accuracy if supported, return 0 if not
         :rtype: int
         """
-        if 'regfile' in interface['class_name']:
-            return 1
+        category, \
+        attributes_dict, \
+        action_name, \
+        _ = self.interface_breakout(interface)
 
-        supported = 1 # dummy support everything
-        if ('format_uarch' not in interface['class_name']) and ('intersect' not in interface['class_name']) and ('pgen' not in interface['class_name']) and ('md_parser' not in interface['class_name']):
-            supported = 0        
-        return 0.1  if supported \
-                    else 0  # if not supported, accuracy is 0
+        instance_ERTART=self.match_interface_to_category_ERTART(attributes_dict,category)
+        if instance_ERTART is None:
+            # Instance mismatch
+            return 0
+        else:
+            ART=instance_ERTART['ART']
+            if ART is not None:
+                # Area match!
+                return 0.1
+            else:
+                # Area mismatch.
+                return 0
+
+        return 0
 
     def estimate_area(self, interface):
         """
@@ -185,49 +158,12 @@ class SAFPrimitives(object):
         :rtype: float
         """
 
-        supported = 1 # dummy support everything
-        if ('format_uarch' not in interface['class_name']) and ('intersect' not in interface['class_name']) and ('pgen' not in interface['class_name']) and ('md_parser' not in interface['class_name']):
-            supported = 0
-        if supported:
-            if 'format_uarch' in interface['class_name']:
-                return 0.0
-            elif 'intersect' in interface['class_name']:
-                if interface['attributes']['metadataformat']=='B':
-                    baseComponentName='BidirectionalBitmaskIntersectDecoupled'
-                    paramList=['metaDataWidth']
-                    paramValues={'metaDataWidth':128} #interface['attributes']['metadatawidth']}
-                    targetTableRow = self.find_row_in_table(baseComponentName,paramList,paramValues)
-                    assert(targetTableRow is not None)
-                    return float(targetTableRow[TOTAL_AREA_IDX])
-                elif interface['attributes']['metadataformat']=='C':
-                    baseComponentName='BidirectionalCoordinatePayloadIntersectDecoupled'
-                    paramList=['metaDataWidth']
-                    paramValues={'metaDataWidth':interface['attributes']['metadatawidth']}
-                    targetTableRow = self.find_row_in_table(baseComponentName,paramList,paramValues)
-                    assert(targetTableRow is not None)
-                    return float(targetTableRow[TOTAL_AREA_IDX])
-            elif 'pgen' in interface['class_name']:
-                if interface['attributes']['metadataformat']=='B':
-                    baseComponentName='ParallelDec2PriorityEncoderRegistered'
-                    paramList=['inputbits']
-                    paramValues={'inputbits':128}#interface['attributes']['metadatawidth']}
-                    targetTableRowPenc = self.find_row_in_table(baseComponentName,paramList,paramValues)
-                    PencAreaAmortizationOverMemories=0.5
-                    baseComponentName='RippleParallelPrefixSumRegistered'#'RippleParallelPrefixSumRegistered'#'ParallelKoggeStonePrefixSumRegistered'
-                    PfsumAreaAmortizationOverCycles=1.0 #/paramValues['inputbits']
-                    paramList=['bitwidth']
-                    paramValues={'bitwidth':128}#interface['attributes']['metadatawidth']}
-                    targetTableRowPfsum = self.find_row_in_table(baseComponentName,paramList,paramValues)                    
-                    assert((targetTableRowPenc is not None) and (targetTableRowPfsum is not None))
-                    print("comb area:",float(float(targetTableRowPenc[COMBINATIONAL_AREA_IDX])*PencAreaAmortizationOverMemories + \
-                                 float(targetTableRowPfsum[COMBINATIONAL_AREA_IDX])*PfsumAreaAmortizationOverCycles)  )
-                    return float(float(targetTableRowPenc[COMBINATIONAL_AREA_IDX])*PencAreaAmortizationOverMemories + \
-                                 float(targetTableRowPfsum[COMBINATIONAL_AREA_IDX])*PfsumAreaAmortizationOverCycles)                    
-                    #return 154.0
-                elif interface['attributes']['metadataformat']=='C':
-                    return 0.0                    
-        return 0
+        category, \
+        attributes_dict = self.interface_breakout(interface,energy=False)
 
-        """if interface["class_name"] == "SRAM" and interface["attributes"]["depth"] == 0:
-            return 0 # zero depth SRAM has zero area
-        return 1 # dummy returns 1 for all areas"""
+        if self.category_supported(category):        
+            return float(self.match_interface_to_category_ERTART(attributes_dict,category)['ART'])
+
+        # Unsupported
+        assert(False)
+        return 0.0
