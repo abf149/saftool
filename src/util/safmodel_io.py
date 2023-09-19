@@ -4,6 +4,7 @@ import os, argparse, test_data as td, copy, re
 import util.sparseloop_config_processor as sl_config, yaml, argparse
 from util.taxonomy.designelement import Architecture
 from util.helper import info,warn,error
+import export.AnalyticalModelExport as am_exp
 
 '''Config - condition the format of YAML file dumps'''
 #yaml.Dumper.ignore_aliases = lambda *args : True
@@ -58,3 +59,8 @@ def parse_args():
 def load_taxonomic_microarchitecture(netlist):
     '''Load taxonomic description of SAF microarchitecture'''
     return Architecture.fromDict(sl_config.load_config_yaml(netlist))
+
+def export_analytical_models(abstract_analytical_models_dict,scale_problem):
+    '''Export abstract analytical models'''
+    backend_rep=am_exp.export_backend_modeling_suite(abstract_analytical_models_dict,scale_problem)
+    return backend_rep

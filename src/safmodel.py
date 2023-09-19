@@ -29,7 +29,10 @@ if __name__=="__main__":
     abstract_analytical_models_dict=safcore.solve_scale_inference_problem(scale_prob)
 
     warn(":: done, scale inference",also_stdout=True)
-
+    warn("")
+    warn(":: Export Accelergy models",also_stdout=True)
+    backend_rep=safio.export_analytical_models(abstract_analytical_models_dict,scale_prob)
+    warn(":: done, Accelergy export",also_stdout=True)
     #print("abstract_analytical_models_dict:",abstract_analytical_models_dict)
     #solve.solve(scale_prob)
 

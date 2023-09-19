@@ -173,6 +173,11 @@ def solve1_populate_analytical_model_attributes(minlp_solution_dict,scale_proble
             primitive_models[primitive_name].get_analytical_modeling_attributes()
         abstract_analytical_models_dict[primitive_name]["category"]= \
             primitive_models[primitive_name].get_category()
+
+        attr_names, attr_vals = primitive_models[primitive_name].get_yield_attributes_names_and_vec()
+
+        abstract_analytical_models_dict[primitive_name]["attribute_names"]=attr_names
+        abstract_analytical_models_dict[primitive_name]["attribute_values"]=attr_vals
 #        abstract_analytical_models_dict[primitive_name]["attribute_types"]= \
 #            [for y in yields]
     warn("-- => done populating analytical model attributes.")

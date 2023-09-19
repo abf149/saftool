@@ -1,6 +1,7 @@
 from util.taxonomy.designelement import Primitive, Component, Architecture, Net, FormatType, \
                                         Topology, NetType, Port, SAF
 import solver.model.build_support.abstraction as ab_
+import util.model.CasCompat as cc_
 from util.helper import info,warn,error
 import copy
 
@@ -36,7 +37,10 @@ def makeCombosConstraint(attr_list,combos_list):
 
 '''Expression evaluation'''
 def injectUriPrefix(str_,uri_prefix):
-    return str_.replace("@",uri_prefix+".")
+    if len(uri_prefix)>0:
+        return str_.replace("@",uri_prefix+".")
+    else:
+        return str_.replace("@","")
 
 def extractForAllParams(foralls):
     var_=foralls[0][0]

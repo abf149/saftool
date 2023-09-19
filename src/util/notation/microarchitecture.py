@@ -433,7 +433,11 @@ class PrimitiveCategory:
         if self.yield_taxo_attributes=="all":
             # yield all taxonomic attributes
             for idx,attr_ in enumerate(self.attributes_):
-                self.yield_symbol_dict[attr_[0]]=(self.attribute_vals[idx],"val")
+                val=self.attribute_vals[idx]
+                if not isinstance(val,FormatType):
+                    self.yield_symbol_dict[attr_[0]]=(val,"val")
+                else:
+                    self.yield_symbol_dict[attr_[0]]=(val.getValue(),"val")
         else:
             if "include" in self.yield_taxo_attributes:
                 attrs_include=self.yield_taxo_attributes["include"]
@@ -441,12 +445,22 @@ class PrimitiveCategory:
                 if type(attrs_include[0]).__name__ == 'int':
                     # by index
                     for idx in attrs_include:
-                        self.yield_symbol_dict[self.attributes_[idx][0]]=(self.attribute_vals[idx],"val")
+                        val=self.attribute_vals[idx]
+                        #print(val)
+                        if not isinstance(val,FormatType):
+                            self.yield_symbol_dict[self.attributes_[idx][0]]=(val,"val")
+                        else:
+                            self.yield_symbol_dict[self.attributes_[idx][0]]=(val.getValue(),"val")
                 elif type(attrs_include[0]).__name__ == 'str':
                     # by name
                     for idx,attr_ in enumerate(self.attributes_):
                         if attr_ in attrs_include:
-                            self.yield_symbol_dict[attr_[0]]=(self.attribute_vals[idx],"val")
+                            val=self.attribute_vals[idx]
+                            #print(val)
+                            if not isinstance(val,FormatType):
+                                self.yield_symbol_dict[attr_[0]]=(val,"val")
+                            else:
+                                self.yield_symbol_dict[attr_[0]]=(val.getValue(),"val")
             elif "exclude" in self.yield_taxo_attributes:
                 attrs_exclude=self.yield_taxo_attributes["exclude"]
                 # yield some taxonomic attributes
@@ -454,12 +468,22 @@ class PrimitiveCategory:
                     # by index
                     for idx,attr_ in enumerate(self.attributes_):
                         if idx not in attrs_exclude:
-                            self.yield_symbol_dict[attr_[0]]=(self.attribute_vals[idx],"val")
+                            val=self.attribute_vals[idx]
+                            #print(val)
+                            if not isinstance(val,FormatType):
+                                self.yield_symbol_dict[attr_[0]]=(val,"val")
+                            else:
+                                self.yield_symbol_dict[attr_[0]]=(val.getValue(),"val")
                 elif type(attrs_exclude[0]).__name__ == 'str':
                     # by name
                     for idx,attr_ in enumerate(self.attributes_):
                         if attr_ not in attrs_exclude:
-                            self.yield_symbol_dict[attr_[0]]=(self.attribute_vals[idx],"val")
+                            val=self.attribute_vals[idx]
+                            #print(val)
+                            if not isinstance(val,FormatType):
+                                self.yield_symbol_dict[attr_[0]]=(val,"val")
+                            else:
+                                self.yield_symbol_dict[attr_[0]]=(val.getValue(),"val")
 
         # - Port throughput threshold attributes, if required
         if self.port_thrpt_thresh_mode is not None:
@@ -683,6 +707,11 @@ class PrimitiveCategory:
 
     def get_ERT(self):
         return self.ERT
+
+    def get_yield_attributes_names_and_vec(self):
+        attr_names=[attr_name for attr_name in self.final_yield_values_dict]
+        attr_vals=[self.final_yield_values_dict[attr_name] for attr_name in attr_names]
+        return attr_names, attr_vals
 
 class SAFCategory(PrimitiveCategory):
 
