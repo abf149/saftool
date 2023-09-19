@@ -79,25 +79,21 @@ def primitive_relations(obj_dict):
     energy_objectives={}
     area_objectives={}
     yields={}
-
-    ldx=0
-    mdx=4000
+    primitive_models={}
 
     for comp_name in obj_dict:
         dct=obj_dict[comp_name]
-        #print("-")
-        #print(obj_dict[comp_name]["uri_prefix"]=="TestArchitecture.BackingStorage_datatype_format_uarch")
-        #print("-")
-        if dct["microarchitecture"] and dct["primitive"] and ldx<mdx:
-            if ldx==mdx-1:
-                print(obj_dict[comp_name]["uri_prefix"]+"."+comp_name)
+        if dct["microarchitecture"] and dct["primitive"]:
 
             comp=obj_dict[comp_name]["obj"]
             uri_prefix=obj_dict[comp_name]["uri_prefix"]
             modelBase=mr.getModel(comp.getCategory()+"Model")
             compModel=modelBase.copy() \
                                .from_taxo_obj(comp) \
-                               .build_symbols_constraints_objectives_attributes(uri_prefix)
+                               .set_uri_prefix(uri_prefix) \
+                               .build_symbols_constraints_objectives_attributes()
+
+            primitive_models[comp_name]=compModel
 
             # Get primitive characteristic relations
             comp_symbols, \
@@ -107,18 +103,6 @@ def primitive_relations(obj_dict):
             comp_area_objectives, \
             comp_yields = compModel.get_scale_inference_problem()
 
-            kdx=100
-            if kdx>0 and ldx==mdx-1:
-                print("relevant:",comp_constraints[min(len(comp_constraints)-1,kdx-1)])
-            if ldx==mdx-1:
-                comp_symbols=comp_symbols #[0:min(len(comp_symbols),kdx)]
-                comp_symbol_types=comp_symbol_types #[0:min(len(comp_symbol_types),kdx)]
-            #comp_constraints=comp_constraints[0:kdx]
-
-            #print(comp_constraints)
-
-            #comp_constraints=[c for c in comp_constraints if "TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser0.md_in_cr/TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser0.md_in_nc" not in c]
-
             symbols.extend(comp_symbols)
             symbol_types.extend(comp_symbol_types)
             constraints.extend(comp_constraints)
@@ -126,9 +110,7 @@ def primitive_relations(obj_dict):
             area_objectives[comp_name]=comp_area_objectives
             yields[comp_name]=comp_yields
 
-            ldx+=1
-
-    return symbols,symbol_types,constraints,energy_objectives,area_objectives,yields
+    return symbols,symbol_types,constraints,energy_objectives,area_objectives,yields,primitive_models
 
 def build2_system_of_relations(sclp):
     warn("- Build phase 2: system of relations")
@@ -146,24 +128,18 @@ def build2_system_of_relations(sclp):
     constraints, \
     energy_objectives, \
     area_objectives, \
-    yields = primitive_relations(obj_dict)
-
-    #print([x for x in constraints if "Eq" in x or "eq" in x])
-    #print(constraints.index("eq"),constraints.index("ineq"))
-    #print(constraints[constraints.index("eq")-1],constraints[constraints.index("eq")+1])
+    yields, \
+    primitive_models = primitive_relations(obj_dict)
 
     # Get additional relations which express connections between primitives
     transitive_relations = \
            transitive_closure_dfs(port_list,net_list,out_port_net_dict,port_attr_dict,rlns) 
 
-    #print(transitive_relations)
-
     constraints.extend(transitive_relations['eq'])
     constraints.extend(transitive_relations['ineq'])
-
-    #print([c for c in constraints if 'TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser3.md_in_rw' in c])
 
     warn("- => done, build phase 2.")
 
     return {"symbols":symbols, "symbol_types":symbol_types, "constraints":constraints, \
-            "energy_objectives":energy_objectives, "area_objectives":area_objectives, "yields":yields}
+            "energy_objectives":energy_objectives, "area_objectives":area_objectives, \
+            "yields":yields, "primitive_models":primitive_models}

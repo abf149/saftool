@@ -94,6 +94,7 @@ class PrimitiveCategory:
 
         # Scale-inference-related initialization
         self.obj_id=None
+        self.category_id=None
         self.scale_attributes_=[]
         self.scale_default_attributes_=[]
         self.scale_attribute_vals=[]
@@ -116,6 +117,8 @@ class PrimitiveCategory:
         self.supported_instances=None
         self.area_objective=""
         self.energy_objective_dict={}
+        self.uri_prefix=None
+        self.final_yield_values_dict={}
 
     def copy(self):
         return copy.deepcopy(self)
@@ -390,6 +393,10 @@ class PrimitiveCategory:
         # Should be a match
         assert(False)
 
+    def set_uri_prefix(self,uri_prefix):
+        self.uri_prefix=uri_prefix
+        return self
+
     def from_taxo_obj(self,obj,param_vals={}):
         '''
         Instantiate new model instance from a taxonomic object of corresponding category,
@@ -398,16 +405,21 @@ class PrimitiveCategory:
         for idx,val in enumerate(obj.getAttributes()):
             self.attribute_vals[idx]=val
         self.obj_id=obj.getId()
+        self.category_id=obj.getCategory()
 
         # Match attributes to a corresponding taxonomic instance alias
         self.find_applicable_taxo_instance_alias()
         return self
+
+    def get_category(self):
+        return self.category_id
 
     def get_taxo_instances(self):
         #   TODO: handle multiple-implementation scenario correctly
         return [taxo_instance for taxo_instance in self.instance_to_implementations]
 
     def build_symbols(self,uri_prefix=""):
+
         # Top-level attributes - TODO
         # Port attributes
         self.symbol_list.extend([ab_.uri(uri_prefix,port_name)+"_"+attr_ \
@@ -503,6 +515,7 @@ class PrimitiveCategory:
         return self
 
     def build_constraints(self,uri_prefix=""):
+
         # Port throughput threshold attributes, if required
         if self.port_thrpt_thresh_mode is not None:
             if self.port_thrpt_thresh_attr_dict is None:
@@ -552,6 +565,7 @@ class PrimitiveCategory:
         return self
 
     def build_objectives(self,uri_prefix=""):
+
         #TODO: support multiple implementations
         impl_=self.instance_to_implementations[self.applicable_taxo_instance_alias][0]
         self.area_objective=mo_.evalObjectiveExpression(impl_["area_objective"],uri_prefix)
@@ -561,6 +575,9 @@ class PrimitiveCategory:
         return self
 
     def build_symbols_constraints_objectives_attributes(self,uri_prefix=""):
+        if self.uri_prefix is not None:
+            uri_prefix=self.uri_prefix
+
         uri_prefix_with_self=ab_.uri(uri_prefix,self.obj_id)
         self.symbol_list=[]
         self.final_constraint_list=[]
@@ -593,6 +610,30 @@ class PrimitiveCategory:
                self.get_energy_objectives(), \
                self.get_area_objective(), \
                self.get_yields()
+
+    def set_analytical_modeling_attributes(self,mnilp_solution_dict):
+        obj_uri=ab_.uri(self.uri_prefix,self.obj_id)
+        for yield_id in self.yield_symbol_dict:
+            yield_info=self.yield_symbol_dict[yield_id]
+            yield_type=yield_info[1]
+            if yield_type=='val':
+                # Accelergy model attribute derived from taxonomic attribute
+                yield_val=yield_info[0]
+                self.final_yield_values_dict[yield_id]=yield_val
+            else: #yield_type=='sym'     
+                # Accelergy model attribute derived from scale inference solution    
+                yield_uri=ab_.uri(obj_uri,yield_id)
+                if yield_uri in mnilp_solution_dict:
+                    self.final_yield_values_dict[yield_id]=mnilp_solution_dict[yield_uri]
+                else:
+                    error("--- => Solution lacks",yield_uri,"during",obj_uri,"set_analytical_modeling_attributes()")
+                    info("Terminating.")
+                    assert(False)
+
+        return self
+
+    def get_analytical_modeling_attributes(self):
+        return self.final_yield_values_dict
 
 class SAFCategory(PrimitiveCategory):
 

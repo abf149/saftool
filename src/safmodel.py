@@ -2,6 +2,7 @@
 #from solver.build import get_buffer_hierarchy
 #import solver.model.solve as solve
 import util.helper as helper
+from util.helper import info,warn,error
 from util import safmodel_core as safcore, safmodel_io as safio
 
 if __name__=="__main__":
@@ -19,11 +20,17 @@ if __name__=="__main__":
     if do_logging:
         helper.log_init(log_fn)  
 
+    warn(":: Scale inference",also_stdout=True)
+
     '''Build scale inference problem'''
     scale_prob=safcore.build_scale_inference_problem(arch, sparseopts, taxo_uarch)
 
     '''Solve scale inference problem'''
-    x=safcore.solve_scale_inference_problem(scale_prob)
+    abstract_analytical_models_dict=safcore.solve_scale_inference_problem(scale_prob)
+
+    warn(":: done, scale inference",also_stdout=True)
+
+    #print("abstract_analytical_models_dict:",abstract_analytical_models_dict)
     #solve.solve(scale_prob)
 
     #comp_list=taxo_uarch_monolithic_to_modular(taxo_uarch)

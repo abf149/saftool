@@ -4,14 +4,14 @@ import re
 from pyomo.environ import *
 from util.helper import info,warn,error
 
-def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,final_constraints,yields):
-    #print([x for x in final_constraints if "Eq" in x or "eq" in x])
-    #print(final_constraints.index("eq"),final_constraints.index("ineq"))
-    #print(final_constraints[final_constraints.index("eq")-1],final_constraints[final_constraints.index("eq")+1])
+supported_neos_solver_opts=['couenne', 'cbc', 'cplex', 'filmint', 'mosek', 'octeract']
 
-    warn("- Solve phase 1: solve MINLP")
+def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,final_constraints,yields, \
+                                              solver_man="neos",solver_opt="filmint",args={'neos_email':'abf149@mit.edu'}):
 
-    os.environ['NEOS_EMAIL'] = 'abf149@mit.edu'
+    info("-- Solving MINLP...")
+    warn("--- Solver options:","solver_man =",solver_man,"solver_opt =",solver_opt,"args =",args)
+    info("--- Converting problem to pyomo syntax...")
 
     # Create a model instance
     model = ConcreteModel()
@@ -99,25 +99,112 @@ def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,f
             model.add_component(f'constr_or_{jdx}', Constraint(expr=sum(binary_or_vars) >= 1))
 
     # Objective function
-    model.obj = Objective(expr=sum(getattr(model, variable_mapping[sym]) for sym in final_symbols), sense=minimize)
+    obj_expr=sum(getattr(model, variable_mapping[sym]) for sym in final_symbols)
+    model.obj = Objective(expr=obj_expr, sense=minimize)
 
     # Solve the model
-    solver_manager = SolverManagerFactory('neos')
-    results = solver_manager.solve(model, opt='filmint', tee=True, keepfiles=True) #couenne, cbc, cplex, filmint, mosek, octeract
+    if solver_man=='neos':
+        # Tier 1: filmint
+        # Tier 2: mosek, couenne, octeract, cbc, cplex
 
-    # Tier 1: filmint
-    # Tier 2: mosek, couenne, octeract, cbc, cplex
+        #['bonmin', 'cbc', 'conopt', 'couenne', 'cplex', 'filmint', 'filter', 
+        # 'ipopt', 'knitro', 'l-bfgs-b', 'lancelot', 'lgo', 'loqo', 'minlp', 
+        # 'minos', 'minto', 'mosek', 'octeract', 'ooqp', 'path', 'raposa', 'snopt']
 
-    #['bonmin', 'cbc', 'conopt', 'couenne', 'cplex', 'filmint', 'filter', 
-    # 'ipopt', 'knitro', 'l-bfgs-b', 'lancelot', 'lgo', 'loqo', 'minlp', 
-    # 'minos', 'minto', 'mosek', 'octeract', 'ooqp', 'path', 'raposa', 'snopt']
+        neos_email=args['neos_email']
+        info("--- moving forward with NEOS solver, os.environ['NEOS_EMAIL'] =",neos_email)
+        os.environ['NEOS_EMAIL'] = neos_email
+        solver_manager = SolverManagerFactory(solver_man)
+        info("--- supported NEOS solver opts:",''.join("%s " % opt_ for opt_ in supported_neos_solver_opts))
+        if solver_opt not in supported_neos_solver_opts:
+            # Terminate if invalid solver_opt
+            error("--- Invalid NEOS solver_opt",solver_opt,also_stdout=True)
+            info("Terminating.",also_stdout=True)
+            assert(False)
+        warn("--- Starting NEOS job with solver_opt =",solver_opt)
+        results = solver_manager.solve(model, opt=solver_opt, tee=True, keepfiles=True) #couenne, cbc, cplex, filmint, mosek, octeract
+        if results.solver.status == SolverStatus.ok:
+            warn("--- => Solver returned status OK.")
+        else:
+            error("--- => Solver returned status",str(results.solver.status),"which is not OK.",also_stdout=True)
+            info("Terminating.",also_stdout=True)
+            assert(False)
+    else:
+        # Other solver managers not supported
+        error("--- Invalid solver manager option",solver_man,also_stdout=True)
+        info("Terminating.",also_stdout=True)
+        assert(False)
+
+    warn("-- => done solving.")
+    warn("-- SOLVE RESULTS:")
+
+    if results.solver.termination_condition == TerminationCondition.optimal:
+        warn("  Termination condition: Optimal",also_stdout=True)
+    else:
+        warn("  Termination condition:",str(results.solver.termination_condition),"which is not Optimal",also_stdout=True)
 
     # Display results
+    solution_dict={}
     if results.solver.status == SolverStatus.ok and results.solver.termination_condition == TerminationCondition.optimal:
-        for original, mapped in variable_mapping.items():
-            print(f"{original} = {getattr(model, mapped)()}")
-        print(f"Objective value: {model.obj()}")
+        info("  Raw solver solution output:")
+        info("    Objective:",str(obj_expr))
+        info(f"    Objective value: {model.obj()}",also_stdout=True)
+        warn("  Solution:")
+
+        solution_dict={original:getattr(model, mapped)() for original, mapped in variable_mapping.items()}
+        for original in solution_dict:
+            info(f"    {original} = {solution_dict[original]}")
     else:
-        print("No solution found!")
+        error("  No solution found!",also_stdout=True)
+        info("Terminating.",also_stdout=True)
+        assert(False)
+
+    return solution_dict
+
+def solve1_populate_analytical_model_attributes(minlp_solution_dict,scale_problem):
+    info("-- Populating analytical model attributes...")
+    abstract_analytical_models_dict={}
+    primitive_models=scale_problem['primitive_models']
+    for primitive_name in primitive_models:
+        abstract_analytical_models_dict[primitive_name]={}
+        yields=primitive_models[primitive_name].get_yields()
+        primitive_models[primitive_name].set_analytical_modeling_attributes(minlp_solution_dict)
+        abstract_analytical_models_dict[primitive_name]["attributes"]= \
+            primitive_models[primitive_name].get_analytical_modeling_attributes()
+        abstract_analytical_models_dict[primitive_name]["category"]= \
+            primitive_models[primitive_name].get_category()
+#        abstract_analytical_models_dict[primitive_name]["attribute_types"]= \
+#            [for y in yields]
+    warn("-- => done populating analytical model attributes.")
+    warn("-- SUMMARY OF ABSTRACT ANALYTICAL MODEL SOLUTION:")
+    info("  Model attribute breakdown (",len(list(abstract_analytical_models_dict.keys())),"analytical models):")
+    for primitive_name in abstract_analytical_models_dict:
+        prim_model_params=abstract_analytical_models_dict[primitive_name]
+        category=prim_model_params["category"]
+        attrs_dict=prim_model_params["attributes"]
+        info("   ",primitive_name,"(",len(list(attrs_dict.keys())),"attributes):")
+        info("    (",category,")")
+        for attr_ in attrs_dict:
+            info("    -",attr_,"=",attrs_dict[attr_])
+
+    return abstract_analytical_models_dict
+
+def solve1_scale_inference(scale_problem):
+    warn("- Solve phase 1: solve MINLP")
+    simplified_symbols=scale_problem["simplified_symbols"]
+    simplified_symbol_types=scale_problem["simplified_symbol_types"]
+    simplified_constraints=scale_problem["simplified_constraints"]
+    yields=scale_problem["yields"]
+    minlp_solution_dict=solve1_scale_inference_simplified_problem(simplified_symbols,simplified_symbol_types, \
+                                                                  simplified_constraints,yields, \
+                                                                  solver_man="neos",solver_opt="filmint", \
+                                                                  args={'neos_email':'abf149@mit.edu'})
+
+    # Duplicate solution_dict within problem struct for later reference
+    scale_problem['minlp_solution_dict']=minlp_solution_dict
+
+    abstract_analytical_models_dict= \
+        solve1_populate_analytical_model_attributes(minlp_solution_dict,scale_problem)
 
     warn("- => done, solve phase 1.")
+    return abstract_analytical_models_dict
