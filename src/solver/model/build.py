@@ -7,7 +7,7 @@ from .build_support.build3 import build3_simplify_system
 def build_scale_inference_problem(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
                                   buffer_kept_dataspace_by_buffer,buff_dags,constraints=[]):
 
-    info("Building scale inference problem...",also_stdout=True)
+    warn("Building scale inference problem...",also_stdout=True)
 
     problem_as_graph=build1_graph_representation(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
                                                  buffer_kept_dataspace_by_buffer,buff_dags,constraints)
@@ -16,6 +16,6 @@ def build_scale_inference_problem(taxo_uarch,arch,fmt_iface_bindings,dtype_list,
 
     simplified_system=build3_simplify_system(problem_as_system)
 
-    info("=> Done, build.",also_stdout=True)
+    warn("=> Done, build.",also_stdout=True)
 
     return simplified_system

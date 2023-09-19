@@ -27,6 +27,7 @@ def makeValuesConstraint(expr,foralls=[],ranges=[]):
     if len(foralls)==0:
         return {"expression":expr}
     else:
+        #print(ranges)
         cnst={"expression":expr,"foralls":foralls,"ranges":ranges}
         return cnst
 
@@ -90,6 +91,7 @@ def evalAttributeRangeExpression(expr_,uri_prefix="",args={}):
         if expr_type=="attrs":
             for idx,attr_ in enumerate(type_arg):
                 range_expr=expr_["ranges"][idx]
+                #print(range_expr)
                 res.append(base_expr.replace("$"+var_,attr_).replace("$!",listToArgsString(range_expr)))
         elif expr_type=="port_thrpt_attrs":
             for idx,attr_ in enumerate(args["port_thrpt_attrs"][type_arg]):
@@ -97,6 +99,8 @@ def evalAttributeRangeExpression(expr_,uri_prefix="",args={}):
                 res.append(base_expr.replace("$"+var_,attr_).replace("$!",listToArgsString(range_expr)))
     else:
         res=[base_expr.replace("$!",listToArgsString(expr_["ranges"]))]
+
+    #print(res)
 
     return res
 

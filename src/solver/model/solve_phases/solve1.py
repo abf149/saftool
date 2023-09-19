@@ -2,7 +2,6 @@
 import os
 import re
 from pyomo.environ import *
-import sympy as sp
 from util.helper import info,warn,error
 
 def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,final_constraints,yields):
@@ -10,7 +9,7 @@ def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,f
     #print(final_constraints.index("eq"),final_constraints.index("ineq"))
     #print(final_constraints[final_constraints.index("eq")-1],final_constraints[final_constraints.index("eq")+1])
 
-    info("- Solve phase 1: solve MINLP")
+    warn("- Solve phase 1: solve MINLP")
 
     os.environ['NEOS_EMAIL'] = 'abf149@mit.edu'
 
@@ -20,7 +19,6 @@ def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,f
     # Mapping symbols to more convenient names
     variable_mapping = {sym: f'x{i+1}' for i, sym in enumerate(final_symbols)}
 
-    #print(variable_mapping)
 
     # Defining the variables based on their types
     for sym, sym_type in zip(final_symbols, final_symbol_types):
@@ -34,6 +32,8 @@ def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,f
     # Sort the symbols by length in descending order to ensure longer names are replaced first
     sorted_symbols = sorted(variable_mapping.keys(), key=len, reverse=True)
 
+    #print([c for c in final_constraints if "TestArchitecture.Skipping_iact_spad1_weight_spad0.PgenFollower.md_in_cr" in c])
+
     # Process constraints
     for jdx,constraint in enumerate(final_constraints):
         # If the constraint is a regular inequality/equality:
@@ -43,7 +43,6 @@ def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,f
                 mapped = variable_mapping[original]
                 constraint = constraint.replace(original, f"model.{mapped}")
             constr_expr = eval(constraint)
-            #print(constr_expr)
             setattr(model, f'constr_{str(jdx)}', Constraint(expr=constr_expr))
 
         # If the constraint specifies a variable to be in a set:
@@ -104,7 +103,14 @@ def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,f
 
     # Solve the model
     solver_manager = SolverManagerFactory('neos')
-    results = solver_manager.solve(model, opt='bonmin', tee=True, keepfiles=True)
+    results = solver_manager.solve(model, opt='filmint', tee=True, keepfiles=True) #couenne, cbc, cplex, filmint, mosek, octeract
+
+    # Tier 1: filmint
+    # Tier 2: mosek, couenne, octeract, cbc, cplex
+
+    #['bonmin', 'cbc', 'conopt', 'couenne', 'cplex', 'filmint', 'filter', 
+    # 'ipopt', 'knitro', 'l-bfgs-b', 'lancelot', 'lgo', 'loqo', 'minlp', 
+    # 'minos', 'minto', 'mosek', 'octeract', 'ooqp', 'path', 'raposa', 'snopt']
 
     # Display results
     if results.solver.status == SolverStatus.ok and results.solver.termination_condition == TerminationCondition.optimal:
@@ -114,4 +120,4 @@ def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,f
     else:
         print("No solution found!")
 
-    info("- => done, solve phase 1.")
+    warn("- => done, solve phase 1.")

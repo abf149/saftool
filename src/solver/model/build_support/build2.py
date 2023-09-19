@@ -68,6 +68,7 @@ def transitive_closure_dfs(port_list,net_list,out_port_net_dict,port_attr_dict,r
     return transitive_closure_relns
 
 def primitive_relations(obj_dict):
+
     '''
     Assemble the key relations needed to apply scale inference to primitives
     '''
@@ -79,9 +80,18 @@ def primitive_relations(obj_dict):
     area_objectives={}
     yields={}
 
+    ldx=0
+    mdx=4000
+
     for comp_name in obj_dict:
         dct=obj_dict[comp_name]
-        if dct["microarchitecture"] and dct["primitive"]:
+        #print("-")
+        #print(obj_dict[comp_name]["uri_prefix"]=="TestArchitecture.BackingStorage_datatype_format_uarch")
+        #print("-")
+        if dct["microarchitecture"] and dct["primitive"] and ldx<mdx:
+            if ldx==mdx-1:
+                print(obj_dict[comp_name]["uri_prefix"]+"."+comp_name)
+
             comp=obj_dict[comp_name]["obj"]
             uri_prefix=obj_dict[comp_name]["uri_prefix"]
             modelBase=mr.getModel(comp.getCategory()+"Model")
@@ -97,6 +107,18 @@ def primitive_relations(obj_dict):
             comp_area_objectives, \
             comp_yields = compModel.get_scale_inference_problem()
 
+            kdx=100
+            if kdx>0 and ldx==mdx-1:
+                print("relevant:",comp_constraints[min(len(comp_constraints)-1,kdx-1)])
+            if ldx==mdx-1:
+                comp_symbols=comp_symbols #[0:min(len(comp_symbols),kdx)]
+                comp_symbol_types=comp_symbol_types #[0:min(len(comp_symbol_types),kdx)]
+            #comp_constraints=comp_constraints[0:kdx]
+
+            #print(comp_constraints)
+
+            #comp_constraints=[c for c in comp_constraints if "TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser0.md_in_cr/TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser0.md_in_nc" not in c]
+
             symbols.extend(comp_symbols)
             symbol_types.extend(comp_symbol_types)
             constraints.extend(comp_constraints)
@@ -104,10 +126,12 @@ def primitive_relations(obj_dict):
             area_objectives[comp_name]=comp_area_objectives
             yields[comp_name]=comp_yields
 
+            ldx+=1
+
     return symbols,symbol_types,constraints,energy_objectives,area_objectives,yields
 
 def build2_system_of_relations(sclp):
-    info("- Build phase 2: system of relations")
+    warn("- Build phase 2: system of relations")
 
     rlns=sclp['reln_list']
     port_list=sclp['port_list']
@@ -137,7 +161,9 @@ def build2_system_of_relations(sclp):
     constraints.extend(transitive_relations['eq'])
     constraints.extend(transitive_relations['ineq'])
 
-    info("- => done, build phase 2.")
+    #print([c for c in constraints if 'TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser3.md_in_rw' in c])
+
+    warn("- => done, build phase 2.")
 
     return {"symbols":symbols, "symbol_types":symbol_types, "constraints":constraints, \
             "energy_objectives":energy_objectives, "area_objectives":area_objectives, "yields":yields}

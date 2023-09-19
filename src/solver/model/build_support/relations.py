@@ -15,6 +15,7 @@ def reln(lhs,reln,rhs,censor_lhs=True):
         return lhs+" "+reln+" "+str(rhs)
 
 def make_read_width_relations(arch_name,buffer_name,idx,oper,rw,relation_dict):
+    flag_rw=1
 
     relation_dict[ab.make_port_uri(arch_name,buffer_name,"md","out",idx)].append( \
         reln(make_port_uri_attribute(arch_name,buffer_name,"md","out",idx,"rw"),oper,str(rw)) \
@@ -25,7 +26,7 @@ def make_read_width_relations(arch_name,buffer_name,idx,oper,rw,relation_dict):
     )
 
     relation_dict[ab.make_port_uri(arch_name,buffer_name,"at_bound","in",idx)].append( \
-        reln(make_port_uri_attribute(arch_name,buffer_name,"at_bound","in",idx,"rw"),oper,str(rw)) \
+        reln(make_port_uri_attribute(arch_name,buffer_name,"at_bound","in",idx,"rw"),oper,str(flag_rw)) \
     )
 
 def make_pos_rate_relations(arch_name,buffer_name,idx,oper,pr,relation_dict):
@@ -113,10 +114,12 @@ def get_scale_boundary_conditions(gpthrpt,port_attr_dict,fmt_iface_bindings,flat
 
                         make_payloadwidth_relations("TestArchitecture",buffer,rdx,"==",payloadwidth,relation_dict)
                         if rdx < last_rank:
+                            #print("last, not last rank",buffer,dtype,rdx,mdwidth,poswidth,flagwidth,payloadwidth,md_storage_width,gpthrpt)
                             make_read_width_relations("TestArchitecture",buffer,rdx,"<=",md_storage_width,relation_dict)
                             make_read_width_relations("TestArchitecture",buffer,rdx,">=",0.0000000001,relation_dict)
                             make_pos_rate_relations("TestArchitecture",buffer,rdx,">=",gpthrpt,relation_dict)
                         else: # last rank
+                            #print("last, last rank",buffer,dtype,rdx,mdwidth,poswidth,flagwidth,payloadwidth,md_storage_width,gpthrpt)
                             make_read_width_relations("TestArchitecture",buffer,rdx,"==",md_storage_width,relation_dict)
                             make_pos_rate_relations("TestArchitecture",buffer,rdx,">=",gpthrpt,relation_dict)
                 else:
@@ -135,9 +138,11 @@ def get_scale_boundary_conditions(gpthrpt,port_attr_dict,fmt_iface_bindings,flat
                                                                                     relation_dict)
                         make_payloadwidth_relations("TestArchitecture",buffer,rdx,"==",payloadwidth,relation_dict)
                         if rdx < last_rank:
+                            #print("non-last, not last rank",buffer,dtype,rdx,mdwidth,poswidth,flagwidth,payloadwidth,md_storage_width,gpthrpt)
                             make_read_width_relations("TestArchitecture",buffer,rdx,"<=",md_storage_width,relation_dict)
                             make_pos_rate_relations("TestArchitecture",buffer,rdx,">=",0.0000000001,relation_dict)
                         else: # last rank
+                            #print("non-last, last rank",buffer,dtype,rdx,mdwidth,poswidth,flagwidth,payloadwidth,md_storage_width,gpthrpt)
                             make_read_width_relations("TestArchitecture",buffer,rdx,"==",md_storage_width,relation_dict)
                             make_pos_rate_relations("TestArchitecture",buffer,rdx,">=",0.0000000001,relation_dict)
         else:
