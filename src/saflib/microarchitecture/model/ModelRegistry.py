@@ -1,23 +1,50 @@
 from saflib.microarchitecture.model.address_primitives.PositionGenerator import PositionGeneratorModel
 from saflib.microarchitecture.model.format.MetadataParser import MetadataParserModel
 from saflib.microarchitecture.model.skipping.IntersectionLeaderFollower import IntersectionLeaderFollowerModel
+from saflib.microarchitecture.model.format.FormatUarch import FormatUarchModel
+from saflib.microarchitecture.model.skipping.SkippingUarch import SkippingUarchModel
 
-model_dict={}
+primitive_model_dict={}
+primitive_model_yields_supersets={}
+primitive_model_actions={}
+component_model_dict={}
+component_model_yields_supersets={}
+component_model_actions={}
 
-def registerModel(name_,model):
+def registerPrimitive(name_,model):
     '''
-    Add a SAF microarchitecture energy/area model to registry
+    Add a SAF microarchitecture primitive energy/area model to registry
     '''
-    global model_dict
-    model_dict[name_]=model
+    global primitive_model_dict
+    primitive_model_dict[name_]=model
+    primitive_model_yields_supersets[name_]={key_:0 for key_ in model.get_superset_yields()}
+    primitive_model_actions[name_]=model.getActions()
 
-def getModel(name_):
+def registerComponent(name_,model):
     '''
-    Get a SAF microarchitecture energy/area model from registry
+    Add a SAF microarchitecture component energy/area model to registry
     '''
-    global model_dict
-    return model_dict[name_]
+    global component_model_dict
+    component_model_dict[name_]=model
+    component_model_yields_supersets[name_]={key_:0 for key_ in model.get_superset_yields()}
+    component_model_actions[name_]=model.getActions()
 
-registerModel("PositionGeneratorModel",PositionGeneratorModel)
-registerModel("MetadataParserModel",MetadataParserModel)
-registerModel("IntersectionLeaderFollowerModel",IntersectionLeaderFollowerModel)
+def getPrimitive(name_):
+    '''
+    Get a SAF microarchitecture primitive energy/area model from registry
+    '''
+    global primitive_model_dict
+    return primitive_model_dict[name_]
+
+def getComponent(name_):
+    '''
+    Get a SAF microarchitecture component energy/area model from registry
+    '''
+    global component_model_dict
+    return component_model_dict[name_]
+
+registerPrimitive("PositionGeneratorModel",PositionGeneratorModel)
+registerPrimitive("MetadataParserModel",MetadataParserModel)
+registerPrimitive("IntersectionLeaderFollowerModel",IntersectionLeaderFollowerModel)
+registerComponent("FormatUarchModel",FormatUarchModel)
+registerComponent("SkippingUarchModel",SkippingUarchModel)

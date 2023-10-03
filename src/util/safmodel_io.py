@@ -4,6 +4,7 @@ import os, argparse, test_data as td, copy, re
 import util.sparseloop_config_processor as sl_config, yaml, argparse
 from util.taxonomy.designelement import Architecture
 from util.helper import info,warn,error
+import saflib.microarchitecture.model.ModelRegistry as mr_
 import export.AnalyticalModelExport as am_exp
 
 '''Config - condition the format of YAML file dumps'''
@@ -14,6 +15,7 @@ def parse_args():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-i','--dir-in',default='')
+    parser.add_argument('-t','--settings',default='ref_input/safmodel_settings.yaml')
     parser.add_argument('-n','--netlist',default='ref_output/new_arch.yaml')
     parser.add_argument('-a','--arch',default='ref_input/arch.yaml')
     parser.add_argument('-s','--sparseopts',default='ref_input/sparseopts.yaml')
@@ -46,6 +48,8 @@ def parse_args():
     arch_out_path=args.arch_out
     print("- compound components path (output):",args.comp_out)
     comp_out_path=args.comp_out
+    print("- SAFModel settings path:",args.settings)
+    user_attributes=sl_config.load_config_yaml(args.settings)
 
     return arch, \
            netlist, \
@@ -53,6 +57,7 @@ def parse_args():
            comp_in, \
            arch_out_path, \
            comp_out_path, \
+           user_attributes, \
            do_logging,\
            args.log_file
 
@@ -62,5 +67,9 @@ def load_taxonomic_microarchitecture(netlist):
 
 def export_analytical_models(abstract_analytical_models_dict,scale_problem):
     '''Export abstract analytical models'''
-    backend_rep=am_exp.export_backend_modeling_suite(abstract_analytical_models_dict,scale_problem)
-    return backend_rep
+    backend_obj_rep, backend_lib_rep= \
+        am_exp.export_backend_modeling_suite(mr_.primitive_model_yields_supersets, \
+                                             mr_.primitive_model_actions, \
+                                             abstract_analytical_models_dict, \
+                                             scale_problem)
+    return backend_obj_rep, backend_lib_rep

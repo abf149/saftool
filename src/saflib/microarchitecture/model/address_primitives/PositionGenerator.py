@@ -6,11 +6,14 @@ pgen_attr_list=["pr","cr","pw","nc"]
 
 PositionGeneratorModel=PositionGenerator \
     .copy() \
-    .scale_parameter("clock","real") \
+    .scale_parameter("clock","real",yield_=True,inherit_=True) \
+    .scale_parameter("technology","string",yield_=True,inherit_=True) \
     .require_port_throughput_attributes("md_in") \
     .require_port_throughput_attributes("pos_out") \
     .yield_taxonomic_attributes() \
     .yield_port_throughput_thresholds(port_attr_dict={"md_in":pgen_attr_list,"pos_out":pgen_attr_list}) \
+    .action("gen") \
+    .action("gated_gen") \
     .taxonomic_instance_alias(["coordinate_payload"],"C") \
     .register_supported_instances(pgen_instances) \
     .add_implementation( \
@@ -35,7 +38,9 @@ PositionGeneratorModel=PositionGenerator \
                             "2*(@pos_out_pr_thresh*@md_in_pr_thresh + " \
                           + "@pos_out_cr_thresh*@md_in_cr_thresh + " \
                           + "@pos_out_pw_thresh*@md_in_pw_thresh + " \
-                          + "@pos_out_nc_thresh*@md_in_nc_thresh)"}, \
+                          + "@pos_out_nc_thresh*@md_in_nc_thresh)", \
+                          "gated_gen": \
+                            "0"}, \
         area_objective="@pos_out_pw_thresh*@md_in_pr_thresh+2"
     )
 

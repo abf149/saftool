@@ -103,6 +103,7 @@ class PrimitiveCategory:
         self.port_thrpt_thresh_mode=None
         self.port_thrpt_thresh_attr_dict=None
         self.instance_to_implementations={}
+        self.actions_=[]
         self.constraint_list=[]
         self.final_constraint_list=[]
         self.symbol_list=[]
@@ -243,21 +244,36 @@ class PrimitiveCategory:
         return prim
     
     '''Scale inference settings'''
-    def scale_parameter(self,param_name,param_type,param_default=None):
+    def scale_parameter(self,param_name,param_type,yield_=False,inherit_=False,param_default=None):
         '''
-        Add a global scale parameter
+        Add a global scale parameter.\n\n
+
+        Arguments:\n
+        - param_name -- Scale parameter name\n
+        - param_type -- Scale parameter type: real, categorical (provide list of values), list\n
+        - param_default -- Default parameter value
         '''
-        self.scale_parameters.append((param_name,param_type))
+        self.scale_parameters.append((param_name,param_type,yield_,inherit_))
         self.scale_default_parameters.append((param_name,param_default))
         self.scale_parameter_vals=copy.deepcopy(self.scale_parameters)
 
         return self
 
     def set_scale_parameter(self,param_name,val,param_type=None):
-        if param_type is None:
+        if (param_type is None) or \
+           (param_type == "real") or \
+           (param_type == "string") or \
+           (param_type == "list"):
             scale_param_names=[att[0] for att in self.scale_parameters]
-            self.scale_attribute_vals[scale_param_names.index(param_name)]=val
+            self.scale_parameter_vals[scale_param_names.index(param_name)]=val
+        else:
+            error("Unrecognized scale parameter type",str(param_type),also_stdout=True)
+            info("Terminating.")
+            assert(False)
         return self
+
+    #def inherit_scale_parameter(self,param_name,param_type=None):
+    #    return self.set_scale_parameter(param_name,param_name,param_type)
 
     def scale_attribute(self,attr_name,attr_type,solution=False,attr_default="?"):
         '''
@@ -349,6 +365,24 @@ class PrimitiveCategory:
         self.port_thrpt_attr_dict[port_name]=thrpt_attr_list
         return self
 
+    '''Component scale inference methods'''
+    def action(self,name_,args_=[]):
+        '''
+        Add a modeling action against this primitive component.\n\n
+
+        Arguments:\n
+        - name_ -- The action name.\n
+        - args_ -- Action arguments spec: [("<arg_name>","type",<default>),...]\n\n
+
+            type can be categorical (a list of allowed values), numerical, or string\n\n
+        '''
+
+        self.actions_.append((name_,args_))
+        return self
+
+    def getActions(self):
+        return self.actions_
+
     def add_implementation(self,name,taxonomic_instance,energy_objective,area_objective,attributes=[],constraints=[], \
                            attr_range_specs=[], attr_combo_specs=[]):
         self.instance_to_implementations[taxonomic_instance].append({
@@ -363,6 +397,8 @@ class PrimitiveCategory:
         })
         return self
 
+
+
     def register_supported_instances(self,insts):
         self.supported_instances=insts
         return self
@@ -373,8 +409,9 @@ class PrimitiveCategory:
             all_match=True
             for inst_attr,attr_ in zip(inst_attrs,self.attribute_vals):
                 if type(attr_).__name__!='str':
-                    if attr_.getValue() != inst_attr:
-                        all_match=False
+                    if type(attr_).__name__!= 'list':
+                        if attr_.getValue() != inst_attr:
+                            all_match=False
                 else:
                     if attr_ != inst_attr:
                         all_match=False
@@ -420,24 +457,64 @@ class PrimitiveCategory:
         #   TODO: handle multiple-implementation scenario correctly
         return [taxo_instance for taxo_instance in self.instance_to_implementations]
 
-    def build_symbols(self,uri_prefix=""):
+    '''Routines to build symbols'''
+    def build_symbols_for_port_attributes(self,uri_prefix=""):
+        '''Build mathematical symbols representing port throughput attributes'''
+        return [ab_.uri(uri_prefix,port_name)+"_"+attr_ \
+            for port_name in self.port_thrpt_attr_dict for attr_ in self.port_thrpt_attr_dict[port_name]], \
+               ["float" \
+            for port_name in self.port_thrpt_attr_dict for attr_ in self.port_thrpt_attr_dict[port_name]]
 
-        # Top-level attributes - TODO
-        # Port attributes
-        self.symbol_list.extend([ab_.uri(uri_prefix,port_name)+"_"+attr_ \
-            for port_name in self.port_thrpt_attr_dict for attr_ in self.port_thrpt_attr_dict[port_name]])
-        self.symbol_types_list.extend(["float" \
-            for port_name in self.port_thrpt_attr_dict for attr_ in self.port_thrpt_attr_dict[port_name]])
+    def build_symbols_for_port_threshold_attributes(self,uri_prefix=""):
+        syms=[]
+        sym_types=[]
 
-        # - Yield taxonomic attributes, if required
+        if self.port_thrpt_thresh_mode is not None:
+            if self.port_thrpt_thresh_attr_dict is None:
+                syms.extend([ab_.uri(uri_prefix,port_name)+"_"+attr_+"_thresh"\
+                    for port_name in self.port_thrpt_attr_dict for attr_ in self.port_thrpt_attr_dict[port_name]])
+            
+                sym_types.extend(["int"\
+                    for port_name in self.port_thrpt_attr_dict for _ in self.port_thrpt_attr_dict[port_name]])
+            else:
+                #new_syms=[]
+                #new_sym_types=[]
+
+                for port_name in self.port_thrpt_thresh_attr_dict:
+                    for attr_ in self.port_thrpt_thresh_attr_dict[port_name]:
+                        syms.append(ab_.uri(uri_prefix,port_name)+"_"+attr_+"_thresh")
+                        sym_types.append("int")
+
+        return syms,sym_types     
+
+    '''Routines to build yield lists'''
+
+    def build_yields_for_scale_parameters(self,uri_prefix=""):
+        yield_symbol_dict_updates={}
+
+        for idx,scl_param in enumerate(self.scale_parameters):
+            yield_=scl_param[2]
+            if yield_:
+                param_name=scl_param[0]
+                param_val=self.scale_parameter_vals[idx]
+                yield_symbol_dict_updates[param_name]=(param_val,"val")
+            
+        return yield_symbol_dict_updates
+
+    def build_yields_for_taxonomic_attributes(self,uri_prefix=""):
+        yield_symbol_dict_updates={}
+
+        '''Build yield symbols for taxonomic attributes'''
         if self.yield_taxo_attributes=="all":
             # yield all taxonomic attributes
             for idx,attr_ in enumerate(self.attributes_):
                 val=self.attribute_vals[idx]
                 if not isinstance(val,FormatType):
-                    self.yield_symbol_dict[attr_[0]]=(val,"val")
+                    yield_symbol_dict_updates[attr_[0]]=(val,"val")
+                    #self.yield_symbol_dict[attr_[0]]=(val,"val")
                 else:
-                    self.yield_symbol_dict[attr_[0]]=(val.getValue(),"val")
+                    yield_symbol_dict_updates[attr_[0]]=(val.getValue(),"val")
+                    #self.yield_symbol_dict[attr_[0]]=(val.getValue(),"val")
         else:
             if "include" in self.yield_taxo_attributes:
                 attrs_include=self.yield_taxo_attributes["include"]
@@ -448,9 +525,11 @@ class PrimitiveCategory:
                         val=self.attribute_vals[idx]
                         #print(val)
                         if not isinstance(val,FormatType):
-                            self.yield_symbol_dict[self.attributes_[idx][0]]=(val,"val")
+                            yield_symbol_dict_updates[self.attributes_[idx][0]]=(val,"val")
+                            #self.yield_symbol_dict[self.attributes_[idx][0]]=(val,"val")
                         else:
-                            self.yield_symbol_dict[self.attributes_[idx][0]]=(val.getValue(),"val")
+                            yield_symbol_dict_updates[self.attributes_[idx][0]]=(val.getValue(),"val")
+                            #self.yield_symbol_dict[self.attributes_[idx][0]]=(val.getValue(),"val")
                 elif type(attrs_include[0]).__name__ == 'str':
                     # by name
                     for idx,attr_ in enumerate(self.attributes_):
@@ -458,9 +537,11 @@ class PrimitiveCategory:
                             val=self.attribute_vals[idx]
                             #print(val)
                             if not isinstance(val,FormatType):
-                                self.yield_symbol_dict[attr_[0]]=(val,"val")
+                                yield_symbol_dict_updates[attr_[0]]=(val,"val")
+                                #self.yield_symbol_dict[attr_[0]]=(val,"val")
                             else:
-                                self.yield_symbol_dict[attr_[0]]=(val.getValue(),"val")
+                                yield_symbol_dict_updates[attr_[0]]=(val.getValue(),"val")
+                                #self.yield_symbol_dict[attr_[0]]=(val.getValue(),"val")
             elif "exclude" in self.yield_taxo_attributes:
                 attrs_exclude=self.yield_taxo_attributes["exclude"]
                 # yield some taxonomic attributes
@@ -471,9 +552,11 @@ class PrimitiveCategory:
                             val=self.attribute_vals[idx]
                             #print(val)
                             if not isinstance(val,FormatType):
-                                self.yield_symbol_dict[attr_[0]]=(val,"val")
+                                yield_symbol_dict_updates[attr_[0]]=(val,"val")
+                                #self.yield_symbol_dict[attr_[0]]=(val,"val")
                             else:
-                                self.yield_symbol_dict[attr_[0]]=(val.getValue(),"val")
+                                yield_symbol_dict_updates[attr_[0]]=(val.getValue(),"val")
+                                #self.yield_symbol_dict[attr_[0]]=(val.getValue(),"val")
                 elif type(attrs_exclude[0]).__name__ == 'str':
                     # by name
                     for idx,attr_ in enumerate(self.attributes_):
@@ -481,42 +564,59 @@ class PrimitiveCategory:
                             val=self.attribute_vals[idx]
                             #print(val)
                             if not isinstance(val,FormatType):
-                                self.yield_symbol_dict[attr_[0]]=(val,"val")
+                                yield_symbol_dict_updates[attr_[0]]=(val,"val")
+                                #self.yield_symbol_dict[attr_[0]]=(val,"val")
                             else:
-                                self.yield_symbol_dict[attr_[0]]=(val.getValue(),"val")
+                                yield_symbol_dict_updates[attr_[0]]=(val.getValue(),"val")
+                                #self.yield_symbol_dict[attr_[0]]=(val.getValue(),"val")
 
-        # - Port throughput threshold attributes, if required
-        if self.port_thrpt_thresh_mode is not None:
+        return yield_symbol_dict_updates
+
+    def build_yields_for_port_threshold_attributes(self,uri_prefix=""):
+        yield_symbol_dict_updates={}
+
+        if (self.port_thrpt_thresh_mode is not None) and (self.port_thrpt_thresh_mode=="yield"):
+            # - Yield port throughput threshold attributes, if required
             if self.port_thrpt_thresh_attr_dict is None:
-                self.symbol_list.extend([ab_.uri(uri_prefix,port_name)+"_"+attr_+"_thresh"\
-                    for port_name in self.port_thrpt_attr_dict for attr_ in self.port_thrpt_attr_dict[port_name]])
-            
-                self.symbol_types_list.extend(["int"\
-                    for port_name in self.port_thrpt_attr_dict for _ in self.port_thrpt_attr_dict[port_name]])
+                for port_name in self.port_thrpt_attr_dict:
+                    for attr_ in self.port_thrpt_attr_dict[port_name]:
+                        yield_symbol_dict_updates[port_name+"_"+attr_+"_thresh"]= \
+                            (ab_.uri(uri_prefix,port_name)+"_"+attr_+"_thresh","sym")
             else:
-                new_syms=[]
-                new_sym_types=[]
-
                 for port_name in self.port_thrpt_thresh_attr_dict:
                     for attr_ in self.port_thrpt_thresh_attr_dict[port_name]:
-                        new_syms.append(ab_.uri(uri_prefix,port_name)+"_"+attr_+"_thresh")
-                        new_sym_types.append("int")
+                        yield_symbol_dict_updates[port_name+"_"+attr_+"_thresh"]= \
+                            (ab_.uri(uri_prefix,port_name)+"_"+attr_+"_thresh","sym")
+                        
+        return yield_symbol_dict_updates
 
-                self.symbol_list.extend(new_syms)
-                self.symbol_types_list.extend(new_sym_types)
+    def get_superset_yields(self,uri_prefix=""):
+        superset_yield_symbols={}
+        superset_yield_symbols.update(self.build_yields_for_scale_parameters(uri_prefix))
+        superset_yield_symbols.update(self.build_yields_for_taxonomic_attributes(uri_prefix))
+        superset_yield_symbols.update(self.build_yields_for_port_threshold_attributes(uri_prefix))
+        # TODO: implementation-specific yields
+        return superset_yield_symbols
 
-            if self.port_thrpt_thresh_mode=="yield":
-                # - Yield port throughput threshold attributes, if required
-                if self.port_thrpt_thresh_attr_dict is None:
-                    for port_name in self.port_thrpt_attr_dict:
-                        for attr_ in self.port_thrpt_attr_dict[port_name]:
-                            self.yield_symbol_dict[port_name+"_"+attr_+"_thresh"]= \
-                                (ab_.uri(uri_prefix,port_name)+"_"+attr_+"_thresh","sym")
-                else:
-                    for port_name in self.port_thrpt_thresh_attr_dict:
-                        for attr_ in self.port_thrpt_thresh_attr_dict[port_name]:
-                            self.yield_symbol_dict[port_name+"_"+attr_+"_thresh"]= \
-                                (ab_.uri(uri_prefix,port_name)+"_"+attr_+"_thresh","sym")
+
+    def build_symbols(self,uri_prefix=""):
+
+        # Top-level attributes - TODO
+        # Port attributes
+        pa_syms,pa_types=self.build_symbols_for_port_attributes(uri_prefix)
+        self.symbol_list.extend(pa_syms)
+        self.symbol_types_list.extend(pa_types)
+
+        self.yield_symbol_dict.update(self.build_yields_for_scale_parameters(uri_prefix))
+
+        # - Yield taxonomic attributes, if required
+        self.yield_symbol_dict.update(self.build_yields_for_taxonomic_attributes(uri_prefix))
+
+        # - Port throughput threshold attributes, if required
+        pa_thr_syms,pa_thr_types=self.build_symbols_for_port_threshold_attributes(uri_prefix)
+        self.symbol_list.extend(pa_thr_syms)
+        self.symbol_types_list.extend(pa_thr_types)
+        self.yield_symbol_dict.update(self.build_yields_for_port_threshold_attributes(uri_prefix))
 
         # Top-level params
         #self.symbol_list.extend( \
@@ -590,14 +690,16 @@ class PrimitiveCategory:
                 )
         return self
 
-    def build_objectives(self,uri_prefix=""):
-
+    def build_objective_for_taxo_instance(self,taxo_instance,uri_prefix=""):
         #TODO: support multiple implementations
-        impl_=self.instance_to_implementations[self.applicable_taxo_instance_alias][0]
-        self.area_objective=mo_.evalObjectiveExpression(impl_["area_objective"],uri_prefix)
+        impl_=self.instance_to_implementations[taxo_instance][0]
         energy_obj=impl_["energy_objective"]
-        self.energy_objective_dict={action:mo_.evalObjectiveExpression(energy_obj[action],uri_prefix) for action in energy_obj}
+        return {action:mo_.evalObjectiveExpression(energy_obj[action],uri_prefix) for action in energy_obj}, \
+               mo_.evalObjectiveExpression(impl_["area_objective"],uri_prefix)
 
+    def build_objectives(self,uri_prefix=""):
+        self.energy_objective_dict,self.area_objective = \
+            self.build_objective_for_taxo_instance(self.applicable_taxo_instance_alias,uri_prefix)
         return self
 
     def build_symbols_constraints_objectives_attributes(self,uri_prefix=""):
@@ -733,9 +835,15 @@ class SAFCategory(PrimitiveCategory):
 class ComponentCategory(PrimitiveCategory):
 
     def __init__(self):
+        # Primitive taxonomy & scale inference notation inits
         super().__init__()
+        # Component taxonomy inits
         self.topology_=TopologyWrapper(component_list=[],net_list=[],topological_hole=True)
+        # Component scale inference inits
+        self.sub_actions_={}
+        self.sub_action_list=[]
 
+    '''Component taxonomy methods'''
     def topological_hole(self):
         self.topology_=TopologyWrapper(component_list=[],net_list=[],topological_hole=True)
         return self
@@ -750,6 +858,100 @@ class ComponentCategory(PrimitiveCategory):
         comp=Component.fromIdCategoryAttributesInterfaceTopology(id,self.name_,self.attribute_vals,iface,topology)
         return comp
 
+    '''Component scale inference methods'''
+
+    def build_subaction_incremental(self,impl_,action_name_,sub_component,sub_action,arg_map={},foralls=[],uri_prefix=""):
+        sub_comp_sub_action_spec_list=self.sub_actions_.setdefault(impl_,{}) \
+                                                       .setdefault(action_name_,{}) \
+                                                       .setdefault(sub_component,[])
+        
+        sub_comp_sub_action_spec_list.append({ \
+                                                "foralls":[],
+                                                "sub-component-actions":{}
+                                            })
+
+        sub_comp_sub_action_spec_list[-1]["foralls"]=foralls
+        assert(sub_action not in sub_comp_sub_action_spec_list[-1]["sub-component-actions"])
+        sub_comp_sub_action_spec_list[-1]["sub-component-actions"][sub_action]={"arg_map":arg_map}
+
+        return self
+
+    def subaction(self,impl_,action_name_,sub_component,sub_action,arg_map={},foralls=[]):
+        self.sub_action_list.append({"impl_":impl_, \
+                                     "action_name_":action_name_, \
+                                     "sub_component":sub_component, \
+                                     "sub_action":sub_action, \
+                                     "arg_map":arg_map, \
+                                     "foralls":foralls})
+        return self
+    
+    def build_subactions(self,uri_prefix=""):
+        for sa_ in self.sub_action_list:
+            self.build_subaction_incremental(sa_["impl_"], \
+                                             sa_["action_name_"], \
+                                             sa_["sub_component"], \
+                                             sa_["sub_action"], \
+                                             sa_["arg_map"], \
+                                             sa_["foralls"], \
+                                             uri_prefix)
+            
+        return self
+    
+    def get_subaction_graph(self):
+        return self.sub_action_list
+    
+    def build_symbols_constraints_objectives_attributes(self,uri_prefix=""):
+        super().build_symbols_constraints_objectives_attributes(uri_prefix)
+        self.build_subactions(uri_prefix)
+        return self
+
+'''
+    def build_symbols_constraints_objectives_attributes(self,uri_prefix=""):
+        if self.uri_prefix is not None:
+            uri_prefix=self.uri_prefix
+
+        uri_prefix_with_self=ab_.uri(uri_prefix,self.obj_id)
+        self.symbol_list=[]
+        self.final_constraint_list=[]
+        #self.yield_symbol_dict
+        self.build_symbols(uri_prefix_with_self)
+        self.build_constraints(uri_prefix_with_self)
+        self.build_objectives(uri_prefix_with_self)
+        return self
+'''
+
+'''
+    def subactions(self,impl_,action_name_,sub_actions_={}):
+
+        Add a modeling action against this primitive component.\n\n
+
+        Arguments:\n
+        - impl_ -- The implementation which these sub-actions apply to.\n
+        - action_name_ -- The action against which these sub-actions apply\n
+        - sub_actions_ -- Sub-actions spec:\n\n
+
+            {\n
+                "<sub-component id>": {\n
+                    "<sub-component-action>": {\n
+                        "<activity-factor>":<float <= 1.0>,\n
+                        "argmap":{\n
+                            "<action-arg>":"<expression>",\n
+                            ...\n
+                        }
+                    },\n
+                    ...\n
+                },\n
+                ...\n
+            }\n\n
+
+            The expression should be in terms of the top-level action arg names.
+
+        sub_act_dict=self.sub_actions_.setdefault(impl_,{}).setdefault(action_name_,{})
+        for key_ in sub_actions_:
+            sub_act_dict[key_]=sub_actions_[key_]
+        return self
+'''
+        
 class ArchitectureCategory(ComponentCategory):
 
     def __init__(self):

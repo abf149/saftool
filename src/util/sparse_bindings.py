@@ -2,6 +2,17 @@ import copy, numpy as np
 from util.dense_bindings import *
 from util.sparse_bindings_reconfigurable import compute_reconfigurable_arch_bindings
 
+def get_sparseloop_arch_parameter_dict(arch):
+    version_=arch['architecture']['version']
+    root_=arch['architecture']['subtree']
+    if len(root_) == 1:
+        return root_[0]['attributes']
+    elif len(root_) == 0:
+        return {}
+    else:
+        # Can't support multiple architectures at this time
+        assert(False)
+
 def compute_fixed_arch_bindings(arch,sparseopts):
     skip_bindings=[]
     dtype_list=extract_dtypes(sparseopts)

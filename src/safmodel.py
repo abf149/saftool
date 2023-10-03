@@ -12,6 +12,7 @@ if __name__=="__main__":
     comp_in, \
     arch_out_path, \
     comp_out_path, \
+    user_attributes, \
     do_logging,\
     log_fn = safio.parse_args()
 
@@ -23,7 +24,7 @@ if __name__=="__main__":
     warn(":: Scale inference",also_stdout=True)
 
     '''Build scale inference problem'''
-    scale_prob=safcore.build_scale_inference_problem(arch, sparseopts, taxo_uarch)
+    scale_prob=safcore.build_scale_inference_problem(arch, sparseopts, taxo_uarch, user_attributes=user_attributes)
 
     '''Solve scale inference problem'''
     abstract_analytical_models_dict=safcore.solve_scale_inference_problem(scale_prob)
@@ -31,7 +32,8 @@ if __name__=="__main__":
     warn(":: done, scale inference",also_stdout=True)
     warn("")
     warn(":: Export Accelergy models",also_stdout=True)
-    backend_rep=safio.export_analytical_models(abstract_analytical_models_dict,scale_prob)
+    backend_obj_rep, backend_lib_rep= \
+        safio.export_analytical_models(abstract_analytical_models_dict,scale_prob)
     warn(":: done, Accelergy export",also_stdout=True)
     #print("abstract_analytical_models_dict:",abstract_analytical_models_dict)
     #solve.solve(scale_prob)
