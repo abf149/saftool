@@ -59,6 +59,7 @@ def transitive_closure_dfs(port_list,net_list,out_port_net_dict,port_attr_dict,r
     DFS algorithm to infer microarchitecture port scale parameters based on boundary conditions at
     architecture buffer ports
     '''
+    info("-- Applying transitive closure to discover relations between primitive ports.")
     transitive_closure_relns={"eq":[],"ineq":[]}
     port_visited=[False]*len(port_list)
 
@@ -66,6 +67,7 @@ def transitive_closure_dfs(port_list,net_list,out_port_net_dict,port_attr_dict,r
         transitive_dfs_from_primitive_port(root_port,root_port,port_list,net_list,out_port_net_dict,port_attr_dict, \
                                            port_visited,transitive_closure_relns,reln_dict)
 
+    info("-- => Done, transitive closure")
     return transitive_closure_relns
 
 def significant_fmt_iface_idxs(fmt_uarch_uri,uarch_port_upstream_map,fmt_iface_bindings,dtype_list,llbs):
@@ -97,8 +99,8 @@ def significant_fmt_iface_idxs(fmt_uarch_uri,uarch_port_upstream_map,fmt_iface_b
 
     return significant_idxs
 
-def component_relations(obj_dict,user_attributes,fmt_iface_bindings,dtype_list,llbs,uarch_port_upstream_map):
-
+def component_relations(obj_dict,user_attributes,fmt_iface_bindings,dtype_list, \
+                        llbs,uarch_port_upstream_map):
     '''
     Assemble the key relations needed to apply scale inference to components.\n\n
 
@@ -121,6 +123,7 @@ def component_relations(obj_dict,user_attributes,fmt_iface_bindings,dtype_list,l
     - yields -- dictionary; keys are a subset of symbols required for building models later\n
     - primitive_models -- dictionary of component model structures
     '''
+    info("-- Building primitive scale inference problems.")
 
     clock_period=user_attributes['clock_period']
     technology=user_attributes['technology']
@@ -142,6 +145,7 @@ def component_relations(obj_dict,user_attributes,fmt_iface_bindings,dtype_list,l
             comp=obj_dict[comp_name]["obj"]
             uri_prefix=obj_dict[comp_name]["uri_prefix"]
             modelBase=mr.getComponent(comp.getCategory()+"Model")
+            info("--- Building",comp_name,"primitive scale inference problem.")            
             compModel=modelBase.copy() \
                                .set_scale_parameter("clock",clock_period,param_type="real") \
                                .set_scale_parameter("technology",technology,param_type="string")
@@ -152,7 +156,8 @@ def component_relations(obj_dict,user_attributes,fmt_iface_bindings,dtype_list,l
                                             fmt_iface_bindings, \
                                             dtype_list, \
                                             llbs)
-                print(comp_name,idxs)
+                warn("---- Detected format microarchitecture (FormatUarch)" + \
+                     "with significant fmt ifaces",idxs)
                 compModel=compModel.set_scale_parameter("high_impact_mdparser_indices", \
                                                         significant_fmt_iface_idxs(comp_name, \
                                                                                    uarch_port_upstream_map, \
@@ -185,12 +190,13 @@ def component_relations(obj_dict,user_attributes,fmt_iface_bindings,dtype_list,l
             area_objectives[comp_name]=comp_area_objectives
             yields[comp_name]=comp_yields
             sub_action_graph[comp_name]=comp_sub_action_graph
+            info("--- Done,",comp_name)
 
+    info("-- => Done, component scale inference problems.")
     return symbols,symbol_types,constraints,energy_objectives, \
            area_objectives,yields,component_models, sub_action_graph
 
 def primitive_relations(obj_dict,user_attributes):
-
     '''
     Assemble the key relations needed to apply scale inference to primitives.\n\n
 
@@ -208,6 +214,7 @@ def primitive_relations(obj_dict,user_attributes):
     - yields -- dictionary; keys are a subset of symbols required for building models later\n
     - primitive_models -- dictionary of component model structures
     '''
+    info("-- Building primitive scale inference problems.")
 
     clock_period=user_attributes['clock_period']
     technology=user_attributes['technology']
@@ -228,6 +235,7 @@ def primitive_relations(obj_dict,user_attributes):
             comp=obj_dict[comp_name]["obj"]
             uri_prefix=obj_dict[comp_name]["uri_prefix"]
             modelBase=mr.getPrimitive(comp.getCategory()+"Model")
+            info("--- Building",comp_name,"primitive scale inference problem.")
             compModel=modelBase.copy() \
                                .set_scale_parameter("clock",clock_period,param_type="real") \
                                .set_scale_parameter("technology",technology,param_type="string") \
@@ -252,13 +260,190 @@ def primitive_relations(obj_dict,user_attributes):
             area_objectives[comp_name]=comp_area_objectives
             yields[comp_name]=comp_yields
 
+            info("--- Done,",comp_name)
+
+    info("-- => Done, primitive scale inference problems.")
     return symbols,symbol_types,constraints,energy_objectives, \
            area_objectives,yields,primitive_models
 
-def build_global_objectives(energy_objectives,area_objectives,sub_action_graph):
-    #print(sub_action_graph)
-    #print(energy_objectives)
-    #print(area_objectives)
+def build_component_energy_objective(component_uri,implementation_id,sub_action_graph,energy_objectives,
+                                     include_spec=None,exclude_spec=None):
+    '''
+    Build component energy objective function.\n\n
+
+    The energy objective function for a component is the sum of the energy-
+    per-action for all of the component's actions.\n\n
+
+    Each action's energy is the sum of the energies of all of its associated
+    sub-component sub-actions, i.e. component action x triggers sub-action y against
+    sub-component A and sub-action z against sub-component B; then the total action
+    energy is the energy of sub-action y plus the energy of sub-action z.
+
+    Arguments:\n
+    - component_uri -- component uri (string)
+    - implementation_id -- implementation id (string)\n
+    - sub_action_graph -- graph representation of how component action energies are constructed
+                          from primitive action energies.\n\n
+
+      dict[component uri] = [{'impl_': implementation string id,
+                              'action_name_': string,
+                              'sub_component': string (optionally with variable i.e. $x),
+                              'sub_action': string,
+                              'arg_map': {action arg name string:sub_action arg name string}},
+                              {...},
+                              ...]\n\n
+    
+    - energy_objectives -- dict[primitive uri] = {action name: string expression, ...}\n
+    - include_spec -- list of string uris of components to include 
+                      in the global energy objective. If None, include all.\n
+    - exclude_spec -- list of string uris of components to exclude
+                      from the global energy objective. If None, exclude None.
+    '''
+
+    if (include_spec is not None) and (component_uri not in include_spec):
+        # No energy contribution if there is an include spec and this
+        # component is not in it
+        return None
+    
+    if (exclude_spec is not None) and (component_uri in exclude_spec):
+        # No energy contribution is there is an exclude spec and this
+        # component is in it
+        return None
+
+    # 1. Get subgraph application to component implementation
+    action_energy_dict={}
+    comp_impl_sub_action_graph=[edge for edge in sub_action_graph[component_uri] \
+                                    if edge['impl_']==implementation_id]
+    
+    # 2. Group sub-action energy expression by the parent action
+    action_energy_objectives={}
+    for edge in comp_impl_sub_action_graph:
+        subcomp_uri=ab_.uri(component_uri,edge['sub_component'])
+
+        if ((include_spec is None) or (subcomp_uri in include_spec)) and \
+                ((exclude_spec is None) or (subcomp_uri not in exclude_spec)):
+            # Only include sub-action energy for subcomponents permitted by
+            # the include/exclude specs
+            action_energy_objectives.setdefault(edge['action_name_'],[]) \
+                .append(energy_objectives[subcomp_uri][edge['sub_action']])
+
+    # 3. Build action energy expressions
+    action_energy_expressions={}
+    for action in action_energy_objectives:
+        expr=action_energy_expressions.setdefault(action,"")
+        for sub_expr in action_energy_objectives[action]:
+            expr=expr+" + "+sub_expr
+
+    # 4. Build expression for component energy objective from weighted sum of action energies
+    #if action_weights_dict is None:
+    #    num_actions=len(list(action_energy_expressions.keys()))
+    #    action_weights_dict = \
+    #        {action:(1/num_actions) for action in action_energy_expressions}
+    #component_energy_objective=""
+    #for action in action_energy_expressions:
+    #    component_energy_objective = \
+    #        component_energy_objective + " + " + str(action_weights_dict[action]) + \
+    #        "* (" + action_energy_expressions[action] + ")"
+
+    return action_energy_expressions
+
+def build_component_area_objective(component_uri,implementation_id,subcomponent_id_list, \
+                                   area_objectives,include_spec=None,exclude_spec=None):
+    '''
+    Build component area objective function.\n\n
+
+    The area objective function for a component is the sum of the area
+     for all of the subcomponents.\n\n
+
+    Arguments:\n
+    - component_uri -- component uri (string)
+    - implementation_id -- implementation id (string)\n
+    - area_objectives -- dict[component uri] = string expression\n
+    - include_spec -- list of string uris of components to include 
+                      in the global energy objective. If None, include all.\n
+    - exclude_spec -- list of string uris of components to exclude
+                      from the global energy objective. If None, exclude None.
+    '''
+
+    if (include_spec is not None) and (component_uri not in include_spec):
+        # No energy contribution if there is an include spec and this
+        # component is not in it
+        return None
+    
+    if (exclude_spec is not None) and (component_uri in exclude_spec):
+        # No energy contribution is there is an exclude spec and this
+        # component is in it
+        return None
+
+    # Build action energy expressions
+    area_expression=""
+    for subcomponent_id in subcomponent_id_list:
+        subcomp_uri=ab_.uri(component_uri,subcomponent_id)
+        if ((include_spec is None) or (subcomp_uri in include_spec)) and \
+                ((exclude_spec is None) or (subcomp_uri not in exclude_spec)):
+            # Only include sub-component area for subcomponents permitted by
+            # the include/exclude specs
+            area_expression = area_expression + " + " + area_objectives[subcomp_uri]
+
+    return area_expression
+
+def build_global_energy_objective(primitive_models,component_models,energy_objectives, \
+                                  sub_action_graph, include_spec=None,exclude_spec=None):
+    '''
+    Build global energy objective functions.\n\n
+
+    The global energy objective is the sum 
+
+    Arguments:\n
+    - primitive_models --
+    - component_models --
+    - energy_objectives -- dict[component uri] = {action name: string expression, ...}\n
+    - sub_action_graph -- graph representation of how component action energies are constructed
+                          from primitive action energies.\n\n
+
+      dict[component uri] = [{'impl_': implementation string id,
+                              'action_name_': string,
+                              'sub_component': string (optionally with variable i.e. $x),
+                              'sub_action': string,
+                              'arg_map': {action arg name string:sub_action arg name string}},
+                              {...},
+                              ...]\n\n
+    
+    - include_spec -- list of string uris of components to include 
+                      in the global energy objective. If None, include all.\n
+    - exclude_spec -- list of string uris of components to exclude
+                      from the global energy objective. If None, exclude None.
+    '''
+
+    global_energy_objective=""
+
+
+def build_global_area_objective(area_objectives,include_spec=None,exclude_spec=None):
+    '''
+    Build global area objective functions.\n\n
+
+    The globnal 
+
+    Arguments:\n
+    - area_objectives -- dict[component uri] = {action name: string expression, ...}\n
+    - include_spec -- list of string uris of components to include 
+                      in the global energy objective. If None, include all.\n
+    - exclude_spec -- list of string uris of components to exclude
+                      from the global energy objective. If None, exclude None.
+    '''
+    global_area_objective=""
+
+def build_global_objectives(energy_objectives,area_objectives,sub_action_graph, \
+                            include_spec=None,exclude_spec=None):
+    '''
+    Build global energy/area objective functions.\n\n
+
+    Arguments:\n
+    - energy_objectives -- \n
+    - area_objectives -- \n
+    - sub_action_graph -- graph representation of how component action energies are constructed
+                          from primitive action energies
+    '''
     global_energy_objective=""
     global_area_objective=""
     return global_energy_objective, global_area_objective
@@ -343,6 +528,10 @@ def build2_system_of_relations(sclp,user_attributes,fmt_iface_bindings,dtype_lis
     models={}
     models.update(primitive_models)
     models.update(component_models)
+
+    print(area_objectives)
+
+    assert(False)
 
     global_energy_objective, global_area_objective = \
         build_global_objectives(energy_objectives,area_objectives,sub_action_graph)
