@@ -3,10 +3,44 @@ import os
 import re
 from pyomo.environ import *
 from util.helper import info,warn,error
+import util.model.CasCompat as cc_
+import sympy as sp
 
 supported_neos_solver_opts=['couenne', 'cbc', 'cplex', 'filmint', 'mosek', 'octeract']
 
-def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,final_constraints,yields, \
+def evaluate_expression(final_objective, model, variable_mapping):
+    '''
+    Parse sympy-compatible objective function expression string (final_objective)
+    and generate a PyMathProg-compatible objective function expression
+    '''
+
+    # Tokenize
+    safe_final_objective=cc_.create_safe_constraint(final_objective)
+    tokens = re.findall(r"[\w.]+|[+-/*()]", safe_final_objective)
+
+    # Parse
+    stack = []
+    operators = ['+', '-', '*', '/', '(', ')']
+    symbol_dict={}
+    for token in tokens:
+        if token in operators:
+            stack.append(token)
+        elif cc_.recover_unsafe_symbol(token) in variable_mapping:
+            unsafe_token_name=cc_.recover_unsafe_symbol(token)
+            symbol_dict[unsafe_token_name]=getattr(model, variable_mapping[cc_.recover_unsafe_symbol(token)])
+            stack.append("symbol_dict[\""+unsafe_token_name+"\"]")
+        else:
+            try:
+                stack.append(float(token))
+            except ValueError:
+                raise ValueError(f"Unknown token: {token}")
+
+    # Generate
+    pymathprog_expr=''.join(map(str, stack))
+    result = eval(pymathprog_expr)
+    return result
+
+def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,final_constraints,final_objective,yields, \
                                               solver_man="neos",solver_opt="filmint",args={'neos_email':'abf149@mit.edu'}):
 
     info("-- Solving MINLP...")
@@ -23,7 +57,6 @@ def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,f
     # Defining the variables based on their types
     for sym, sym_type in zip(final_symbols, final_symbol_types):
         var_name = variable_mapping[sym]
-        #print(var_name)
         if sym_type == 'int':
             setattr(model, var_name, Var(within=Integers))
         elif sym_type == 'float':
@@ -31,8 +64,6 @@ def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,f
 
     # Sort the symbols by length in descending order to ensure longer names are replaced first
     sorted_symbols = sorted(variable_mapping.keys(), key=len, reverse=True)
-
-    #print([c for c in final_constraints if "TestArchitecture.Skipping_iact_spad1_weight_spad0.PgenFollower.md_in_cr" in c])
 
     # Process constraints
     for jdx,constraint in enumerate(final_constraints):
@@ -99,7 +130,8 @@ def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,f
             model.add_component(f'constr_or_{jdx}', Constraint(expr=sum(binary_or_vars) >= 1))
 
     # Objective function
-    obj_expr=sum(getattr(model, variable_mapping[sym]) for sym in final_symbols)
+    obj_expr=evaluate_expression(final_objective, model, variable_mapping)
+    #obj_expr=sum(getattr(model, variable_mapping[sym]) for sym in final_symbols)
     model.obj = Objective(expr=obj_expr, sense=minimize)
 
     # Solve the model
@@ -199,10 +231,11 @@ def solve1_scale_inference(scale_problem):
     simplified_symbols=scale_problem["simplified_symbols"]
     simplified_symbol_types=scale_problem["simplified_symbol_types"]
     simplified_constraints=scale_problem["simplified_constraints"]
+    simplified_objective_function=scale_problem["global_objective"]
     yields=scale_problem["yields"]
     minlp_solution_dict=solve1_scale_inference_simplified_problem(simplified_symbols,simplified_symbol_types, \
-                                                                  simplified_constraints,yields, \
-                                                                  solver_man="neos",solver_opt="filmint", \
+                                                                  simplified_constraints,simplified_objective_function, \
+                                                                  yields,solver_man="neos",solver_opt="filmint", \
                                                                   args={'neos_email':'abf149@mit.edu'})
 
     # Duplicate solution_dict within problem struct for later reference
