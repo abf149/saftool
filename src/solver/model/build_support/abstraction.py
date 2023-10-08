@@ -20,6 +20,12 @@ def uri(prfx,sffx):
     else:
         return sffx_strp
 
+def split_uri(uri):
+    uri_split=uri.split('.')
+    base_id=uri_split[-1]
+    prefix_split=uri_split[0:-1]
+    return prefix_split,base_id
+
 def make_port_uri(arch_name,buffer_name,port_prefix,direction,idx):
     return uri(uri(arch_name,buffer_name),port_prefix+"_"+direction+str(idx))
 

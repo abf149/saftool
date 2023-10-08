@@ -153,6 +153,9 @@ class PrimitiveCategory:
         self.attribute_vals=copy.deepcopy(self.attributes_)
         return self
 
+    def set_attributes(self,val_list):
+        self.attribute_vals=val_list
+
     def set_attribute(self,attr_name,val,att_type=None):
         '''
         Set an attribute\n\n
@@ -178,6 +181,10 @@ class PrimitiveCategory:
         else:
             assert(False)
         return self
+    
+    def get_attribute(self,attr_name):
+        attr_names=[att[0] for att in self.attributes_]
+        return self.attribute_vals[attr_names.index(attr_name)]
 
     def port_in(self,port_name,port_net_type,port_fmt,attr_reference=None):
         self.ports_.append((port_name,"in",port_net_type,port_fmt,attr_reference))
@@ -271,6 +278,10 @@ class PrimitiveCategory:
             info("Terminating.")
             assert(False)
         return self
+
+    def get_scale_parameter(self,param_name):
+        scale_param_names=[att[0] for att in self.scale_parameters]
+        return self.scale_parameter_vals[scale_param_names.index(param_name)]
 
     #def inherit_scale_parameter(self,param_name,param_type=None):
     #    return self.set_scale_parameter(param_name,param_name,param_type)
@@ -421,6 +432,9 @@ class PrimitiveCategory:
 
         # Should be a match
         assert(False)
+
+    def get_applicable_taxo_instance(self):
+        return self.applicable_taxo_instance_alias
 
     def find_applicable_taxo_instance_alias(self):
         inst_name=self.find_applicable_taxo_instance()
@@ -842,6 +856,8 @@ class ComponentCategory(PrimitiveCategory):
         # Component scale inference inits
         self.sub_actions_={}
         self.sub_action_list=[]
+        self.action_map_list=[]
+        self.subcomponent_list=[]
 
     '''Component taxonomy methods'''
     def topological_hole(self):
@@ -852,6 +868,11 @@ class ComponentCategory(PrimitiveCategory):
         self.topology_=topology_
         return self
 
+    def from_taxo_obj(self,obj,param_vals={}):
+        super().from_taxo_obj(obj,param_vals=param_vals)
+        self.subcomponent_list=[subcomp.getId() for subcomp in obj.getTopology().getComponentList()]
+        return self
+
     def build(self,id):
         iface=self.buildInterface()
         topology=self.topology_.build()
@@ -860,19 +881,75 @@ class ComponentCategory(PrimitiveCategory):
 
     '''Component scale inference methods'''
 
-    def build_subaction_incremental(self,impl_,action_name_,sub_component,sub_action,arg_map={},foralls=[],uri_prefix=""):
+    def build_subaction_incremental_base(self,impl_,action_name_,sub_component,sub_action,arg_map={},uri_prefix=""):
         sub_comp_sub_action_spec_list=self.sub_actions_.setdefault(impl_,{}) \
                                                        .setdefault(action_name_,{}) \
                                                        .setdefault(sub_component,[])
         
         sub_comp_sub_action_spec_list.append({ \
-                                                "foralls":[],
                                                 "sub-component-actions":{}
                                             })
 
-        sub_comp_sub_action_spec_list[-1]["foralls"]=foralls
         assert(sub_action not in sub_comp_sub_action_spec_list[-1]["sub-component-actions"])
         sub_comp_sub_action_spec_list[-1]["sub-component-actions"][sub_action]={"arg_map":arg_map}
+
+        return self
+
+    def build_subaction_incremental(self,impl_,action_name_,sub_component,sub_action,arg_map={},foralls=[],uri_prefix=""):
+        if foralls is None or len(foralls)==0:
+            # The sub-action definition contains no variables
+            self.build_subaction_incremental_base(impl_=impl_, \
+                                                  action_name_=action_name_, \
+                                                  sub_component=sub_component, \
+                                                  sub_action=sub_action, \
+                                                  arg_map=arg_map, \
+                                                  uri_prefix=uri_prefix)
+
+        else:
+            # The sub-action definition contains variables which are set by an iterator
+            # ("x","param","high_impact_mdparser_indices",None)
+            # ("x,v","taxo_fibertree","fibertree",("not in","param","high_impact_mdparser_indices"))
+            spec=foralls[0]
+            var_name_spec=spec[0]
+            forall_type=spec[1]
+            forall_type_arg=spec[2]
+            exclude_spec=spec[3]
+
+            include_idxs=[]
+            exclude_idxs=[]
+
+            if forall_type == "param":
+                # forall_type_arg is scale parameter name
+                include_idxs=self.get_scale_parameter(forall_type_arg)
+            elif forall_type == "taxo_fibertree":
+                # forall_type_arg is taxonomic attribute name of fibertree
+                #print(self.obj.getId())
+                #print(forall_type_arg)
+                taxo_fibertree_val=self.get_attribute(forall_type_arg)
+                include_idxs=list(range(len(taxo_fibertree_val)))
+            else:
+                error("Invalid iterator type",forall_type,also_stdout=True)
+                info("Terminating.")
+                assert(False)
+
+            if exclude_spec is not None:
+                exclude_type=exclude_spec[1]
+                exclude_type_arg=exclude_spec[2]
+                if exclude_type == "param":
+                    exclude_idxs=self.get_scale_parameter(exclude_type_arg)
+                elif exclude_type == "taxo_fibertree":
+                    taxo_fibertree_val=self.get_attribute(exclude_type_arg)
+                    exclude_idxs=list(range(len(taxo_fibertree_val)))
+
+            final_idxs=[idx for idx in include_idxs if (idx not in exclude_idxs)]
+            subcomponent_list=[sub_component.replace("$x",str(idx)) for idx in final_idxs]
+            for subcomp in subcomponent_list:
+                self.build_subaction_incremental_base(impl_=impl_, \
+                                                    action_name_=action_name_, \
+                                                    sub_component=subcomp, \
+                                                    sub_action=sub_action, \
+                                                    arg_map=arg_map, \
+                                                    uri_prefix=uri_prefix)                
 
         return self
 
@@ -884,7 +961,19 @@ class ComponentCategory(PrimitiveCategory):
                                      "arg_map":arg_map, \
                                      "foralls":foralls})
         return self
-    
+
+    def arch_buffer_action_map(self,buffer_upstream_of_port,upstream_action, \
+                               downstream_action,alias_dict=mo_.std_buffer_action_aliases):
+
+        self.action_map_list.append({
+            "buffer_upstream_of_port":buffer_upstream_of_port,
+            "upstream_action":upstream_action,
+            "downstream_action":downstream_action,
+            "alias_dict":alias_dict
+        })
+
+        return self
+
     def build_subactions(self,uri_prefix=""):
         for sa_ in self.sub_action_list:
             self.build_subaction_incremental(sa_["impl_"], \
@@ -894,12 +983,18 @@ class ComponentCategory(PrimitiveCategory):
                                              sa_["arg_map"], \
                                              sa_["foralls"], \
                                              uri_prefix)
-            
+
         return self
     
-    def get_subaction_graph(self):
-        return self.sub_action_list
+    def get_subcomponent_list(self):
+        return self.subcomponent_list
     
+    def get_subaction_graph(self):
+        return self.sub_actions_
+    
+    def get_buffer_action_graph(self):
+        return self.action_map_list
+
     def build_symbols_constraints_objectives_attributes(self,uri_prefix=""):
         super().build_symbols_constraints_objectives_attributes(uri_prefix)
         self.build_subactions(uri_prefix)

@@ -5,6 +5,14 @@ import util.model.CasCompat as cc_
 from util.helper import info,warn,error
 import copy
 
+'''Buffer action names which are aliases for the same concept'''
+std_buffer_action_aliases= {
+    "write":["write"],
+    "read":["read"],
+    "metadata_read":["metadata_read"],
+    "metadata_write":["metadata_write"]
+}
+
 '''Attribute construction'''
 def makeAttribute(expr,foralls=[]):
     if len(foralls)==0:
