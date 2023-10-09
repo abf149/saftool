@@ -358,31 +358,39 @@ def build_component_energy_objective(component_uri,implementation_id,sub_action_
 
     # 3. Build action energy expressions
     action_energy_expression_dict={}
-    for action in action_energy_tree:
-        action_energy_expression_dict[action]=""
-        for sub_component_uri in action_energy_tree[action]:
-            if ((include_spec is None) or (component_uri in include_spec) and \
-                (exclude_spec is None) or (component_uri not in exclude_spec)):
-                for sub_action in action_energy_tree[action][sub_component_uri]:
-                    sub_action_config_spec=action_energy_tree[action][sub_component_uri][sub_action]
-                    arg_map=sub_action_config_spec['arg_map']
-                    obj_expr=energy_objectives[sub_component_uri][sub_action]
-                    obj_expr_subs=obj_expr
-                    for arg_ in arg_map:
-                        # Map action args to sub-action args
-                        map_=arg_map[arg_]
-                        obj_expr_subs=obj_expr_subs.replace(str(arg_),str(map_))
+    if ((include_spec is None) or (component_uri in include_spec) and \
+        (exclude_spec is None) or (component_uri not in exclude_spec)):
 
-                    if len(action_energy_expression_dict[action])==0:
-                        action_energy_expression_dict[action]="("+obj_expr_subs+")"
-                    else:
-                        action_energy_expression_dict[action]+= " + (" + obj_expr_subs + ")"
+        for action in action_energy_tree:
+            action_energy_expression_dict[action]=""
+            for sub_component_uri in action_energy_tree[action]:
+                if ((include_spec is None) or (sub_component_uri in include_spec) and \
+                    (exclude_spec is None) or (sub_component_uri not in exclude_spec)):
+                    for sub_action in action_energy_tree[action][sub_component_uri]:
+                        sub_action_config_spec=action_energy_tree[action][sub_component_uri][sub_action]
+                        arg_map=sub_action_config_spec['arg_map']
+                        obj_expr=energy_objectives[sub_component_uri][sub_action]
+                        obj_expr_subs=obj_expr
+                        for arg_ in arg_map:
+                            # Map action args to sub-action args
+                            map_=arg_map[arg_]
+                            obj_expr_subs=obj_expr_subs.replace(str(arg_),str(map_))
 
-            else:
-                warn("--- Excluding primitive",sub_component_uri)
+                        if len(action_energy_expression_dict[action])==0:
+                            action_energy_expression_dict[action]="("+obj_expr_subs+")"
+                        else:
+                            action_energy_expression_dict[action]+= " + (" + obj_expr_subs + ")"
 
-        if len(action_energy_expression_dict[action]) == 0:
-            warn("---",component_uri,"action",action,"has no included subactions; setting energy expression to 0")
+                else:
+                    warn("--- Excluding primitive",sub_component_uri)
+
+            if len(action_energy_expression_dict[action]) == 0:
+                warn("---",component_uri,"action",action,"has no included subactions; setting energy expression to 0")
+                action_energy_expression_dict[action]="0"
+
+    else:
+        warn("---",component_uri,"excluded; setting all action energies to zero.")
+        for action in action_energy_tree:
             action_energy_expression_dict[action]="0"
 
     return action_energy_expression_dict, action_energy_tree
@@ -420,16 +428,28 @@ def build_component_area_objective(component_uri,implementation_id,subcomponent_
 
     # Build action energy expressions
     area_expression=""
-    for subcomponent_id in subcomponent_id_list:
-        subcomp_uri=ab_.uri(component_uri,subcomponent_id)
-        if ((include_spec is None) or (subcomp_uri in include_spec)) and \
-                ((exclude_spec is None) or (subcomp_uri not in exclude_spec)):
-            # Only include sub-component area for subcomponents permitted by
-            # the include/exclude specs
-            if len(area_expression)==0:
-                area_expression = area_objectives[subcomp_uri]
+    if ((include_spec is None) or (component_uri in include_spec) and \
+        (exclude_spec is None) or (component_uri not in exclude_spec)):
+
+        for subcomponent_id in subcomponent_id_list:
+            subcomp_uri=ab_.uri(component_uri,subcomponent_id)
+            if ((include_spec is None) or (subcomp_uri in include_spec) and \
+                (exclude_spec is None) or (subcomp_uri not in exclude_spec)):
+
+                if ((include_spec is None) or (subcomp_uri in include_spec)) and \
+                        ((exclude_spec is None) or (subcomp_uri not in exclude_spec)):
+                    # Only include sub-component area for subcomponents permitted by
+                    # the include/exclude specs
+                    if len(area_expression)==0:
+                        area_expression = area_objectives[subcomp_uri]
+                    else:
+                        area_expression = area_expression + " + " + area_objectives[subcomp_uri]
             else:
-                area_expression = area_expression + " + " + area_objectives[subcomp_uri]
+                warn("--- Excluding component",subcomp_uri)            
+
+    else:
+        warn("---",component_uri,"excluded; setting component area to zero.")
+        area_expression="0"
 
     return area_expression
 
