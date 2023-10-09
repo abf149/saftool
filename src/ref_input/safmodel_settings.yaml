@@ -2,3 +2,8 @@ clock_period: 5ns
 scale_inference_include_obj:
   energy: null
   area: null
+scale_inference_solver:
+  manager: neos
+  solver: filmint
+  args:
+    neos_email: abf149@mit.edu

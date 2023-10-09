@@ -48,6 +48,14 @@ def complete_user_attributes(user_attributes,system_attributes):
                                                          'energy':None,
                                                          'area':None
                                                      }},'defaults')    
+    user_attributes=update_or_default_user_attribute(user_attributes,'scale_inference_solver', \
+                                                     {'scale_inference_solver':{ \
+                                                          'manager':'neos',
+                                                          'solver':'filmint',
+                                                          'args': {
+                                                              'neos_email':''
+                                                          }
+                                                     }},'defaults')
     return user_attributes
 
 def build_scale_inference_problem(arch, sparseopts, taxo_uarch, user_attributes={}):

@@ -233,10 +233,13 @@ def solve1_scale_inference(scale_problem):
     simplified_constraints=scale_problem["simplified_constraints"]
     simplified_objective_function=scale_problem["global_objective"]
     yields=scale_problem["yields"]
+    user_attributes=scale_problem["user_attributes"]
+    solver_attributes=user_attributes["scale_inference_solver"]
     minlp_solution_dict=solve1_scale_inference_simplified_problem(simplified_symbols,simplified_symbol_types, \
                                                                   simplified_constraints,simplified_objective_function, \
-                                                                  yields,solver_man="neos",solver_opt="filmint", \
-                                                                  args={'neos_email':'abf149@mit.edu'})
+                                                                  yields,solver_man=solver_attributes['manager'], \
+                                                                  solver_opt=solver_attributes['solver'], \
+                                                                  args=solver_attributes['args'])
 
     # Duplicate solution_dict within problem struct for later reference
     scale_problem['minlp_solution_dict']=minlp_solution_dict
