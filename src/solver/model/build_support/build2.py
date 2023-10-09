@@ -213,7 +213,7 @@ def component_relations(obj_dict,user_attributes,fmt_iface_bindings,dtype_list, 
             yields[comp_name]=comp_yields
             sub_action_graph[comp_name]=comp_sub_action_graph
             raw_buffer_action_graph[comp_name]=comp_buffer_action_graph
-            info("--- Done,",comp_name,"component scale inference problem")
+            info("--- => Done,",comp_name,"component scale inference problem")
 
     info("-- => Done, component scale inference problems.")
     return symbols,symbol_types,constraints,energy_objectives,area_objectives, \
@@ -283,7 +283,7 @@ def primitive_relations(obj_dict,user_attributes):
             area_objectives[comp_name]=comp_area_objectives
             yields[comp_name]=comp_yields
 
-            info("--- Done,",comp_name)
+            info("--- => Done,",comp_name)
 
     info("-- => Done, primitive scale inference problems.")
     return symbols,symbol_types,constraints,energy_objectives, \
@@ -325,6 +325,7 @@ def build_component_energy_objective(component_uri,implementation_id,sub_action_
     Returns:
     - action_energy_expression_dict -- dict[action name str] = expression str
     '''
+    info("----- Building component",component_uri,"energy objective")
 
     #if (include_spec is not None) and (component_uri not in include_spec):
     #    # No energy contribution if there is an include spec and this
@@ -340,6 +341,7 @@ def build_component_energy_objective(component_uri,implementation_id,sub_action_
     comp_impl_sub_action_graph=sub_action_graph[component_uri][implementation_id]
     
     # 2. Group sub-action energy expression by the parent action
+    info("------ Building",component_uri,"action tree")
     action_energy_tree={}
     for action in comp_impl_sub_action_graph:
         action_subcomp_dict=comp_impl_sub_action_graph[action]
@@ -355,8 +357,10 @@ def build_component_energy_objective(component_uri,implementation_id,sub_action_
                                                               .setdefault(sub_component_uri,{})
                     assert(sub_action not in new_subcomp_action_dict)
                     new_subcomp_action_dict[sub_action]=sub_action_config_spec
+    info("------ => Done, building",component_uri,"action tree")
 
     # 3. Build action energy expressions
+    info("------ Building",component_uri,"action energy expressions")
     action_energy_expression_dict={}
     if ((include_spec is None) or (component_uri in include_spec) and \
         (exclude_spec is None) or (component_uri not in exclude_spec)):
@@ -382,17 +386,19 @@ def build_component_energy_objective(component_uri,implementation_id,sub_action_
                             action_energy_expression_dict[action]+= " + (" + obj_expr_subs + ")"
 
                 else:
-                    warn("--- Excluding primitive",sub_component_uri)
+                    warn("-------- Excluding primitive",sub_component_uri)
 
             if len(action_energy_expression_dict[action]) == 0:
-                warn("---",component_uri,"action",action,"has no included subactions; setting energy expression to 0")
+                warn("-------",component_uri,"action",action,"has no included subactions; setting energy expression to 0")
                 action_energy_expression_dict[action]="0"
 
     else:
-        warn("---",component_uri,"excluded; setting all action energies to zero.")
+        warn("-------",component_uri,"excluded; setting all action energies to zero.")
         for action in action_energy_tree:
             action_energy_expression_dict[action]="0"
 
+    info("------ => Done,",component_uri,"action expressions")
+    info("----- => Done,",component_uri,"energy objective")
     return action_energy_expression_dict, action_energy_tree
 
 def build_component_area_objective(component_uri,implementation_id,subcomponent_id_list, \
@@ -415,16 +421,7 @@ def build_component_area_objective(component_uri,implementation_id,subcomponent_
     Returns:\n
     - area_expression -- expression str
     '''
-
-    #if (include_spec is not None) and (component_uri not in include_spec):
-    #    # No energy contribution if there is an include spec and this
-    #    # component is not in it
-    #    return None
-    
-    #if (exclude_spec is not None) and (component_uri in exclude_spec):
-    #    # No energy contribution is there is an exclude spec and this
-    #    # component is in it
-    #    return None
+    info("---- Building buffer area objective.")
 
     # Build action energy expressions
     area_expression=""
@@ -445,12 +442,13 @@ def build_component_area_objective(component_uri,implementation_id,subcomponent_
                     else:
                         area_expression = area_expression + " + " + area_objectives[subcomp_uri]
             else:
-                warn("--- Excluding component",subcomp_uri)            
+                warn("------ Excluding component",subcomp_uri)            
 
     else:
-        warn("---",component_uri,"excluded; setting component area to zero.")
+        warn("-----",component_uri,"excluded; setting component area to zero.")
         area_expression="0"
 
+    info("---- => Done, building buffer area objective.")
     return area_expression
 
 def build_buffer_action_tree(buffer_action_graph):
@@ -468,7 +466,7 @@ def build_buffer_action_tree(buffer_action_graph):
 
     return buffer_action_tree,alias_dict
 
-def build_global_energy_objective(primitive_models,component_models,energy_objectives,sub_action_graph, \
+def build_buffer_action_energy_objective(primitive_models,component_models,energy_objectives,sub_action_graph, \
                                   buffer_action_graph,include_spec=None,exclude_spec=None):
     '''
     Build global energy objective functions.\n\n
@@ -495,6 +493,7 @@ def build_global_energy_objective(primitive_models,component_models,energy_objec
     - exclude_spec -- list of string uris of components to exclude
                       from the global energy objective. If None, exclude None.
     '''
+    info("---- Building buffer action energy objective.")
 
     # Energy expressions for all actions of all components
     component_energy_action_expression_dict = {}
@@ -536,11 +535,12 @@ def build_global_energy_objective(primitive_models,component_models,energy_objec
                                 buffer_energy_action_expression_dict[buffer_id][action]+=\
                                     " + ("+component_energy_action_expression_dict[subcomp_id][sub_action]+")"
                         else:
-                            warn("--- Scale inference energy objective for buffer",buffer_id, \
+                            warn("----- Scale inference energy objective for buffer",buffer_id, \
                                 "ignores component =",subcomp_id,", action =",sub_action)
                 else:
-                    warn("---",subcomp_id,"excluded from energy objective (energy action expression dict is None)")
+                    warn("-----",subcomp_id,"excluded from energy objective (energy action expression dict is None)")
 
+    info("---- => Done, building buffer action energy objective.")
     return buffer_energy_action_expression_dict, \
            buffer_action_tree,component_energy_action_tree,alias_dict
 
@@ -548,7 +548,7 @@ def build_global_area_objective(component_models,area_objectives,include_spec=No
     '''
     Build global area objective functions.\n\n
 
-    The globnal 
+    The global 
 
     Arguments:\n
     - area_objectives -- dict[component uri] = {action name: string expression, ...}\n
@@ -557,28 +557,24 @@ def build_global_area_objective(component_models,area_objectives,include_spec=No
     - exclude_spec -- list of string uris of components to exclude
                       from the global energy objective. If None, exclude None.
     '''
+    info("--- Building buffer area objective.")
 
     # Area expressions for all components
     global_area_objective=""
     for component_uri in component_models:
+        component_area_objective= \
+            build_component_area_objective(component_uri,
+                                           component_models[component_uri].get_applicable_taxo_instance(),
+                                           component_models[component_uri].get_subcomponent_list(),
+                                           area_objectives,include_spec=include_spec,
+                                           exclude_spec=exclude_spec)
         if len(global_area_objective)==0:
-            global_area_objective = \
-                "("+ \
-                build_component_area_objective(component_uri,
-                                            component_models[component_uri].get_applicable_taxo_instance(),
-                                            component_models[component_uri].get_subcomponent_list(),
-                                            area_objectives,include_spec=include_spec,
-                                            exclude_spec=exclude_spec) \
-                +")"
-        else:
-            global_area_objective = global_area_objective + " + (" + \
-                build_component_area_objective(component_uri,
-                                            component_models[component_uri].get_applicable_taxo_instance(),
-                                            component_models[component_uri].get_subcomponent_list(),
-                                            area_objectives,include_spec=include_spec,
-                                            exclude_spec=exclude_spec) \
-                +")"
 
+            global_area_objective = "("+component_area_objective+")"
+        else:
+            global_area_objective = global_area_objective+" + ("+component_area_objective+")"
+
+    info("--- => Done, building buffer area objective.")
     return global_area_objective
 
 def build_global_objective(expr,primitive_models,component_models,energy_objectives,area_objectives, \
@@ -593,7 +589,7 @@ def build_global_objective(expr,primitive_models,component_models,energy_objecti
     - sub_action_graph -- graph representation of how component action energies are constructed
                           from primitive action energies
     '''
-
+    info("-- Building global objective function with expression",expr)
 
     energy_include_spec=None
     area_include_spec=None
@@ -607,40 +603,48 @@ def build_global_objective(expr,primitive_models,component_models,energy_objecti
         area_exclude_spec=exclude_spec['area']
 
 
+    info("--- Building global energy objective")
     buffer_energy_action_expression_dict,buffer_action_tree, \
     component_energy_action_tree,alias_dict= \
-        build_global_energy_objective(primitive_models,component_models,energy_objectives,sub_action_graph, \
+        build_buffer_action_energy_objective(primitive_models,component_models,energy_objectives,sub_action_graph, \
                                       buffer_action_graph,include_spec=energy_include_spec, \
                                       exclude_spec=energy_exclude_spec)
     
+    info("---- Building global energy objective from weighted sum of action energy objectives.")
     global_energy_objective=""
     for buffer in buffer_energy_action_expression_dict:
+        info("----- Integrating buffer",buffer,"energy expression into global energy objective")
         action_energy_expression_dict=buffer_energy_action_expression_dict[buffer]
         # Compute appropriate weighting of component actions
         action_weight_dict={}
         num_actions=len(list(action_energy_expression_dict.keys()))
-        info("--- Buffer",buffer,"default action weight = 1/",str(num_actions))
+        info("------ Buffer",buffer,"default action weight = 1/",str(num_actions))
         buffer_action_weights_specd=(buffer in buffer_action_weight_dict)
         if buffer_action_weights_specd:
-            warn("---- Detected buffer",buffer,"user spec for action weights")
+            warn("------- Detected buffer",buffer,"user spec for action weights")
         else:
-            warn("---- No user spec for relative buffer action weights; using default")
+            warn("------- No user spec for relative buffer action weights; using default")
+        info("------ Integrating buffer action energy expressions into buffer energy expression")
         buffer_expr="("
         for action in action_energy_expression_dict:
             if buffer_action_weights_specd and action in buffer_action_weight_dict:
                 action_weight=buffer_action_weight_dict[buffer][action]
-                info("---- Buffer",buffer,", action",action,"weight user override =",action_weight,"per user spec")
+                info("------- Buffer",buffer,", action",action,"weight user override =",action_weight,"per user spec")
                 action_weight_dict[action]=action_weight
             else:
                 action_weight_dict[action]=1/num_actions
                 if buffer_action_weights_specd:
-                    warn("--- Buffer",buffer,", action",action,"weight omitted from user spec; using buffer default")
+                    warn("------- Buffer",buffer,", action",action,"weight omitted from user spec; using buffer default")
 
             if len(action_energy_expression_dict[action])>0:
                 if len(buffer_expr)==1:
                     buffer_expr+="( "+str(action_weight_dict[action])+" )*("+action_energy_expression_dict[action]+")"
                 else:
                     buffer_expr+=" + ( "+str(action_weight_dict[action])+" )*("+action_energy_expression_dict[action]+")"
+            else:
+                warn("------",buffer,"action(",action,")energy expression empty; ignoring")
+
+        info("------ => Done, integrating buffer action energy expressions")
 
         buffer_expr+=")"
         if len(buffer_expr)>0 and buffer_expr != "()":
@@ -648,11 +652,19 @@ def build_global_objective(expr,primitive_models,component_models,energy_objecti
                 global_energy_objective=buffer_expr
             else:
                 global_energy_objective+=" + "+buffer_expr
+        else:
+            warn("-------",buffer,"energy expression empty; ignoring")
+
+        info("----- => Done, integrating buffer",buffer,"energy expression into global")
+
+    info("---- => Done, weighted sum of buffer action energy objectives.")
+    info("--- => Done, building global energy objective.")
 
     global_area_objective= \
         build_global_area_objective(component_models,area_objectives,include_spec=area_include_spec, \
                                     exclude_spec=area_exclude_spec)
 
+    info("-- => Done, building global objective function")
     return expr.replace("$E","("+global_energy_objective+")").replace("$A","("+global_area_objective+")"), \
            global_energy_objective,global_area_objective,buffer_action_tree, \
            component_energy_action_tree,alias_dict
@@ -709,8 +721,8 @@ def simplify_global_objective(global_objective):
         info("\nSimplified objective:",unsafe_simplified_safe_global_objective,"\n",also_stdout=True)
         info("Terminating.")
         assert(False)
-    info("--- Done, checking correctness of simplification")
-    info("-- Done, simplifying global objective function.")
+    info("--- => Done, checking correctness of simplification")
+    info("-- => Done, simplifying global objective function.")
     return unsafe_simplified_safe_global_objective
 
 def build2_system_of_relations(sclp,user_attributes,fmt_iface_bindings,dtype_list):
@@ -815,7 +827,7 @@ def build2_system_of_relations(sclp,user_attributes,fmt_iface_bindings,dtype_lis
 
     simplified_global_objective=simplify_global_objective(global_objective)
 
-    warn("- => done, build phase 2.")
+    warn("- => Done, build phase 2.")
 
     return {"symbols":symbols, "symbol_types":symbol_types, "constraints":constraints, \
             "energy_objectives":energy_objectives, "area_objectives":area_objectives, \
