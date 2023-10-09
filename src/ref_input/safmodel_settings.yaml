@@ -1,1 +1,4 @@
 clock_period: 5ns
+scale_inference_include_obj:
+  energy: null
+  area: null

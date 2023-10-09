@@ -41,7 +41,7 @@ def evaluate_expression(final_objective, model, variable_mapping):
     return result
 
 def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,final_constraints,final_objective,yields, \
-                                              solver_man="neos",solver_opt="couenne",args={'neos_email':'abf149@mit.edu'}):
+                                              solver_man="neos",solver_opt="filmint",args={'neos_email':'abf149@mit.edu'}):
 
     info("-- Solving MINLP...")
     warn("--- Solver options:","solver_man =",solver_man,"solver_opt =",solver_opt,"args =",args)

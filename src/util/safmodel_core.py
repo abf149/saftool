@@ -11,7 +11,7 @@ from util.helper import info,warn,error
 def update_user_attribute(user_attributes,field,source_dict,default_source='defaults'):
     if field in source_dict:
         warn('Updating',field,'=',source_dict[field],'from',default_source,'to',field,"=", \
-             user_attributes['field'],'from user-provided attributes')
+             user_attributes[field],'from user-provided attributes')
     else:
         warn('Setting',field,"=",user_attributes[field],'from user-provided attributes')
 
@@ -38,6 +38,16 @@ def complete_user_attributes(user_attributes,system_attributes):
     user_attributes=update_or_default_user_attribute(user_attributes,'technology',system_attributes,'arch.yaml')
     user_attributes=update_or_default_user_attribute(user_attributes,'clock_period',system_attributes,'arch.yaml')
     user_attributes=update_or_default_user_attribute(user_attributes,'constraints',{'constraints':[]},'defaults')
+    user_attributes=update_or_default_user_attribute(user_attributes,'scale_inference_include_obj', \
+                                                     {'scale_inference_include_obj':{
+                                                         'energy':None,
+                                                         'area':None
+                                                     }},'defaults')
+    user_attributes=update_or_default_user_attribute(user_attributes,'scale_inference_exclude_obj', \
+                                                     {'scale_inference_exclude_obj':{
+                                                         'energy':None,
+                                                         'area':None
+                                                     }},'defaults')    
     return user_attributes
 
 def build_scale_inference_problem(arch, sparseopts, taxo_uarch, user_attributes={}):

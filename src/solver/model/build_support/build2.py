@@ -326,15 +326,15 @@ def build_component_energy_objective(component_uri,implementation_id,sub_action_
     - action_energy_expression_dict -- dict[action name str] = expression str
     '''
 
-    if (include_spec is not None) and (component_uri not in include_spec):
-        # No energy contribution if there is an include spec and this
-        # component is not in it
-        return None
+    #if (include_spec is not None) and (component_uri not in include_spec):
+    #    # No energy contribution if there is an include spec and this
+    #    # component is not in it
+    #    return None
     
-    if (exclude_spec is not None) and (component_uri in exclude_spec):
-        # No energy contribution is there is an exclude spec and this
-        # component is in it
-        return None
+    #if (exclude_spec is not None) and (component_uri in exclude_spec):
+    #    # No energy contribution is there is an exclude spec and this
+    #    # component is in it
+    #    return None
 
     # 1. Get subgraph application to component implementation
     comp_impl_sub_action_graph=sub_action_graph[component_uri][implementation_id]
@@ -360,21 +360,30 @@ def build_component_energy_objective(component_uri,implementation_id,sub_action_
     action_energy_expression_dict={}
     for action in action_energy_tree:
         action_energy_expression_dict[action]=""
-        for sub_component_id in action_energy_tree[action]:
-            for sub_action in action_energy_tree[action][sub_component_id]:
-                sub_action_config_spec=action_energy_tree[action][sub_component_id][sub_action]
-                arg_map=sub_action_config_spec['arg_map']
-                obj_expr=energy_objectives[sub_component_id][sub_action]
-                obj_expr_subs=obj_expr
-                for arg_ in arg_map:
-                    # Map action args to sub-action args
-                    map_=arg_map[arg_]
-                    obj_expr_subs=obj_expr_subs.replace(str(arg_),str(map_))
+        for sub_component_uri in action_energy_tree[action]:
+            if ((include_spec is None) or (component_uri in include_spec) and \
+                (exclude_spec is None) or (component_uri not in exclude_spec)):
+                for sub_action in action_energy_tree[action][sub_component_uri]:
+                    sub_action_config_spec=action_energy_tree[action][sub_component_uri][sub_action]
+                    arg_map=sub_action_config_spec['arg_map']
+                    obj_expr=energy_objectives[sub_component_uri][sub_action]
+                    obj_expr_subs=obj_expr
+                    for arg_ in arg_map:
+                        # Map action args to sub-action args
+                        map_=arg_map[arg_]
+                        obj_expr_subs=obj_expr_subs.replace(str(arg_),str(map_))
 
-                if len(action_energy_expression_dict[action])==0:
-                    action_energy_expression_dict[action]="("+obj_expr_subs+")"
-                else:
-                    action_energy_expression_dict[action]+= " + (" + obj_expr_subs + ")"
+                    if len(action_energy_expression_dict[action])==0:
+                        action_energy_expression_dict[action]="("+obj_expr_subs+")"
+                    else:
+                        action_energy_expression_dict[action]+= " + (" + obj_expr_subs + ")"
+
+            else:
+                warn("--- Excluding primitive",sub_component_uri)
+
+        if len(action_energy_expression_dict[action]) == 0:
+            warn("---",component_uri,"action",action,"has no included subactions; setting energy expression to 0")
+            action_energy_expression_dict[action]="0"
 
     return action_energy_expression_dict, action_energy_tree
 
@@ -399,15 +408,15 @@ def build_component_area_objective(component_uri,implementation_id,subcomponent_
     - area_expression -- expression str
     '''
 
-    if (include_spec is not None) and (component_uri not in include_spec):
-        # No energy contribution if there is an include spec and this
-        # component is not in it
-        return None
+    #if (include_spec is not None) and (component_uri not in include_spec):
+    #    # No energy contribution if there is an include spec and this
+    #    # component is not in it
+    #    return None
     
-    if (exclude_spec is not None) and (component_uri in exclude_spec):
-        # No energy contribution is there is an exclude spec and this
-        # component is in it
-        return None
+    #if (exclude_spec is not None) and (component_uri in exclude_spec):
+    #    # No energy contribution is there is an exclude spec and this
+    #    # component is in it
+    #    return None
 
     # Build action energy expressions
     area_expression=""
@@ -719,6 +728,12 @@ def build2_system_of_relations(sclp,user_attributes,fmt_iface_bindings,dtype_lis
     obj_dict=sclp['obj_dict']
     uarch_port_upstream_map=sclp['uarch_port_upstream_map']
     llbs=sclp['llbs']
+    include_spec=None
+    exclude_spec=None
+    if 'scale_inference_include_obj' in user_attributes:
+        include_spec=user_attributes['scale_inference_include_obj']
+    if 'scale_inference_exclude_obj' in user_attributes:
+        exclude_spec=user_attributes['scale_inference_exclude_obj']
 
     # Get system of relations describing supported primitive configurations
     primitive_symbols, \
@@ -776,7 +791,7 @@ def build2_system_of_relations(sclp,user_attributes,fmt_iface_bindings,dtype_lis
         buffer_action_tree,component_energy_action_tree,alias_dict = \
             build_global_objective(abstract_global_objective_expression,primitive_models,component_models, \
                                energy_objectives,area_objectives,buffer_action_graph,sub_action_graph, \
-                               buffer_action_weight,include_spec=None,exclude_spec=None)
+                               buffer_action_weight,include_spec=include_spec,exclude_spec=exclude_spec)
 
     simplified_global_objective=simplify_global_objective(global_objective)
 
