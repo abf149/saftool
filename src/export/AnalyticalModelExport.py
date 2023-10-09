@@ -2,18 +2,23 @@
 from .export_support.export1 import export1_backend_primitive_lib_objective_models
 from util.helper import info,warn,error
 
-def export_backend_modeling_suite(analytical_model_classes_dict, \
-                                  analytical_model_actions_dict, \
-                                  abstract_analytical_models_dict, \
-                                  scale_problem):
+def export_backend_modeling_suite(analytical_primitive_model_classes_dict, \
+                                  analytical_primitive_model_actions_dict, \
+                                  abstract_analytical_primitive_models_dict, \
+                                  analytical_component_model_classes_dict, \
+                                  analytical_component_model_actions_dict, \
+                                  abstract_analytical_component_models, \
+                                  scale_problem, \
+                                  backend_args={}):
     warn("Exporting backend modeling suite.",also_stdout=True)
 
     backend_obj_rep, backend_lib_rep= \
         export1_backend_primitive_lib_objective_models(scale_problem, \
-                                                       analytical_model_classes_dict, \
-                                                       analytical_model_actions_dict, \
-                                                       abstract_analytical_models_dict, \
-                                                       backend='accelergy')
+                                                       analytical_primitive_model_classes_dict, \
+                                                       analytical_primitive_model_actions_dict, \
+                                                       abstract_analytical_primitive_models_dict, \
+                                                       backend='accelergy', \
+                                                       backend_args=backend_args)
 
     warn("=> done, export modeling suite.",also_stdout=True)
     return backend_obj_rep, backend_lib_rep

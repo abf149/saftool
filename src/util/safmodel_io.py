@@ -65,11 +65,20 @@ def load_taxonomic_microarchitecture(netlist):
     '''Load taxonomic description of SAF microarchitecture'''
     return Architecture.fromDict(sl_config.load_config_yaml(netlist))
 
-def export_analytical_models(abstract_analytical_models_dict,scale_problem):
+def export_analytical_models(abstract_analytical_primitive_models_dict,abstract_analytical_component_models, \
+                             scale_problem,user_attributes):
+    backend_args={
+        "accelergy_version":user_attributes["accelergy_version"]
+    }
+
     '''Export abstract analytical models'''
     backend_obj_rep, backend_lib_rep= \
         am_exp.export_backend_modeling_suite(mr_.primitive_model_yields_supersets, \
                                              mr_.primitive_model_actions, \
-                                             abstract_analytical_models_dict, \
-                                             scale_problem)
+                                             abstract_analytical_primitive_models_dict, \
+                                             mr_.component_model_yields_supersets, \
+                                             mr_.component_model_actions, \
+                                             abstract_analytical_component_models, \
+                                             scale_problem, \
+                                             backend_args=backend_args)
     return backend_obj_rep, backend_lib_rep

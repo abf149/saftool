@@ -27,13 +27,15 @@ if __name__=="__main__":
     scale_prob=safcore.build_scale_inference_problem(arch, sparseopts, taxo_uarch, user_attributes=user_attributes)
 
     '''Solve scale inference problem'''
-    abstract_analytical_models_dict=safcore.solve_scale_inference_problem(scale_prob)
+    abstract_analytical_primitive_models_dict,abstract_analytical_component_models_dict= \
+        safcore.solve_scale_inference_problem(scale_prob)
 
     warn(":: done, scale inference",also_stdout=True)
     warn("")
     warn(":: Export Accelergy models",also_stdout=True)
     backend_obj_rep, backend_lib_rep= \
-        safio.export_analytical_models(abstract_analytical_models_dict,scale_prob)
+        safio.export_analytical_models(abstract_analytical_primitive_models_dict, \
+                                       abstract_analytical_component_models_dict,scale_prob,user_attributes)
     warn(":: done, Accelergy export",also_stdout=True)
     #print("abstract_analytical_models_dict:",abstract_analytical_models_dict)
     #solve.solve(scale_prob)

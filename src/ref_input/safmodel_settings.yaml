@@ -7,3 +7,4 @@ scale_inference_solver:
   solver: filmint
   args:
     neos_email: abf149@mit.edu
+accelergy_version: 0.3

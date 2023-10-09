@@ -283,6 +283,14 @@ class PrimitiveCategory:
         scale_param_names=[att[0] for att in self.scale_parameters]
         return self.scale_parameter_vals[scale_param_names.index(param_name)]
 
+    def is_scale_parameter_inherited(self,param_name):
+        scale_param_names=[att[0] for att in self.scale_parameters]
+        return self.scale_parameters[scale_param_names.index(param_name)][3]
+
+    def is_scale_parameter(self,param_name):
+        scale_param_names=[att[0] for att in self.scale_parameters]
+        return param_name in scale_param_names
+
     #def inherit_scale_parameter(self,param_name,param_type=None):
     #    return self.set_scale_parameter(param_name,param_name,param_type)
 
@@ -774,8 +782,15 @@ class PrimitiveCategory:
 
         return self
 
-    def get_analytical_modeling_attributes(self):
-        return self.final_yield_values_dict
+    def get_analytical_modeling_attributes(self,force_inherit=False):
+        if force_inherit:
+            return {yield_id:(self.final_yield_values_dict[yield_id] \
+                        if ((not self.is_scale_parameter(yield_id)) or \
+                            (not self.is_scale_parameter_inherited(yield_id))) \
+                        else yield_id) \
+                            for yield_id in self.final_yield_values_dict}
+        else:
+            return self.final_yield_values_dict
 
     def build_ART(self):
         #TODO: support multiple implementations

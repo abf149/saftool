@@ -35,16 +35,17 @@ def action_expression_from_tuple(action_tuple):
     return action_dict
 
 def getAccelergyPrimitivesLibrary(analytical_model_classes_dict, \
-                                  analytical_model_actions_dict):
+                                  analytical_model_actions_dict,backend_args={}):
     info("--- moving forward with Accelergy modeling backend...")
-
+    accelergy_version=backend_args['accelergy_version']
+    # analytical_model_classes_dict[name_][yield_]
     primitives_lib={
-                    "version": 0.3,
+                    "version": accelergy_version,
                     "classes":[\
                         {
                             "name":name_,
                             "attributes": { \
-                                yield_:analytical_model_classes_dict[name_][yield_] \
+                                yield_: "must_specify" \
                                 for yield_ in analytical_model_classes_dict[name_]
                             }, \
                             "actions":[ \
@@ -59,9 +60,9 @@ def getAccelergyPrimitivesLibrary(analytical_model_classes_dict, \
     warn("--- done, build primitive classes library")
     return primitives_lib
 
-def getAccelergyTables(abstract_analytical_models_dict,primitive_models):
+def getAccelergyTables(abstract_analytical_models_dict,primitive_models,backend_args={}):
     info("--- moving forward with Accelergy modeling backend...")
-
+    accelergy_version=backend_args['accelergy_version']
     table_dict={}
     for primitive_name in abstract_analytical_models_dict:
         attr_names=abstract_analytical_models_dict[primitive_name]["attribute_names"]
@@ -103,7 +104,7 @@ def getAccelergyTables(abstract_analytical_models_dict,primitive_models):
             info("\n",''.join("\n%s = %s" % nm_val for nm_val in zip(attr_names,attr_vals)),':\n', \
                  ''.join("- %s: %s pJ\n" % (action,ERT[action]) for action in ERT),'\n')
 
-    return table_dict
+    return {"table_dict":table_dict,"accelergy_version":accelergy_version}
 
 def exportAccelergyERTART(primitives_ERT_ART,ERTART_fn_=ERTART_fn):
     info("--- saving Accelergy ERT/ART to",ERTART_fn_,"...")

@@ -2,46 +2,46 @@ version: 0.3
 classes:
 - name: PositionGeneratorModel
   attributes:
-    clock: 0
-    technology: 0
-    format: 0
-    md_in_pr_thresh: 0
-    md_in_cr_thresh: 0
-    md_in_pw_thresh: 0
-    md_in_nc_thresh: 0
-    pos_out_pr_thresh: 0
-    pos_out_cr_thresh: 0
-    pos_out_pw_thresh: 0
-    pos_out_nc_thresh: 0
+    clock: must_specify
+    technology: must_specify
+    format: must_specify
+    md_in_pr_thresh: must_specify
+    md_in_cr_thresh: must_specify
+    md_in_pw_thresh: must_specify
+    md_in_nc_thresh: must_specify
+    pos_out_pr_thresh: must_specify
+    pos_out_cr_thresh: must_specify
+    pos_out_pw_thresh: must_specify
+    pos_out_nc_thresh: must_specify
   actions:
   - name: gen
   - name: gated_gen
 - name: MetadataParserModel
   attributes:
-    clock: 0
-    technology: 0
-    format: 0
-    md_in_rw_thresh: 0
-    md_in_pr_thresh: 0
-    md_in_ww_thresh: 0
-    at_bound_out_rw_thresh: 0
-    at_bound_out_pr_thresh: 0
-    at_bound_out_ww_thresh: 0
+    clock: must_specify
+    technology: must_specify
+    format: must_specify
+    md_in_rw_thresh: must_specify
+    md_in_pr_thresh: must_specify
+    md_in_ww_thresh: must_specify
+    at_bound_out_rw_thresh: must_specify
+    at_bound_out_pr_thresh: must_specify
+    at_bound_out_ww_thresh: must_specify
   actions:
   - name: check_bound
   - name: gated_check_bound
 - name: IntersectionLeaderFollowerModel
   attributes:
-    clock: 0
-    technology: 0
-    format_leader: 0
-    strategy: 0
-    md_in_leader_rw_thresh: 0
-    md_in_leader_pr_thresh: 0
-    md_in_leader_ww_thresh: 0
-    md_out_rw_thresh: 0
-    md_out_pr_thresh: 0
-    md_out_ww_thresh: 0
+    clock: must_specify
+    technology: must_specify
+    format_leader: must_specify
+    strategy: must_specify
+    md_in_leader_rw_thresh: must_specify
+    md_in_leader_pr_thresh: must_specify
+    md_in_leader_ww_thresh: must_specify
+    md_out_rw_thresh: must_specify
+    md_out_pr_thresh: must_specify
+    md_out_ww_thresh: must_specify
   actions:
   - name: fill
   - name: intersect

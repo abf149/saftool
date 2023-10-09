@@ -193,8 +193,8 @@ def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,f
 
     return solution_dict
 
-def solve1_populate_analytical_model_attributes(minlp_solution_dict,scale_problem):
-    info("-- Populating analytical model attributes...")
+def solve1_populate_analytical_primitive_model_attributes(minlp_solution_dict,scale_problem):
+    info("-- Populating analytical primitive model attributes...")
     abstract_analytical_models_dict={}
     primitive_models=scale_problem['primitive_models']
     for primitive_name in primitive_models:
@@ -212,8 +212,8 @@ def solve1_populate_analytical_model_attributes(minlp_solution_dict,scale_proble
         abstract_analytical_models_dict[primitive_name]["attribute_values"]=attr_vals
 #        abstract_analytical_models_dict[primitive_name]["attribute_types"]= \
 #            [for y in yields]
-    warn("-- => done populating analytical model attributes.")
-    warn("-- SUMMARY OF ABSTRACT ANALYTICAL MODEL SOLUTION:")
+    warn("-- => done populating analytical primitive model attributes.")
+    warn("-- SUMMARY OF ABSTRACT ANALYTICAL PRIMITIVE MODEL SOLUTION:")
     info("  Model attribute breakdown (",len(list(abstract_analytical_models_dict.keys())),"analytical models):")
     for primitive_name in abstract_analytical_models_dict:
         prim_model_params=abstract_analytical_models_dict[primitive_name]
@@ -226,12 +226,47 @@ def solve1_populate_analytical_model_attributes(minlp_solution_dict,scale_proble
 
     return abstract_analytical_models_dict
 
+def solve1_populate_analytical_component_model_attributes(minlp_solution_dict,scale_problem,sub_action_graph):
+    info("-- Populating analytical component model attributes...")
+    abstract_analytical_models_dict={}
+    component_models=scale_problem['component_models']
+    for component_name in component_models:
+        abstract_analytical_models_dict[component_name]={}
+        yields=component_models[component_name].get_yields()
+        component_models[component_name].set_analytical_modeling_attributes(minlp_solution_dict)
+        abstract_analytical_models_dict[component_name]["attributes"]= \
+            component_models[component_name].get_analytical_modeling_attributes(force_inherit=True)
+        abstract_analytical_models_dict[component_name]["category"]= \
+            component_models[component_name].get_category()
+
+        attr_names, attr_vals = component_models[component_name].get_yield_attributes_names_and_vec()
+
+        abstract_analytical_models_dict[component_name]["attribute_names"]=attr_names
+        abstract_analytical_models_dict[component_name]["attribute_values"]=attr_vals
+#        abstract_analytical_models_dict[primitive_name]["attribute_types"]= \
+#            [for y in yields]
+    warn("-- => done populating analytical model attributes.")
+    warn("-- SUMMARY OF ABSTRACT ANALYTICAL MODEL SOLUTION:")
+    info("  Model attribute breakdown (",len(list(abstract_analytical_models_dict.keys())),"analytical models):")
+    for component_name in abstract_analytical_models_dict:
+        prim_model_params=abstract_analytical_models_dict[component_name]
+        category=prim_model_params["category"]
+        attrs_dict=prim_model_params["attributes"]
+        info("   ",component_name,"(",len(list(attrs_dict.keys())),"attributes):")
+        info("    (",category,")")
+        for attr_ in attrs_dict:
+            info("    -",attr_,"=",attrs_dict[attr_])
+
+    return abstract_analytical_models_dict
+
 def solve1_scale_inference(scale_problem):
     warn("- Solve phase 1: solve MINLP")
     simplified_symbols=scale_problem["simplified_symbols"]
     simplified_symbol_types=scale_problem["simplified_symbol_types"]
     simplified_constraints=scale_problem["simplified_constraints"]
     simplified_objective_function=scale_problem["global_objective"]
+    buffer_action_tree=scale_problem["buffer_action_tree"]
+    sub_action_graph=scale_problem["sub_action_graph"]
     yields=scale_problem["yields"]
     user_attributes=scale_problem["user_attributes"]
     solver_attributes=user_attributes["scale_inference_solver"]
@@ -244,8 +279,11 @@ def solve1_scale_inference(scale_problem):
     # Duplicate solution_dict within problem struct for later reference
     scale_problem['minlp_solution_dict']=minlp_solution_dict
 
-    abstract_analytical_models_dict= \
-        solve1_populate_analytical_model_attributes(minlp_solution_dict,scale_problem)
+    abstract_analytical_primitive_models_dict= \
+        solve1_populate_analytical_primitive_model_attributes(minlp_solution_dict,scale_problem)
+    
+    abstract_analytical_component_models_dict= \
+        solve1_populate_analytical_component_model_attributes(minlp_solution_dict,scale_problem,sub_action_graph)
 
     warn("- => done, solve phase 1.")
-    return abstract_analytical_models_dict
+    return abstract_analytical_primitive_models_dict,abstract_analytical_component_models_dict

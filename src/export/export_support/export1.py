@@ -5,7 +5,8 @@ from util.helper import info,warn,error
 
 def getBackendPrimitiveLibraryRepresentation(analytical_model_classes_dict, \
                                              analytical_model_actions_dict, \
-                                             backend="accelergy"):
+                                             backend="accelergy", \
+                                             backend_args={}):
     '''Get a backend-compatible reprsentation of all
        primitive classes'''
     info("-- Generating backend-compatible representation of primitive classes...")
@@ -14,7 +15,8 @@ def getBackendPrimitiveLibraryRepresentation(analytical_model_classes_dict, \
     res={}
     if backend=="accelergy":
         res=acc_.getAccelergyPrimitivesLibrary(analytical_model_classes_dict, \
-                                               analytical_model_actions_dict)
+                                               analytical_model_actions_dict, \
+                                               backend_args=backend_args)
     else:
         error("Invalid modeling backend",backend)
         info("Terminating.")
@@ -24,7 +26,8 @@ def getBackendPrimitiveLibraryRepresentation(analytical_model_classes_dict, \
     return res
 
 def getBackendPrimitiveObjectiveRepresentation(abstract_analytical_models_dict, \
-                                               primitive_models, backend="accelergy"):
+                                               primitive_models, backend="accelergy", \
+                                               backend_args={}):
     '''Get a backend-compatible representation of all 
        primitives' objective function values'''
     info("-- Generating backend-compatible representation of primitive objective function...")
@@ -32,7 +35,7 @@ def getBackendPrimitiveObjectiveRepresentation(abstract_analytical_models_dict, 
 
     res={}
     if backend=="accelergy":
-        res=acc_.getAccelergyTables(abstract_analytical_models_dict,primitive_models)
+        res=acc_.getAccelergyTables(abstract_analytical_models_dict,primitive_models,backend_args=backend_args)
     else:
         error("Invalid modeling backend",backend)
         info("Terminating.")
@@ -100,12 +103,14 @@ def installPrimitiveLibToBackend(lib_dump_fn, backend='accelergy'):
 
 def export1_backend_objective_models(abstract_analytical_models_dict, \
                                      primitive_models, \
-                                     backend='accelergy'):
+                                     backend='accelergy', \
+                                     backend_args={}):
     warn("- Starting export of objective function models to modeling backend")
 
     backend_obj_rep=getBackendPrimitiveObjectiveRepresentation(abstract_analytical_models_dict, \
                                                                primitive_models, \
-                                                               backend=backend)
+                                                               backend=backend, \
+                                                               backend_args=backend_args)
 
     obj_dump_fn=exportPrimitiveObjectiveRepresentation(backend_obj_rep, \
                                                        backend=backend)
@@ -118,11 +123,13 @@ def export1_backend_objective_models(abstract_analytical_models_dict, \
 
 def export1_backend_primitive_lib(analytical_model_classes_dict, \
                                   analytical_model_actions_dict, \
-                                  backend='accelergy'):
+                                  backend='accelergy', \
+                                  backend_args={}):
     warn("- Starting export of primitive library to modeling backend")
     backend_lib_rep=getBackendPrimitiveLibraryRepresentation(analytical_model_classes_dict, \
                                                              analytical_model_actions_dict, \
-                                                             backend=backend)    
+                                                             backend=backend, \
+                                                             backend_args=backend_args)    
     lib_dump_fn=exportPrimitiveLibraryRepresentation(backend_lib_rep, \
                                                      backend=backend)
     lib_install_fn=installPrimitiveLibToBackend(lib_dump_fn, \
@@ -134,14 +141,17 @@ def export1_backend_primitive_lib_objective_models(scale_problem, \
                                                    analytical_model_classes_dict, \
                                                    analytical_model_actions_dict, \
                                                    abstract_analytical_models_dict, \
-                                                   backend='accelergy'):
+                                                   backend='accelergy', \
+                                                   backend_args={}):
     
     backend_obj_rep=export1_backend_objective_models(abstract_analytical_models_dict, \
                                                      scale_problem['primitive_models'], \
-                                                     backend=backend)
+                                                     backend=backend, \
+                                                     backend_args=backend_args)
     
     backend_lib_rep=export1_backend_primitive_lib(analytical_model_classes_dict, \
                                                   analytical_model_actions_dict, \
-                                                  backend=backend)
+                                                  backend=backend, \
+                                                  backend_args=backend_args)
     
     return backend_obj_rep, backend_lib_rep
