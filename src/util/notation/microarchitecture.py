@@ -291,6 +291,9 @@ class PrimitiveCategory:
         scale_param_names=[att[0] for att in self.scale_parameters]
         return param_name in scale_param_names
 
+    def is_taxo_attribute(self,attr_name):
+        return attr_name in [attr_tuple[0] for attr_tuple in self.attributes_]
+
     #def inherit_scale_parameter(self,param_name,param_type=None):
     #    return self.set_scale_parameter(param_name,param_name,param_type)
 
@@ -545,7 +548,6 @@ class PrimitiveCategory:
                     # by index
                     for idx in attrs_include:
                         val=self.attribute_vals[idx]
-                        #print(val)
                         if not isinstance(val,FormatType):
                             yield_symbol_dict_updates[self.attributes_[idx][0]]=(val,"val")
                             #self.yield_symbol_dict[self.attributes_[idx][0]]=(val,"val")
@@ -557,7 +559,6 @@ class PrimitiveCategory:
                     for idx,attr_ in enumerate(self.attributes_):
                         if attr_ in attrs_include:
                             val=self.attribute_vals[idx]
-                            #print(val)
                             if not isinstance(val,FormatType):
                                 yield_symbol_dict_updates[attr_[0]]=(val,"val")
                                 #self.yield_symbol_dict[attr_[0]]=(val,"val")
@@ -572,7 +573,6 @@ class PrimitiveCategory:
                     for idx,attr_ in enumerate(self.attributes_):
                         if idx not in attrs_exclude:
                             val=self.attribute_vals[idx]
-                            #print(val)
                             if not isinstance(val,FormatType):
                                 yield_symbol_dict_updates[attr_[0]]=(val,"val")
                                 #self.yield_symbol_dict[attr_[0]]=(val,"val")
@@ -584,7 +584,6 @@ class PrimitiveCategory:
                     for idx,attr_ in enumerate(self.attributes_):
                         if attr_ not in attrs_exclude:
                             val=self.attribute_vals[idx]
-                            #print(val)
                             if not isinstance(val,FormatType):
                                 yield_symbol_dict_updates[attr_[0]]=(val,"val")
                                 #self.yield_symbol_dict[attr_[0]]=(val,"val")
@@ -784,11 +783,18 @@ class PrimitiveCategory:
 
     def get_analytical_modeling_attributes(self,force_inherit=False):
         if force_inherit:
-            return {yield_id:(self.final_yield_values_dict[yield_id] \
-                        if ((not self.is_scale_parameter(yield_id)) or \
-                            (not self.is_scale_parameter_inherited(yield_id))) \
-                        else yield_id) \
-                            for yield_id in self.final_yield_values_dict}
+            res={}
+            for yield_id in self.final_yield_values_dict:
+                if ((self.is_scale_parameter(yield_id)) and \
+                    (self.is_scale_parameter_inherited(yield_id))):
+
+                    res[yield_id]=yield_id
+
+                else:
+
+                    res[yield_id]=self.final_yield_values_dict[yield_id]
+
+            return res
         else:
             return self.final_yield_values_dict
 
@@ -938,8 +944,6 @@ class ComponentCategory(PrimitiveCategory):
                 include_idxs=self.get_scale_parameter(forall_type_arg)
             elif forall_type == "taxo_fibertree":
                 # forall_type_arg is taxonomic attribute name of fibertree
-                #print(self.obj.getId())
-                #print(forall_type_arg)
                 taxo_fibertree_val=self.get_attribute(forall_type_arg)
                 include_idxs=list(range(len(taxo_fibertree_val)))
             else:

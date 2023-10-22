@@ -73,3 +73,7 @@ def load_config_yaml(config_filename):
         config=yaml.safe_load(config_fp)
     
     return config
+
+def save_yaml(dict_,save_filename):
+    with open(save_filename,'w') as save_fp:
+        yaml.dump(dict_,save_fp)

@@ -19,10 +19,11 @@ def parse_args():
     parser.add_argument('-n','--netlist',default='ref_output/new_arch.yaml')
     parser.add_argument('-a','--arch',default='ref_input/arch.yaml')
     parser.add_argument('-s','--sparseopts',default='ref_input/sparseopts.yaml')
-    parser.add_argument('-c','--comp-in',default='ref_input/compound_components.yaml')
+    #parser.add_argument('-c','--comp-in',default='ref_input/compound_components.yaml')
+    parser.add_argument('-c', '--comp-in', action='append', default=['ref_input/compound_components.yaml'])
     parser.add_argument('-o','--dir-out',default='')
     parser.add_argument('-r','--arch-out',default='ref_output/arch_w_SAF.yaml')
-    parser.add_argument('-k','--comp-out',default='ref_output/compound_components.yaml')
+    parser.add_argument('-k','--comp-out',default='ref_output/') #ref_output/compound_components.yaml
     parser.add_argument('-L','--log', action='store_true')
     parser.add_argument('-f','--log-file',default='./safmodel.log')    
     args = parser.parse_args()
@@ -43,7 +44,7 @@ def parse_args():
     print("- sparseopts:",args.sparseopts)
     sparseopts=sl_config.load_config_yaml(args.sparseopts)
     print("- compound components (input):",args.comp_in)
-    comp_in=sl_config.load_config_yaml(args.comp_in)
+    comp_in=[sl_config.load_config_yaml(fn_str) for fn_str in args.comp_in]
     print("- arch output path:",args.arch_out)
     arch_out_path=args.arch_out
     print("- compound components path (output):",args.comp_out)
@@ -65,15 +66,28 @@ def load_taxonomic_microarchitecture(netlist):
     '''Load taxonomic description of SAF microarchitecture'''
     return Architecture.fromDict(sl_config.load_config_yaml(netlist))
 
-def export_analytical_models(abstract_analytical_primitive_models_dict,abstract_analytical_component_models, \
+def export_analytical_models(arch, \
+                             comp_in, \
+                             arch_out_path, \
+                             comp_out_path, \
+                             abstract_analytical_primitive_models_dict,abstract_analytical_component_models, \
                              scale_problem,user_attributes):
     backend_args={
-        "accelergy_version":user_attributes["accelergy_version"]
+        "accelergy_version":user_attributes["model_export_settings"]["accelergy_version"],
+        "arch_out_path":arch_out_path,
+        "comp_out_path":comp_out_path,
+        "component_single_file":user_attributes["model_export_settings"]["component_single_file"]
     }
 
+    '''Augment scale inference problem structure with arch and flattened_arch'''
+    flat_arch=sl_config.flatten_arch_wrapper(arch)
+    scale_problem['arch']=arch
+    scale_problem['flat_arch']=flat_arch
+
     '''Export abstract analytical models'''
-    backend_obj_rep, backend_lib_rep= \
-        am_exp.export_backend_modeling_suite(mr_.primitive_model_yields_supersets, \
+    backend_obj_rep, backend_prim_lib_rep, backend_comp_lib_rep, backend_buffer_lib_rep= \
+        am_exp.export_backend_modeling_suite(comp_in, \
+                                             mr_.primitive_model_yields_supersets, \
                                              mr_.primitive_model_actions, \
                                              abstract_analytical_primitive_models_dict, \
                                              mr_.component_model_yields_supersets, \
@@ -81,4 +95,4 @@ def export_analytical_models(abstract_analytical_primitive_models_dict,abstract_
                                              abstract_analytical_component_models, \
                                              scale_problem, \
                                              backend_args=backend_args)
-    return backend_obj_rep, backend_lib_rep
+    return backend_obj_rep, backend_prim_lib_rep, backend_comp_lib_rep, backend_buffer_lib_rep

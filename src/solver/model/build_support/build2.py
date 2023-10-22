@@ -832,7 +832,8 @@ def build2_system_of_relations(sclp,user_attributes,fmt_iface_bindings,dtype_lis
     return {"symbols":symbols, "symbol_types":symbol_types, "constraints":constraints, \
             "energy_objectives":energy_objectives, "area_objectives":area_objectives, \
             "yields":yields, "primitive_models":primitive_models, "component_models":component_models, \
-            "buffer_action_tree":buffer_action_tree,"sub_action_graph":sub_action_graph, \
+            "buffer_action_tree":buffer_action_tree,"component_energy_action_tree":component_energy_action_tree, \
+            "sub_action_graph":sub_action_graph, \
             "global_objective":simplified_global_objective,"global_energy_objective":global_energy_objective, \
             "global_area_objective":global_area_objective, \
             "abstract_global_objective_expression":abstract_global_objective_expression,}

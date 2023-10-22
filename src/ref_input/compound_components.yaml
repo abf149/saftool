@@ -200,53 +200,53 @@ compound_components:
               - name: idle
   
   
-  - name: FIFO
-    attributes:
-      technology: must_specify
-      depth: must_specify
-      width: must_specify
-      counter_width: log2(depth)
-    subcomponents:
-      - name: storage
-        class: SRAM
-        attributes:
-          technology: technology
-          width: width
-          depth: depth
-          datawidth: width
-      - name: addr_counters[0..1] #read and write addr counters
-        class: intadder
-        attributes:
-          technology: technology
-          datawidth: counter_width
-      - name: occupancy_counter
-        class: intadder
-        attributes:
-          technology: technology
-          datawidth: counter_width
-    actions:
-      - name: read
-        subcomponents:
-          - name: storage
-            actions:
-              - name: read
-          - name: addr_counters[0]
-            actions: 
-              - name: add
-          - name: occupancy_counter
-            actions:
-              - name: add
-      - name: write
-        subcomponents:
-          - name: storage
-            actions:
-              - name: write
-          - name: addr_counters[0]
-            actions: 
-              - name: add
-          - name: occupancy_counter
-            actions:
-              - name: add
+#  - name: FIFO
+#    attributes:
+#      technology: must_specify
+#      depth: must_specify
+#      width: must_specify
+#      counter_width: log2(depth)
+#    subcomponents:
+#      - name: storage
+#        class: SRAM
+#        attributes:
+#          technology: technology
+#          width: width
+#          depth: depth
+#          datawidth: width
+#      - name: addr_counters[0..1] #read and write addr counters
+#        class: intadder
+#        attributes:
+#          technology: technology
+#          datawidth: counter_width
+#      - name: occupancy_counter
+#        class: intadder
+#        attributes:
+#          technology: technology
+#          datawidth: counter_width
+#    actions:
+#      - name: read
+#        subcomponents:
+#          - name: storage
+#            actions:
+#              - name: read
+#          - name: addr_counters[0]
+#            actions: 
+#              - name: add
+#          - name: occupancy_counter
+#            actions:
+#              - name: add
+#      - name: write
+#        subcomponents:
+#          - name: storage
+#            actions:
+#              - name: write
+#          - name: addr_counters[0]
+#            actions: 
+#              - name: add
+#          - name: occupancy_counter
+#            actions:
+#              - name: add
               
   - name: SRAM_MD_bank_control
     attributes:

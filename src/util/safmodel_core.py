@@ -56,7 +56,11 @@ def complete_user_attributes(user_attributes,system_attributes):
                                                               'neos_email':''
                                                           }
                                                      }},'defaults')
-    user_attributes=update_or_default_user_attribute(user_attributes,'accelergy_version',{'accelergy_version':0.3},'defaults')
+    #user_attributes=update_or_default_user_attribute(user_attributes,'accelergy_version',{'accelergy_version':0.3},'defaults')
+    user_attributes=update_or_default_user_attribute(user_attributes,'model_export_settings',{ \
+        'accelergy_version':0.3, \
+        'component_single_file': True
+    },'defaults')
     return user_attributes
 
 def build_scale_inference_problem(arch, sparseopts, taxo_uarch, user_attributes={}):

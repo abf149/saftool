@@ -33,8 +33,12 @@ if __name__=="__main__":
     warn(":: done, scale inference",also_stdout=True)
     warn("")
     warn(":: Export Accelergy models",also_stdout=True)
-    backend_obj_rep, backend_lib_rep= \
-        safio.export_analytical_models(abstract_analytical_primitive_models_dict, \
+    backend_obj_rep, backend_prim_lib_rep, backend_comp_lib_rep, backend_buffer_lib_rep = \
+        safio.export_analytical_models(arch, \
+                                       comp_in, \
+                                       arch_out_path, \
+                                       comp_out_path, \
+                                       abstract_analytical_primitive_models_dict, \
                                        abstract_analytical_component_models_dict,scale_prob,user_attributes)
     warn(":: done, Accelergy export",also_stdout=True)
     #print("abstract_analytical_models_dict:",abstract_analytical_models_dict)
