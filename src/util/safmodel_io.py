@@ -16,18 +16,18 @@ def parse_args():
     parser = argparse.ArgumentParser(description='safmodel: SAF microarchitecture modeling generator.')
     parser.add_argument('-a','--arch',default='ref_input/arch.yaml', \
                         help='Sparseloop architecture file.')
-    parser.add_argument('-b','--char',default='accelergy/data/primitives_table.csv', \
+    parser.add_argument('-b','--char',action='append',default=['accelergy/data/primitives_table.csv'], \
                         help='CSV EAT characterization table.')
     parser.add_argument('-c', '--comp-in', action='append', default=['ref_input/compound_components.yaml'], \
                         help='One or more Accelergy component library YAML filenames.')
-    parser.add_argument('-d','--rtl',default='hw/rtl_out/', \
+    parser.add_argument('-d','--rtl',action='append',default=['hw/rtl_out/'], \
                         help='Path to underlying RTL files associated with CSV EAT characterization table (-b/--char)')
     parser.add_argument('-f','--log-file',default='./safmodel.log', \
                         help='Log filepath (requires -L/--log to enable logging).')
     parser.add_argument('-i','--dir-in',default='', \
                         help='Input files\' directory. If not specified, '+ \
                              'arch (--arch) and components (--comp-in) files must be explicit.')
-    parser.add_argument('-j','--hcl',default='hw/chisel/src', \
+    parser.add_argument('-j','--hcl',action='append',default=['hw/chisel/src'], \
                         help='Path to high-level hardware construction language (HCL) code which generates the verilog.')
     parser.add_argument('-k','--comp-out',default='ref_output/', \
                         help='Components output filename (TODO: not currently used).')
@@ -44,7 +44,7 @@ def parse_args():
                         help='Sparseloop SAF specification file.')
     parser.add_argument('-t','--settings',default='ref_input/safmodel_settings.yaml', \
                         help='safmodel configuration file.')
-    parser.add_argument('-u','--sim',default='hw/sim_data', \
+    parser.add_argument('-u','--sim',action='append',default=['hw/sim_data'], \
                         help='safmodel configuration file.')
     args = parser.parse_args()
 
@@ -80,7 +80,8 @@ def parse_args():
            comp_out_path, \
            user_attributes, \
            do_logging,\
-           args.log_file
+           args.log_file,\
+           args.char
 
 def load_taxonomic_microarchitecture(netlist):
     '''Load taxonomic description of SAF microarchitecture'''

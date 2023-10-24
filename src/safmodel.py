@@ -4,6 +4,7 @@
 import util.helper as helper
 from util.helper import info,warn,error
 from util import safmodel_core as safcore, safmodel_io as safio
+import saflib.resources.char.ResourceRegistry as rr_
 
 if __name__=="__main__":
     arch, \
@@ -14,12 +15,20 @@ if __name__=="__main__":
     comp_out_path, \
     user_attributes, \
     do_logging,\
-    log_fn = safio.parse_args()
+    log_fn, \
+    characterization_path_list = safio.parse_args()
 
     print("logging:",do_logging)
     helper.do_log=do_logging
     if do_logging:
         helper.log_init(log_fn)  
+
+    warn(":: Setup",also_stdout=True)
+    info("Loading characterization files (",len(characterization_path_list),")...")
+    rr_.registerCharacterizationTables(filepath_list=characterization_path_list)
+    warn("=> Done.")
+
+    assert(False)
 
     warn(":: Scale inference",also_stdout=True)
 
