@@ -18,6 +18,7 @@ def registerCharacterizationTable(id_=None,filepath=""):
         #id_ = str(uuid.uuid4())
     info('- Loading characterization table with id =',id_,", filepath =",filepath,'...')
     charactization_table_dict[id_]=ch_.CharacterizationTableLoader(filepath)
+    charactization_table_dict[id_].loadCharacterizationTable()
     info('- => Done.')
 
 def registerCharacterizationTables(id_list=None,filepath_list=[]):
@@ -45,3 +46,31 @@ def getCharacterizationTablesDict():
     '''
     global charactization_table_dict
     return charactization_table_dict
+
+registerCharacterizationTable(filepath='accelergy/data/primitives_table.csv')
+ctbl=getCharacterizationTable('accelergy/data/primitives_table.csv')
+ctv,rgx=ctbl.getViewMatchingNameExpression \
+    ('BidirectionalBitmaskIntersectDecoupled_metaDataWidth$(u)',['u'])
+
+#print(ctv)
+
+sv=ctv.getSupportedVariableValues()
+cmbs=ctv.getSupportedVariableValueCombos()
+
+#print(sv)
+#print(cmbs)
+
+ctv2,rgx2=ctbl.getViewMatchingNameExpression \
+    ('BidirectionalBitmaskIntersectDecoupled_metaDataWidth$(u)',['u'],'And(clock > 1.5, clock <= 5.5)','2*critical_path_length')
+
+print( \
+ctv2.getAggregatedRowsListByNameAndFilter(name_='BidirectionalBitmaskIntersectDecoupled_metaDataWidth128', \
+                                          row_filter_expression=None, 
+                                          aggregation_expression='2*critical_path_length') \
+)
+
+cfxn=ch_.CharacterizationFunction('test_fxn',ctv2)
+
+#print(ctv2.view_dict)
+
+assert(False)
