@@ -1,10 +1,14 @@
 ''' Helper functions '''
-import yaml,logging,os
+import yaml,logging,os,warnings
 
 '''Logging'''
 log_configured=False
 do_log=False
 log_path="./safinfer.log"
+
+def custom_warning_handler(message, category, filename, lineno, file=None, line=None):
+    warn(f"{category.__name__}: {filename}:{lineno}: {message}")
+
 
 def log_init(log_path_):
     global log_path
@@ -19,6 +23,10 @@ def log_init(log_path_):
 
     logging.basicConfig(filename=log_path, level=logging.INFO)
     log_configured=True
+    #warnings.simplefilter("default")
+    #logging.captureWarnings(True)
+    warnings.showwarning = custom_warning_handler
+
 
 def log_concat(*args):
     return ' '.join(map(str, args))

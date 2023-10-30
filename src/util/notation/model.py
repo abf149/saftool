@@ -34,7 +34,7 @@ def makePassthroughConstraint(port_a,port_b,foralls=[]):
 
 def makeValuesConstraint(expr,foralls=[],ranges=[]):
     if len(foralls)==0:
-        return {"expression":expr}
+        return {"expression":expr,"ranges":ranges}
     else:
         #print(ranges)
         cnst={"expression":expr,"foralls":foralls,"ranges":ranges}
