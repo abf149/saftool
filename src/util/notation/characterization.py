@@ -94,6 +94,10 @@ class CharacterizationTableView:
     def getRowsListByName(self,name_):
         return self.view_dict[name_]
     
+    def getRowsListByVariablesDict(self,vars_dict):
+        name_=self.varsDictToName(vars_dict)
+        return self.getRowsListByName(name_)
+
     def getAggregatedRowsDictByNameAndFilter(self,name_=None,row_filter_expression=None, \
                                              aggregation_expression=None,substitute_in_filter={}):
 
