@@ -3,8 +3,21 @@
 #import solver.model.solve as solve
 import util.helper as helper
 from util.helper import info,warn,error
-from util import safmodel_core as safcore, safmodel_io as safio
 import saflib.resources.char.ResourceRegistry as rr_
+import saflib.microarchitecture.model.ModelRegistry as mr_
+from util import safmodel_core as safcore, safmodel_io as safio
+
+def temporary_model_loader():
+    from saflib.microarchitecture.model.address_primitives.PositionGenerator import PositionGeneratorModel
+    mr_.registerPrimitive("PositionGeneratorModel",PositionGeneratorModel)
+    from saflib.microarchitecture.model.format.MetadataParser import MetadataParserModel
+    mr_.registerPrimitive("MetadataParserModel",MetadataParserModel)
+    from saflib.microarchitecture.model.skipping.IntersectionLeaderFollower import IntersectionLeaderFollowerModel
+    mr_.registerPrimitive("IntersectionLeaderFollowerModel",IntersectionLeaderFollowerModel)
+    from saflib.microarchitecture.model.format.FormatUarch import FormatUarchModel
+    mr_.registerComponent("FormatUarchModel",FormatUarchModel)
+    from saflib.microarchitecture.model.skipping.SkippingUarch import SkippingUarchModel
+    mr_.registerComponent("SkippingUarchModel",SkippingUarchModel)
 
 if __name__=="__main__":
     arch, \
@@ -26,9 +39,9 @@ if __name__=="__main__":
     warn(":: Setup",also_stdout=True)
     info("Loading characterization files (",len(characterization_path_list),")...")
     rr_.registerCharacterizationTables(filepath_list=characterization_path_list)
+    info("TODO: fix hard-coded model loads (temporary_model_loader()); remove mr_ import...")
+    temporary_model_loader()
     warn("=> Done.")
-
-    assert(False)
 
     warn(":: Scale inference",also_stdout=True)
 

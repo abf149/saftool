@@ -1,6 +1,29 @@
 from ...taxo.skipping.IntersectionLeaderFollower import IntersectionLeaderFollower, intersection_instances
 import util.notation.model as mo_
-#import saflib.microarchitecture.model.model_registry as mr_
+import util.notation.characterization as ch_
+import saflib.resources.char.ResourceRegistry as rr_
+
+ctbl=rr_.getCharacterizationTable('accelergy/data/primitives_table.csv')
+cfxn=ch_.CharacterizationMetricModel('test_fxn',ctbl) \
+        .parentComponentUri('f.g') \
+        .nameExpression('BidirectionalBitmaskIntersectDecoupled_metaDataWidth$(u)',['u']) \
+        .symbolMap({'u':'@x','v':'@y'}) \
+        .inheritParameters({'clock':'5ns','technology':'45nm'}) \
+        .latencyIndependentVariableExpression('critical_path_clock_latency') \
+        .latencyRangeExpression('And(latency<=2,latency>=0)')\
+        .rowEnergyMetricFromRowPowerMetricExpression('combinational_total_power+register_total_power+clock_network_total_power') \
+        .rowAreaMetricExpression('Combinational_Area') \
+        .buildSymbolMap() \
+        .buildSymList() \
+        .buildCharacterizationTableView() \
+        .buildSupportedConfigurations() \
+        .buildSupportedSymbolValuesConstraints() \
+        .buildSupportedSymbolValueCombosConstraints() \
+        .buildRowEnergyMetricExpressionIfDerivedFromPower() \
+        .buildRowEnergyLambda() \
+        .buildRowAreaLambda() \
+        .buildEnergyAreaLatencyTable() \
+        .buildEnergyAreaMetricModels()
 
 isect_attr_list=['rw','pr','cr','ww','nc']
 scale_determinative_attr_list=['rw','pr','ww']

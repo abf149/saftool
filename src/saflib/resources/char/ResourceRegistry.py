@@ -47,7 +47,10 @@ def getCharacterizationTablesDict():
     global charactization_table_dict
     return charactization_table_dict
 
+
 registerCharacterizationTable(filepath='accelergy/data/primitives_table.csv')
+
+'''
 ctbl=getCharacterizationTable('accelergy/data/primitives_table.csv')
 ctv,rgx=ctbl.getViewMatchingNameExpression \
     ('BidirectionalBitmaskIntersectDecoupled_metaDataWidth$(u)',['u'])
@@ -120,3 +123,4 @@ cfxn=ch_.CharacterizationMetricModel('test_fxn',ctbl) \
 #print(ctv2.view_dict)
 
 assert(False)
+'''

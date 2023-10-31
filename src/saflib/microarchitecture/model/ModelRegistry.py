@@ -42,9 +42,3 @@ def getComponent(name_):
     '''
     global component_model_dict
     return component_model_dict[name_]
-
-registerPrimitive("PositionGeneratorModel",PositionGeneratorModel)
-registerPrimitive("MetadataParserModel",MetadataParserModel)
-registerPrimitive("IntersectionLeaderFollowerModel",IntersectionLeaderFollowerModel)
-registerComponent("FormatUarchModel",FormatUarchModel)
-registerComponent("SkippingUarchModel",SkippingUarchModel)
