@@ -3,7 +3,9 @@ from util.taxonomy.designelement import Primitive, Component, Architecture, Net,
 import solver.model.build_support.abstraction as ab_
 import util.model.CasCompat as cc_
 from util.helper import info,warn,error
-import copy
+import copy,re
+
+characterization_subs_char="#"
 
 '''Buffer action names which are aliases for the same concept'''
 std_buffer_action_aliases= {
@@ -36,7 +38,6 @@ def makeValuesConstraint(expr,foralls=[],ranges=[]):
     if len(foralls)==0:
         return {"expression":expr,"ranges":ranges}
     else:
-        #print(ranges)
         cnst={"expression":expr,"foralls":foralls,"ranges":ranges}
         return cnst
 
@@ -49,6 +50,28 @@ def injectUriPrefix(str_,uri_prefix):
         return str_.replace("@",uri_prefix+".")
     else:
         return str_.replace("@","")
+
+def injectCharacterizationExpressions(str_,characterization_expressions_dict):
+    if (characterization_subs_char in str_) and \
+        len(characterization_expressions_dict)>0:
+
+        # Define a regex pattern to match #(expression) in the input string
+        pattern = r'#\(([^)]+)\)'
+
+        # Function to replace matched pattern with its value from the dictionary
+        def replacer(match):
+            key = match.group(1)
+            return characterization_expressions_dict.get(key, match.group(0))
+
+        # Use re.sub to replace all instances of the pattern in the string
+        return re.sub(pattern, replacer, str_)
+    elif (characterization_subs_char in str_):
+        error('Cannot inject characterization expressions if there are none.')
+        info('Terminating.')
+        assert(False)
+
+    # Nothing to replace
+    return str_
 
 def extractForAllParams(foralls):
     var_=foralls[0][0]
@@ -103,7 +126,6 @@ def evalAttributeRangeExpression(expr_,uri_prefix="",args={}):
         if expr_type=="attrs":
             for idx,attr_ in enumerate(type_arg):
                 range_expr=expr_["ranges"][idx]
-                #print(range_expr)
                 res.append(base_expr.replace("$"+var_,attr_).replace("$!",listToArgsString(range_expr)))
         elif expr_type=="port_thrpt_attrs":
             for idx,attr_ in enumerate(args["port_thrpt_attrs"][type_arg]):
@@ -111,8 +133,6 @@ def evalAttributeRangeExpression(expr_,uri_prefix="",args={}):
                 res.append(base_expr.replace("$"+var_,attr_).replace("$!",listToArgsString(range_expr)))
     else:
         res=[base_expr.replace("$!",listToArgsString(expr_["ranges"]))]
-
-    #print(res)
 
     return res
 
@@ -143,8 +163,10 @@ def evalAttributeComboExpression(expr_,uri_prefix=""):
     return [res]
 '''
 
-def evalObjectiveExpression(expr_,uri_prefix=""):
-    return injectUriPrefix(expr_,uri_prefix)
+def evalObjectiveExpression(expr_,uri_prefix="",metrics_model_expressions_dict={}):
+    return injectUriPrefix(injectCharacterizationExpressions(expr_, \
+                                                             metrics_model_expressions_dict), \
+                           uri_prefix)
 
 '''
 class PrimitiveModel:

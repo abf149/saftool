@@ -122,6 +122,8 @@ class PrimitiveCategory:
         self.final_yield_values_dict={}
         self.ART=None
         self.ERT=None
+        self.characterization_metrics_model_dict={}
+        self.characterization_metrics_expression_dict={}
 
     def copy(self):
         return copy.deepcopy(self)
@@ -278,6 +280,22 @@ class PrimitiveCategory:
             info("Terminating.")
             assert(False)
         return self
+
+    def get_scale_param_spec_list(self):
+        return self.scale_parameters
+
+    def get_scale_parameters_name_list(self):
+        return [scale_param_tuple[0] for scale_param_tuple in self.get_scale_param_spec_list()]
+
+    def get_scale_parameters_values_list(self):
+        return self.scale_parameter_vals
+
+    def get_scale_parameters_dict(self):
+        res={}
+        scale_param_vals_list=self.get_scale_parameters_values_list()
+        for idx,scale_param_name in enumerate(self.get_scale_parameters_name_list()):
+            res[scale_param_name]=scale_param_vals_list[idx]
+        return res
 
     def get_scale_parameter(self,param_name):
         scale_param_names=[att[0] for att in self.scale_parameters]
@@ -481,6 +499,79 @@ class PrimitiveCategory:
     def get_taxo_instances(self):
         #   TODO: handle multiple-implementation scenario correctly
         return [taxo_instance for taxo_instance in self.instance_to_implementations]
+
+    '''Routines to build characterization metrics models'''
+    def register_characterization_metrics_model(self,characterization_metrics_model,id_=None):
+        '''
+        Arguments:\n
+        - characterization_metrics_model -- CharacterizationMetricModel instance capturing energy/area relationship of some
+        characterized RTL\n
+        - id_ = None - metrics model ID; if None, id_ is the function id (.getFunctionId()) of the model
+        '''
+        if id_ is None:
+            id_=characterization_metrics_model.getFunctionId()
+        self.characterization_metrics_model_dict[id_]=characterization_metrics_model
+        return self
+
+    def get_characterization_metrics_model_dict(self):
+        return self.characterization_metrics_model_dict
+
+    def get_characterization_metrics_model_id_list(self):
+        return list(self.get_characterization_metrics_model_dict().keys())
+
+    def get_characterization_metrics_model_by_id(self,id_):
+        return self.get_characterization_metrics_model_dict()[id_]
+
+    def build_characterization_metrics_model(self,id_,char_metrics_model,uri_prefix=""):
+
+        char_metrics_model.parentComponentUri(uri_prefix) \
+        .inheritParameters(self.get_scale_parameters_dict()) \
+        .buildSymbolMap() \
+        .buildSymList() \
+        .buildCharacterizationTableView() \
+        .buildSupportedConfigurations() \
+        .buildSupportedSymbolValuesConstraints() \
+        .buildSupportedSymbolValueCombosConstraints() \
+        .buildRowEnergyMetricExpressionIfDerivedFromPower() \
+        .buildRowEnergyLambda() \
+        .buildRowAreaLambda() \
+        .buildEnergyAreaLatencyTable() \
+        .buildEnergyAreaMetricModels()
+        return self
+
+    def get_metrics_model_expressions_dict(self):
+        return self.characterization_metrics_expression_dict
+
+    def get_energy_metrics_model_expressions_dict(self):
+        dct=self.get_metrics_model_expressions_dict()
+        return {id_:dct[id_]['energy'] for id_ in dct}
+
+    def get_area_metrics_model_expressions_dict(self):
+        dct=self.get_metrics_model_expressions_dict()
+        return {id_:dct[id_]['area'] for id_ in dct}
+
+    def get_metrics_model_expressions_dict_by_id(self,id_):
+        return self.get_metrics_model_expressions_dict()[id_]
+
+    def build_characterization_metrics_model_expressions(self,id_,char_metrics_model,uri_prefix=""):
+        energy_metric_expression=char_metrics_model.getEnergyMetricModelExpression()
+        area_metric_expression=char_metrics_model.getAreaMetricModelExpression()
+        self.characterization_metrics_expression_dict[id_]={
+            'energy':energy_metric_expression,
+            'area':area_metric_expression
+        }
+        return self
+
+    def build_characterization_metrics_models(self,uri_prefix=""):
+        for char_metrics_model_id in self.get_characterization_metrics_model_id_list():
+            char_metrics_model=self.get_characterization_metrics_model_dict()[char_metrics_model_id]
+            self.build_characterization_metrics_model(char_metrics_model_id, \
+                                                      char_metrics_model, \
+                                                      uri_prefix=uri_prefix)
+            self.build_characterization_metrics_model_expressions(char_metrics_model_id, \
+                                                                  char_metrics_model, \
+                                                                  uri_prefix=uri_prefix)
+        return self
 
     '''Routines to build symbols'''
     def build_symbols_for_port_attributes(self,uri_prefix=""):
@@ -713,10 +804,16 @@ class PrimitiveCategory:
 
     def build_objective_for_taxo_instance(self,taxo_instance,uri_prefix=""):
         #TODO: support multiple implementations
+        energy_metrics_model_expressions_dict=self.get_energy_metrics_model_expressions_dict()
+        area_metrics_model_expressions_dict=self.get_area_metrics_model_expressions_dict()
         impl_=self.instance_to_implementations[taxo_instance][0]
         energy_obj=impl_["energy_objective"]
-        return {action:mo_.evalObjectiveExpression(energy_obj[action],uri_prefix) for action in energy_obj}, \
-               mo_.evalObjectiveExpression(impl_["area_objective"],uri_prefix)
+        return {action:mo_.evalObjectiveExpression(energy_obj[action], \
+                                                   uri_prefix, \
+                                                   energy_metrics_model_expressions_dict) for action in energy_obj}, \
+               mo_.evalObjectiveExpression(impl_["area_objective"], \
+                                           uri_prefix, \
+                                           area_metrics_model_expressions_dict)
 
     def build_objectives(self,uri_prefix=""):
         self.energy_objective_dict,self.area_objective = \
@@ -731,6 +828,7 @@ class PrimitiveCategory:
         self.symbol_list=[]
         self.final_constraint_list=[]
         #self.yield_symbol_dict
+        self.build_characterization_metrics_models(uri_prefix_with_self)
         self.build_symbols(uri_prefix_with_self)
         self.build_constraints(uri_prefix_with_self)
         self.build_objectives(uri_prefix_with_self)
@@ -801,7 +899,8 @@ class PrimitiveCategory:
     def build_ART(self):
         #TODO: support multiple implementations
         impl_=self.instance_to_implementations[self.applicable_taxo_instance_alias][0]
-        area_obj_str=mo_.evalObjectiveExpression(impl_["area_objective"],"")
+        area_metrics_model_expressions_dict=self.get_area_metrics_model_expressions_dict()
+        area_obj_str=mo_.evalObjectiveExpression(impl_["area_objective"],"",area_metrics_model_expressions_dict)
         target_attrs=[]
         for y in self.final_yield_values_dict:
             val=self.final_yield_values_dict[y]
@@ -810,6 +909,7 @@ class PrimitiveCategory:
                 target_attrs.append(y)
             except:
                 pass
+
         ART_fxn=lambda model_attr_dict: \
                     sp.sympify(area_obj_str).subs({y:model_attr_dict[y] for y in target_attrs})
 
@@ -822,8 +922,11 @@ class PrimitiveCategory:
     def build_ERT(self):
         #TODO: support multiple implementations
         impl_=self.instance_to_implementations[self.applicable_taxo_instance_alias][0]
+        energy_metrics_model_expressions_dict=self.get_energy_metrics_model_expressions_dict()
         energy_obj=impl_["energy_objective"]
-        energy_obj_str_dict={action:mo_.evalObjectiveExpression(energy_obj[action],"") for action in energy_obj}
+        energy_obj_str_dict={action:mo_.evalObjectiveExpression(energy_obj[action], \
+                                                                "", \
+                                                                energy_metrics_model_expressions_dict) for action in energy_obj}
         target_attrs=[]
         for y in self.final_yield_values_dict:
             val=self.final_yield_values_dict[y]

@@ -3,6 +3,7 @@ import util.notation.model as mo_
 import sympy as sp
 from util.helper import info,warn,error
 import csv, re
+import util.model.CasCompat as cc_
 import util.notation.characterization_support.expressions as ex_
 import util.notation.characterization_support.fit as fit_
 import copy
@@ -236,6 +237,10 @@ class CharacterizationMetricModel:
         self.energy_area_latency_dict=None
         self.energy_area_latency_dataset_column_names=None
         self.energy_area_latency_dataset=None
+        self.metric_model_exprs=None
+        self.metric_model_lambdas=None
+        self.single_latency=None
+        self.clock_latency_column=None
 
     '''Function initialization'''
     def functionId(self,function_id):
@@ -288,8 +293,13 @@ class CharacterizationMetricModel:
     def getLatencyIndependentVariableExpression(self):
         return self.latency_independent_variable_expression
 
-    def latencyParameterId(self,latency_param_id):
+    def latencyParameterId(self,latency_param_id,single_latency=False,clock_latency_column=None):
         self.latency_param_id=latency_param_id
+        self.single_latency=single_latency
+        if single_latency and (clock_latency_column is None):
+            # Default clock latency column in characterization table
+            clock_latency_column='critical_path_clock_latency'
+        self.clock_latency_column=clock_latency_column
         return self
     
     def getLatencyParameterId(self):
@@ -301,6 +311,18 @@ class CharacterizationMetricModel:
     
     def getLatencyConstantValue(self):
         return self.latency_constant_value
+
+    def isSingleLatency(self):
+        return self.single_latency
+    
+    def getClockLatencyColumn(self):
+        return self.clock_latency_column
+
+    def setSingleLatencyValue(self,val_):
+        self.single_latency_value=val_
+
+    def getSingleLatencyValue(self):
+        return self.single_latency_value
 
     def latencyRangeExpression(self,latency_range_expression):
         self.latency_range_expression=latency_range_expression
@@ -356,7 +378,11 @@ class CharacterizationMetricModel:
 
     def buildSymbolMap(self):
         if self.parent_uri is not None:
+            '''
             self.sym_map_dict={var_:self.sym_map_dict[var_].replace("@",self.parent_uri+".") \
+                                    for var_ in self.sym_map_dict}
+            '''
+            self.sym_map_dict={var_:self.sym_map_dict[var_] \
                                     for var_ in self.sym_map_dict}
         return self
 
@@ -390,7 +416,11 @@ class CharacterizationMetricModel:
                     info("Terminating.")
                     assert(False)
 
-            latency_independent_variable_expression=self.getLatencyIndependentVariableExpression()
+            if self.isSingleLatency():
+                latency_independent_variable_expression=self.getClockLatencyColumn()
+                self.setSingleLatencyValue(latency_val)
+            else:
+                latency_independent_variable_expression=self.getLatencyIndependentVariableExpression()
             latency_range_expression="Eq(latency,"+str(latency_val)+")"
 
             self.latencyIndependentVariableExpression(latency_independent_variable_expression)
@@ -612,7 +642,45 @@ class CharacterizationMetricModel:
     
     def getSupportedSymbolValueCombosConstraints(self):
         return self.supported_symbol_value_combos_constraints_list
-    
+
+    def getMetricModelExpressionsDict(self):
+        return self.metric_model_exprs
+
+    def getEnergyMetricModelExpression(self):
+        return self.getMetricModelExpressionsDict()['energy']
+
+    def getAreaMetricModelExpression(self):
+        return self.getMetricModelExpressionsDict()['area']
+
+    def getMetricModelLambdasDict(self):
+        return self.metric_model_lambdas
+
+    def getEnergyMetricModelLambda(self):
+        return self.getMetricModelLambdasDict()['energy']
+
+    def getAreaMetricModelLambda(self):
+        return self.getMetricModelLambdasDict()['area']
+
+    def substituteClockLatencyInExprAndLambda(self,expr,lmbda,independent_var_names,clock_value):
+        safe_non_latency_independent_var_names=[cc_.create_safe_symbol(var_name) \
+                                                    for var_name in independent_var_names if var_name != 'latency']
+
+        safe_from_prefix_non_latency_independent_var_names=[var_name.replace("@","x___") \
+                                                                for var_name in safe_non_latency_independent_var_names]
+
+        latency_sym=sp.symbols('latency')
+        #clock_column_name_sym=sp.symbols('clock_column_name')
+        clock_column_val_expr=sp.sympify(clock_value)
+        expr_safe=cc_.create_safe_constraint(expr)
+        expr_safe_from_prefix=expr_safe.replace("@","x___")
+        expr_sp=sp.sympify(expr_safe_from_prefix)
+        expr_sp_subs=sp.simplify(expr_sp.subs({latency_sym:clock_column_val_expr}))
+        expr_subs=str(expr_sp_subs)
+        lmbda_subs=sp.lambdify(safe_from_prefix_non_latency_independent_var_names, expr_sp_subs, 'numpy')
+        expr_subs_unsafe_from_prefix=expr_subs.replace("x___","@")
+        expr_subs_unsafe=cc_.recover_unsafe_symbol(expr_subs_unsafe_from_prefix)
+        return expr_subs_unsafe,lmbda_subs
+
     def buildEnergyAreaMetricModels(self,type_='poly',norm_='StandardScaler'):
         
         name_expression=self.getNameExpression()
@@ -642,9 +710,6 @@ class CharacterizationMetricModel:
             area_scaler=scalers['area']
             area_best_degree=best_degrees['area']
 
-            #print(energy_model)
-            #print(energy_scaler)
-
             energy_expr, \
             energy_lambda=fit_.polynomial_to_sympy_expression_with_lambda_generalized(energy_model, \
                                                                                       X_scaler, \
@@ -658,8 +723,12 @@ class CharacterizationMetricModel:
                                                                                     area_scaler, \
                                                                                     area_best_degree, \
                                                                                     independent_var_names)
-
+            
+            exprs={"energy":energy_expr,"area":area_expr}
             lambdas={"energy":energy_lambda,"area":area_lambda}
+
+            self.metric_model_exprs=exprs
+            self.metric_model_lambdas=lambdas
 
             mse_comparison=fit_.compare_lambda_with_baseline(fitted_models, \
                                                              lambdas, \
@@ -668,7 +737,7 @@ class CharacterizationMetricModel:
                                                              independent_var_names, \
                                                              scalers, \
                                                              best_degrees)
-            
+
             if mse_comparison['energy'] > 1e-10 or mse_comparison['area'] > 1e-10:
                 warn('Warning: mse_comparison[\'energy\'] ==', \
                      mse_comparison['energy'], \
@@ -681,6 +750,30 @@ class CharacterizationMetricModel:
             info(name_expression,"area expression:\n",area_expr)
             info("-",name_expression,"MSE area error (symbolic vs numerical):",mse_comparison['area'],also_stdout=True)
     
+            if self.isSingleLatency():
+                info("- Substituting in clock latency for latency independent variable...")
+                # Substitute in clock latency column for latneyc
+                clock_column_name=self.getClockLatencyColumn()
+                clock_value=self.getSingleLatencyValue()
+                energy_expr,energy_lambda=self.substituteClockLatencyInExprAndLambda(energy_expr, \
+                                                                                     energy_lambda, \
+                                                                                     independent_var_names, \
+                                                                                     clock_value)
+                area_expr,area_lambda=self.substituteClockLatencyInExprAndLambda(area_expr, \
+                                                                                 area_lambda, \
+                                                                                 independent_var_names, \
+                                                                                 clock_value)
+                
+                exprs={"energy":energy_expr,"area":area_expr}
+                lambdas={"energy":energy_lambda,"area":area_lambda}
+
+                self.metric_model_exprs=exprs
+                self.metric_model_lambdas=lambdas
+            else:
+                error("Non-single latency not yet supported.",also_stdout=True)
+                info("Terminating.")
+                assert(False)
+
 
             #energy_model_expr, \
             #energy_model_lambda=fit_.polynomial_to_sympy_expression_with_lambda_corrected(energy_model, energy_scaler, energy_best_degree, features)

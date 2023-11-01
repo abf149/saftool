@@ -8,11 +8,12 @@ import sympy as sp
 
 supported_neos_solver_opts=['couenne', 'cbc', 'cplex', 'filmint', 'mosek', 'octeract']
 
+'''
 def evaluate_expression(final_objective, model, variable_mapping):
-    '''
+
     Parse sympy-compatible objective function expression string (final_objective)
-    and generate a PyMathProg-compatible objective function expression
-    '''
+    and generate a pyomo-compatible objective function expression
+
 
     # Tokenize
     safe_final_objective=cc_.create_safe_constraint(final_objective)
@@ -39,7 +40,39 @@ def evaluate_expression(final_objective, model, variable_mapping):
     pymathprog_expr=''.join(map(str, stack))
     result = eval(pymathprog_expr)
     return result
+'''
 
+def evaluate_expression(final_objective, model, variable_mapping):
+    '''
+    Parse sympy-compatible objective function expression string (final_objective)
+    and generate a pyomo-compatible objective function expression
+    '''
+
+    # Tokenize with improved regex to handle scientific notation
+    tokens = re.findall(r"[\w.]+[eE][-+]?[\d]+|[+-/*()]|[\w.]+", final_objective)
+
+    # Parse
+    stack = []
+    operators = ['+', '-', '*', '/', '(', ')']
+    symbol_dict = {}
+    for token in tokens:
+        if token in operators:
+            stack.append(token)
+        elif cc_.recover_unsafe_symbol(token) in variable_mapping:
+            unsafe_token_name = cc_.recover_unsafe_symbol(token)
+            symbol_dict[unsafe_token_name] = getattr(model, variable_mapping[cc_.recover_unsafe_symbol(token)])
+            stack.append(f"symbol_dict['{unsafe_token_name}']")
+        else:
+            try:
+                stack.append(float(token))
+            except ValueError:
+                raise ValueError(f"Unknown token: {token}")
+
+    # Generate
+    pymathprog_expr = ''.join(map(str, stack))
+    result = eval(pymathprog_expr)
+    return result
+    
 def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,final_constraints,final_objective,yields, \
                                               solver_man="neos",solver_opt="filmint",args={'neos_email':'abf149@mit.edu'}):
 
