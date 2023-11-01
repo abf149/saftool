@@ -17,7 +17,7 @@ if __name__=="__main__":
     reconfigurable_arch, \
     bind_out_path, \
     topo_out_path, \
-    saflib, \
+    saflib_path, \
     do_logging,\
     log_fn = safio.parse_args()
 
@@ -27,15 +27,18 @@ if __name__=="__main__":
         helper.log_init(log_fn)    
     print("reconfigurable_arch:",reconfigurable_arch)
 
+    # Load taxonomic library
+    import saflib.microarchitecture.taxo.TaxoRegistry
+
     # Build and solve the SAF microarchitecture inference problem:
     taxo_arch = safcore.build_saf_uarch_inference_problem(arch, \
-                                                  sparseopts, \
-                                                  prob, \
-                                                  mapping, \
-                                                  reconfigurable_arch, \
-                                                  bind_out_path)
+                                                          sparseopts, \
+                                                          prob, \
+                                                          mapping, \
+                                                          reconfigurable_arch, \
+                                                          bind_out_path)
 
-    result = safcore.solve_saf_uarch_inference_problem(taxo_arch, saflib)
+    result = safcore.solve_saf_uarch_inference_problem(taxo_arch, saflib_path)
 
     # Success: dump
     # Fail: exit
