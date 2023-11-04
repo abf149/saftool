@@ -188,6 +188,12 @@ class PrimitiveCategory:
         attr_names=[att[0] for att in self.attributes_]
         return self.attribute_vals[attr_names.index(attr_name)]
 
+    def get_attributes(self):
+        return self.attributes_
+    
+    def get_attribute_names(self):
+        return [att[0] for att in self.attributes_]
+
     def port_in(self,port_name,port_net_type,port_fmt,attr_reference=None):
         self.ports_.append((port_name,"in",port_net_type,port_fmt,attr_reference))
         return self

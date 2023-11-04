@@ -4,15 +4,6 @@ import util.notation.characterization as ch_
 import saflib.resources.char.ResourceRegistry as rr_
 
 ctbl=rr_.getCharacterizationTable('accelergy/data/primitives_table.csv')
-'''
-cfxn=ch_.CharacterizationMetricModel('test_fxn',ctbl) \
-        .nameExpression('BidirectionalCoordinatePayloadIntersectDecoupled_metaDataWidth$(u)',['u']) \
-        .symbolMap({'u':'@md_in_leader_ww_thresh'}) \
-        .latencyIndependentVariableExpression('critical_path_clock_latency') \
-        .latencyRangeExpression('And(latency<=2,latency>=0)')\
-        .rowEnergyMetricFromRowPowerMetricExpression('combinational_total_power+register_total_power+clock_network_total_power') \
-        .rowAreaMetricExpression('Combinational_Area')
-'''
 cfxn=ch_.CharacterizationMetricModel('test_fxn',ctbl) \
         .nameExpression('BidirectionalCoordinatePayloadIntersectDecoupled_metaDataWidth$(u)',['u']) \
         .symbolMap({'u':'@md_in_leader_ww_thresh'}) \

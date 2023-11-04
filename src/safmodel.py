@@ -34,7 +34,7 @@ if __name__=="__main__":
     print("logging:",do_logging)
     helper.do_log=do_logging
     if do_logging:
-        helper.log_init(log_fn)  
+        helper.log_init(log_fn)
 
     warn(":: Setup",also_stdout=True)
     info("Loading characterization files (",len(characterization_path_list),")...")
