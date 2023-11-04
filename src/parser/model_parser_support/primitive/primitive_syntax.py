@@ -3,7 +3,10 @@ import parser.model_parser_support.keywords as kw_
 import parser.model_parser_support.primitive.primitive_keywords as pkw_
 import saflib.microarchitecture.taxo.TaxoRegistry as tr_
 import util.notation.model as mo_
+import util.notation.characterization as ch_
+import saflib.resources.char.ResourceRegistry as rr_
 from util.helper import info,warn,error
+import re
 
 def parse_name(primitive):
     return primitive[pkw_.primitive_name]
@@ -24,7 +27,8 @@ def parse_from_taxonomic_primitive(primitive, supported_instances):
     taxo_category_attributes = taxo_category.get_attributes()
     instances = taxo_primitive_dict[pkw_.taxo_primitive_instances]
     #nfo("---- Taxonomic category:",taxo_category_name)
-    info("----",taxo_category_name,"taxonomic attributes:",taxo_category_attributes)
+    info("# ",taxo_category_name,"taxonomic attributes:",taxo_category_attributes)
+    info("")
     model_instance = taxo_category.copy()
     info(name_,"=",taxo_category_name)
     info(".copy()")
@@ -54,6 +58,212 @@ def parse_actions(primitive, model_instance):
         info(".action(",action['name'],")")
         model_instance.action(action['name'])
     return model_instance
+
+'''Characterization Metric Model (chmm) parsing routines'''
+def parse_chmm_name_table_id_rtl_id_expression(chmm_spec):
+    return chmm_spec['name'], \
+           chmm_spec['table_id'], \
+           chmm_spec['rtl_id_expression']
+
+def parse_chmm_symbol_map(chmm_spec):
+    spec_list=chmm_spec['symbol_map']
+    return {spec['variable']:spec['symbol'] for spec in spec_list}
+
+def parse_chmm_energy_area_latency(chmm_spec):
+    # TODO: support factory methods for energy, area, latency
+    # TODO: support more flexibility around latency
+
+    '''
+    return_list=[chmm_spec['energy'][0]['expression'], \
+                 chmm_spec['energy'][0]['type'], \
+                 chmm_spec['area'][0]['expression'], \
+                 chmm_spec['area'][0]['type']]
+    '''
+    # Parse latency
+    latency_range_type="" # expr: range expression, const: value, param: scale parameter value by id
+    latency_expr_type="" # expr: latency independent variable expression, column_arg: specify a single column
+    single_latency=False # True: final energy/area expressions are latency-independent, False: parameterized by latency
+    supported_configs={("param","column_arg",True):"latencyParameterId_True_Yes", \
+                       ("param","expr",False):"latencyParameterId_False_None__latencyIndependentVariableExpression", \
+                       ("const","column_arg",True):"latencyConstantValue_True_Yes", \
+                       ("const","expr",False):"latencyConstantValue_False_None__latencyIndependentVariableExpression", \
+                       ("expr","expr",False):"latencyRangeExpression__latencyIndependentVariableExpression"}
+    latency_spec=chmm_spec['latency']
+    latency_dict={}
+
+    # Categorize constraints on latency range
+    # imposed by modelscript
+    if 'parameter_id' in latency_spec:
+        latency_range_type="param"
+        latency_dict["parameter_id"]=latency_spec['parameter_id']
+    elif 'constant_value' in latency_spec:
+        latency_range_type="const"
+        latency_dict["constant_value"]=latency_spec['constant_value']
+    elif 'range_expression' in latency_spec:
+        latency_range_type="expr"
+        latency_dict['range_expression']=latency_spec['range_expression']
+
+    # Categorize the way in which 'latency' synthetic column
+    # is synthesized from characterization table columns
+    if 'synthetic_latency_expression' in latency_spec:
+        latency_expr_type="expr"
+        latency_dict['synthetic_latency_expression']=latency_spec['synthetic_latency_expression']
+    elif 'latency_column_name' in latency_spec:
+        latency_expr_type="column_arg"
+        latency_dict['latency_column_name']=latency_spec['latency_column_name']
+
+    # parse single_latency
+    if 'single_latency' in latency_spec:
+        single_latency=bool(latency_spec['single_latency'])
+        latency_dict['single_latency']=single_latency
+
+    config_=(latency_range_type,latency_expr_type,single_latency)
+    if config_ not in supported_configs:
+        error("Latency spec latency_range_type =",str(latency_range_type), \
+              "latency_expr_type =",str(latency_expr_type), \
+              "single_latency =",str(single_latency),also_stdout=True)
+        info("Terminating.")
+        assert(False)
+
+    latency_dict["config"]=supported_configs[config_]
+
+    return chmm_spec['energy'][0]['expression'], \
+           chmm_spec['energy'][0]['type'], \
+           chmm_spec['area'][0]['expression'], \
+           chmm_spec['area'][0]['type'], \
+           latency_dict
+
+def parse_chmm_approximation(chmm_spec):
+    return chmm_spec['approximation']
+
+def parse_chmm_generate_constraints(chmm_spec):
+    return chmm_spec['generate_constraints']
+
+def register_characterization_metric_models(characterization_metric_models, model_instance):
+    for chmm_id in characterization_metric_models:
+        chmm=characterization_metric_models[chmm_id]
+        info(".register_characterization_metrics_model(<chmm_id =",chmm_id,">)")
+        model_instance.register_characterization_metrics_model(chmm)
+    return model_instance
+
+
+def apply_latency_config_to_chmm(latency_dict,chmm):
+    config_=latency_dict["config"]
+    if config_=="latencyParameterId_True_Yes":
+        parameter_id=latency_dict["parameter_id"]
+        clock_latency_column=latency_dict["latency_column_name"]
+        single_latency=True
+        info(".latencyParameterId(",parameter_id,",","single_latency =", \
+             single_latency,",","clock_latency_column =",clock_latency_column,")")
+        chmm.latencyParameterId(parameter_id,single_latency=single_latency,clock_latency_column=clock_latency_column)
+    elif config_=="latencyParameterId_False_None__latencyIndependentVariableExpression":
+        parameter_id=latency_dict["parameter_id"]
+        single_latency=False
+        info(".latencyParameterId(",parameter_id,",","single_latency =", \
+             single_latency,")")
+        chmm.latencyParameterId(parameter_id,single_latency=single_latency)
+        synthetic_latency_expression=latency_dict["synthetic_latency_expression"]
+        info(".latencyIndependentVariableExpression(",synthetic_latency_expression,")")
+        chmm.latencyIndependentVariableExpression(synthetic_latency_expression)
+    elif config_=="latencyConstantValue_True_Yes":
+        error("Not yet implemented.",also_stdout=True)
+        info("Terminating.")
+        assert(False)
+    elif config_=="latencyConstantValue_False_None__latencyIndependentVariableExpression":
+        error("Not yet implemented.",also_stdout=True)
+        info("Terminating.")
+        assert(False)
+    elif config_=="latencyRangeExpression__latencyIndependentVariableExpression":
+        error("Not yet implemented.",also_stdout=True)
+        info("Terminating.")
+        assert(False)
+    return chmm
+
+def apply_energy_config_to_chmm(expr,energy_type,chmm):
+    if energy_type=="energy":
+        info(".rowEnergyMetricExpression(",expr,")")
+        chmm.rowEnergyMetricExpression(expr)
+    elif energy_type=="power":
+        info(".rowEnergyMetricFromRowPowerMetricExpression(",expr,")")
+        chmm.rowEnergyMetricFromRowPowerMetricExpression(expr)
+    else:
+        error("Invalid energy expression type",energy_type,also_stdout=True)
+        info("Terminating.")
+        assert(False)
+    return chmm
+
+def apply_area_config_to_chmm(expr,area_type,chmm):
+    if area_type=="area":
+        info(".rowAreaMetricExpression(",expr,")")
+        chmm.rowAreaMetricExpression(expr)
+    else:
+        error("Invalid area expression type",area_type,also_stdout=True)
+        info("Terminating.")
+        assert(False)
+    return chmm
+
+def parse_rtl_id_expression_variable_ids(expression):
+    '''i.e. asdf$(u)lkiujh$(v) should return ['u','v']'''
+    pattern = r'\$\((.*?)\)'
+    matches = re.findall(pattern, expression)
+    return matches
+
+def check_variables_list_matches_symbol_map(variable_list,symbol_map):
+    '''variable_list must be a subset of symbol_map keys'''
+    for var_id in variable_list:
+        if var_id not in symbol_map:
+            error("Variable =",var_id,"not found in symbol_map =",symbol_map,also_stdout=True)
+            info("Terminating.")
+            assert(False)
+
+def parse_characterization_metric_models(primitive):
+    '''Parse characterization metric models'''
+    ctbl_dict={}
+    chmm_dict={}
+    for chmm_spec in primitive.get('characterization_metric_models', []):
+        # Parse
+        # TODO: approximation,generate_constraints are unused
+        name_, \
+        table_id, \
+        rtl_id_expression = parse_chmm_name_table_id_rtl_id_expression(chmm_spec)
+        variables_list = parse_rtl_id_expression_variable_ids(rtl_id_expression)
+        approximation = parse_chmm_approximation(chmm_spec)
+        symbol_map = parse_chmm_symbol_map(chmm_spec)
+        check_variables_list_matches_symbol_map(variables_list,symbol_map)
+        generate_constraints = parse_chmm_generate_constraints(chmm_spec)
+        energy, \
+        energy_type, \
+        area, \
+        area_type, \
+        latency_dict = parse_chmm_energy_area_latency(chmm_spec)
+
+        #print(energy)
+        #print(energy_type)
+        #print(area)
+        #print(area_type)
+        #print(latency_dict)
+
+        # Table
+        if table_id not in ctbl_dict:
+            #info("characterization_table=rr_.getCharacterizationTable(",table_id,")")
+            ctbl_dict[table_id]=rr_.getCharacterizationTable(table_id)
+        ctbl=ctbl_dict[table_id]
+
+        # Characterization metric model
+        info("<chmm id =",name_,">=CharacterizationMetricModel(")
+        info(" ",name_,",", \
+             "characterization_table=rr_.getCharacterizationTable(",table_id,"))")
+        info(")")
+        info(".nameExpression(",rtl_id_expression,",",variables_list,")")
+        info(".symbolMap(",symbol_map,")")
+        chmm=ch_.CharacterizationMetricModel(name_,ctbl) \
+                .nameExpression(rtl_id_expression,variables_list) \
+                .symbolMap(symbol_map)
+        chmm=apply_latency_config_to_chmm(latency_dict,chmm)
+        chmm=apply_energy_config_to_chmm(energy,energy_type,chmm)
+        chmm=apply_area_config_to_chmm(area,area_type,chmm)
+        chmm_dict[name_]=chmm
+    return chmm_dict
 
 def parse_load_ranks_list(sym_load_tensors_list):
     parsed_load_ranks_list=[]

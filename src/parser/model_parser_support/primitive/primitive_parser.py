@@ -18,11 +18,13 @@ def parse_modelscript_primitive(primitive):
     info("-- Parsing",id_)
 
     # Parse the from_taxonomic_primitive to get the instance and supported instances
+    characterization_metric_models = ps_.parse_characterization_metric_models(primitive)
+    info("")
+    info("")
     model_instance, supported_instances = ps_.parse_from_taxonomic_primitive(primitive, supported_instances)
-    
-    # Other parsing functions
     model_instance = ps_.parse_scale_parameters(primitive, model_instance)
     model_instance = ps_.parse_actions(primitive, model_instance)
+    model_instance = ps_.register_characterization_metric_models(characterization_metric_models, model_instance)
     model_instance = ps_.parse_require_port_throughput_attributes(primitive, model_instance)
     model_instance = ps_.parse_export_attributes_to_model(primitive, model_instance)
     model_instance = ps_.parse_yield_port_throughput_thresholds(primitive, model_instance)
