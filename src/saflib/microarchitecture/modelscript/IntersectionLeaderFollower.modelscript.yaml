@@ -85,7 +85,7 @@ modelscript_primitives:
         rtl_id_expression: BidirectionalCoordinatePayloadIntersectDecoupled_metaDataWidth$(u)
         symbol_map:
           - variable: u
-            symbol: md_in_leader.peak.metadata_word_width
+            symbol: md_in_leader.peak.datatype.metadata_word_width
         latency:
           parameter_id: clock
           single_latency: true

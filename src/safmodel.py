@@ -12,8 +12,8 @@ def temporary_model_loader():
     mr_.registerPrimitive("PositionGeneratorModel",PositionGeneratorModel)
     from saflib.microarchitecture.model.format.MetadataParser import MetadataParserModel
     mr_.registerPrimitive("MetadataParserModel",MetadataParserModel)
-    from saflib.microarchitecture.model.skipping.IntersectionLeaderFollower import IntersectionLeaderFollowerModel
-    mr_.registerPrimitive("IntersectionLeaderFollowerModel",IntersectionLeaderFollowerModel)
+    #from saflib.microarchitecture.model.skipping.IntersectionLeaderFollower import IntersectionLeaderFollowerModel
+    #mr_.registerPrimitive("IntersectionLeaderFollowerModel",IntersectionLeaderFollowerModel)
     from saflib.microarchitecture.model.format.FormatUarch import FormatUarchModel
     mr_.registerComponent("FormatUarchModel",FormatUarchModel)
     from saflib.microarchitecture.model.skipping.SkippingUarch import SkippingUarchModel
@@ -29,7 +29,8 @@ if __name__=="__main__":
     user_attributes, \
     do_logging,\
     log_fn, \
-    characterization_path_list = safio.parse_args()
+    characterization_path_list, \
+    model_script_lib_list = safio.parse_args()
 
     print("logging:",do_logging)
     helper.do_log=do_logging
@@ -39,8 +40,41 @@ if __name__=="__main__":
     warn(":: Setup",also_stdout=True)
     info("Loading characterization files (",len(characterization_path_list),")...")
     rr_.registerCharacterizationTables(filepath_list=characterization_path_list)
-    info("TODO: fix hard-coded model loads (temporary_model_loader()); remove mr_ import...")
+    # TODO: remove
     temporary_model_loader()
+    # Parse modelscript
+    import glob,yaml
+    import parser.model_parser_core as mp_
+    lib_filepath_list=[]
+    lib_filepath_list.extend(glob.glob(model_script_lib_list[0]))
+    assert(len(lib_filepath_list)==1)
+    info("Parsing modelscript libraries (",len(lib_filepath_list),")...")
+    for lib_filepath in lib_filepath_list:
+        info("-",lib_filepath)
+        lib_struct=None
+        with open(lib_filepath, 'r') as file:
+            lib_struct= yaml.safe_load(file)
+        primitives_dict, components_dict=mp_.parse_modelscript(lib_struct)
+        if len(primitives_dict)>0:
+            info("-- Registering primitives")
+            for primitive_id in primitives_dict:
+                info("--- registering primitive",primitive_id)
+                primitive=primitives_dict[primitive_id]
+                mr_.registerPrimitive(primitive_id,primitive)
+            warn("-- => Done, registering primitives")
+        else:
+            info("-- No primitives to register")
+        if len(components_dict)>0:
+            info("-- Registering components")
+            for component_id in components_dict:
+                info("--- registering component",component_id)
+                component=components_dict[component_id]
+                mr_.registerPrimitive(component_id,component)
+            warn("-- => Done, registering components")
+        else:
+            info("-- No components to register")
+    warn("=> Done,")
+
     warn("=> Done.")
 
     warn(":: Scale inference",also_stdout=True)

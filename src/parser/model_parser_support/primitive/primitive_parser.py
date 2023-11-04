@@ -15,7 +15,7 @@ def parse_modelscript_primitive(primitive):
     
     # Name
     id_=ps_.parse_name(primitive)
-    info("-- Parsing",id_)
+    info("---- Parsing",id_)
 
     # Parse the from_taxonomic_primitive to get the instance and supported instances
     characterization_metric_models = ps_.parse_characterization_metric_models(primitive)
@@ -32,7 +32,7 @@ def parse_modelscript_primitive(primitive):
     model_instance = ps_.parse_register_supported_instances(primitive, model_instance, supported_instances)
     model_instance = ps_.parse_implementations(primitive, model_instance)
 
-    warn("-- => Done, parsing",id_)
+    warn("---- => Done, parsing",id_)
     return id_,model_instance #{"primitive":model_instance,"instances":supported_instances}
 
 def parse_modelscript_primitives(primitives_list):
@@ -43,11 +43,11 @@ def parse_modelscript_primitives(primitives_list):
     Returns:\n
     - primitives_dict[<id>] = dict["primitive","constructor","instances"]
     '''
-    info("- Parsing primitives...")
+    info("--- Parsing primitives...")
     primitives_dict={}
     assert(len(primitives_list)>0)
     for primitive_spec in primitives_list:
         id_,primitive = parse_modelscript_primitive(primitive_spec)
         primitives_dict[id_]=primitive
-    warn("- => Done, parsing primitives...")
+    warn("--- => Done, parsing primitives...")
     return primitives_dict

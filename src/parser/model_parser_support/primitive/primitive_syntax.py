@@ -67,10 +67,12 @@ def parse_chmm_name_table_id_rtl_id_expression(chmm_spec):
 
 def parse_chmm_symbol_map(chmm_spec):
     spec_list=chmm_spec['symbol_map']
-    return {spec['variable']:spec['symbol'] for spec in spec_list}
+    return {spec['variable']: \
+                kw_.build_internal_symbol_from_syntactic_symbol(spec['symbol']) \
+                    for spec in spec_list}
 
 def parse_chmm_energy_area_latency(chmm_spec):
-    # TODO: support factory methods for energy, area, latency
+    # TODO: support factory methods for having multiple energy, area, latency terms
     # TODO: support more flexibility around latency
 
     '''
@@ -394,7 +396,7 @@ def parse_values_constraint(item):
     symbol = item['symbol']
     values = tuple(item['values'])
     sym_dict=kw_.parse_symbol(symbol)
-    sym_expr="@"+sym_dict['port']+'_$a'+sym_dict['flavor']
+    sym_expr=kw_.build_internal_symbol_from_parsed_syntactic_symbol(sym_dict,load_rank_placeholder='$a')
     constraints=mo_.makeValuesConstraint(
         sym_expr,
         foralls=[("a", "attrs", [sym_dict['load_rank']])],

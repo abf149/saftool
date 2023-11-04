@@ -67,3 +67,14 @@ def parse_symbol(symbol_str):
 
         sym_fields[field_name]=field_value
     return sym_fields
+
+def build_internal_symbol_from_parsed_syntactic_symbol(parsed_sym_dict,load_rank_placeholder=None):
+    #sym_dict=kw_.parse_symbol(symbol)
+    if load_rank_placeholder is None:
+        return "@"+parsed_sym_dict['port']+'_'+parsed_sym_dict['load_rank']+parsed_sym_dict['flavor']
+    else:
+        return "@"+parsed_sym_dict['port']+'_'+load_rank_placeholder+parsed_sym_dict['flavor']
+
+def build_internal_symbol_from_syntactic_symbol(symbol,load_rank_placeholder=None):
+    sym_dict=parse_symbol(symbol)
+    return build_internal_symbol_from_parsed_syntactic_symbol(sym_dict,load_rank_placeholder)

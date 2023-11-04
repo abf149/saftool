@@ -36,12 +36,12 @@ classes:
     technology: must_specify
     format_leader: must_specify
     strategy: must_specify
-    md_in_leader_rw_thresh: must_specify
-    md_in_leader_pr_thresh: must_specify
     md_in_leader_ww_thresh: must_specify
-    md_out_rw_thresh: must_specify
-    md_out_pr_thresh: must_specify
+    md_in_leader_pr_thresh: must_specify
+    md_in_leader_rw_thresh: must_specify
     md_out_ww_thresh: must_specify
+    md_out_pr_thresh: must_specify
+    md_out_rw_thresh: must_specify
   actions:
   - name: fill
   - name: intersect

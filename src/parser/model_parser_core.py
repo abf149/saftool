@@ -6,18 +6,18 @@ import util.notation.model as mo_
 from util.helper import info,warn,error
 
 def parse_modelscript(script_dict):
-    info("Parsing modelscript file.")
+    info("-- Parsing modelscript file.")
 
     # Preamble
-    info("- modelscript version",script_dict[kw_.modelscript_version])
+    info("--- modelscript version",script_dict[kw_.modelscript_version])
     modelscript_primitives=prpr_.get_modelscript_primitives(script_dict)
     modelscript_components=cmpr_.get_modelscript_components(script_dict)
     num_modelscript_primitives=len(modelscript_primitives)
     num_modelscript_components=len(modelscript_components)
     num_objects=num_modelscript_primitives+num_modelscript_components
-    info("- Parsing",num_objects,"modelscript objects")
-    info("--",num_modelscript_primitives,"primitives")
-    info("--",num_modelscript_components,"components")
+    info("--- Parsing",num_objects,"modelscript objects")
+    info("----",num_modelscript_primitives,"primitives")
+    info("----",num_modelscript_components,"components")
     
     # Primitives
     primitives_dict={}
@@ -29,7 +29,7 @@ def parse_modelscript(script_dict):
     if num_modelscript_components>0:
         components_dict=cmpr_.parse_modelscript_components(modelscript_components)
 
-    warn("=> Done, parsing modelscript.")
+    warn("-- => Done, parsing modelscript.")
 
     return primitives_dict, components_dict
 
