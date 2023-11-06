@@ -48,6 +48,7 @@ IntersectionLeaderFollowerModel=IntersectionLeaderFollower \
                                               (1, 8, 64, 256)]) \
         ],
         constraints=[mo_.makePassthroughConstraint("@md_out_$a","@md_in_leader_$a",foralls=[("a","attrs",isect_attr_list)])], \
+        constraints_from_characterization_models=['test_fxn'],
         energy_objective={"fill": \
                             "1e-10*(@md_out_rw_thresh + @md_out_pr_thresh + @md_out_ww_thresh + #(test_fxn))", \
                           "intersect": \

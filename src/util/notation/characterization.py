@@ -241,6 +241,8 @@ class CharacterizationMetricModel:
         self.metric_model_lambdas=None
         self.single_latency=None
         self.clock_latency_column=None
+        self.supported_symbol_values=None
+        self.supported_symbol_value_combos=None
 
     '''Function initialization'''
     def functionId(self,function_id):
@@ -475,10 +477,16 @@ class CharacterizationMetricModel:
         return self.characterization_table_view.getSupportedVariableValueCombos()
 
     def getSupportedSymbolValues(self):
-        return self.supported_symbol_values
+        if self.hasVars():
+            return self.supported_symbol_values
+        else:
+            return {}
     
     def getSupportedSymbolValueCombos(self):
-        return self.supported_symbol_value_combos
+        if self.hasCombos():
+            return self.supported_symbol_value_combos
+        else:
+            return {}
 
     def buildSupportedSymbolValuesConstraints(self):
         if self.hasVars():
@@ -486,7 +494,7 @@ class CharacterizationMetricModel:
             self.supported_symbol_values_constraints_list= \
                 [
                     mo_.makeValuesConstraint(sym_, \
-                                             foralls=[('a',"attrs",[0])], \
+                                             foralls=[('a',"attrs",[""])], \
                                              ranges=[tuple(supported_symbol_values[sym_])])
                                                     
                         for sym_ in supported_symbol_values \

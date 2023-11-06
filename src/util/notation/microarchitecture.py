@@ -124,6 +124,7 @@ class PrimitiveCategory:
         self.ERT=None
         self.characterization_metrics_model_dict={}
         self.characterization_metrics_expression_dict={}
+        self.characterization_model_constraints_dict={}
 
     def copy(self):
         return copy.deepcopy(self)
@@ -430,7 +431,7 @@ class PrimitiveCategory:
         return self.actions_
 
     def add_implementation(self,name,taxonomic_instance,energy_objective,area_objective,attributes=[],constraints=[], \
-                           attr_range_specs=[], attr_combo_specs=[]):
+                           attr_range_specs=[], attr_combo_specs=[], constraints_from_characterization_models=[]):
         self.instance_to_implementations[taxonomic_instance].append({
             "name":name,
             "taxonomic_instance":taxonomic_instance,
@@ -440,6 +441,7 @@ class PrimitiveCategory:
             "attr_combo_specs":attr_combo_specs,
             "energy_objective":energy_objective,
             "area_objective":area_objective,
+            "constraints_from_characterization_models":constraints_from_characterization_models
         })
         return self
 
@@ -559,13 +561,38 @@ class PrimitiveCategory:
     def get_metrics_model_expressions_dict_by_id(self,id_):
         return self.get_metrics_model_expressions_dict()[id_]
 
+    def get_characterization_model_constraints_dict(self):
+        return self.characterization_model_constraints_dict
+
+    def get_characterization_model_constraints_dict_by_id(self,id_):
+        return self.get_characterization_model_constraints_dict()[id_]
+
+    def get_characterization_model_sym_supp_vals_by_id(self,id_):
+        return self.get_characterization_model_constraints_dict_by_id(id_)["values"]
+
+    def get_characterization_model_sym_val_combos_by_id(self,id_):
+        return self.get_characterization_model_constraints_dict_by_id(id_)["combos"]
+
+    def get_characterization_model_unified_constraints_list_by_id(self,id_):
+        return self.get_characterization_model_constraints_dict_by_id(id_)["values_combos"]
+
     def build_characterization_metrics_model_expressions(self,id_,char_metrics_model,uri_prefix=""):
+        # Build objective expressions
         energy_metric_expression=char_metrics_model.getEnergyMetricModelExpression()
         area_metric_expression=char_metrics_model.getAreaMetricModelExpression()
         self.characterization_metrics_expression_dict[id_]={
             'energy':energy_metric_expression,
             'area':area_metric_expression
         }
+
+        # Build supported symbol values constraints/combos
+        self.characterization_model_constraints_dict[id_] = {
+            "values":char_metrics_model.getSupportedSymbolValuesConstraints(),
+            "combos":char_metrics_model.getSupportedSymbolValueCombosConstraints()
+        }
+        self.characterization_model_constraints_dict[id_]["values_combos"] = \
+            self.characterization_model_constraints_dict[id_]["values"] + \
+                self.characterization_model_constraints_dict[id_]["combos"]
         return self
 
     def build_characterization_metrics_models(self,uri_prefix=""):
@@ -787,22 +814,39 @@ class PrimitiveCategory:
         # Implementation-level constraints
         # - Explicit constraints
         #   TODO: handle multiple-implementation scenario correctly
+        idx=0
         for impl_ in self.instance_to_implementations[self.applicable_taxo_instance_alias]:
-            for cnst in impl_["constraints"]:
+            assert(idx==0)
+            impl_constraints=impl_["constraints"]
+            for cnst in impl_constraints:
                 self.final_constraint_list.extend( \
                     mo_.evalConstraintExpression(cnst,uri_prefix,args={"port_thrpt_attrs":self.port_thrpt_attr_dict}) \
                 )
+
+            idx+=1
         # - Ranges of allowed values for attributes
         #   TODO: handle multiple-implementation scenario correctly
         for impl_ in self.instance_to_implementations[self.applicable_taxo_instance_alias]:
-            for spec_ in impl_["attr_range_specs"]:
+            impl_range_specs=impl_["attr_range_specs"]
+            for chmm_name in impl_["constraints_from_characterization_models"]:
+                impl_range_specs.extend(\
+                    self.get_characterization_model_sym_supp_vals_by_id(chmm_name)
+                )
+
+            for spec_ in impl_range_specs:
                 self.final_constraint_list.extend( \
                     mo_.evalAttributeRangeExpression(spec_,uri_prefix,args={"port_thrpt_attrs":self.port_thrpt_attr_dict}) \
                 )
+
         # - Allowed combinations of attribute values
         #   TODO: handle multiple-implementation scenario correctly
         for impl_ in self.instance_to_implementations[self.applicable_taxo_instance_alias]:
-            for expr_ in impl_["attr_combo_specs"]:
+            impl_combo_specs=impl_["attr_combo_specs"]
+            for chmm_name in impl_["constraints_from_characterization_models"]:
+                impl_combo_specs.extend(\
+                    self.get_characterization_model_sym_val_combos_by_id(chmm_name)
+                )
+            for expr_ in impl_combo_specs:
                 self.final_constraint_list.extend( \
                     mo_.evalAttributeComboExpression(expr_,uri_prefix) \
                 )

@@ -433,6 +433,7 @@ def print_implementation(name, \
                          taxonomic_instance, \
                          attr_range_specs, \
                          constraints_param, \
+                         constraints_from_characterization_models, \
                          energy_objective, \
                          area_objective):
     '''Print parsed implementation'''
@@ -453,7 +454,10 @@ def print_implementation(name, \
             info("     ",k,":",const_[k],',')
         info("    },")
     info("  ],")
-    #info("  energy_objective =",str(energy_objective),",")
+    chmm_const_str=""
+    for const_ in constraints_from_characterization_models:
+        chmm_const_str+=const_+","
+    info("  constraints_from_characterization_models = [",chmm_const_str,"]")
     info("  energy_objective = {")
     for action in energy_objective:
         info("   ",action,":",energy_objective[action],',')
@@ -480,6 +484,7 @@ def parse_implementations(primitive, model_instance):
         constraints = impl.get('constraints', [])
         attr_range_specs = []
         constraints_param = []
+        constraints_from_characterization_models = []
         
         for constraint in constraints:
             if constraint['type'] == 'values':
@@ -491,12 +496,18 @@ def parse_implementations(primitive, model_instance):
                 # Process the 'passthrough' constraint.
                 for passthru_constraint in passthru_constraint_list:
                     constraints_param.extend(parse_passthrough_constraint(passthru_constraint))
+            elif constraint['type'] == 'characterization_metrics_model':
+                chmm_id_list=constraint['list']
+                # Process characterization metric model constraints
+                for chmm_id in chmm_id_list:
+                    constraints_from_characterization_models.append(chmm_id)
         
         # Call the add_implementation method on the model_instance
         print_implementation(name, \
                              taxonomic_instance, \
                              attr_range_specs, \
                              constraints_param, \
+                             constraints_from_characterization_models, \
                              energy_objective, \
                              area_objective)
         model_instance.add_implementation(
@@ -504,6 +515,7 @@ def parse_implementations(primitive, model_instance):
             taxonomic_instance=taxonomic_instance,
             attr_range_specs=attr_range_specs,
             constraints=constraints_param,
+            constraints_from_characterization_models=constraints_from_characterization_models,
             energy_objective=energy_objective,
             area_objective=area_objective
         )
