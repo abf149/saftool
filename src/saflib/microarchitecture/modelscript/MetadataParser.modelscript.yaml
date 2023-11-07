@@ -1,0 +1,182 @@
+modelscript_version: 0.1
+modelscript_primitives:
+  - name: MetadataParserModel
+    from_taxonomic_primitive: MetadataParser
+    export_attributes_to_model: true
+    instance_aliases:
+    - alias: C
+      instances:
+      - coordinate_payload
+    - alias: U
+      instances:
+      - uncompressed
+    scale_parameters:
+      - name: clock
+        type: real
+        export_as_model_attribute: true
+        inherit: true
+      - name: technology
+        type: string
+        export_as_model_attribute: true
+        inherit: true
+    load_symbols:
+      - port: md_in
+        symbol_types:
+        - type: level
+          load_tensors:
+          - load_tensor: datatype
+            load_ranks:
+            - load_rank: metadata_word_width
+          - load_tensor: position
+            load_ranks:
+            - load_rank: positions_per_cycle
+          - load_tensor: coordinate
+            load_ranks:
+            - load_rank: dense_data_rank_size
+            - load_rank: nodes_per_cycle
+          - load_tensor: bandwidth
+            load_ranks:
+            - load_rank: metadata_read_width
+        - type: peak
+          load_tensors:
+          - load_tensor: bandwidth
+            load_ranks:
+            - load_rank: metadata_read_width
+          - load_tensor: position
+            load_ranks:
+            - load_rank: positions_per_cycle
+          - load_tensor: datatype
+            load_ranks:
+            - load_rank: metadata_word_width
+      - port: at_bound_out
+        symbol_types:
+        - type: level
+          load_tensors:
+          - load_tensor: datatype
+            load_ranks:
+            - load_rank: metadata_word_width
+          - load_tensor: position
+            load_ranks:
+            - load_rank: positions_per_cycle
+          - load_tensor: coordinate
+            load_ranks:
+            - load_rank: dense_data_rank_size
+            - load_rank: nodes_per_cycle
+          - load_tensor: bandwidth
+            load_ranks:
+            - load_rank: metadata_read_width
+        - type: peak
+          load_tensors:
+          - load_tensor: bandwidth
+            load_ranks:
+            - load_rank: metadata_read_width
+          - load_tensor: position
+            load_ranks:
+            - load_rank: positions_per_cycle
+          - load_tensor: datatype
+            load_ranks:
+            - load_rank: metadata_word_width
+    actions:
+      - name: check_bound
+      - name: gated_check_bound
+    implementations:
+      - name: C
+        taxonomic_instance_alias: C
+        objective:
+          actions:
+            - name: check_bound
+              energy: 2*(@md_in_rw_thresh + @md_in_pr_thresh + @md_in_ww_thresh)
+            - name: gated_check_bound
+              energy: 0
+          area: 2*(@md_in_rw_thresh + @md_in_pr_thresh + @md_in_ww_thresh)
+        constraints:
+          - type: custom
+            list:
+              - ( @at_bound_out_pr ) == ( @md_in_cr/@md_in_nc )
+          - type: passthrough
+            list:
+              - port_in: md_in
+                port_out: at_bound_out
+                suffixes:
+                  - level.coordinate.dense_data_rank_size
+                  - level.coordinate.nodes_per_cycle
+          - type: values
+            list:
+              - symbol: md_in.peak.bandwidth.metadata_read_width
+                values:
+                  - 1
+                  - 8
+                  - 64
+                  - 256
+              - symbol: md_in.peak.position.positions_per_cycle
+                values:
+                  - 1
+                  - 8
+                  - 64
+                  - 256
+              - symbol: md_in.peak.datatype.metadata_word_width
+                values:
+                  - 1
+                  - 8
+                  - 64
+                  - 256
+
+              - symbol: at_bound_out.peak.bandwidth.metadata_read_width
+                values:
+                  - 1
+              - symbol: at_bound_out.peak.position.positions_per_cycle
+                values:
+                  - 1
+              - symbol: at_bound_out.peak.datatype.metadata_word_width
+                values:
+                  - 1
+      - name: U
+        taxonomic_instance_alias: U
+        objective:
+          actions:
+            - name: check_bound
+              energy: 2*(@md_in_rw_thresh + @md_in_pr_thresh + @md_in_ww_thresh)
+            - name: gated_check_bound
+              energy: 0
+          area: 2*(@md_in_rw_thresh + @md_in_pr_thresh + @md_in_ww_thresh)
+        constraints:
+          - type: custom
+            list:
+              - ( @at_bound_out_pr ) == ( @md_in_cr/@md_in_nc )
+          - type: passthrough
+            list:
+              - port_in: md_in
+                port_out: at_bound_out
+                suffixes:
+                  - level.coordinate.dense_data_rank_size
+                  - level.coordinate.nodes_per_cycle
+          - type: values
+            list:
+              - symbol: md_in.peak.bandwidth.metadata_read_width
+                values:
+                  - 1
+                  - 8
+                  - 64
+                  - 256
+              - symbol: md_in.peak.position.positions_per_cycle
+                values:
+                  - 1
+                  - 8
+                  - 64
+                  - 256
+              - symbol: md_in.peak.datatype.metadata_word_width
+                values:
+                  - 1
+                  - 8
+                  - 64
+                  - 256
+
+              - symbol: at_bound_out.peak.bandwidth.metadata_read_width
+                values:
+                  - 1
+              - symbol: at_bound_out.peak.position.positions_per_cycle
+                values:
+                  - 1
+              - symbol: at_bound_out.peak.datatype.metadata_word_width
+                values:
+                  - 1

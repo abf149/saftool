@@ -1,19 +1,5 @@
 version: 0.3
 classes:
-- name: MetadataParserModel
-  attributes:
-    clock: must_specify
-    technology: must_specify
-    format: must_specify
-    md_in_rw_thresh: must_specify
-    md_in_pr_thresh: must_specify
-    md_in_ww_thresh: must_specify
-    at_bound_out_rw_thresh: must_specify
-    at_bound_out_pr_thresh: must_specify
-    at_bound_out_ww_thresh: must_specify
-  actions:
-  - name: check_bound
-  - name: gated_check_bound
 - name: PositionGeneratorModel
   attributes:
     clock: must_specify
@@ -47,3 +33,17 @@ classes:
   - name: intersect
   - name: gated_fill
   - name: gated_intersect
+- name: MetadataParserModel
+  attributes:
+    clock: must_specify
+    technology: must_specify
+    format: must_specify
+    md_in_rw_thresh: must_specify
+    md_in_pr_thresh: must_specify
+    md_in_ww_thresh: must_specify
+    at_bound_out_rw_thresh: must_specify
+    at_bound_out_pr_thresh: must_specify
+    at_bound_out_ww_thresh: must_specify
+  actions:
+  - name: check_bound
+  - name: gated_check_bound

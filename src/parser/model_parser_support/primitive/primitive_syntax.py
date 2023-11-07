@@ -465,6 +465,9 @@ def print_implementation(name, \
     info("  area_objective =",str(area_objective),",")
     info(")")
 
+def parse_custom_constraint(expr):
+    return mo_.makeConstraint(expr)
+
 def parse_implementations(primitive, model_instance):
     
     # Extract the implementations list from the primitive dictionary.
@@ -501,6 +504,10 @@ def parse_implementations(primitive, model_instance):
                 # Process characterization metric model constraints
                 for chmm_id in chmm_id_list:
                     constraints_from_characterization_models.append(chmm_id)
+            elif constraint['type'] == 'custom':
+                expr_list = constraint['list']
+                for expr in expr_list:
+                    constraints_param.append(parse_custom_constraint(expr))
         
         # Call the add_implementation method on the model_instance
         print_implementation(name, \

@@ -10,8 +10,8 @@ from util import safmodel_core as safcore, safmodel_io as safio
 def temporary_model_loader():
     #from saflib.microarchitecture.model.address_primitives.PositionGenerator import PositionGeneratorModel
     #mr_.registerPrimitive("PositionGeneratorModel",PositionGeneratorModel)
-    from saflib.microarchitecture.model.format.MetadataParser import MetadataParserModel
-    mr_.registerPrimitive("MetadataParserModel",MetadataParserModel)
+    #from saflib.microarchitecture.model.format.MetadataParser import MetadataParserModel
+    #mr_.registerPrimitive("MetadataParserModel",MetadataParserModel)
     #from saflib.microarchitecture.model.skipping.IntersectionLeaderFollower import IntersectionLeaderFollowerModel
     #mr_.registerPrimitive("IntersectionLeaderFollowerModel",IntersectionLeaderFollowerModel)
     from saflib.microarchitecture.model.format.FormatUarch import FormatUarchModel
