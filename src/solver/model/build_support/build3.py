@@ -121,6 +121,8 @@ def build3_simplify_system(problem_as_system):
                 discarded_constraints.append(final_constraints[const_idx])
                 final_constraints[const_idx]=None
 
+    print(discarded_constraints)
+
     # Third-pass: 
     lb_dict={}
     for non_yield_sym_name in sym_to_const_idxs:

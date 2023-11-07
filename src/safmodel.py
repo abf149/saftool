@@ -3,7 +3,6 @@
 #import solver.model.solve as solve
 import util.helper as helper
 from util.helper import info,warn,error
-import saflib.resources.char.ResourceRegistry as rr_
 import saflib.microarchitecture.model.ModelRegistry as mr_
 from util import safmodel_core as safcore, safmodel_io as safio
 
@@ -26,41 +25,10 @@ if __name__=="__main__":
         helper.log_init(log_fn)
 
     warn(":: Setup",also_stdout=True)
-    info("Loading characterization files (",len(characterization_path_list),")...")
-
-    # Parse modelscript
-    import glob,yaml
-    import parser.model_parser_core as mp_
-    lib_filepath_list=[]
-    lib_filepath_list.extend(glob.glob(model_script_lib_list[0]))
-    info("Parsing modelscript libraries (",len(lib_filepath_list),")...")
-    for lib_filepath in lib_filepath_list:
-        info("-",lib_filepath)
-        lib_struct=None
-        with open(lib_filepath, 'r') as file:
-            lib_struct= yaml.safe_load(file)
-        primitives_dict, components_dict=mp_.parse_modelscript(lib_struct)
-        if len(primitives_dict)>0:
-            info("-- Registering primitives")
-            for primitive_id in primitives_dict:
-                info("--- registering primitive",primitive_id)
-                primitive=primitives_dict[primitive_id]
-                mr_.registerPrimitive(primitive_id,primitive)
-            warn("-- => Done, registering primitives")
-        else:
-            info("-- No primitives to register")
-        if len(components_dict)>0:
-            info("-- Registering components")
-            for component_id in components_dict:
-                info("--- registering component",component_id)
-                component=components_dict[component_id]
-                mr_.registerComponent(component_id,component)
-            warn("-- => Done, registering components")
-        else:
-            info("-- No components to register")
-    warn("=> Done,")
-
-    warn("=> Done.")
+    '''Register characterization resources; load and parse model libraries'''
+    safio.register_characterization_resources(characterization_path_list)
+    safio.load_parse_model_libs(model_script_lib_list)
+    warn(":: => Done, setup")
 
     warn(":: Scale inference",also_stdout=True)
 
@@ -71,7 +39,7 @@ if __name__=="__main__":
     abstract_analytical_primitive_models_dict,abstract_analytical_component_models_dict= \
         safcore.solve_scale_inference_problem(scale_prob)
 
-    warn(":: done, scale inference",also_stdout=True)
+    warn(":: => Done, scale inference",also_stdout=True)
     warn("")
     warn(":: Export Accelergy models",also_stdout=True)
     backend_obj_rep, backend_prim_lib_rep, backend_comp_lib_rep, backend_buffer_lib_rep = \
@@ -81,7 +49,7 @@ if __name__=="__main__":
                                        comp_out_path, \
                                        abstract_analytical_primitive_models_dict, \
                                        abstract_analytical_component_models_dict,scale_prob,user_attributes)
-    warn(":: done, Accelergy export",also_stdout=True)
+    warn(":: => Done, Accelergy export",also_stdout=True)
     #print("abstract_analytical_models_dict:",abstract_analytical_models_dict)
     #solve.solve(scale_prob)
 

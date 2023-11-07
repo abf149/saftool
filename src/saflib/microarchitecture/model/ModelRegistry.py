@@ -1,9 +1,3 @@
-from saflib.microarchitecture.model.address_primitives.PositionGenerator import PositionGeneratorModel
-from saflib.microarchitecture.model.format.MetadataParser import MetadataParserModel
-from saflib.microarchitecture.model.skipping.IntersectionLeaderFollower import IntersectionLeaderFollowerModel
-from saflib.microarchitecture.model.format.FormatUarch import FormatUarchModel
-from saflib.microarchitecture.model.skipping.SkippingUarch import SkippingUarchModel
-
 primitive_model_dict={}
 primitive_model_yields_supersets={}
 primitive_model_actions={}

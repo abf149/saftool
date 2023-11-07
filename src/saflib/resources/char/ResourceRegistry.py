@@ -47,9 +47,6 @@ def getCharacterizationTablesDict():
     global charactization_table_dict
     return charactization_table_dict
 
-
-registerCharacterizationTable(filepath='accelergy/data/primitives_table.csv')
-
 '''
 ctbl=getCharacterizationTable('accelergy/data/primitives_table.csv')
 ctv,rgx=ctbl.getViewMatchingNameExpression \

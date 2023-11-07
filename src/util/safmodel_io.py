@@ -5,10 +5,52 @@ import util.sparseloop_config_processor as sl_config, yaml, argparse
 from util.taxonomy.designelement import Architecture
 from util.helper import info,warn,error
 import saflib.microarchitecture.model.ModelRegistry as mr_
+import saflib.resources.char.ResourceRegistry as rr_
 import export.AnalyticalModelExport as am_exp
 
 '''Config - condition the format of YAML file dumps'''
 #yaml.Dumper.ignore_aliases = lambda *args : True
+
+'''Register characterization resources'''
+def register_characterization_resources(characterization_path_list):
+    info("Loading & registering characterization files (",len(characterization_path_list),")...")
+    for pth in characterization_path_list:
+        rr_.registerCharacterizationTable(filepath=pth)
+    warn("=> Done, loading & registering characterization")
+
+'''Load & parse model libraries'''
+def load_parse_model_libs(model_script_lib_list):
+    # Parse modelscript
+    import glob,yaml
+    import parser.model_parser_core as mp_
+    lib_filepath_list=[]
+    lib_filepath_list.extend(glob.glob(model_script_lib_list[0]))
+    info("Parsing modelscript libraries (",len(lib_filepath_list),")...")
+    for lib_filepath in lib_filepath_list:
+        info("-",lib_filepath)
+        lib_struct=None
+        with open(lib_filepath, 'r') as file:
+            lib_struct= yaml.safe_load(file)
+        primitives_dict, components_dict=mp_.parse_modelscript(lib_struct)
+        if len(primitives_dict)>0:
+            info("-- Registering primitives")
+            for primitive_id in primitives_dict:
+                info("--- registering primitive",primitive_id)
+                primitive=primitives_dict[primitive_id]
+                mr_.registerPrimitive(primitive_id,primitive)
+            warn("-- => Done, registering primitives")
+        else:
+            info("-- No primitives to register")
+        if len(components_dict)>0:
+            info("-- Registering components")
+            for component_id in components_dict:
+                info("--- registering component",component_id)
+                component=components_dict[component_id]
+                mr_.registerComponent(component_id,component)
+            warn("-- => Done, registering components")
+        else:
+            info("-- No components to register")
+    warn("=> Done,")
 
 '''CLI argparse'''
 def parse_args():
