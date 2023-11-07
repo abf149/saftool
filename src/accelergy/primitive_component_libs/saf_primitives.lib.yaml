@@ -1,21 +1,5 @@
 version: 0.3
 classes:
-- name: PositionGeneratorModel
-  attributes:
-    clock: must_specify
-    technology: must_specify
-    format: must_specify
-    md_in_pr_thresh: must_specify
-    md_in_cr_thresh: must_specify
-    md_in_pw_thresh: must_specify
-    md_in_nc_thresh: must_specify
-    pos_out_pr_thresh: must_specify
-    pos_out_cr_thresh: must_specify
-    pos_out_pw_thresh: must_specify
-    pos_out_nc_thresh: must_specify
-  actions:
-  - name: gen
-  - name: gated_gen
 - name: MetadataParserModel
   attributes:
     clock: must_specify
@@ -30,6 +14,22 @@ classes:
   actions:
   - name: check_bound
   - name: gated_check_bound
+- name: PositionGeneratorModel
+  attributes:
+    clock: must_specify
+    technology: must_specify
+    format: must_specify
+    md_in_pr_thresh: must_specify
+    md_in_pw_thresh: must_specify
+    md_in_nc_thresh: must_specify
+    md_in_cr_thresh: must_specify
+    pos_out_pr_thresh: must_specify
+    pos_out_pw_thresh: must_specify
+    pos_out_nc_thresh: must_specify
+    pos_out_cr_thresh: must_specify
+  actions:
+  - name: gen
+  - name: gated_gen
 - name: IntersectionLeaderFollowerModel
   attributes:
     clock: must_specify

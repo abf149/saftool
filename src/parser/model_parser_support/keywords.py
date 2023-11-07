@@ -17,7 +17,10 @@ coordinate_load_rank_map={
     'nodes_per_cycle':'cr',
     'dense_data_rank_size':'nc'
 }
-position_load_rank_map={'positions_per_cycle':'pr',}
+position_load_rank_map={
+    'positions_per_cycle':'pr',
+    'position_word_width':'pw'
+}
 bandwidth_load_rank_map={'metadata_read_width':'rw'}
 load_rank_map={
     "datatype":datatype_load_rank_map,
