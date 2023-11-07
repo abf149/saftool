@@ -1,0 +1,80 @@
+modelscript_version: 0.1
+modelscript_components:
+  - name: FormatUarchModel
+    from_taxonomic_component: FormatUarch
+    export_attributes_to_model: true
+    instance_aliases:
+    - alias: all
+      instances:
+      - all
+    scale_parameters:
+      - name: clock
+        type: real
+        export_as_model_attribute: true
+        inherit: true
+      - name: technology
+        type: string
+        export_as_model_attribute: true
+        inherit: true
+      - name: high_impact_mdparser_indices
+        type: list
+        export_as_model_attribute: false
+        inherit: false
+        default: []
+    arch_buffer_action_map:
+    - buffer_upstream_of_port: md_in0
+      upstream_action: metadata_read
+      downstream_action: check_bounds
+    - buffer_upstream_of_port: md_in0
+      upstream_action: gated_metadata_read
+      downstream_action: gated_check_bounds
+    actions:
+      - name: check_bounds
+        implementations:
+        - alias: all
+          subcomponents: 
+          - name: TestMetadataParser$x
+            actions:
+            - name: check_bound
+              for:
+                vars:
+                - x
+                iterator:
+                  type: param
+                  arg: high_impact_mdparser_indices
+            - name: gated_check_bound
+              for:
+                vars:
+                - x
+                - v
+                iterator:
+                  type: taxo_fibertree
+                  arg: fibertree
+                exclude:
+                  type: param
+                  arg: high_impact_mdparser_indices
+                  
+      - name: gated_check_bounds
+        implementations:
+        - alias: all
+          subcomponents: 
+          - name: TestMetadataParser$x
+            actions:
+            - name: gated_check_bound
+              for:
+                vars:
+                - x
+                - v
+                iterator:
+                  type: taxo_fibertree
+                  arg: fibertree
+    implementations:
+      - name: all
+        taxonomic_instance_alias: all
+        objective:
+          actions:
+            - name: check_bounds
+              energy: 0
+            - name: gated_check_bounds
+              energy: 0
+          area: 0

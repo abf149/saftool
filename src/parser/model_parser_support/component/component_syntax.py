@@ -39,16 +39,33 @@ def parse_from_taxonomic_component(component, supported_instances):
 def parse_scale_parameters(component, model_instance):
     #info("--- Parsing scale parameters")
     for scale_param in component.get('scale_parameters', []):
-        info(".scale_parameter(", \
-             str(scale_param['name']),",", \
-             str(scale_param['type']), \
-            ",yield_=",str(scale_param['export_as_model_attribute']), \
-            ",inherit_=",str(scale_param.get('inherit', False)),")")
-        model_instance.scale_parameter(
-            scale_param['name'],
-            scale_param['type'],
-            yield_=scale_param['export_as_model_attribute'],
+        param_name=scale_param['name']
+        param_type=scale_param['type']
+        yield_=False
+        if 'export_as_model_attribute' in scale_param:
+            yield_=scale_param['export_as_model_attribute']
+        inherit_=False
+        if 'inherit' in scale_param:
             inherit_=scale_param.get('inherit', False)
+        param_default=None
+        if 'default' in scale_param:
+            param_default=scale_param['default']
+
+        assert(param_name is not None)
+        assert(param_type is not None)
+
+        info(".scale_parameter(", \
+             str(param_name),",", \
+             str(param_type), \
+            ",yield_=",str(yield_), \
+            ",inherit_=",str(inherit_),
+            ",param_default=",str(param_default),")")
+        model_instance.scale_parameter(
+            param_name,
+            param_type,
+            yield_=yield_,
+            inherit_=inherit_,
+            param_default=param_default
         )
     #warn("--- => Done, parsing scale parameters")
     return model_instance
@@ -88,6 +105,57 @@ def synth_subaction_call(model_instance,action_id,impl_alias, \
                              sub_component=subcomp_id, \
                              sub_action=subaction_id)
 
+def synth_subaction_call_iter(model_instance,action_id,impl_alias, \
+                              subcomp_id,subaction_id, subaction_iter):
+
+    if 'vars' not in subaction_iter:
+        error("Iterated subaction expression must have vars")
+        info("Subaction: action_id =",action_id,"impl_alias =",impl_alias,"subcomp_id =", \
+             subcomp_id,"subaction_id =",subaction_id,"subaction_iter =",subaction_iter)
+        assert(False)
+
+    valid_iterator_types=['param','taxo_fibertree']
+    iterators_with_args=['param','taxo_fibertree']
+
+    vars_spec = ','.join(subaction_iter['vars'])
+    assert('iterator' in subaction_iter)
+    iterator_spec=subaction_iter['iterator']
+    assert('type' in iterator_spec)
+    iterator_type=iterator_spec['type']
+    if iterator_type not in valid_iterator_types:
+        error("Iterator type",iterator_type,"not one of valid iterator types",valid_iterator_types)
+        info("Subaction: action_id =",action_id,"impl_alias =",impl_alias,"subcomp_id =", \
+             subcomp_id,"subaction_id =",subaction_id,"subaction_iter =",subaction_iter)
+        assert(False)
+    iterator_arg=None
+    if iterator_type in iterators_with_args:
+        iterator_arg=iterator_spec['arg']
+    parsed_exclude_spec=None
+    if 'exclude' in subaction_iter:
+        exclude_spec=subaction_iter['exclude']
+        assert('type' in exclude_spec)
+        exclude_type=exclude_spec['type']
+        if exclude_type not in valid_iterator_types:
+            error("Exclude type",exclude_type,"not one of valid iterator types",valid_iterator_types)
+            info("Subaction: action_id =",action_id,"impl_alias =",impl_alias,"subcomp_id =", \
+                subcomp_id,"subaction_id =",subaction_id,"subaction_iter =",subaction_iter)
+            assert(False)
+        exclude_arg=None
+        if exclude_type in iterators_with_args:
+            exclude_arg=exclude_spec['arg']
+
+        parsed_exclude_spec=("not in",exclude_type,exclude_arg)
+
+    parsed_iterator_spec=[(vars_spec,iterator_type,iterator_arg,parsed_exclude_spec)]
+
+    info(".subaction(impl_ =",impl_alias,", action_name_ =",action_id, \
+         ", sub_component =",subcomp_id,", sub_action =",subaction_id,", foralls =",parsed_iterator_spec,")")
+    model_instance.subaction(impl_=impl_alias, \
+                             action_name_=action_id, \
+                             sub_component=subcomp_id, \
+                             sub_action=subaction_id, \
+                             foralls=parsed_iterator_spec)
+
 def parse_subactions(component, model_instance):
     for action_struct in component.get('actions', []):
         #info(".action(",action['name'],")")
@@ -101,11 +169,17 @@ def parse_subactions(component, model_instance):
                         if 'actions' in subcomponent:
                             subcomp_id=subcomponent['name']
                             subactions_list=subcomponent['actions']
-                            for subaction in subactions_list:
-                                subaction_id=subaction['name']
-                                # Build subaction
-                                synth_subaction_call(model_instance,action_id,impl_alias, \
-                                                     subcomp_id,subaction_id)
+                            for subaction_struct in subactions_list:
+                                subaction_id=subaction_struct['name']
+                                if 'for' in subaction_struct:
+                                    # Build subaction with iteration
+                                    subaction_iter=subaction_struct['for']
+                                    synth_subaction_call_iter(model_instance,action_id,impl_alias, \
+                                                        subcomp_id,subaction_id,subaction_iter)
+                                else:
+                                    # Build subaction, no iteration
+                                    synth_subaction_call(model_instance,action_id,impl_alias, \
+                                                        subcomp_id,subaction_id)
             
     return model_instance
 
