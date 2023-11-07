@@ -47,7 +47,6 @@ if __name__=="__main__":
     import parser.model_parser_core as mp_
     lib_filepath_list=[]
     lib_filepath_list.extend(glob.glob(model_script_lib_list[0]))
-    assert(len(lib_filepath_list)==1)
     info("Parsing modelscript libraries (",len(lib_filepath_list),")...")
     for lib_filepath in lib_filepath_list:
         info("-",lib_filepath)
@@ -69,7 +68,7 @@ if __name__=="__main__":
             for component_id in components_dict:
                 info("--- registering component",component_id)
                 component=components_dict[component_id]
-                mr_.registerPrimitive(component_id,component)
+                mr_.registerComponent(component_id,component)
             warn("-- => Done, registering components")
         else:
             info("-- No components to register")
