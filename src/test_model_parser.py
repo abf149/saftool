@@ -5,7 +5,7 @@ import util.notation.model as mo_
 from util.helper import info,warn,error
 from util import helper
 
-yaml_fn='saflib/microarchitecture/modelscript/IntersectionLeaderFollower.modelscript.yaml'
+yaml_fn='saflib/microarchitecture/modelscript/SkippingUarch.modelscript.yaml'
 log_fn='test_model_parser.log'
 
 def load_yaml(yaml_file_path):

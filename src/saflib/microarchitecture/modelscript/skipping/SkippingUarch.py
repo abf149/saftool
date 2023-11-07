@@ -44,7 +44,4 @@ SkippingUarchModel=SkippingUarch \
     .subaction(impl_="CLFNN", \
                action_name_="skip_follower", \
                sub_component="PgenFollower", \
-               sub_action="gen") \
-
-#    .require_port_throughput_attributes("md_in_leader",isect_attr_list) \
-#    .require_port_throughput_attributes("md_out",isect_attr_list) \
+               sub_action="gen")

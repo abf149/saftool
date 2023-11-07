@@ -1,0 +1,73 @@
+modelscript_version: 0.1
+modelscript_components:
+  - name: SkippingUarchModel
+    from_taxonomic_component: SkippingUarch
+    export_attributes_to_model: true
+    instance_aliases:
+    - alias: CLFNN
+      instances:
+      - cp_lf_none_none
+    scale_parameters:
+      - name: clock
+        type: real
+        export_as_model_attribute: true
+        inherit: true
+      - name: technology
+        type: string
+        export_as_model_attribute: true
+        inherit: true
+    arch_buffer_action_map:
+    - buffer_upstream_of_port: md_in_leader
+      upstream_action: metadata_write
+      downstream_action: fill_leader
+    - buffer_upstream_of_port: md_in_follower
+      upstream_action: metadata_write
+      downstream_action: fill_follower
+    - buffer_upstream_of_port: pos_out_leader
+      upstream_action: read
+      downstream_action: skip_leader
+    - buffer_upstream_of_port: pos_out_follower
+      upstream_action: read
+      downstream_action: skip_follower
+    actions:
+      - name: fill_leader
+        implementations:
+        - alias: CLFNN
+          subcomponents: 
+          - name: IntersectionLF
+            actions:
+            - name: fill
+      - name: fill_follower
+#        subcomponents: 
+#        - name: IntersectionLF
+#          actions:
+#          - name: fill
+      - name: skip_leader
+#        subcomponents: 
+#        - name: IntersectionLF
+#          actions:
+#          - name: fill      
+      - name: skip_follower
+        implementations:
+        - alias: CLFNN
+          subcomponents: 
+          - name: IntersectionLF
+            actions:
+            - name: intersect
+          - name: PgenFollower
+            actions:
+            - name: gen      
+    implementations:
+      - name: CLFNN
+        taxonomic_instance_alias: CLFNN
+        objective:
+          actions:
+            - name: fill_leader
+              energy: 0
+            - name: fill_follower
+              energy: 0
+            - name: skip_leader
+              energy: 0
+            - name: skip_follower
+              energy: 0
+          area: 0

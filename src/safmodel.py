@@ -16,8 +16,8 @@ def temporary_model_loader():
     #mr_.registerPrimitive("IntersectionLeaderFollowerModel",IntersectionLeaderFollowerModel)
     from saflib.microarchitecture.model.format.FormatUarch import FormatUarchModel
     mr_.registerComponent("FormatUarchModel",FormatUarchModel)
-    from saflib.microarchitecture.model.skipping.SkippingUarch import SkippingUarchModel
-    mr_.registerComponent("SkippingUarchModel",SkippingUarchModel)
+    #from saflib.microarchitecture.model.skipping.SkippingUarch import SkippingUarchModel
+    #mr_.registerComponent("SkippingUarchModel",SkippingUarchModel)
 
 if __name__=="__main__":
     arch, \
