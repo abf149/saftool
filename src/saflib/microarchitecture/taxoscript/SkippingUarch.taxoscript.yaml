@@ -1,0 +1,122 @@
+taxoscript_version: 0.1
+taxoscript_components:
+  - name: SkippingUarch
+    attributes:
+    - fibertree: format_leader=?
+    - fibertree: format_follower=?
+    - string: direction=bidirectional
+    ports:
+    - input: md_in_leader(md)=attributes.format_leader
+    - input: md_in_follower(md)=attributes.format_follower
+    - output: pos_out_leader(pos)=addr
+    - output: pos_out_follower(pos)=addr
+    instances:
+    - cp_bd_none_none: [C,C,bidirectional,none,none]
+    - cp_bd_opskip_none: [C,C,bidirectional,operand_skip,none]
+    - cp_lf_none_none: [C,U,leader_follower,none,none]
+    - cp_lf_none_pbubble: [C,U,leader_follower,none,pipeline_bubble]
+    - cp_lf_none_lut: [C,U,leader_follower,none,lut]
+    - b_bd_none_none: [B,B,bidirectional,none,none]
+    - b_lf_none_none: [B,U,leader_follower,none,none]
+    - b_lf_none_pbubble: [B,U,leader_follower,none,pipeline_bubble]
+    - b_lf_none_lut: [B,U,leader_follower,none,lut]
+    topologies:
+
+      - name: cp_bd_none_none
+        components:
+        - IntersectionBidirectional: IntersectionBD(C,C,none)
+        - PositionGenerator: PgenLeader(C)
+        - PositionGenerator: PgenFollower(C)
+        netlist:
+        - md: [md_in_leader,IntersectionBD.md_in_0]
+        - md: [md_in_follower,IntersectionBD.md_in_1]
+        - md: [IntersectionBD.md_out,PgenLeader.md_in]
+        - md: [IntersectionBD.md_out,PgenFollower.md_in]
+        - pos: [PgenLeader.pos_out,pos_out_leader]
+        - pos: [PgenFollower.pos_out,pos_out_follower]
+
+      - name: cp_bd_opskip_none
+        components:
+        - IntersectionBidirectional: IntersectionBD(C,C,opskip)
+        - PositionGenerator: PgenLeader(C)
+        - PositionGenerator: PgenFollower(C)
+        netlist:
+        - md: [md_in_leader,IntersectionBD.md_in_0]
+        - md: [md_in_follower,IntersectionBD.md_in_1]
+        - md: [IntersectionBD.md_out,PgenLeader.md_in]
+        - md: [IntersectionBD.md_out,PgenFollower.md_in]
+        - pos: [PgenLeader.pos_out,pos_out_leader]
+        - pos: [PgenFollower.pos_out,pos_out_follower]
+
+      - name: cp_lf_none_none
+        components:
+        - IntersectionLeaderFollower: IntersectionLF(C,none)
+        - PositionGenerator: PgenFollower(C)
+        netlist:
+        - md: [md_in_leader,IntersectionLF.md_in_leader]
+        - md: [IntersectionLF.md_out,PgenFollower.md_in]
+        - pos: [PgenFollower.pos_out,pos_out_follower]
+
+      - name: cp_lf_none_pbubble
+        components:
+        - IntersectionLeaderFollower: IntersectionLF(C,none)
+        - PositionGenerator: PgenFollower(C)
+        - FillGate: FillGateLeader(pipeline_bubble)
+        netlist:
+        - md: [md_in_leader,IntersectionLF.md_in_leader]
+        - md: [IntersectionLF.md_out,PgenFollower.md_in]
+        - pos: [PgenFollower.pos_out,pos_out_follower]
+
+      - name: cp_lf_none_lut
+        components:
+        - IntersectionLeaderFollower: IntersectionLF(C,none)
+        - PositionGenerator: PgenFollower(C)
+        - FillGate: FillGateLeader(lut)
+        netlist:
+        - md: [md_in_leader,IntersectionLF.md_in_leader]
+        - md: [IntersectionLF.md_out,PgenFollower.md_in]
+        - pos: [PgenFollower.pos_out,pos_out_follower]
+
+      - name: b_bd_none_none
+        components:
+        - IntersectionBidirectional: IntersectionBD(B,B,none)
+        - PositionGenerator: PgenLeader(B)
+        - PositionGenerator: PgenFollower(B)
+        netlist:
+        - md: [md_in_leader,IntersectionBD.md_in_0]
+        - md: [md_in_follower,IntersectionBD.md_in_1]
+        - md: [IntersectionBD.md_out,PgenLeader.md_in]
+        - md: [IntersectionBD.md_out,PgenFollower.md_in]
+        - pos: [PgenLeader.pos_out,pos_out_leader]
+        - pos: [PgenFollower.pos_out,pos_out_follower]
+
+      - name: b_lf_none_none
+        components:
+        - IntersectionLeaderFollower: IntersectionLF(B,none)
+        - PositionGenerator: PgenFollower(B)
+        netlist:
+        - md: [md_in_leader,IntersectionLF.md_in_leader]
+        - md: [IntersectionLF.md_out,PgenFollower.md_in]
+        - pos: [PgenFollower.pos_out,pos_out_follower]
+
+      - name: b_lf_none_pbubble
+        components:
+        - IntersectionLeaderFollower: IntersectionLF(B,none)
+        - PositionGenerator: PgenFollower(B)
+        - FillGate: FillGateLeader(pipeline_bubble)
+        netlist:
+        - md: [md_in_leader,IntersectionLF.md_in_leader]
+        - md: [IntersectionLF.md_out,PgenFollower.md_in]
+        - pos: [PgenFollower.pos_out,pos_out_followe]
+        - pos: [PgenLeader.pos_out,FillGateLeader.pos_in]
+
+      - name: b_lf_none_lut
+        components:
+        - IntersectionLeaderFollower: IntersectionLF(B,none)
+        - PositionGenerator: PgenFollower(B)
+        - FillGate: FillGateLeader(lut)
+        netlist:
+        - md: [md_in_leader,IntersectionLF.md_in_leader]
+        - md: [IntersectionLF.md_out,PgenFollower.md_in]
+        - pos: [PgenFollower.pos_out,pos_out_follower]
+        - pos: [PgenLeader.pos_out,FillGateLeader.pos_in]

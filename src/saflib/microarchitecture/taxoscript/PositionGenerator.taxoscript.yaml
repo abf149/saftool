@@ -1,0 +1,13 @@
+taxoscript_version: 0.1
+taxoscript_primitives:
+  - name: PositionGenerator
+    attributes:
+    - format: format=?
+    ports:
+    - input: md_in(md)=attributes.format
+    - output: pos_out(pos)=addr
+    instances:
+    - uncompressed: [U]
+    - coordinate_payload: [C]
+    - bitmask: [B]
+    - run_length_encoding: [R]

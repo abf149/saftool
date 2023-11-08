@@ -105,7 +105,7 @@ skipping_uarch_topologies=( \
             "" # Generator argument from this component attribute
         ),
 
-        "cp_lf_none_pbubble": (\
+        "cp_lf_none_lut": (\
             [(buildIntersectionLeaderFollower,'IntersectionLF',('C','none')), \
              (buildPgen,'PgenFollower',('C',)),\
              ((buildFillGate),'FillGateLeader',('lut'))],\

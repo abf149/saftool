@@ -22,7 +22,7 @@ def register_characterization_resources(characterization_path_list):
 def load_parse_model_libs(model_script_lib_list):
     # Parse modelscript
     import glob,yaml
-    import parser.model_parser_core as mp_
+    import parser.taxo_parser_core as tp_
     lib_filepath_list=[]
     lib_filepath_list.extend(glob.glob(model_script_lib_list[0]))
     info("Parsing modelscript libraries (",len(lib_filepath_list),")...")
@@ -31,7 +31,7 @@ def load_parse_model_libs(model_script_lib_list):
         lib_struct=None
         with open(lib_filepath, 'r') as file:
             lib_struct= yaml.safe_load(file)
-        primitives_dict, components_dict=mp_.parse_modelscript(lib_struct)
+        primitives_dict, components_dict=tp_.parse_modelscript(lib_struct)
         if len(primitives_dict)>0:
             info("-- Registering primitives")
             for primitive_id in primitives_dict:

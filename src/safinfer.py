@@ -1,5 +1,6 @@
 '''SAFinfer - tool to build and solve SAF microarchitecture inference problem from Sparseloop inputs'''
 from util import safinfer_core as safcore, safinfer_io as safio
+from util.helper import info,warn,error
 import util.helper as helper
 import os
 
@@ -19,7 +20,8 @@ if __name__=="__main__":
     topo_out_path, \
     saflib_path, \
     do_logging,\
-    log_fn = safio.parse_args()
+    log_fn, \
+    taxo_script_lib = safio.parse_args()
 
     print("logging:",do_logging)
     helper.do_log=do_logging
@@ -27,8 +29,14 @@ if __name__=="__main__":
         helper.log_init(log_fn)    
     print("reconfigurable_arch:",reconfigurable_arch)
 
+    warn(":: Setup",also_stdout=True)
+
     # Load taxonomic library
     import saflib.microarchitecture.taxo.TaxoRegistry
+
+    warn(":: => Done, setup",also_stdout=True)
+
+    warn(":: Taxonomic inference",also_stdout=True)
 
     # Build and solve the SAF microarchitecture inference problem:
     taxo_arch = safcore.build_saf_uarch_inference_problem(arch, \
@@ -50,3 +58,4 @@ if __name__=="__main__":
     else:
         print("  => FAILURE")
         safio.dump_saf_uarch_topology(inferred_arch,topo_out_path + ".fail")
+    warn(":: => Done, taxonomic inference",also_stdout=True)

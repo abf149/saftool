@@ -1,0 +1,14 @@
+taxoscript_version: 0.1
+taxoscript_primitives:
+  - name: IntersectionLeaderFollower
+    attributes:
+    - format: format_leader=?
+    - string: strategy
+    ports:
+    - input: md_in_leader(md)=attributes.format_leader
+    - output: md_out(md)=attributes.format_leader
+    instances:
+    - unc_lf_none: [U,none]
+    - cp_lf_none: [C,none]
+    - b_lf_none: [B,none]
+    - r_lf_none: [R,none]

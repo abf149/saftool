@@ -4,9 +4,48 @@ import util.sparseloop_config_processor as sl_config, yaml, argparse
 from util.helper import info,warn,error
 import util.notation.predicates as p_
 import solver.model.build_support.abstraction as ab
+import saflib.microarchitecture.taxo.TaxoRegistry as tr_
 
 '''Config - condition the format of YAML file dumps'''
 yaml.Dumper.ignore_aliases = lambda *args : True
+
+'''Load & parse taxonomic libraries'''
+def load_parse_taxo_libs(taxo_script_lib_list):
+    # Parse modelscript
+    import glob,yaml
+    import parser.taxo_parser_core as tp_
+    lib_filepath_list=[]
+    lib_filepath_list.extend(glob.glob(taxo_script_lib_list[0]))
+    info("Parsing taxoscript libraries (",len(lib_filepath_list),")...")
+
+    '''
+    for lib_filepath in lib_filepath_list:
+        info("-",lib_filepath)
+        lib_struct=None
+        with open(lib_filepath, 'r') as file:
+            lib_struct= yaml.safe_load(file)
+        primitives_dict, components_dict=tp_.parse_taxoscript(lib_struct)
+        if len(primitives_dict)>0:
+            info("-- Registering primitives")
+            for primitive_id in primitives_dict:
+                info("--- registering primitive",primitive_id)
+                primitive=primitives_dict[primitive_id]
+                tr_.registerPrimitive(primitive_id,primitive)
+            warn("-- => Done, registering primitives")
+        else:
+            info("-- No primitives to register")
+        if len(components_dict)>0:
+            info("-- Registering components")
+            for component_id in components_dict:
+                info("--- registering component",component_id)
+                component=components_dict[component_id]
+                tr_.registerComponent(component_id,component)
+            warn("-- => Done, registering components")
+        else:
+            info("-- No components to register")
+    '''
+
+    warn("=> Done,")
 
 '''CLI argparse'''
 def parse_args():
@@ -35,7 +74,8 @@ def parse_args():
     parser.add_argument('-s','--sparseopts',default='ref_input/sparseopts.yaml')
     parser.add_argument('-o','--dir-out',default='')
     parser.add_argument('-b','--binding-out',default='ref_output/bindings.yaml')
-    parser.add_argument('-t','--topology-out',default='ref_output/new_arch.yaml')
+    parser.add_argument('-t','--taxo-script-lib',action='append',default=['saflib/microarchitecture/taxoscript/*.yaml'])
+    parser.add_argument('-T','--topology-out',default='ref_output/new_arch.yaml')
     parser.add_argument('-r', '--reconfigurable-arch', action='store_true')
     parser.add_argument('-L','--log', action='store_true')
     parser.add_argument('-f','--log-file',default='./safinfer.log')
@@ -86,7 +126,8 @@ def parse_args():
            topo_out_path, \
            args.saftaxolib, \
            do_logging, \
-           args.log_file
+           args.log_file, \
+           args.taxo_script_lib
 
 '''Binding & SAF microarchitecture topology YAML dumps'''
 def dump_bindings(bind_out_path,fmt_iface_bindings,skip_bindings):
