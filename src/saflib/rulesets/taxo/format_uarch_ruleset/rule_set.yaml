@@ -6,20 +6,7 @@ id: FormatUarchRuleSet
 validation_rule_set:
   classtype: ValidationRuleSet
   id: ComponentFormatUarchValidationRuleSet
-  validation_rules:
-
-  # - Supported-instantiation validation rules
-
-  - classtype: ValidationRule
-    conditionally_evaluated_expression:
-      classtype: FunctionReference
-      id: assertion
-      value: assertComponentFormatUarchAttributesAreSupported
-    id: AssertComponentFormatUarchSupportedInstantiation
-    predicate:
-      classtype: FunctionReference
-      id: predicate
-      value: predicateIsComponentFormatUarch
+  validation_rules: []
 
 # Format uarch rewrite rules
 

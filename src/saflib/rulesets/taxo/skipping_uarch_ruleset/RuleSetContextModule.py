@@ -50,13 +50,6 @@ predicateIsArchitectureHasSkippingSAF=b_.AND(p_.isArchitecture, \
                                             )
                                     )
 
-''' - Validation rules'''
-''' -- AssertComponentSkippingUarchAttributesAreSupported'''
-''' --- assert supported instance '''
-predicateIsComponentSkippingUarch, \
-assertComponentSkippingUarchAttributesAreSupported = \
-    r_.isValidComponentOrPrimitiveMatchingCategoryRule(skipping_uarch_instances,SkippingUarch)
-
 ''' - Rewrite rules'''
 ''' -- TransformTopologicalHoleToPerRankMdParserTopology'''
 ''' --- transform supported instance topological hole to instance topology'''

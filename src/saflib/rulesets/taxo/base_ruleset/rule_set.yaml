@@ -44,6 +44,18 @@ validation_rule_set:
       id: predicate
       value: predicateIsMicroarchitecturePrimitive
 
+  # Component validation
+  - classtype: ValidationRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: assertion
+      value: assertComponentAttributesAreSupported
+    id: AssertComponentAttributesAreSupported
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsMicroarchitectureComponent
+
 # Format uarch rewrite rules
 
 rewrite_rule_set:

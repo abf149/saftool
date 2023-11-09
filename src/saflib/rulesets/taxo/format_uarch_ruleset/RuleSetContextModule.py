@@ -50,13 +50,6 @@ predicateIsArchitectureHasFormatSAF=b_.AND(p_.isArchitecture, \
                                             )
                                     )
 
-''' - Validation rules'''
-''' -- AssertComponentFormatUarchAttributesAreSupported'''
-''' --- assert supported instance '''
-predicateIsComponentFormatUarch, \
-assertComponentFormatUarchAttributesAreSupported = \
-    r_.isValidComponentOrPrimitiveMatchingCategoryRule(fmt_uarch_instances,FormatUarch)
-
 ''' - Rewrite rules'''
 ''' -- TransformTopologicalHoleToPerRankMdParserTopology'''
 ''' --- transform supported instance topological hole to instance topology'''

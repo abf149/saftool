@@ -6,20 +6,7 @@ id: SkippingUarchRuleSet
 validation_rule_set:
   classtype: ValidationRuleSet
   id: ComponentSkippingUarchValidationRuleSet
-  validation_rules:
-
-  # - Supported-instantiation validation rules
-
-  - classtype: ValidationRule
-    conditionally_evaluated_expression:
-      classtype: FunctionReference
-      id: assertion
-      value: assertComponentSkippingUarchAttributesAreSupported
-    id: AssertComponentSkippingUarchAttributesAreSupported
-    predicate:
-      classtype: FunctionReference
-      id: predicate
-      value: predicateIsComponentSkippingUarch
+  validation_rules: []
 
 # Skipping uarch rewrite rules
 

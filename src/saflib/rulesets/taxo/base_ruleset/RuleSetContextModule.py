@@ -64,12 +64,7 @@ predicateIsPrimitiveOrComponentHasUnknownInterfaceTypeReferencingKnownAttribute 
                  p_.isComponent), \
            p_.hasKnownAttributeTypeReferencedByPortWithUnknownAttribute)
 
-'''Primitive validation rules'''        
-#from util.notation.generators import rules as r_
-#from saflib.microarchitecture.taxo.address_primitives.PositionGenerator \
-#    import PositionGenerator as Pgen, pgen_instances
-
-
+'''Primitive validation rules'''
 ''' - Validation rules'''
 ''' -- AssertPrimitiveAttributesAreSupported'''
 def predicateIsMicroarchitecturePrimitive(obj):
@@ -84,5 +79,23 @@ def getPrimitiveCategoryAndSupportedInstances(obj):
 def assertPrimitiveAttributesAreSupported(obj):
     category,supported_instances= \
         getPrimitiveCategoryAndSupportedInstances(obj)
+    return r_.isValidComponentOrPrimitiveMatchingCategoryRule \
+                (supported_instances,category)
+
+'''Component validation rules'''
+''' - Validation rules'''
+''' -- AssertComponentAttributesAreSupported'''
+def predicateIsMicroarchitectureComponent(obj):
+    return p_.isComponent(obj)
+def getComponentCategoryAndSupportedInstances(obj):
+    category_str=obj.getCategory()
+    ilf_dict=tr_.getComponent(category_str)
+    category=ilf_dict["description"]
+    supported_instances=ilf_dict["instances"]
+    return category,supported_instances
+
+def assertComponentAttributesAreSupported(obj):
+    category,supported_instances= \
+        getComponentCategoryAndSupportedInstances(obj)
     return r_.isValidComponentOrPrimitiveMatchingCategoryRule \
                 (supported_instances,category)
