@@ -5,7 +5,8 @@ import saflib.microarchitecture.taxo.TaxoRegistry as tr_
 from util.helper import info,warn,error
 from util import helper
 
-yaml_fn=['saflib/microarchitecture/taxoscript/IntersectionLeaderFollower.taxoscript.yaml',
+yaml_fn=['saflib/microarchitecture/taxoscript/FillGate.taxoscript.yaml',
+         'saflib/microarchitecture/taxoscript/IntersectionLeaderFollower.taxoscript.yaml',
          'saflib/microarchitecture/taxoscript/IntersectionBidirectional.taxoscript.yaml',
          'saflib/microarchitecture/taxoscript/SkippingUarch.taxoscript.yaml']
 log_fn='test_taxo_parser.log'

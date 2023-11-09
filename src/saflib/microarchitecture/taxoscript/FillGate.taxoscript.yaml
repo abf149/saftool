@@ -1,0 +1,10 @@
+taxoscript_version: 0.1
+taxoscript_primitives:
+  - name: FillGate
+    attributes:
+    - string: strategy=pipeline_bubble
+    ports:
+    - input: pos_in(pos)
+    instances:
+    - pipeline_bubble: [pipeline_bubble]
+    - lut: [lut]
