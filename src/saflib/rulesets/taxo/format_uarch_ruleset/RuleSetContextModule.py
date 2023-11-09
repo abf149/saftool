@@ -49,12 +49,3 @@ predicateIsArchitectureHasFormatSAF=b_.AND(p_.isArchitecture, \
                                                 )
                                             )
                                     )
-
-''' - Rewrite rules'''
-''' -- TransformTopologicalHoleToPerRankMdParserTopology'''
-''' --- transform supported instance topological hole to instance topology'''
-predicateIsComponentIsFormatUarchHasTopologicalHole, \
-transformTopologicalHoleToPerRankMdParserTopology = \
-    r_.transformFillTopologyOfValidComponentOrPrimitiveMatchingCategoryRule(fmt_uarch_instances, \
-                                                                            fmt_uarch_topologies, \
-                                                                            FormatUarch)

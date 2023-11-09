@@ -50,12 +50,3 @@ predicateIsArchitectureHasSkippingSAF=b_.AND(p_.isArchitecture, \
                                             )
                                     )
 
-''' - Rewrite rules'''
-''' -- TransformTopologicalHoleToPerRankMdParserTopology'''
-''' --- transform supported instance topological hole to instance topology'''
-predicateIsComponentIsSkippingUarchHasTopologicalHole, \
-transformTopologicalHoleToIntersectionTopology = \
-    r_.transformFillTopologyOfValidComponentOrPrimitiveMatchingCategoryRule(skipping_uarch_instances, \
-                                                                            skipping_uarch_topologies, \
-                                                                            SkippingUarch)
-

@@ -79,8 +79,9 @@ def getPrimitiveCategoryAndSupportedInstances(obj):
 def assertPrimitiveAttributesAreSupported(obj):
     category,supported_instances= \
         getPrimitiveCategoryAndSupportedInstances(obj)
-    return r_.isValidComponentOrPrimitiveMatchingCategoryRule \
+    _,valid=r_.isValidComponentOrPrimitiveMatchingCategoryRule \
                 (supported_instances,category)
+    return valid(obj)
 
 '''Component validation rules'''
 ''' - Validation rules'''
@@ -97,5 +98,31 @@ def getComponentCategoryAndSupportedInstances(obj):
 def assertComponentAttributesAreSupported(obj):
     category,supported_instances= \
         getComponentCategoryAndSupportedInstances(obj)
-    return r_.isValidComponentOrPrimitiveMatchingCategoryRule \
-                (supported_instances,category)
+    _,valid=r_.isValidComponentOrPrimitiveMatchingCategoryRule \
+                     (supported_instances,category)
+    return valid(obj)
+
+'''Component rewrite rules'''
+def predicateIsComponentHasTopologicalHole(obj):
+    return p_.isComponent(obj) and (not p_.isArchitecture(obj)) \
+           and p_.hasTopologicalHole(obj)
+def getComponentCategoryAndSupportedInstancesAndTopologies(obj):
+    category_str=obj.getCategory()
+    ilf_dict=tr_.getComponent(category_str)
+    category=ilf_dict["description"]
+    supported_instances=ilf_dict["instances"]
+    topologies=ilf_dict["topologies"]
+    return category,supported_instances,topologies
+
+def transformTopologicalHoleToIntersectionTopology(obj):
+    category, \
+    supported_instances, \
+    topologies=getComponentCategoryAndSupportedInstancesAndTopologies(obj)
+    _,xform=r_.transformFillTopologyOfValidComponentOrPrimitiveMatchingCategoryRule(supported_instances, \
+                                                                                    topologies, \
+                                                                                    category)
+    x=xform(obj)
+    #print(obj.getId())
+    #print(obj.getCategory())
+    #print(obj)
+    return x

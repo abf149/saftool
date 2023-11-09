@@ -56,7 +56,7 @@ validation_rule_set:
       id: predicate
       value: predicateIsMicroarchitectureComponent
 
-# Format uarch rewrite rules
+# Rewrite rules
 
 rewrite_rule_set:
   classtype: RewriteRuleSet
@@ -109,6 +109,22 @@ rewrite_rule_set:
       classtype: FunctionReference
       id: predicate
       value: predicateIsPrimitiveOrComponentHasUnknownInterfaceTypeReferencingKnownAttribute
+
+  # Component topology inference
+
+  - classtype: RewriteRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: transform
+      value: transformTopologicalHoleToIntersectionTopology
+    id: TransformTopologicalHoleToIntersectionTopology
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsComponentHasTopologicalHole
+
+#predicateIsComponent
+
 
 # Topology completion rules
 completion_rule_set:

@@ -27,17 +27,3 @@ rewrite_rule_set:
       id: concretization
       classtype: FunctionReference
       value: concretizeArchitectureFormatSAFsToFormatUarches
-
-
-  # - Topological hole rewrite
-
-  - classtype: RewriteRule
-    conditionally_evaluated_expression:
-      classtype: FunctionReference
-      id: transform
-      value: transformTopologicalHoleToPerRankMdParserTopology
-    id: TransformTopologicalHoleToPerRankMdParserTopology
-    predicate:
-      classtype: FunctionReference
-      id: predicate
-      value: predicateIsComponentIsFormatUarchHasTopologicalHole

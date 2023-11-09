@@ -139,7 +139,6 @@ def transformFillComponentTopologicalHoleWithTopologySpec(obj,instance_topology_
     obj.setTopology( \
         m_.TopologyWrapper().components(components_list).nets(net_list_).build()
     )
-
     return obj
 
 def transformFillTopologyOfValidComponentOrPrimitiveMatchingCategoryRule(supported_instances,instance_topologies,category_template):
