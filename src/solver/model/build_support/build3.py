@@ -32,7 +32,6 @@ def build3_simplify_system(problem_as_system):
             lhs, rhs = constraint.split('==')
             return sp.Eq(sp.sympify(lhs.strip(), locals=symbols_dict), sp.sympify(rhs.strip(), locals=symbols_dict))
         
-        #print(constraint)
         return sp.sympify(constraint, locals=symbols_dict)
 
     # Convert the modified constraints into Sympy expressions.
@@ -120,8 +119,6 @@ def build3_simplify_system(problem_as_system):
             if const is not None:
                 discarded_constraints.append(final_constraints[const_idx])
                 final_constraints[const_idx]=None
-
-    print(discarded_constraints)
 
     # Third-pass: 
     lb_dict={}

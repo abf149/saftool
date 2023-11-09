@@ -22,7 +22,7 @@ def register_characterization_resources(characterization_path_list):
 def load_parse_model_libs(model_script_lib_list):
     # Parse modelscript
     import glob,yaml
-    import parser.taxo_parser_core as tp_
+    import parser.model_parser_core as tp_
     lib_filepath_list=[]
     lib_filepath_list.extend(glob.glob(model_script_lib_list[0]))
     info("Parsing modelscript libraries (",len(lib_filepath_list),")...")
@@ -85,7 +85,8 @@ def parse_args():
                         help='Output filename for Sparseloop arch augmented with SAF microarchitecture models.')
     parser.add_argument('-s','--sparseopts',default='ref_input/sparseopts.yaml', \
                         help='Sparseloop SAF specification file.')
-    parser.add_argument('-t','--settings',default='ref_input/safmodel_settings.yaml', \
+    parser.add_argument('-t','--taxo-script-lib',action='append',default=['saflib/microarchitecture/taxoscript/*.yaml'])
+    parser.add_argument('-T','--settings',default='ref_input/safmodel_settings.yaml', \
                         help='safmodel configuration file.')
     parser.add_argument('-u','--sim',action='append',default=['hw/sim_data'], \
                         help='safmodel configuration file.')
@@ -125,7 +126,8 @@ def parse_args():
            do_logging,\
            args.log_file,\
            args.char, \
-           args.model_script_lib
+           args.model_script_lib, \
+           args.taxo_script_lib
 
 def load_taxonomic_microarchitecture(netlist):
     '''Load taxonomic description of SAF microarchitecture'''

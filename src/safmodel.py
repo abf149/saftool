@@ -4,7 +4,7 @@
 import util.helper as helper
 from util.helper import info,warn,error
 import saflib.microarchitecture.ModelRegistry as mr_
-from util import safmodel_core as safcore, safmodel_io as safio
+from util import safmodel_core as safcore, safmodel_io as safio, safinfer_io
 
 if __name__=="__main__":
     arch, \
@@ -17,7 +17,8 @@ if __name__=="__main__":
     do_logging,\
     log_fn, \
     characterization_path_list, \
-    model_script_lib_list = safio.parse_args()
+    model_script_lib_list, \
+    taxo_script_lib_list = safio.parse_args()
 
     print("logging:",do_logging)
     helper.do_log=do_logging
@@ -26,6 +27,7 @@ if __name__=="__main__":
 
     warn(":: Setup",also_stdout=True)
     '''Register characterization resources; load and parse model libraries'''
+    safinfer_io.load_parse_taxo_libs(taxo_script_lib_list)
     safio.register_characterization_resources(characterization_path_list)
     safio.load_parse_model_libs(model_script_lib_list)
     warn(":: => Done, setup")
