@@ -1,5 +1,5 @@
 classtype: RuleSet
-id: FormatUarchRuleSet
+id: UarchFromSAFRuleSet
 
 # Component FormatUarch validation rules
 
@@ -27,3 +27,14 @@ rewrite_rule_set:
       id: concretization
       classtype: FunctionReference
       value: concretizeArchitectureFormatSAFsToFormatUarches
+
+  - id: ConcretizeArchitectureSkippingSAFsToSkippingUarches
+    classtype: RewriteRule
+    predicate:
+      id: predicate
+      classtype: FunctionReference
+      value: predicateIsArchitectureHasSkippingSAF
+    conditionally_evaluated_expression:
+      id: concretization
+      classtype: FunctionReference
+      value: concretizeArchitectureSkippingSAFsToSkippingUarches

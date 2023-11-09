@@ -14,9 +14,7 @@ default_ruleset_list = ['base_ruleset', \
 '''
 
 default_ruleset_list = ['base_ruleset', \
-                        'format_uarch_ruleset', \
-                        'gating_ruleset', \
-                        'skipping_uarch_ruleset']
+                        'microarchitecture_from_saf']
 
 '''Routines - build and solve SAF microarchitecture inference problem'''
 def build_saf_uarch_inference_problem(arch, sparseopts, prob, mapping, reconfigurable_arch, bind_out_path):
