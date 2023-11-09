@@ -1,6 +1,6 @@
 '''Format microarchitecture'''
 from util.notation import microarchitecture as m_, transform as t_
-import saflib.microarchitecture.taxo.TaxoRegistry as tr_
+import saflib.microarchitecture.TaxoRegistry as tr_
 format_uarch_dict=tr_.getComponent("FormatUarch")
 buildFormatUarch=format_uarch_dict['constructor']
 

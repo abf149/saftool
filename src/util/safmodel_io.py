@@ -4,7 +4,7 @@ import os, argparse, test_data as td, copy, re
 import util.sparseloop_config_processor as sl_config, yaml, argparse
 from util.taxonomy.designelement import Architecture
 from util.helper import info,warn,error
-import saflib.microarchitecture.model.ModelRegistry as mr_
+import saflib.microarchitecture.ModelRegistry as mr_
 import saflib.resources.char.ResourceRegistry as rr_
 import export.AnalyticalModelExport as am_exp
 

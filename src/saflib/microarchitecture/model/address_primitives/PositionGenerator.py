@@ -1,4 +1,4 @@
-import saflib.microarchitecture.taxo.TaxoRegistry as tr_
+import saflib.microarchitecture.TaxoRegistry as tr_
 import util.notation.model as mo_
 
 pgen_attr_list=["pr","cr","pw","nc"]

@@ -1,6 +1,6 @@
 '''SAFmodel core library - build and solve SAF model synthesis problem 
                            from microarchitecture & Sparseloop problem description'''
-import saflib.microarchitecture.taxo.TaxoRegistry as tr_ # Initialize taxonomic registry (TODO: from files)
+import saflib.microarchitecture.TaxoRegistry as tr_ # Initialize taxonomic registry (TODO: from files)
 import util.sparseloop_config_processor as sl_config
 #from util.safinfer_io import sprettyprint_taxo_uarch
 #from solver.build import get_buffer_hierarchy

@@ -1,4 +1,4 @@
-import saflib.microarchitecture.taxo.TaxoRegistry as tr_
+import saflib.microarchitecture.TaxoRegistry as tr_
 #from ...taxo.address_primitives.PositionGenerator import PositionGenerator, pgen_instances
 import util.notation.model as mo_
 

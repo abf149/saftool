@@ -2,7 +2,7 @@
 from util.helper import info, warn, error
 import solver.model.build_support.relations as rn
 import solver.model.build_support.scale as sc
-import saflib.microarchitecture.model.ModelRegistry as mr
+import saflib.microarchitecture.ModelRegistry as mr
 import solver.model.build_support.abstraction as ab_
 import util.model.CasCompat as cc_
 import sympy as sp

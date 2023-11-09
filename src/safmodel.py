@@ -3,7 +3,7 @@
 #import solver.model.solve as solve
 import util.helper as helper
 from util.helper import info,warn,error
-import saflib.microarchitecture.model.ModelRegistry as mr_
+import saflib.microarchitecture.ModelRegistry as mr_
 from util import safmodel_core as safcore, safmodel_io as safio
 
 if __name__=="__main__":

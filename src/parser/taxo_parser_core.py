@@ -1,7 +1,7 @@
 import parser.taxo_parser_support.keywords as kw_
 import parser.taxo_parser_support.primitive.primitive_parser as prpr_
 import parser.taxo_parser_support.component.component_parser as cmpr_
-import saflib.microarchitecture.taxo.TaxoRegistry as tr_
+import saflib.microarchitecture.TaxoRegistry as tr_
 from util.helper import info,warn,error
 
 def parse_taxoscript(script_dict,primitives_only=False,components_only=False):

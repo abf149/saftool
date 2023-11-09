@@ -13,15 +13,15 @@ from util.notation.generators import boolean_operators as b_, \
 
 '''SAF, component and primitive imports'''
 from saflib.saf.SkippingSAF import SkippingSAF, isSkipSAF
-import saflib.microarchitecture.taxo.TaxoRegistry as tr_
+import saflib.microarchitecture.TaxoRegistry as tr_
 
 skipping_uarch_dict=tr_.getComponent("SkippingUarch")
 SkippingUarch=skipping_uarch_dict["description"]
 skipping_uarch_instances=skipping_uarch_dict["instances"]
 skipping_uarch_topologies=skipping_uarch_dict["topologies"]
 
-from saflib.microarchitecture.taxo.skipping.SkippingUarch import SkipSAFtoUarch, \
-                                                                newSkipUarchBufferStubNetlistFromSkipSAF
+from saflib.saf.microarchitecture_from_saf.skipping.SkippingUarch import SkipSAFtoUarch, \
+                                                   newSkipUarchBufferStubNetlistFromSkipSAF
 
 ilf_dict=tr_.getPrimitive("IntersectionLeaderFollower")
 IntersectionLeaderFollower=ilf_dict["description"]

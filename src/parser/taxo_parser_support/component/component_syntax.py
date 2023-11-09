@@ -3,7 +3,7 @@ from util.notation import microarchitecture as m_
 import util.taxonomy.designelement as de_
 import parser.taxo_parser_support.keywords as kw_
 import parser.taxo_parser_support.component.component_keywords as ckw_
-import saflib.microarchitecture.taxo.TaxoRegistry as tr_
+import saflib.microarchitecture.TaxoRegistry as tr_
 from util.helper import info,warn,error
 
 def parse_name(component):

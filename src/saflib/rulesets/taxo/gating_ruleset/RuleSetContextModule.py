@@ -1,7 +1,7 @@
 '''Gating uarch RuleSet'''             
 from util.notation.generators import rules as r_
 
-import saflib.microarchitecture.taxo.TaxoRegistry as tr_
+import saflib.microarchitecture.TaxoRegistry as tr_
 
 pgen_dict=tr_.getPrimitive("FillGate")
 FillGate=pgen_dict["description"]

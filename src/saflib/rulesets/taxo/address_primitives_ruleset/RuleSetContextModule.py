@@ -6,7 +6,7 @@ from util.notation.generators import rules as r_
 ''' -- AssertPrimitivePgenAttributesAreSupported'''
 ''' --- assert supported instance'''
 
-import saflib.microarchitecture.taxo.TaxoRegistry as tr_
+import saflib.microarchitecture.TaxoRegistry as tr_
 
 pgen_dict=tr_.getPrimitive("PositionGenerator")
 

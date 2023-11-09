@@ -1,6 +1,6 @@
 import parser.taxo_parser_core as tp_
 import yaml
-import saflib.microarchitecture.taxo.TaxoRegistry as tr_
+import saflib.microarchitecture.TaxoRegistry as tr_
 #import util.notation.taxo as mo_
 from util.helper import info,warn,error
 from util import helper
