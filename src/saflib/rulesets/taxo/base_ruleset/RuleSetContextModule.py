@@ -1,6 +1,8 @@
 '''Base SAFInfer RuleSet'''
 from util.notation.generators import quantifiers as q_, boolean_operators as b_
 from util.notation import attributes as a_, objects as o_, predicates as p_, transform as t_
+import saflib.microarchitecture.TaxoRegistry as tr_
+from util.notation.generators import rules as r_
 from util.taxonomy.expressions import FormatType
 
 ''' Topology validation rules'''
@@ -63,8 +65,24 @@ predicateIsPrimitiveOrComponentHasUnknownInterfaceTypeReferencingKnownAttribute 
            p_.hasKnownAttributeTypeReferencedByPortWithUnknownAttribute)
 
 '''Primitive validation rules'''        
-from util.notation.generators import rules as r_
+#from util.notation.generators import rules as r_
 #from saflib.microarchitecture.taxo.address_primitives.PositionGenerator \
 #    import PositionGenerator as Pgen, pgen_instances
 
 
+''' - Validation rules'''
+''' -- AssertPrimitiveAttributesAreSupported'''
+def predicateIsMicroarchitecturePrimitive(obj):
+    return p_.isPrimitive(obj) and obj.getCategory()!="BufferStub"
+def getPrimitiveCategoryAndSupportedInstances(obj):
+    category_str=obj.getCategory()
+    ilf_dict=tr_.getPrimitive(category_str)
+    category=ilf_dict["description"]
+    supported_instances=ilf_dict["instances"]
+    return category,supported_instances
+
+def assertPrimitiveAttributesAreSupported(obj):
+    category,supported_instances= \
+        getPrimitiveCategoryAndSupportedInstances(obj)
+    return r_.isValidComponentOrPrimitiveMatchingCategoryRule \
+                (supported_instances,category)

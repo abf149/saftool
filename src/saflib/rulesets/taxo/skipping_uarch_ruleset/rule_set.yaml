@@ -1,26 +1,6 @@
 classtype: RuleSet
 id: SkippingUarchRuleSet
 
-# Primitive Intersection validation rules
-
-validation_rule_set:
-  classtype: ValidationRuleSet
-  id: PrimitiveIntersectionValidationRuleSet
-  validation_rules:
-
-  # - Supported-instantiation validation rules
-
-  - classtype: ValidationRule
-    conditionally_evaluated_expression:
-      classtype: FunctionReference
-      id: assertion
-      value: assertPrimitiveIntersectionAttributesAreSupported
-    id: AssertPrimitiveIntersectionAttributesAreSupported
-    predicate:
-      classtype: FunctionReference
-      id: predicate
-      value: predicateIsIntersectionParser
-
 # Component SkippingUarch validation rules
 
 validation_rule_set:

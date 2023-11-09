@@ -15,7 +15,6 @@ default_ruleset_list = ['base_ruleset', \
 
 default_ruleset_list = ['base_ruleset', \
                         'format_uarch_ruleset', \
-                        'address_primitives_ruleset', \
                         'gating_ruleset', \
                         'skipping_uarch_ruleset']
 

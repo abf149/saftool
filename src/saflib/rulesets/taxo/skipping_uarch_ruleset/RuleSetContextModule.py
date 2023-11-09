@@ -23,10 +23,6 @@ skipping_uarch_topologies=skipping_uarch_dict["topologies"]
 from saflib.saf.microarchitecture_from_saf.skipping.SkippingUarch import SkipSAFtoUarch, \
                                                    newSkipUarchBufferStubNetlistFromSkipSAF
 
-ilf_dict=tr_.getPrimitive("IntersectionLeaderFollower")
-IntersectionLeaderFollower=ilf_dict["description"]
-intersection_lf_instances=ilf_dict["instances"]
-
 ''' Skipping microarchitecture'''
 
 '''- SAF rewrite rules'''
@@ -69,13 +65,4 @@ transformTopologicalHoleToIntersectionTopology = \
     r_.transformFillTopologyOfValidComponentOrPrimitiveMatchingCategoryRule(skipping_uarch_instances, \
                                                                             skipping_uarch_topologies, \
                                                                             SkippingUarch)
-
-'''Intersection microarchitecture primitive'''
-
-''' - Validation rules'''
-''' -- AssertPrimitiveIntersectionAttributesAreSupported'''
-''' --- assert supported instance'''
-predicateIsIntersectionParser, \
-assertPrimitiveIntersectionAttributesAreSupported = \
-    r_.isValidComponentOrPrimitiveMatchingCategoryRule(intersection_lf_instances,IntersectionLeaderFollower)
 

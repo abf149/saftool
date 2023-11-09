@@ -32,6 +32,18 @@ validation_rule_set:
       id: predicate
       value: predicateNetHasConsistentPortFormatType
 
+  # Primitive validation
+  - classtype: ValidationRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: assertion
+      value: assertPrimitiveAttributesAreSupported
+    id: AssertPrimitiveAttributesAreSupported
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsMicroarchitecturePrimitive
+
 # Format uarch rewrite rules
 
 rewrite_rule_set:

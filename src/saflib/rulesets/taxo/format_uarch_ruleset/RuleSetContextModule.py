@@ -24,10 +24,6 @@ fmt_uarch_topologies=format_uarch_dict['topologies']
 from saflib.saf.microarchitecture_from_saf.format.FormatUarch import FMTSAFtoUarch, \
                                                                      newFMTUarchBufferStubNetlistFromFMTSAF
 
-metadata_parser_dict=tr_.getPrimitive("MetadataParser")
-MetadataParser=metadata_parser_dict["description"]
-md_parser_instances=metadata_parser_dict["instances"]
-
 ''' Format microarchitecture'''
 
 '''- SAF rewrite rules'''
@@ -69,13 +65,3 @@ transformTopologicalHoleToPerRankMdParserTopology = \
     r_.transformFillTopologyOfValidComponentOrPrimitiveMatchingCategoryRule(fmt_uarch_instances, \
                                                                             fmt_uarch_topologies, \
                                                                             FormatUarch)
-
-'''MetadataParser microarchitecture primitive'''
-
-''' - Validation rules'''
-''' -- AssertPrimitiveMetadataParserAttributesAreSupported'''
-''' --- assert supported instance'''
-predicateIsPrimitiveMetadataParser, \
-assertPrimitiveMetadataParserAttributesAreSupported = \
-    r_.isValidComponentOrPrimitiveMatchingCategoryRule(md_parser_instances,MetadataParser)
-

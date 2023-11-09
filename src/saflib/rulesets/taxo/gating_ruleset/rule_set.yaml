@@ -1,22 +1,3 @@
 classtype: RuleSet
 id: GatingUarchRuleSet
 
-# Primitive FillGate validation rules
-
-validation_rule_set:
-  classtype: ValidationRuleSet
-  id: PrimitiveFillGateValidationRuleSet
-  validation_rules:
-
-  # - Supported-instantiation validation rules
-
-  - classtype: ValidationRule
-    conditionally_evaluated_expression:
-      classtype: FunctionReference
-      id: assertion
-      value: assertPrimitiveFillGateAttributesAreSupported
-    id: AssertPrimitiveFillGateAttributesAreSupported
-    predicate:
-      classtype: FunctionReference
-      id: predicate
-      value: predicateIsFillGate
