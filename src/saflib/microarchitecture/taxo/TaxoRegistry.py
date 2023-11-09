@@ -1,8 +1,8 @@
-from saflib.microarchitecture.taxo.address_primitives.PositionGenerator import PositionGenerator,buildPositionGenerator,pgen_instances
-from saflib.microarchitecture.taxo.format.MetadataParser import MetadataParser,buildMetadataParser,md_parser_instances
-from saflib.microarchitecture.taxo.skipping.IntersectionLeaderFollower import IntersectionLeaderFollower,buildIntersectionLeaderFollower,intersection_instances
-from saflib.microarchitecture.taxo.format.FormatUarch import FormatUarch,buildFormatUarch,fmt_uarch_instances,fmt_uarch_topologies
-from saflib.microarchitecture.taxo.skipping.SkippingUarch import SkippingUarch,buildSkippingUarch,skipping_uarch_instances,skipping_uarch_topologies
+#from saflib.microarchitecture.taxo.address_primitives.PositionGenerator import PositionGenerator,buildPositionGenerator,pgen_instances
+#from saflib.microarchitecture.taxo.format.MetadataParser import MetadataParser,buildMetadataParser,md_parser_instances
+#from saflib.microarchitecture.taxo.skipping.IntersectionLeaderFollower import IntersectionLeaderFollower,buildIntersectionLeaderFollower,intersection_instances
+#from saflib.microarchitecture.taxo.format.FormatUarch import FormatUarch,buildFormatUarch,fmt_uarch_instances,fmt_uarch_topologies
+#from saflib.microarchitecture.taxo.skipping.SkippingUarch import SkippingUarch,buildSkippingUarch,skipping_uarch_instances,skipping_uarch_topologies
 from util.helper import info,warn,error
 
 primitive_taxo_description_dict={}
@@ -118,6 +118,7 @@ def getComponent(name_):
         'topologies':component_taxo_topologies_dict[name_],
     }
 
+'''
 registerPrimitive('PositionGenerator', \
                   PositionGenerator, \
                   buildPositionGenerator, \
@@ -144,3 +145,4 @@ registerComponent('SkippingUarch', \
                   buildSkippingUarch, \
                   skipping_uarch_instances, \
                   skipping_uarch_topologies)
+'''

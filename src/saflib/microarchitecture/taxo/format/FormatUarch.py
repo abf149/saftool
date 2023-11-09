@@ -1,39 +1,8 @@
 '''Format microarchitecture'''
 from util.notation import microarchitecture as m_, transform as t_
-
-'''Microarchitecture primitive imports'''
-from .MetadataParser import buildMetadataParser
-
-'''Component definition'''
-FormatUarch = m_.ComponentCategory().name("FormatUarch") \
-                                    .port_in("md_in$x","md","$v") \
-                                    .port_out("at_bound_out$x","flag","none") \
-                                    .attribute("fibertree",["fibertree"],[None]) \
-                                    .generator("fibertree")
-
-'''Constructor'''
-buildFormatUarch = \
-    lambda id,fibertree:FormatUarch.copy().set_attribute("fibertree",fibertree,"rank_list") \
-                                   .generate_ports("fibertree", "fibertree").build(id)
-
-'''Supported instances'''
-fmt_uarch_instances={ \
-    "all":["/"]    
-}
-
-'''Supported instance topologies'''
-fmt_uarch_topologies=( \
-    { \
-
-        "all": (\
-            [(buildMetadataParser,'TestMetadataParser$x',('?',))],
-            [('md','md_in$x','TestMetadataParser$x.md_in'),('flag','at_bound_out$x','TestMetadataParser$x.at_bound_out')],
-            "fibertree", # Generator type
-            "fibertree" # Generator argument from this component attribute
-        )
-
-    }
-)
+import saflib.microarchitecture.taxo.TaxoRegistry as tr_
+format_uarch_dict=tr_.getComponent("FormatUarch")
+buildFormatUarch=format_uarch_dict['constructor']
 
 '''Concretize SAF to microarchitecture'''
 '''- Helper functions/constants for wiring to BufferStub'''

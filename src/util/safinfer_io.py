@@ -11,40 +11,27 @@ yaml.Dumper.ignore_aliases = lambda *args : True
 
 '''Load & parse taxonomic libraries'''
 def load_parse_taxo_libs(taxo_script_lib_list):
-    # Parse modelscript
+    #print(taxo_script_lib_list)
+    # Parse taxoscript
     import glob,yaml
     import parser.taxo_parser_core as tp_
     lib_filepath_list=[]
-    lib_filepath_list.extend(glob.glob(taxo_script_lib_list[0]))
+    for taxo_script_lib in taxo_script_lib_list:
+        lib_filepath_list.extend(glob.glob(taxo_script_lib))
     info("Parsing taxoscript libraries (",len(lib_filepath_list),")...")
-
-    '''
-    for lib_filepath in lib_filepath_list:
+    #print(lib_filepath_list)
+    # First pass - parse primitives
+    for idx,script_dict in enumerate([sl_config.load_config_yaml(fn) for fn in lib_filepath_list]):
+        #print(idx)
+        lib_filepath=lib_filepath_list[idx]
         info("-",lib_filepath)
-        lib_struct=None
-        with open(lib_filepath, 'r') as file:
-            lib_struct= yaml.safe_load(file)
-        primitives_dict, components_dict=tp_.parse_taxoscript(lib_struct)
-        if len(primitives_dict)>0:
-            info("-- Registering primitives")
-            for primitive_id in primitives_dict:
-                info("--- registering primitive",primitive_id)
-                primitive=primitives_dict[primitive_id]
-                tr_.registerPrimitive(primitive_id,primitive)
-            warn("-- => Done, registering primitives")
-        else:
-            info("-- No primitives to register")
-        if len(components_dict)>0:
-            info("-- Registering components")
-            for component_id in components_dict:
-                info("--- registering component",component_id)
-                component=components_dict[component_id]
-                tr_.registerComponent(component_id,component)
-            warn("-- => Done, registering components")
-        else:
-            info("-- No components to register")
-    '''
-
+        _, _=tp_.parse_taxoscript(script_dict,primitives_only=True)
+    # Second pass - parse components
+    for idx,script_dict in enumerate([sl_config.load_config_yaml(fn) for fn in lib_filepath_list]):
+        #print(idx)
+        lib_filepath=lib_filepath_list[idx]
+        info("-",lib_filepath)
+        _, _=tp_.parse_taxoscript(script_dict,components_only=True)
     warn("=> Done,")
 
 '''CLI argparse'''

@@ -61,3 +61,10 @@ predicateIsPrimitiveOrComponentHasUnknownInterfaceTypeReferencingKnownAttribute 
     b_.AND(b_.OR(p_.isPrimitive, \
                  p_.isComponent), \
            p_.hasKnownAttributeTypeReferencedByPortWithUnknownAttribute)
+
+'''Primitive validation rules'''        
+from util.notation.generators import rules as r_
+#from saflib.microarchitecture.taxo.address_primitives.PositionGenerator \
+#    import PositionGenerator as Pgen, pgen_instances
+
+

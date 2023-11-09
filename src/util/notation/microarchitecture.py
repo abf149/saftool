@@ -151,13 +151,25 @@ class PrimitiveCategory:
         - attr_type -- Primitive category attribute type ("fibertree","format","net_type","buffer","int","string","any","list(<type>)","list(*)",[<type>,type,...])
         - attr_default -- Primitive category attribute default value (can be specific value, or "?")
         '''
+        if attr_default is None:
+            warn("Changing",self.name_,"attribute",attr_name,"default from",attr_default,"to \'none\'")
+            attr_default='none'
+
         self.attributes_.append((attr_name,attr_type))
         self.default_attributes_.append((attr_name,attr_default))
         self.attribute_vals=copy.deepcopy(self.attributes_)
         return self
 
     def set_attributes(self,val_list):
-        self.attribute_vals=val_list
+        safe_val_list=[]
+        for idx,attr_val in enumerate(val_list):
+            if attr_val is None:
+                warn("Changing",self.name_,"new value for attribute num.", \
+                     str(idx),"in list",str(val_list),"from",attr_val,"to \'none\'")
+                safe_val_list.append('none')
+            else:  
+                safe_val_list.append(attr_val)
+        self.attribute_vals=safe_val_list
 
     def set_attribute(self,attr_name,val,att_type=None):
         '''
@@ -168,6 +180,9 @@ class PrimitiveCategory:
         - val -- Updated attribute value
         - att_type -- None==typical setter behavior, or fibertree, or rank_list
         '''
+        if val is None:
+            warn("Changing",self.name_,"attribute",attr_name,"new value from",val,"to \'none\'")
+            val='none'
         if att_type is None:
             attr_names=[att[0] for att in self.attributes_]
             self.attribute_vals[attr_names.index(attr_name)]=val
@@ -200,6 +215,9 @@ class PrimitiveCategory:
         return self
 
     def port_out(self,port_name,port_net_type,port_fmt,attr_reference=None):
+        if port_fmt is None:
+            warn("Changing",self.getName(),"port",port_name,"format from",port_fmt,"to \'none\'")
+            port_fmt="none"
         self.ports_.append((port_name,"out",port_net_type,port_fmt,attr_reference))
         return self
 

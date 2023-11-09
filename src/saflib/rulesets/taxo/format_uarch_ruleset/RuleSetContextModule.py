@@ -10,17 +10,23 @@ from util.notation.generators import boolean_operators as b_, \
                                      quantifiers as q_, \
                                      comparison as c_, \
                                      rules as r_
+import saflib.microarchitecture.taxo.TaxoRegistry as tr_
 
 '''SAF, component and primitive imports'''
 from saflib.saf.FormatSAF import FormatSAF, isFMTSAF
 
-from saflib.microarchitecture.taxo.format.FormatUarch import FMTSAFtoUarch, \
-                         newFMTUarchBufferStubNetlistFromFMTSAF, \
-                         FormatUarch, \
-                         fmt_uarch_instances, \
-                         fmt_uarch_topologies
+format_uarch_dict=tr_.getComponent("FormatUarch")
+FormatUarch=format_uarch_dict["description"]
+buildFormatUarch=format_uarch_dict['constructor']
+fmt_uarch_instances=format_uarch_dict['instances']
+fmt_uarch_topologies=format_uarch_dict['topologies']
 
-from saflib.microarchitecture.taxo.format.MetadataParser import MetadataParser, md_parser_instances
+from saflib.microarchitecture.taxo.format.FormatUarch import FMTSAFtoUarch, \
+                         newFMTUarchBufferStubNetlistFromFMTSAF
+
+metadata_parser_dict=tr_.getPrimitive("MetadataParser")
+MetadataParser=metadata_parser_dict["description"]
+md_parser_instances=metadata_parser_dict["instances"]
 
 ''' Format microarchitecture'''
 

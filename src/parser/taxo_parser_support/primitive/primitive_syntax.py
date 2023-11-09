@@ -319,7 +319,7 @@ def build_constructor(name_,taxo_instance,attr_dict,iter_spec):
             info("++ -",str(idx),":",attr_name,"= (",type_,")",arg_val)
             inst_.set_attribute(attr_name, \
                                 cast_value_to_type(arg_val,type_))
-        if iter_spec is not None:
+        if (iter_spec is not None) and (len(iter_spec)>0):
             iter_attr=iter_spec['attribute']
             iter_type=iter_spec['type']
             info("++ - generate_ports(",iter_attr,",",iter_type,")")

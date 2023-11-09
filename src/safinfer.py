@@ -30,10 +30,8 @@ if __name__=="__main__":
     print("reconfigurable_arch:",reconfigurable_arch)
 
     warn(":: Setup",also_stdout=True)
-
     # Load taxonomic library
-    import saflib.microarchitecture.taxo.TaxoRegistry
-
+    safio.load_parse_taxo_libs(taxo_script_lib)
     warn(":: => Done, setup",also_stdout=True)
 
     warn(":: Taxonomic inference",also_stdout=True)

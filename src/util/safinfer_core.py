@@ -5,6 +5,14 @@ from solver.build import build_taxonomic_arch_and_safs_from_bindings
 from util.helper import info,warn,error
 
 '''Constants - default list of ruleset names to apply to SAF microarchitecture topology inference'''
+'''
+default_ruleset_list = ['base_ruleset', \
+                        'format_uarch_ruleset', \
+                        'address_primitives_ruleset', \
+                        'gating_ruleset', \
+                        'skipping_uarch_ruleset']
+'''
+
 default_ruleset_list = ['base_ruleset', \
                         'format_uarch_ruleset', \
                         'address_primitives_ruleset', \
