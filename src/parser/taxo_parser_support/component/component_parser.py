@@ -1,8 +1,10 @@
 '''Taxoscript component parsing'''
 import parser.taxo_parser_support.primitive.primitive_keywords as pkw_
-#import parser.taxo_parser_support.primitive.primitive_syntax as ps_
+#import parser.taxo_parser_support.primitive.primitive_syntax as cs_
+import parser.taxo_parser_support.primitive.primitive_syntax as ps_
 import parser.taxo_parser_support.component.component_syntax as cs_
 import parser.taxo_parser_support.component.component_keywords as ckw_
+import saflib.microarchitecture.taxo.TaxoRegistry as tr_
 from util.helper import info,warn,error
 
 def get_taxoscript_components(script_dict):
@@ -18,26 +20,22 @@ def parse_taxoscript_component(component):
     # Name
     id_=cs_.parse_name(component)
     info("---- Parsing",id_)
-
-    # Parse the from_taxonomic_component to get the instance and supported instances
-    characterization_metric_taxos = cs_.parse_characterization_metric_taxos(component)
     info("")
     info("")
-    taxo_instance, supported_instances = cs_.parse_from_taxonomic_component(component, supported_instances)
-    taxo_instance = cs_.parse_scale_parameters(component, taxo_instance)
-    taxo_instance = cs_.parse_actions(component, taxo_instance)
-    taxo_instance = cs_.parse_arch_buffer_action_maps(component, taxo_instance)
-    taxo_instance = cs_.register_characterization_metric_taxos(characterization_metric_taxos, taxo_instance)
-    taxo_instance = cs_.parse_require_port_throughput_attributes(component, taxo_instance)
-    taxo_instance = cs_.parse_export_attributes_to_taxo(component, taxo_instance)
-    taxo_instance = cs_.parse_yield_port_throughput_thresholds(component, taxo_instance)
-    taxo_instance = cs_.parse_instance_aliases(component, taxo_instance)
-    taxo_instance = cs_.parse_register_supported_instances(component, taxo_instance, supported_instances)
-    taxo_instance = cs_.parse_implementations(component, taxo_instance)
-    taxo_instance = cs_.parse_subactions(component, taxo_instance)
-
+    taxo_instance,attr_dict,iter_attr=cs_.parse_attributes(component)
+    taxo_instance=cs_.parse_ports(component,taxo_instance)
+    taxo_instance,iter_spec=cs_.parse_iterator(component,taxo_instance,iter_attr)
+    info("")
+    supported_instances=cs_.parse_instances(component)
+    info("")
+    constructor=cs_.build_constructor(id_,taxo_instance,attr_dict,iter_spec)
+    info("")
+    topologies=cs_.parse_topologies(component,supported_instances,iter_attr)
     warn("---- => Done, parsing",id_)
-    return id_,taxo_instance
+    return id_,{"component":taxo_instance, \
+                "instances":supported_instances, \
+                "constructor":constructor, \
+                "topologies":topologies}
 
 def parse_taxoscript_components(components_list):
     '''

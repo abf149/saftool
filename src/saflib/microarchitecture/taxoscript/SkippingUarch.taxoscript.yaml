@@ -2,8 +2,8 @@ taxoscript_version: 0.1
 taxoscript_components:
   - name: SkippingUarch
     attributes:
-    - fibertree: format_leader=?
-    - fibertree: format_follower=?
+    - format: format_leader=?
+    - format: format_follower=?
     - string: direction=bidirectional
     ports:
     - input: md_in_leader(md)=attributes.format_leader

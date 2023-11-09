@@ -2,7 +2,7 @@ taxoscript_version: 0.1
 taxoscript_components:
   - name: FormatUarch
     attributes:
-    - fibertree: fibertree
+    - fibertree: ^fibertree
     ports:
     - input: md_in$x(md)=$v
     - output: at_bound_out$x(flag)
@@ -16,4 +16,4 @@ taxoscript_components:
         netlist:
         - md: [md_in$x,TestMetadataParser$x.md_in]
         - flag: [at_bound_out$x,TestMetadataParser$x.at_bound_out]
-        generator: fibertree
+        iterator: fibertree

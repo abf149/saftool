@@ -23,10 +23,30 @@ def parse_taxoscript(script_dict):
     if num_taxoscript_primitives>0:
         primitives_dict=prpr_.parse_taxoscript_primitives(taxoscript_primitives)
 
+    info("---- Registering primitives (",len(list(primitives_dict.keys())),")")
+    for primitive_id in primitives_dict:
+        primitive_info_dict=primitives_dict[primitive_id]
+        info("----- Registering",primitive_id)
+        tr_.registerPrimitive(primitive_id, \
+                              primitive_info_dict['primitive'], \
+                              primitive_info_dict['constructor'], \
+                              primitive_info_dict['instances'])
+    warn("---- => Done, registering primitives")
+
     # Components
     components_dict={}
     if num_taxoscript_components>0:
         components_dict=cmpr_.parse_taxoscript_components(taxoscript_components)
+
+    info("---- Registering components (",len(list(components_dict.keys())),")")
+    for component_id in components_dict:
+        component_info_dict=components_dict[component_id]
+        info("----- Registering",component_id)
+        tr_.registerComponent(component_id, \
+                              component_info_dict['component'], \
+                              component_info_dict['constructor'], \
+                              component_info_dict['instances'], \
+                              component_info_dict['topologies'])
 
     warn("-- => Done, parsing taxoscript.")
     return primitives_dict, components_dict

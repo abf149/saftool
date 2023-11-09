@@ -19,24 +19,19 @@ def parse_taxoscript_primitive(primitive):
     # Name
     id_=ps_.parse_name(primitive)
     info("---- Parsing",id_)
-
-    # Parse the from_taxonomic_primitive to get the instance and supported instances
-    characterization_metric_taxos = ps_.parse_characterization_metric_taxos(primitive)
     info("")
     info("")
-    taxo_instance, supported_instances = ps_.parse_from_taxonomic_primitive(primitive, supported_instances)
-    taxo_instance = ps_.parse_scale_parameters(primitive, taxo_instance)
-    taxo_instance = ps_.parse_actions(primitive, taxo_instance)
-    taxo_instance = ps_.register_characterization_metric_taxos(characterization_metric_taxos, taxo_instance)
-    taxo_instance = ps_.parse_require_port_throughput_attributes(primitive, taxo_instance)
-    taxo_instance = ps_.parse_export_attributes_to_taxo(primitive, taxo_instance)
-    taxo_instance = ps_.parse_yield_port_throughput_thresholds(primitive, taxo_instance)
-    taxo_instance = ps_.parse_instance_aliases(primitive, taxo_instance)
-    taxo_instance = ps_.parse_register_supported_instances(primitive, taxo_instance, supported_instances)
-    taxo_instance = ps_.parse_implementations(primitive, taxo_instance)
-
+    taxo_instance,attr_dict,iterator_attr=ps_.parse_attributes(primitive)
+    taxo_instance=ps_.parse_ports(primitive,taxo_instance)
+    taxo_instance,iter_spec=ps_.parse_iterator(primitive,taxo_instance,attr_dict,iterator_attr)
+    info("")
+    supported_instances=ps_.parse_instances(primitive)
+    info("")
+    constructor=ps_.build_constructor(id_,taxo_instance,attr_dict,iter_spec)
     warn("---- => Done, parsing",id_)
-    return id_,taxo_instance #{"primitive":taxo_instance,"instances":supported_instances}
+    return id_,{"primitive":taxo_instance, \
+                "instances":supported_instances, \
+                "constructor":constructor}
 
 def parse_taxoscript_primitives(primitives_list):
     '''
