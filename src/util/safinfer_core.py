@@ -39,24 +39,24 @@ def build_saf_uarch_inference_problem(arch, sparseopts, prob, mapping, reconfigu
     info("\nBuilding the SAF microarchitecture inference problem.")
     info("- Computing SAF microarchitecture bindings to architectural buffers.")
     fmt_iface_bindings=[]
-    skip_bindings=[]
+    action_bindings=[]
     data_space_dict_list=[]
     if not reconfigurable_arch:
         # "Typical" case: fixed architecture with sparseopts
 
         fmt_iface_bindings, \
-        skip_bindings, \
+        action_bindings, \
         dtype_list, _, _ = sl_config.compute_fixed_arch_bindings(arch,sparseopts)
     else:
         # "Special" case: reconfigurable architecture tuned for problem and mapping
         fmt_iface_bindings, \
-        skip_bindings, \
+        action_bindings, \
         data_space_dict_list = sl_config.compute_reconfigurable_arch_bindings(arch,sparseopts,prob,mapping)
         dtype_list=list(data_space_dict_list.keys())
 
     # - Dump bindings
     info("  => Done. Dumping bindings to",bind_out_path)
-    safio.dump_bindings(bind_out_path,fmt_iface_bindings,skip_bindings)
+    safio.dump_bindings(bind_out_path,fmt_iface_bindings,action_bindings)
 
     # - Create microarchitecture topology with dummy buffers interfaced to SAF microarchitectures which contain holes
 
@@ -64,7 +64,7 @@ def build_saf_uarch_inference_problem(arch, sparseopts, prob, mapping, reconfigu
     # Problem- and mapping-independent, given fmt_iface_bindings, skip_bindings
     # and data_space_dict_list have already been computed
     info("- Realizing microarchitecture with topological holes, based on bindings.\n")
-    return build_taxonomic_arch_and_safs_from_bindings(arch, fmt_iface_bindings, skip_bindings, dtype_list)
+    return build_taxonomic_arch_and_safs_from_bindings(arch, fmt_iface_bindings, action_bindings, dtype_list)
 def solve_saf_uarch_inference_problem(taxo_arch, saflib_path, ruleset_names=default_ruleset_list):
     '''
     Trigger SAF microarchitecture solver against an input
