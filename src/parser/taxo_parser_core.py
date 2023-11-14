@@ -33,7 +33,8 @@ def parse_taxoscript(script_dict,primitives_only=False,components_only=False):
             tr_.registerPrimitive(primitive_id, \
                                 primitive_info_dict['primitive'], \
                                 primitive_info_dict['constructor'], \
-                                primitive_info_dict['instances'])
+                                primitive_info_dict['instances'], \
+                                primitive_info_dict['values'])
         warn("---- => Done, registering primitives")
     else:
         warn("---- => Skipping primitives")
@@ -50,7 +51,8 @@ def parse_taxoscript(script_dict,primitives_only=False,components_only=False):
                                 component_info_dict['component'], \
                                 component_info_dict['constructor'], \
                                 component_info_dict['instances'], \
-                                component_info_dict['topologies'])
+                                component_info_dict['topologies'], \
+                                component_info_dict['values'])
         warn("---- => Done, registering components")
     else:
         warn("---- => Skipping components")

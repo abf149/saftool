@@ -8,16 +8,19 @@ from util.helper import info,warn,error
 primitive_taxo_description_dict={}
 primitive_taxo_constructor_dict={}
 primitive_taxo_instances_dict={}
+primitive_taxo_attribute_values_dict={}
 
 component_taxo_description_dict={}
 component_taxo_constructor_dict={}
 component_taxo_instances_dict={}
 component_taxo_topologies_dict={}
+component_taxo_attribute_values_dict={}
 
 def registerPrimitive(name_, \
                       taxo_primitive_description, \
                       primitive_constructor=None, \
-                      primitive_instances_dict=None):
+                      primitive_instances_dict=None, \
+                      attribute_values_dict=None):
     '''
     Add a SAF microarchitecture primitive taxonomic category description to registry.\n\n
 
@@ -31,18 +34,21 @@ def registerPrimitive(name_, \
     global primitive_taxo_description_dict
     global primitive_taxo_constructor_dict
     global primitive_taxo_instances_dict
+    global primitive_taxo_attribute_values_dict
     assert((primitive_constructor is not None) and \
            (primitive_instances_dict is not None))
 
     primitive_taxo_description_dict[name_]=taxo_primitive_description
     primitive_taxo_constructor_dict[name_]=primitive_constructor
     primitive_taxo_instances_dict[name_]=primitive_instances_dict
+    primitive_taxo_attribute_values_dict[name_]=attribute_values_dict
 
 def registerComponent(name_, \
                       taxo_component_description, \
                       component_constructor=None, \
                       component_instances_dict=None, \
-                      component_topologies_dict=None):
+                      component_topologies_dict=None, \
+                      attribute_values_dict=None):
     '''
     Add a SAF microarchitecture component taxonomic category description to registry.\n\n
 
@@ -58,6 +64,7 @@ def registerComponent(name_, \
     global component_taxo_constructor_dict
     global component_taxo_instances_dict
     global component_taxo_topologies_dict
+    global component_taxo_attribute_values_dict
     assert((component_constructor is not None) and \
            (component_instances_dict is not None) and \
            (component_topologies_dict is not None))
@@ -66,6 +73,7 @@ def registerComponent(name_, \
     component_taxo_constructor_dict[name_]=component_constructor
     component_taxo_instances_dict[name_]=component_instances_dict
     component_taxo_topologies_dict[name_]=component_topologies_dict
+    component_taxo_attribute_values_dict[name_]=attribute_values_dict
 
 def getPrimitive(name_):
     '''
@@ -79,17 +87,18 @@ def getPrimitive(name_):
     global primitive_taxo_description_dict
     global primitive_taxo_constructor_dict
     global primitive_taxo_instances_dict
+    global primitive_taxo_attribute_values_dict
 
     if name_ not in primitive_taxo_description_dict:
         error("Cannot find taxonomic primitive",name_,also_stdout=True)
         info("Terminating.")
         assert(False)
 
-
     return {
         'description':primitive_taxo_description_dict[name_],
         'constructor':primitive_taxo_constructor_dict[name_],
-        'instances':primitive_taxo_instances_dict[name_]
+        'instances':primitive_taxo_instances_dict[name_],
+        'values':primitive_taxo_attribute_values_dict[name_]
     }
 
 def getComponent(name_):
@@ -105,6 +114,7 @@ def getComponent(name_):
     global component_taxo_constructor_dict
     global component_taxo_instances_dict
     global component_taxo_topologies_dict
+    global component_taxo_attribute_values_dict
 
     if name_ not in component_taxo_description_dict:
         error("Cannot find taxonomic component",name_,also_stdout=True)
@@ -116,6 +126,7 @@ def getComponent(name_):
         'constructor':component_taxo_constructor_dict[name_],
         'instances':component_taxo_instances_dict[name_],
         'topologies':component_taxo_topologies_dict[name_],
+        'values':component_taxo_attribute_values_dict[name_]
     }
 
 '''

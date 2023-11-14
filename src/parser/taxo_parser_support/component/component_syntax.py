@@ -13,8 +13,6 @@ def parse_name(component):
         info(str(component))
     return component[kw_.object_name]
 
-
-
 def is_none(val_):
     '''
     None, 'None', or 'none' are valid None's
@@ -73,6 +71,24 @@ def get_single_dict_key(dict_):
     '''
     return list(dict_.keys())[0]
 
+def attribute_has_values_spec(expr_dict):
+    if len(list(expr_dict.keys()))>1:
+        key_test=any([k=="values" for k in expr_dict])
+        if not key_test:
+            error("Attribute expression",expr_dict, \
+                  "has two keys but none of them are a values specification.")
+            info("Terminating.")
+            assert(False)
+        return True
+    return False
+
+def get_attr_type_and_val_list(expr_dict):
+    if attribute_has_values_spec(expr_dict):
+        for k in expr_dict:
+            if k!="values":
+                return k,expr_dict["values"]
+    return get_single_dict_key(expr_dict),None
+
 def parse_attribute_expression(expr_dict):
     '''
     Parse taxoscript attribute expression.\n\n
@@ -82,7 +98,7 @@ def parse_attribute_expression(expr_dict):
 
     Returns
     '''
-    attr_type=get_single_dict_key(expr_dict)
+    attr_type,attr_val_list=get_attr_type_and_val_list(expr_dict)
     attr_name=expr_dict[attr_type]
     attr_default=None
     is_iterator=False
@@ -103,7 +119,7 @@ def parse_attribute_expression(expr_dict):
         
     cast_attr_default=cast_value_to_type(attr_default,attr_type)
     
-    return attr_name,attr_type,cast_attr_default,is_iterator
+    return attr_name,attr_type,cast_attr_default,is_iterator,attr_val_list
 
 def print_name(name_):
     info("#",name_,"taxonomic category")
@@ -117,6 +133,7 @@ def print_attribute(attr_name,attr_type,attr_default,is_iterator):
         info(".attribute(",attr_name,",",attr_type,",",attr_default,")")
 
 def parse_attributes(component):
+    attr_vals_list_dict={}
     taxo_instance=m_.ComponentCategory()
     name_=parse_name(component)
     full_attr_dict={}
@@ -135,7 +152,9 @@ def parse_attributes(component):
             attr_name, \
             attr_type, \
             attr_default, \
-            is_iterator=parse_attribute_expression(attr_dict)
+            is_iterator, \
+            attr_val_list=parse_attribute_expression(attr_dict)
+            attr_vals_list_dict[attr_name]={"idx":idx,"values":attr_val_list}
             formatted_type=format_type_string(attr_type)
             full_attr_dict[attr_name]={"type":attr_type,"default":attr_default,"index":idx}
             print_attribute(attr_name,formatted_type,attr_default,is_iterator)
@@ -145,7 +164,7 @@ def parse_attributes(component):
     else:
         warn("# No attributes.")
 
-    return taxo_instance,full_attr_dict,iterator_attr
+    return taxo_instance,full_attr_dict,iterator_attr,attr_vals_list_dict
 
 def parse_port_name_net_type(expr):
     expr_splits=expr.split("(")

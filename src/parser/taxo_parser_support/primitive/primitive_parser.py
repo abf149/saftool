@@ -21,7 +21,8 @@ def parse_taxoscript_primitive(primitive):
     info("---- Parsing",id_)
     info("")
     info("")
-    taxo_instance,attr_dict,iterator_attr=ps_.parse_attributes(primitive)
+    taxo_instance,attr_dict,iterator_attr,attr_vals_list_dict = \
+        ps_.parse_attributes(primitive)
     taxo_instance=ps_.parse_ports(primitive,taxo_instance)
     taxo_instance,iter_spec=ps_.parse_iterator(primitive,taxo_instance,attr_dict,iterator_attr)
     info("")
@@ -31,7 +32,8 @@ def parse_taxoscript_primitive(primitive):
     warn("---- => Done, parsing",id_)
     return id_,{"primitive":taxo_instance, \
                 "instances":supported_instances, \
-                "constructor":constructor}
+                "constructor":constructor,
+                "values":attr_vals_list_dict}
 
 def parse_taxoscript_primitives(primitives_list):
     '''

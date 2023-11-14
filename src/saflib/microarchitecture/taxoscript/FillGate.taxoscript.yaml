@@ -3,6 +3,7 @@ taxoscript_primitives:
   - name: FillGate
     attributes:
     - string: strategy=pipeline_bubble
+      values: [pipeline_bubble,lut]
     ports:
     - input: pos_in(pos)
     instances:

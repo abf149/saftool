@@ -5,13 +5,14 @@ taxoscript_primitives:
     - format: format_0=?
     - format: format_1=?
     - string: strategy=none
+      values: [none,operand_skip]
     ports:
      - input: md_in_0(md)=format_0
      - input: md_in_1(md)=format_1
      - output: md_out(md)=format_0
     instances:
-    - unc_bd_none: [U,U,bidirectional,none]
-    - cp_bd_none: [C,C,bidirectional,none]
-    - cp_bd_opskip: [C,C,bidirectional,operand_skip]
-    - b_bd_none: [B,B,bidirectional,none]
-    - r_bd_none: [R,R,bidirectional,none]
+    - unc_bd_none: [U,U,none]
+    - cp_bd_none: [C,C,none]
+    - cp_bd_opskip: [C,C,operand_skip]
+    - b_bd_none: [B,B,none]
+    - r_bd_none: [R,R,none]

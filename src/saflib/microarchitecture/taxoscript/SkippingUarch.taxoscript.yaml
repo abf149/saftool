@@ -5,6 +5,11 @@ taxoscript_components:
     - format: format_leader=?
     - format: format_follower=?
     - string: direction=bidirectional
+      values: [bidirectional,leader_follower]
+    - string: skip_strategy=none
+      values: [none,operand_skip]
+    - string: fill_gate_strategy=none
+      values: [none,pipeline_bubble,lut]
     ports:
     - input: md_in_leader(md)=attributes.format_leader
     - input: md_in_follower(md)=attributes.format_follower

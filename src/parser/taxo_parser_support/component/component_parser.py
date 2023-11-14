@@ -22,7 +22,8 @@ def parse_taxoscript_component(component):
     info("---- Parsing",id_)
     info("")
     info("")
-    taxo_instance,attr_dict,iter_attr=cs_.parse_attributes(component)
+    taxo_instance,attr_dict,iter_attr,attr_vals_list_dict = \
+        cs_.parse_attributes(component)
     taxo_instance=cs_.parse_ports(component,taxo_instance)
     taxo_instance,iter_spec=cs_.parse_iterator(component,taxo_instance,iter_attr)
     info("")
@@ -35,7 +36,8 @@ def parse_taxoscript_component(component):
     return id_,{"component":taxo_instance, \
                 "instances":supported_instances, \
                 "constructor":constructor, \
-                "topologies":topologies}
+                "topologies":topologies,
+                "values":attr_vals_list_dict}
 
 def parse_taxoscript_components(components_list):
     '''
