@@ -4,7 +4,8 @@ import util.sparseloop_config_processor as sl_config, yaml, argparse
 from util.helper import info,warn,error
 import util.notation.predicates as p_
 import solver.model.build_support.abstraction as ab
-import safinfer_io,safmodel_io
+import util.safinfer_io as safinfer_io, \
+       util.safmodel_io as safmodel_io
 
 '''Config - condition the format of YAML file dumps'''
 yaml.Dumper.ignore_aliases = lambda *args : True
@@ -73,7 +74,7 @@ def parse_args():
                         help='Output files directory.')
     parser.add_argument('-f','--log-file',default='./safsearch.log', \
                         help='Log filepath (requires -L/--log to enable logging).')
-    parser.add_argument('-h','--hcl',action='append',default=['hw/chisel/src'], \
+    parser.add_argument('-g','--hcl',action='append',default=['hw/chisel/src'], \
                         help='Path to high-level hardware construction language (HCL) code which generates the verilog.')
     parser.add_argument('-k','--comp-out',default='ref_output/', \
                         help='Components output filename (TODO: not currently used).')
