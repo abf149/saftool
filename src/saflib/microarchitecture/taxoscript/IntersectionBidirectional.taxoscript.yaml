@@ -4,7 +4,7 @@ taxoscript_primitives:
     attributes:
     - format: format_0=?
     - format: format_1=?
-    - string: strategy=none
+    - string: strategy=?
       values: [none,operand_skip]
     ports:
      - input: md_in_0(md)=format_0

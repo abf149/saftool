@@ -75,5 +75,6 @@ if __name__=="__main__":
     setup(taxo_script_lib)
     result=pipeline(arch,mapping,prob,sparseopts,reconfigurable_arch,bind_out_path, \
                     saflib_path,taxo_script_lib)
+    #print(result)
     handle_outcome(result)
     closing_remark()

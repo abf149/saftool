@@ -3,7 +3,7 @@ taxoscript_primitives:
   - name: IntersectionLeaderFollower
     attributes:
     - format: format_leader=?
-    - string: strategy
+    - string: strategy=?
       values: [none]
     ports:
     - input: md_in_leader(md)=attributes.format_leader
