@@ -4,7 +4,6 @@ import util.sparseloop_config_processor as sl_config, yaml, argparse
 from util.helper import info,warn,error
 import util.notation.predicates as p_
 import solver.model.build_support.abstraction as ab
-import saflib.microarchitecture.TaxoRegistry as tr_
 
 '''Config - condition the format of YAML file dumps'''
 yaml.Dumper.ignore_aliases = lambda *args : True
@@ -34,40 +33,7 @@ def load_parse_taxo_libs(taxo_script_lib_list):
         _, _=tp_.parse_taxoscript(script_dict,components_only=True)
     warn("=> Done,")
 
-'''CLI argparse'''
-def parse_args():
-    '''
-    Parse CLI arguments.\n\n
-
-    Arguments: None\n\n
-
-    Returns:\n
-    - arch -- Sparseloop architecture\n
-    - mapping -- Sparseloop mapping\n
-    - prob -- Sparseloop problem\n
-    - sparseopts -- Sparseloop sparse optimizations
-    - reconfigurable_arch -- True if arch reconfigurable for prob/mapping, False if fixed arch
-    - bind_out_path -- output filepath for dumping format and action bindings
-    - topo_out_path -- output filepath for dumping inferred SAF microarchitecture topology
-    - saftaxolib -- SAF taxonomy library directory
-    '''
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-l','--saftaxolib',default='saflib/rulesets/taxo/')
-    parser.add_argument('-i','--dir-in',default='')
-    parser.add_argument('-a','--arch',default='ref_input/arch.yaml')
-    parser.add_argument('-m','--map',default='ref_input/map.yaml')
-    parser.add_argument('-p','--prob',default='ref_input/prob.yaml')
-    parser.add_argument('-s','--sparseopts',default='ref_input/sparseopts.yaml')
-    parser.add_argument('-o','--dir-out',default='')
-    parser.add_argument('-b','--binding-out',default='ref_output/bindings.yaml')
-    parser.add_argument('-t','--taxo-script-lib',action='append',default=['saflib/microarchitecture/taxoscript/*.yaml'])
-    parser.add_argument('-T','--topology-out',default='ref_output/new_arch.yaml')
-    parser.add_argument('-r', '--reconfigurable-arch', action='store_true')
-    parser.add_argument('-L','--log', action='store_true')
-    parser.add_argument('-f','--log-file',default='./safinfer.log')
-    args = parser.parse_args()
-
+def process_args(args):
     # Parse the CLI arguments
     info("SAFinfer.\n")    
     do_logging=args.log
@@ -115,6 +81,56 @@ def parse_args():
            do_logging, \
            args.log_file, \
            args.taxo_script_lib
+
+'''CLI argparse'''
+def parse_args():
+    '''
+    Parse CLI arguments.\n\n
+
+    Arguments: None\n\n
+
+    Returns:\n
+    - arch -- Sparseloop architecture\n
+    - mapping -- Sparseloop mapping\n
+    - prob -- Sparseloop problem\n
+    - sparseopts -- Sparseloop sparse optimizations
+    - reconfigurable_arch -- True if arch reconfigurable for prob/mapping, False if fixed arch
+    - bind_out_path -- output filepath for dumping format and action bindings
+    - topo_out_path -- output filepath for dumping inferred SAF microarchitecture topology
+    - saftaxolib -- SAF taxonomy library directory
+    '''
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-l','--saftaxolib',default='saflib/rulesets/taxo/')
+    parser.add_argument('-i','--dir-in',default='')
+    parser.add_argument('-a','--arch',default='ref_input/arch.yaml')
+    parser.add_argument('-m','--map',default='ref_input/map.yaml')
+    parser.add_argument('-p','--prob',default='ref_input/prob.yaml')
+    parser.add_argument('-s','--sparseopts',default='ref_input/sparseopts.yaml')
+    parser.add_argument('-o','--dir-out',default='')
+    parser.add_argument('-b','--binding-out',default='ref_output/bindings.yaml')
+    parser.add_argument('-t','--taxo-script-lib',action='append',default=['saflib/microarchitecture/taxoscript/*.yaml'])
+    parser.add_argument('-T','--topology-out',default='ref_output/new_arch.yaml')
+    parser.add_argument('-r', '--reconfigurable-arch', action='store_true')
+    parser.add_argument('-L','--log', action='store_true')
+    parser.add_argument('-f','--log-file',default='./safinfer.log')
+    args = parser.parse_args()
+    processed_args = process_args(args) # Get full return tuple
+    return processed_args
+
+    '''
+    return arch, \
+           mapping, \
+           prob, \
+           sparseopts, \
+           args.reconfigurable_arch, \
+           bind_out_path, \
+           topo_out_path, \
+           args.saftaxolib, \
+           do_logging, \
+           args.log_file, \
+           args.taxo_script_lib
+    '''
 
 '''Binding & SAF microarchitecture topology YAML dumps'''
 def dump_bindings(bind_out_path,fmt_iface_bindings,skip_bindings):

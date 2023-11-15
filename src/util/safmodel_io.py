@@ -52,6 +52,44 @@ def load_parse_model_libs(model_script_lib_list):
             info("-- No components to register")
     warn("=> Done,")
 
+def process_args(args):
+    # Parse the CLI arguments
+    print("SAFmodel.\n")
+    do_logging=args.log
+    print("Parsing input files:")
+
+    if len(args.dir_out) > 0 or len(args.dir_in)>0:
+        # Not yet supported
+        assert(False) 
+ 
+    print("- netlist:",args.netlist)
+    netlist=de.Architecture.fromYamlFilename(args.netlist)
+    print("- arch:",args.arch)
+    arch=sl_config.load_config_yaml(args.arch)
+    print("- sparseopts:",args.sparseopts)
+    sparseopts=sl_config.load_config_yaml(args.sparseopts)
+    print("- compound components (input):",args.comp_in)
+    comp_in=[sl_config.load_config_yaml(fn_str) for fn_str in args.comp_in]
+    print("- arch output path:",args.arch_out)
+    arch_out_path=args.arch_out
+    print("- compound components path (output):",args.comp_out)
+    comp_out_path=args.comp_out
+    print("- SAFModel settings path:",args.settings)
+    user_attributes=sl_config.load_config_yaml(args.settings)
+
+    return arch, \
+           netlist, \
+           sparseopts, \
+           comp_in, \
+           arch_out_path, \
+           comp_out_path, \
+           user_attributes, \
+           do_logging,\
+           args.log_file,\
+           args.char, \
+           args.model_script_lib, \
+           args.taxo_script_lib
+
 '''CLI argparse'''
 def parse_args():
 
@@ -92,42 +130,9 @@ def parse_args():
                         help='safmodel configuration file.')
     args = parser.parse_args()
 
-    # Parse the CLI arguments
-    print("SAFmodel.\n")
-    do_logging=args.log
-    print("Parsing input files:")
+    processed_args=process_args(args)
 
-    if len(args.dir_out) > 0 or len(args.dir_in)>0:
-        # Not yet supported
-        assert(False) 
- 
-    print("- netlist:",args.netlist)
-    netlist=de.Architecture.fromYamlFilename(args.netlist)
-    print("- arch:",args.arch)
-    arch=sl_config.load_config_yaml(args.arch)
-    print("- sparseopts:",args.sparseopts)
-    sparseopts=sl_config.load_config_yaml(args.sparseopts)
-    print("- compound components (input):",args.comp_in)
-    comp_in=[sl_config.load_config_yaml(fn_str) for fn_str in args.comp_in]
-    print("- arch output path:",args.arch_out)
-    arch_out_path=args.arch_out
-    print("- compound components path (output):",args.comp_out)
-    comp_out_path=args.comp_out
-    print("- SAFModel settings path:",args.settings)
-    user_attributes=sl_config.load_config_yaml(args.settings)
-
-    return arch, \
-           netlist, \
-           sparseopts, \
-           comp_in, \
-           arch_out_path, \
-           comp_out_path, \
-           user_attributes, \
-           do_logging,\
-           args.log_file,\
-           args.char, \
-           args.model_script_lib, \
-           args.taxo_script_lib
+    return processed_args
 
 def load_taxonomic_microarchitecture(netlist):
     '''Load taxonomic description of SAF microarchitecture'''
