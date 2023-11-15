@@ -78,10 +78,11 @@ def getPrimitiveCategoryAndSupportedInstances(obj):
     return category,supported_instances
 
 def assertPrimitiveAttributesAreSupported(obj):
+    # Permissive match - "unknowns" (?) and wildcards match
     category,supported_instances= \
         getPrimitiveCategoryAndSupportedInstances(obj)
     _,valid=r_.isValidComponentOrPrimitiveMatchingCategoryRule \
-                (supported_instances,category)
+                (supported_instances,category,strict=False)
     return valid(obj)
 
 '''Component validation rules'''
@@ -97,16 +98,26 @@ def getComponentCategoryAndSupportedInstances(obj):
     return category,supported_instances
 
 def assertComponentAttributesAreSupported(obj):
+    # Permissive match - "unknowns" (?) and wildcards match
     category,supported_instances= \
         getComponentCategoryAndSupportedInstances(obj)
     _,valid=r_.isValidComponentOrPrimitiveMatchingCategoryRule \
-                     (supported_instances,category)
+                     (supported_instances,category,strict=False)
+    return valid(obj)
+
+def assertComponentAttributesStrictMatch(obj):
+    # Permissive match - "unknowns" (?) and wildcards match
+    category,supported_instances= \
+        getComponentCategoryAndSupportedInstances(obj)
+    _,valid=r_.isValidComponentOrPrimitiveMatchingCategoryRule \
+                     (supported_instances,category,strict=True)
     return valid(obj)
 
 '''Component rewrite rules'''
-def predicateIsComponentHasTopologicalHole(obj):
+def predicateIsComponentHasTopologicalHoleHasValidAttributesWithNoUnknowns(obj):
     return p_.isComponent(obj) and (not p_.isArchitecture(obj)) \
-           and p_.hasTopologicalHole(obj)
+           and p_.hasTopologicalHole(obj) \
+           and assertComponentAttributesStrictMatch(obj)
 def getComponentCategoryAndSupportedInstancesAndTopologies(obj):
     category_str=obj.getCategory()
     ilf_dict=tr_.getComponent(category_str)

@@ -121,7 +121,7 @@ rewrite_rule_set:
     predicate:
       classtype: FunctionReference
       id: predicate
-      value: predicateIsComponentHasTopologicalHole
+      value: predicateIsComponentHasTopologicalHoleHasValidAttributesWithNoUnknowns
 
 #predicateIsComponent
 

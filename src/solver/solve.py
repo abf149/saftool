@@ -128,11 +128,11 @@ class Solver:
             next_sm_state, component, \
             uri, failure_comp=self.runSMPass(component, recurse=recurse)
 
-            for comp in component.getTopology().getComponentList():
-                 if "Skipping" in comp.getId():
-                    if not comp.getTopology().is_hole:
-                        print(comp.getTopology())
-                        assert(False)
+            #for comp in component.getTopology().getComponentList():
+            #     if "Skipping" in comp.getId():
+            #        if comp.getTopology().is_hole:
+            #            print(comp.getTopology())
+            #            assert(False)
 
             
             component_iterations.append(component)

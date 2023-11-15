@@ -10,7 +10,8 @@ def attrCompareTo(obj_attr,inst_attr,attr_info=(None,"string"),wildcard="/",unkn
     
     return obj_attr==inst_attr
 
-def allObjAttributesMatchInstanceAttributes(obj_attributes,instance_attributes,attribute_types,wildcard="/",unknown="?"):
+def allObjAttributesMatchInstanceAttributes(obj_attributes,instance_attributes,attribute_types, \
+                                            wildcard="/",unknown="?",strict=False):
     '''
     True if an object's attributes match a particular supported instance.\n
 
@@ -33,9 +34,9 @@ def allObjAttributesMatchInstanceAttributes(obj_attributes,instance_attributes,a
                     for obj_attr,inst_attr,attr_info in \
                         zip(obj_attributes,instance_attributes,attribute_types) \
                             if ((wildcard is None) or inst_attr!=wildcard) and \
-                                ((unknown is None) or (obj_attr!=unknown))])
+                                ((unknown is None) or strict or (obj_attr!=unknown))])
 
-def findInstanceMatchingObjectAttributes(obj_attributes,supported_instances,attributes):
+def findInstanceMatchingObjectAttributes(obj_attributes,supported_instances,attributes,strict=False):
     '''
     True if an object's attributes match a one from a list of supported instances.\n\n
 
@@ -51,23 +52,24 @@ def findInstanceMatchingObjectAttributes(obj_attributes,supported_instances,attr
     for inst_name in supported_instances:
         # For a given instance,
         inst_attr=supported_instances[inst_name]
-        if allObjAttributesMatchInstanceAttributes(obj_attributes,inst_attr,attributes):
+        if allObjAttributesMatchInstanceAttributes(obj_attributes,inst_attr,attributes,strict=strict):
             # do object attributes match?
             return (True,inst_name,inst_attr)
     # otherwise...
     return (False,None,None)
 
-def anyInstanceMatchesObjectAttributes(obj_attributes,supported_instances,attributes):
-    return findInstanceMatchingObjectAttributes(obj_attributes,supported_instances,attributes)[0]
+def anyInstanceMatchesObjectAttributes(obj_attributes,supported_instances,attributes,strict=False):
+    return findInstanceMatchingObjectAttributes(obj_attributes,supported_instances,attributes,strict=strict)[0]
 
-def isValidComponentOrPrimitiveMatchingCategoryRule(supported_instances,category_template):
+def isValidComponentOrPrimitiveMatchingCategoryRule(supported_instances,category_template,strict=False):
     return lambda obj: \
                 b_.AND( \
                     lambda x: p_.isComponentOrPrimitiveIsCategory(x,category_template.name_), \
                     b_.NOT(p_.isArchitecture) \
                 )(obj), \
            lambda obj: \
-                anyInstanceMatchesObjectAttributes(obj.getAttributes(),supported_instances,category_template.attributes_)
+                anyInstanceMatchesObjectAttributes(obj.getAttributes(),supported_instances,category_template.attributes_, \
+                                                   strict=strict)
 
 def expandComponentsSpec(components_spec, obj, generator_type, generator_arg, component_template):
     if (generator_type is None) or generator_type=='none' or generator_type=='None':
