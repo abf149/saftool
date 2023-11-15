@@ -16,7 +16,7 @@ assertNetHasConsistentPortFormatType = q_.forObjNetsForNetPorts("all", \
                                                                 a_.getFormat, \
                                                                 comparator = FormatType.compareFormatTypes
                                                                )
-'''- AssertIsComponentOrArchitectureHasTopology: no topological holes in design'''
+'''- CheckIsComponentOrArchitectureHasTopology: no topological holes in design'''
 predicateIsComponentOrArchitectureHasTopology = p_.isComponentOrArchitecture
 checkIsComponentOrArchitectureHasTopology = b_.NOT(p_.hasTopologicalHole)
 
@@ -38,7 +38,8 @@ predicateComponentHasNoUnknownInterfaceTypes = p_.isComponentOrPrimitive
 checkComponentHasNoUnknownInterfaceTypes = b_.NOT(q_.anyForObjPorts(p_.isPortWithUnknownFormat))
 ''' - CheckComponentHasNoUnknownAttributeTypes: the component's attributes should all have known types'''
 predicateComponentHasNoUnknownAttributeTypes = p_.isComponentOrPrimitive
-checkComponentHasNoUnknownAttributeTypes = b_.NOT(q_.anyForObjAttributes(p_.isUnknownFormatAttribute))
+checkComponentHasNoUnknownAttributeTypes = b_.NOT(q_.anyForObjAttributes(b_.OR(p_.isUnknownFormatAttribute, \
+                                                                               p_.isUnknownStringAttribute)))
 
 ''' - TransformSetUnknownAttributeFromKnownInterfaceTypeReferencingAttribute:
       Allow component attributes to be inferred from interface type

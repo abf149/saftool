@@ -38,14 +38,21 @@ def pipeline(arch,mapping,prob,sparseopts,reconfigurable_arch,bind_out_path, \
 def handle_outcome(result):
     # Success: dump
     # Fail: exit
-    outcome=result[0]
-    inferred_arch=result[-1][-1]
+    #print(result[-1][0].getTopology().getComponentList()[-1])
+    #print(result[0])
+    outcome=result['outcome']
+    inferred_arch=result['component_iterations'][-1]
+    uri=result['uri']
+    failure_comp=result['failure_comp']
     if outcome:
-        print("  => SUCCESS")
+        warn("  => SUCCESS",also_stdout=True)
         safio.dump_saf_uarch_topology(inferred_arch,topo_out_path)
     else:
-        print("  => FAILURE")
+        error("  => FAILURE",also_stdout=True)
         safio.dump_saf_uarch_topology(inferred_arch,topo_out_path + ".fail")
+        info("Failure component:")
+        info("- Component:",uri)
+        info("- Attributes:",failure_comp.getAttributes())
     warn(":: => Done, taxonomic inference",also_stdout=True)
 
 def closing_remark():

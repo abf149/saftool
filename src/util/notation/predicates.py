@@ -12,7 +12,6 @@ def isComponent(obj):
     - True if Component
     '''
     x=type(obj).__name__ == 'Component'
-    #print("isComponent:",x)
     return x
 def isArchitecture(obj):
     '''
@@ -32,7 +31,6 @@ def isPrimitive(obj):
     - True if Primitive
     '''    
     x=type(obj).__name__ == 'Primitive'
-    #print("isPrimitive:",x)
     return x
 def isCategory(obj,category):
     return obj.getCategory()==category
@@ -60,8 +58,12 @@ def hasTopologicalHole(obj):
 '''Attribute checks'''
 def isFormatAttribute(att):
     return type(att).__name__ == 'FormatType'
+def isString(att):
+    return type(att).__name__ == 'str'
 def isUnknownFormatAttribute(att):
     return b_.AND(isFormatAttribute,lambda x: x.isUnknown())(att)
+def isUnknownStringAttribute(att):
+    return b_.AND(isString,lambda x: x=='?')(att)
 def isKnownFormatAttribute(att):
     return b_.AND(isFormatAttribute,lambda x: not x.isUnknown())(att)
 def hasKnownInterfaceTypeReferencingUnknownAttribute(obj):

@@ -23,7 +23,7 @@ SkipSAFtoUarch = \
                                     str(get_follower_fmt_iface(sks)), \
                                   "?", \
                                   "?", \
-                                  sks.getAttributes()[1],"none","none")
+                                  sks.getAttributes()[1],"?","?")
 
 
 
