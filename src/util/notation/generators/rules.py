@@ -58,6 +58,29 @@ def findInstanceMatchingObjectAttributes(obj_attributes,supported_instances,attr
     # otherwise...
     return (False,None,None)
 
+def findAllInstancesPartiallyMatchingObjectAttributes(obj_attributes,supported_instances,attributes):
+    '''
+    True if an object's attributes match a one from a list of supported instances.\n\n
+
+    Arguments:\n
+    - obj_attributes -- list of object attributes. \n
+    - supported_instances -- dict of named supported-instance attribute lists.\n\n
+
+    Returns:\n
+    - (True,<supp. inst. name>,<supp. inst. attr.>) if all object attributes match 
+      corresponding non-wildcard instance attributes, for some supported instance;
+      (False,None,None) otherwise.
+    '''
+    matches_list=[]
+    for inst_name in supported_instances:
+        # For a given instance,
+        inst_attr=supported_instances[inst_name]
+        if allObjAttributesMatchInstanceAttributes(obj_attributes,inst_attr,attributes,strict=False):
+            # do object attributes match?
+            matches_list.append({'inst_name':inst_name,'inst_attr':inst_attr})
+    # otherwise...
+    return matches_list
+
 def anyInstanceMatchesObjectAttributes(obj_attributes,supported_instances,attributes,strict=False):
     return findInstanceMatchingObjectAttributes(obj_attributes,supported_instances,attributes,strict=strict)[0]
 

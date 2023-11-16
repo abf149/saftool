@@ -19,8 +19,7 @@ def setup(taxo_script_lib):
     safio.load_parse_taxo_libs(taxo_script_lib)
     warn(":: => Done, setup",also_stdout=True)
 
-def pipeline(arch,mapping,prob,sparseopts,reconfigurable_arch,bind_out_path, \
-             saflib_path,taxo_script_lib): 
+def pipeline(arch,mapping,prob,sparseopts,reconfigurable_arch,bind_out_path,saflib_path): 
     info("reconfigurable_arch:",reconfigurable_arch,also_stdout=True)
 
     warn(":: Taxonomic inference",also_stdout=True)
@@ -81,7 +80,7 @@ if __name__=="__main__":
     opening_remark()
     setup(taxo_script_lib)
     result=pipeline(arch,mapping,prob,sparseopts,reconfigurable_arch,bind_out_path, \
-                    saflib_path,taxo_script_lib)
+                    saflib_path)
     #print(result)
     handle_outcome(result)
     closing_remark()

@@ -1,6 +1,6 @@
 from util.helper import info,warn,error
 import util.helper as helper
-import safinfer,safmodel,util.safsearch_io as safsearch_io
+import safinfer,safmodel,util.safsearch_io as safsearch_io,util.safsearch_core as safsearch_core
 '''
 from util import safmodel_core as safcore, \
                  safmodel_io as safio, \
@@ -49,4 +49,22 @@ if __name__=="__main__":
     # Safinfer/safmodel setup
     setup(taxo_script_lib_list,characterization_path_list, \
           model_script_lib_list)
+    safsearch_core.search_loop(arch, \
+                               mapping, \
+                               prob, \
+                               sparseopts, \
+                               reconfigurable_arch, \
+                               bind_out_path, \
+                               topo_out_path, \
+                               saflib_path, \
+                               do_logging,\
+                               log_fn, \
+                               taxo_script_lib_list, \
+                               taxo_uarch, \
+                               comp_in, \
+                               arch_out_path, \
+                               comp_out_path, \
+                               user_attributes, \
+                               characterization_path_list, \
+                               model_script_lib_list)
     closing_remark()
