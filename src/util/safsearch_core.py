@@ -224,13 +224,14 @@ def assert_top_lvl_comp_cnt_sanity(top_lvl_comp_cnt,top_lvl_comp_cnt_sanity_limi
 def print_search_space(final_configs_dict,incomplete=False):
     num_components=len(final_configs_dict)
     if not incomplete:
-        warn("SAFsearch discovered search spaces for",str(num_components),"component(s)",also_stdout=True)
+        warn("SAFsearch discovered taxonomic search spaces for",str(num_components),"top-level component(s)",also_stdout=True)
         info("Search space summary:")
     else:
         info("Incomplete search space:")
     for comp_uri in final_configs_dict:
         comp_search_space=final_configs_dict[comp_uri]
-        info("- Search tree rooted at:",comp_uri)
+        num_search_points=len(comp_search_space)
+        info("- Search tree rooted at",comp_uri,"(",str(num_search_points),"search-points):")
         for idx,search_point in enumerate(comp_search_space):
             num_settings=len(search_point)
             info("-- Search-point",str(idx),"config (",str(num_settings),")")
