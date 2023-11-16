@@ -65,7 +65,7 @@ def build_saf_uarch_inference_problem(arch, sparseopts, prob, mapping, reconfigu
     # and data_space_dict_list have already been computed
     info("- Realizing microarchitecture with topological holes, based on bindings.\n")
     return build_taxonomic_arch_and_safs_from_bindings(arch, fmt_iface_bindings, action_bindings, dtype_list)
-def solve_saf_uarch_inference_problem(taxo_arch, saflib_path, ruleset_names=default_ruleset_list):
+def solve_saf_uarch_inference_problem(taxo_arch, saflib_path, ruleset_names=default_ruleset_list, user_attributes={}):
     '''
     Trigger SAF microarchitecture solver against an input
     problem description, which is a SAF microarchitecture
@@ -88,6 +88,6 @@ def solve_saf_uarch_inference_problem(taxo_arch, saflib_path, ruleset_names=defa
     rules_engine = Solver(ruleset_full_paths)
     rules_engine.preloadRules()
     info("\n\n- Solving.")    
-    result=rules_engine.run(taxo_arch)
+    result=rules_engine.run(taxo_arch,user_attributes=user_attributes)
     
     return result

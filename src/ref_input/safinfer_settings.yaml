@@ -1,0 +1,19 @@
+force_attributes:
+#- uri: /.Skipping_iact_spad1_weight_spad0
+#  settings:
+#  - type: positional
+#    values:
+#    - position: 3
+#      value: 'none'
+#    - position: 4
+#      value: 'none'
+#  - type: full
+#    values: [a,b,c,d]
+#  - type: positional
+#    values:
+#    - position: z
+#      value: k
+#  - type: keyword
+#    values:
+#    - name: x
+#      value: z

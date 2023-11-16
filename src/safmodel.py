@@ -10,7 +10,7 @@ def opening_remark():
 
 def log_config(do_logging,log_fn):
     print("logging:",do_logging)
-    helper.do_log=do_logging
+    helper.enable_log=do_logging
     if do_logging:
         helper.log_init(log_fn)
 
@@ -26,7 +26,8 @@ def setup(taxo_script_lib_list,characterization_path_list,model_script_lib_list,
     safio.load_parse_model_libs(model_script_lib_list)
     warn(":: => Done, setup")
 
-def pipeline(arch,taxo_uarch,sparseopts,user_attributes,characterization_path_list,model_script_lib_list,taxo_script_lib_list):
+def pipeline(arch,taxo_uarch,sparseopts,user_attributes,characterization_path_list, \
+             model_script_lib_list,taxo_script_lib_list):
     warn(":: Scale inference",also_stdout=True)
     '''Build scale inference problem'''
     scale_prob=safcore.build_scale_inference_problem(arch, sparseopts, taxo_uarch, user_attributes=user_attributes)

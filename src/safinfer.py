@@ -9,7 +9,7 @@ def opening_remark():
 
 def log_config(do_logging,log_fn):
     print("logging:",do_logging)
-    helper.do_log=do_logging
+    helper.enable_log=do_logging
     if do_logging:
         helper.log_init(log_fn)
 
@@ -19,7 +19,7 @@ def setup(taxo_script_lib):
     safio.load_parse_taxo_libs(taxo_script_lib)
     warn(":: => Done, setup",also_stdout=True)
 
-def pipeline(arch,mapping,prob,sparseopts,reconfigurable_arch,bind_out_path,saflib_path): 
+def pipeline(arch,mapping,prob,sparseopts,reconfigurable_arch,bind_out_path,saflib_path,user_attributes): 
     info("reconfigurable_arch:",reconfigurable_arch,also_stdout=True)
 
     warn(":: Taxonomic inference",also_stdout=True)
@@ -32,7 +32,7 @@ def pipeline(arch,mapping,prob,sparseopts,reconfigurable_arch,bind_out_path,safl
                                                           reconfigurable_arch, \
                                                           bind_out_path)
 
-    return safcore.solve_saf_uarch_inference_problem(taxo_arch, saflib_path)
+    return safcore.solve_saf_uarch_inference_problem(taxo_arch, saflib_path, user_attributes=user_attributes)
 
 def handle_outcome(result):
     # Success: dump
@@ -74,13 +74,14 @@ if __name__=="__main__":
     saflib_path, \
     do_logging,\
     log_fn, \
-    taxo_script_lib = safio.parse_args()
+    taxo_script_lib, \
+    user_attributes = safio.parse_args()
 
     log_config(do_logging,log_fn)
     opening_remark()
     setup(taxo_script_lib)
     result=pipeline(arch,mapping,prob,sparseopts,reconfigurable_arch,bind_out_path, \
-                    saflib_path)
+                    saflib_path, user_attributes)
     #print(result)
     handle_outcome(result)
     closing_remark()

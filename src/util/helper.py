@@ -3,7 +3,9 @@ import yaml,logging,os,warnings
 
 '''Logging'''
 log_configured=False
-do_log=False
+enable_log=False
+enable_stdout=True
+enable_stderr=True
 log_path="./safinfer.log"
 
 def custom_warning_handler(message, category, filename, lineno, file=None, line=None):
@@ -36,22 +38,22 @@ def crash_if_log_not_configured():
         print("=> Log not configured. Terminating.")
         assert(False)
 def info(*args,also_stdout=False):
-    if do_log:
+    if enable_log:
         crash_if_log_not_configured()
         logging.info(log_concat(*args))
-    if also_stdout:
+    if enable_stdout and also_stdout:
         print(*args)
 def warn(*args,also_stdout=False):
-    if do_log:
+    if enable_log:
         crash_if_log_not_configured()
         logging.warn(log_concat(*args))
-    if also_stdout:
+    if enable_stdout and also_stdout:
         print(*args)
 def error(*args,also_stdout=False):
-    if do_log:
+    if enable_log:
         crash_if_log_not_configured()
         logging.error(log_concat(*args))
-    if also_stdout:
+    if enable_stderr and also_stdout:
         print(*args)
 
 def dirpath_to_importpath(dirpath):

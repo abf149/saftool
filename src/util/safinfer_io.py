@@ -70,6 +70,9 @@ def process_args(args):
         bind_out_path=args.dir_out+'bindings.yaml'
         topo_out_path=args.dir_out+'new_arch.yaml'
 
+    print("- SAFinfer settings path:",args.settings)
+    user_attributes=sl_config.load_config_yaml(args.settings)
+
     return arch, \
            mapping, \
            prob, \
@@ -80,7 +83,8 @@ def process_args(args):
            args.saftaxolib, \
            do_logging, \
            args.log_file, \
-           args.taxo_script_lib
+           args.taxo_script_lib, \
+           user_attributes
 
 '''CLI argparse'''
 def parse_args():
@@ -114,6 +118,8 @@ def parse_args():
     parser.add_argument('-r', '--reconfigurable-arch', action='store_true')
     parser.add_argument('-L','--log', action='store_true')
     parser.add_argument('-f','--log-file',default='./safinfer.log')
+    parser.add_argument('-q','--settings',default='ref_input/safinfer_settings.yaml', \
+                    help='safinfer configuration file.')
     args = parser.parse_args()
     processed_args = process_args(args) # Get full return tuple
     return processed_args

@@ -3,6 +3,7 @@ from util.taxonomy.serializableobject import SerializableObject
 from solver.rulesets import RuleSet
 from util.helper import info, warn, error
 import solver.model.build_support.abstraction as ab_
+from solver.constraints import force_attributes
 #import os
 
 '''Solver'''
@@ -109,15 +110,21 @@ class Solver:
             # Microarchitecture is valid but cannot be completely inferred; error
             return 'error', result_rewrite_component, result_dict['uri'], result_dict['failure_comp']
 
-    def run(self, component, recurse=True, max_sm_passes=100):
+    def run(self, component, recurse=True, max_sm_passes=100, user_attributes={}):
         # Wrapper for multiple passes of (optionally-)recursive rule evaluation against the provided component and its subcomponents
-
-
 
         rule_engine_sm_pass_count=0
         next_sm_state='doValidate'
         uri=None
         failure_comp=None
+        visited_set=set()
+        force_attr_spec={}
+        if (user_attributes is not None) \
+            and 'force_attributes' in user_attributes \
+            and user_attributes['force_attributes'] is not None:
+
+            force_attr_spec=user_attributes['force_attributes']
+
         component_iterations=[component]
         res=False
 
@@ -125,8 +132,14 @@ class Solver:
 
         while(next_sm_state=='doValidate' and rule_engine_sm_pass_count < max_sm_passes):
             info('\n\n- STARTING: state-machine pass',rule_engine_sm_pass_count,'')
+            component,visited_set,force_attr_spec=force_attributes(component,force_attr_spec,visited_set)
+            #print("\n\n\n")
+            #print(component.getId())
+            #print(visited_set)
+            #print(force_attr_spec)
+            #assert(False)
             next_sm_state, component, \
-            uri, failure_comp=self.runSMPass(component, recurse=recurse)
+                uri, failure_comp=self.runSMPass(component, recurse=recurse)
 
             #for comp in component.getTopology().getComponentList():
             #     if "Skipping" in comp.getId():
