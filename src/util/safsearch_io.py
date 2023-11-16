@@ -26,6 +26,29 @@ def disable_stdout():
 def disable_stderr():
     helper.enable_stderr=False
 
+def disable_logs(disable_file_log=False):
+    stream_state = {
+        'stdout':helper.enable_stdout,
+        'stderr':helper.enable_stderr,
+        'log':helper.enable_log,
+    }
+    disable_stdout()
+    disable_stderr()
+    if disable_file_log:
+        log_control(False)
+    return stream_state
+
+def revert_logs(stream_state):
+    if stream_state['stdout']:
+        enable_stdout()
+    else:
+        disable_stdout()
+    if stream_state['stderr']:
+        enable_stderr()
+    else:
+        disable_stderr()
+    log_control(stream_state['log'])
+
 def process_args(args):
     arch, \
     mapping, \

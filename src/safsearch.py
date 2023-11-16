@@ -44,23 +44,23 @@ def pipeline(arch, \
              model_script_lib_list):
     
     final_configs_dict=safsearch_core.build_taxonomic_search_space(arch, \
-                                                         mapping, \
-                                                         prob, \
-                                                         sparseopts, \
-                                                         reconfigurable_arch, \
-                                                         bind_out_path, \
-                                                         topo_out_path, \
-                                                         saflib_path, \
-                                                         do_logging,\
-                                                         log_fn, \
-                                                         taxo_script_lib_list, \
-                                                         taxo_uarch, \
-                                                         comp_in, \
-                                                         arch_out_path, \
-                                                         comp_out_path, \
-                                                         safinfer_user_attributes, \
-                                                         characterization_path_list, \
-                                                         model_script_lib_list)
+                                                                   mapping, \
+                                                                   prob, \
+                                                                   sparseopts, \
+                                                                   reconfigurable_arch, \
+                                                                   bind_out_path, \
+                                                                   topo_out_path, \
+                                                                   saflib_path, \
+                                                                   do_logging,\
+                                                                   log_fn, \
+                                                                   taxo_script_lib_list, \
+                                                                   taxo_uarch, \
+                                                                   comp_in, \
+                                                                   arch_out_path, \
+                                                                   comp_out_path, \
+                                                                   safinfer_user_attributes, \
+                                                                   characterization_path_list, \
+                                                                   model_script_lib_list)
     
     #print("final_configs_dict:",final_configs_dict)
 
