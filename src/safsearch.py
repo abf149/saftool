@@ -42,8 +42,10 @@ def pipeline(arch, \
              safmodel_user_attributes, \
              characterization_path_list, \
              model_script_lib_list, \
-             log_taxo_component_search_space_discovery):
-    
+             log_taxo_component_search_space_discovery,
+             remark=False):
+    if remark:
+        opening_remark()
     final_configs_dict=safsearch_core.build_taxonomic_search_space(arch, \
                                                                    mapping, \
                                                                    prob, \
@@ -63,9 +65,8 @@ def pipeline(arch, \
                                                                    characterization_path_list, \
                                                                    model_script_lib_list, \
                                                                    log_taxo_component_search_space_discovery)
-    
-    #print("final_configs_dict:",final_configs_dict)
-
+    if remark:
+        closing_remark()
 
 def closing_remark():
     warn("<< Done, SAFsearch",also_stdout=True)
