@@ -1,20 +1,3 @@
-'''
-from util import sparseloop_config_processor as sl_config, safinfer_io, safmodel_io
-from solver.solve import Solver
-from solver.build import build_taxonomic_arch_and_safs_from_bindings
-from util.helper import info,warn,error
-import util.helper as helper
-import util.safsearch_io as safsearch_io
-from util.notation.generators.rules import findAllInstancesPartiallyMatchingObjectAttributes
-import util.notation.predicates as pr_
-import saflib.microarchitecture.TaxoRegistry as tr_ # Initialize taxonomic registry (TODO: from files)
-#from util.safinfer_io import sprettyprint_taxo_uarch
-#from solver.build import get_buffer_hierarchy
-import solver.model.build as build
-import solver.model.solve as solve
-import safinfer
-import copy
-'''
 import search.taxonomic.build.component as bc_
 from util.helper import info,warn,error
 
