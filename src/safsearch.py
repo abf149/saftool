@@ -41,7 +41,8 @@ def pipeline(arch, \
              safinfer_user_attributes, \
              safmodel_user_attributes, \
              characterization_path_list, \
-             model_script_lib_list):
+             model_script_lib_list, \
+             log_taxo_component_search_space_discovery):
     
     final_configs_dict=safsearch_core.build_taxonomic_search_space(arch, \
                                                                    mapping, \
@@ -60,7 +61,8 @@ def pipeline(arch, \
                                                                    comp_out_path, \
                                                                    safinfer_user_attributes, \
                                                                    characterization_path_list, \
-                                                                   model_script_lib_list)
+                                                                   model_script_lib_list, \
+                                                                   log_taxo_component_search_space_discovery)
     
     #print("final_configs_dict:",final_configs_dict)
 
@@ -89,8 +91,9 @@ if __name__=="__main__":
     characterization_path_list, \
     model_script_lib_list, = safsearch_io.parse_args()
 
-    #print(safinfer_user_attributes)
-    #assert(False)
+    log_taxo_component_search_space_discovery=False
+    log_global_search_safinfer=False
+    log_global_search_safmodel=False
 
     log_config(do_logging,log_fn)
     opening_remark()
@@ -114,5 +117,6 @@ if __name__=="__main__":
              safinfer_user_attributes, \
              safmodel_user_attributes, \
              characterization_path_list, \
-             model_script_lib_list)
+             model_script_lib_list, \
+             log_taxo_component_search_space_discovery)
     closing_remark()

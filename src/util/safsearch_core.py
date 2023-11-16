@@ -19,6 +19,7 @@ def build_taxonomic_search_space(arch, \
     safinfer_user_attributes, \
     characterization_path_list, \
     model_script_lib_list, \
+    log_taxo_component_search_space_discovery=False, \
     top_lvl_comp_cnt_sanity_limit=100, \
     comp_tree_depth_sanity_limit=100):
     
@@ -41,6 +42,7 @@ def build_taxonomic_search_space(arch, \
                                                                          safinfer_user_attributes, \
                                                                          characterization_path_list, \
                                                                          model_script_lib_list, \
+                                                                         log_taxo_component_search_space_discovery, \
                                                                          top_lvl_comp_cnt_sanity_limit= \
                                                                             top_lvl_comp_cnt_sanity_limit, \
                                                                          comp_tree_depth_sanity_limit= \

@@ -19,7 +19,9 @@ def setup(taxo_script_lib):
     safio.load_parse_taxo_libs(taxo_script_lib)
     warn(":: => Done, setup",also_stdout=True)
 
-def pipeline(arch,mapping,prob,sparseopts,reconfigurable_arch,bind_out_path,saflib_path,user_attributes): 
+def pipeline(arch,mapping,prob,sparseopts,reconfigurable_arch,bind_out_path,saflib_path,user_attributes,remarks=False):
+    if remarks:
+        opening_remark() 
     info("reconfigurable_arch:",reconfigurable_arch,also_stdout=True)
 
     warn(":: Taxonomic inference",also_stdout=True)
@@ -32,6 +34,8 @@ def pipeline(arch,mapping,prob,sparseopts,reconfigurable_arch,bind_out_path,safl
                                                           reconfigurable_arch, \
                                                           bind_out_path)
 
+    if remarks:
+        closing_remark()
     return safcore.solve_saf_uarch_inference_problem(taxo_arch, saflib_path, user_attributes=user_attributes)
 
 def handle_outcome(result):
