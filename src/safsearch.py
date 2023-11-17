@@ -45,52 +45,80 @@ def pipeline(arch, \
              log_taxo_component_search_space_discovery,
              log_global_search_safinfer, \
              log_global_search_safmodel, \
+             dump_best, \
+             load_best, \
              remark=False):
     if remark:
         opening_remark()
-    global_search_space=safsearch_core.build_taxonomic_search_space(arch, \
-                                                                    mapping, \
-                                                                    prob, \
-                                                                    sparseopts, \
-                                                                    reconfigurable_arch, \
-                                                                    bind_out_path, \
-                                                                    topo_out_path, \
-                                                                    saflib_path, \
-                                                                    do_logging,\
-                                                                    log_fn, \
-                                                                    taxo_script_lib_list, \
-                                                                    taxo_uarch, \
-                                                                    comp_in, \
-                                                                    arch_out_path, \
-                                                                    comp_out_path, \
-                                                                    safinfer_user_attributes, \
-                                                                    characterization_path_list, \
-                                                                    model_script_lib_list, \
-                                                                    log_taxo_component_search_space_discovery)
-    search_result=safsearch_core.global_search(global_search_space, \
-                                               arch, \
-                                                mapping, \
-                                                prob, \
-                                                sparseopts, \
-                                                reconfigurable_arch, \
-                                                bind_out_path, \
-                                                topo_out_path, \
-                                                saflib_path, \
-                                                do_logging,\
-                                                log_fn, \
-                                                taxo_script_lib_list, \
-                                                taxo_uarch, \
-                                                comp_in, \
-                                                arch_out_path, \
-                                                comp_out_path, \
-                                                safinfer_user_attributes, \
-                                                safmodel_user_attributes, \
-                                                characterization_path_list, \
-                                                model_script_lib_list, \
-                                                log_global_search_safinfer, \
-                                                log_global_search_safmodel)
+    if dump_best:
+        warn(":: --dump-best selected; SAFsearch pipeline will terminate after search completes.")
+    elif load_best:
+        warn(":: --load-best selected; SAFsearch will skip search and load best configuration from file.")
     
-    safsearch_core.export_artifacts_from_search_result(global_search_space, \
+    global_search_space=None
+    search_result=None
+    best_config=None
+
+    if not load_best:
+        global_search_space=safsearch_core.build_taxonomic_search_space(arch, \
+                                                                        mapping, \
+                                                                        prob, \
+                                                                        sparseopts, \
+                                                                        reconfigurable_arch, \
+                                                                        bind_out_path, \
+                                                                        topo_out_path, \
+                                                                        saflib_path, \
+                                                                        do_logging,\
+                                                                        log_fn, \
+                                                                        taxo_script_lib_list, \
+                                                                        taxo_uarch, \
+                                                                        comp_in, \
+                                                                        arch_out_path, \
+                                                                        comp_out_path, \
+                                                                        safinfer_user_attributes, \
+                                                                        characterization_path_list, \
+                                                                        model_script_lib_list, \
+                                                                        log_taxo_component_search_space_discovery)
+        search_result=safsearch_core.global_search(global_search_space, \
+                                                arch, \
+                                                    mapping, \
+                                                    prob, \
+                                                    sparseopts, \
+                                                    reconfigurable_arch, \
+                                                    bind_out_path, \
+                                                    topo_out_path, \
+                                                    saflib_path, \
+                                                    do_logging,\
+                                                    log_fn, \
+                                                    taxo_script_lib_list, \
+                                                    taxo_uarch, \
+                                                    comp_in, \
+                                                    arch_out_path, \
+                                                    comp_out_path, \
+                                                    safinfer_user_attributes, \
+                                                    safmodel_user_attributes, \
+                                                    characterization_path_list, \
+                                                    model_script_lib_list, \
+                                                    log_global_search_safinfer, \
+                                                    log_global_search_safmodel)
+        
+        best_config = {
+            "global_search_space":global_search_space,
+            "search_result":search_result
+        }
+    else:
+        # --load-best skips search and loads saved search result
+        best_config=safsearch_io.load_best_config()
+        global_search_space=best_config['global_search_space']
+        search_result=best_config['search_result']
+
+    if dump_best:
+        # --dump-best skips post-search steps and dumps search result to file
+        safsearch_io.dump_best_config(best_config)
+        return
+
+    safsearch_core.export_artifacts_from_search_result(search_result, \
+                                                        global_search_space, \
                                                         arch, \
                                                         mapping, \
                                                         prob, \
@@ -138,7 +166,13 @@ if __name__=="__main__":
     safinfer_user_attributes, \
     safmodel_user_attributes, \
     characterization_path_list, \
-    model_script_lib_list, = safsearch_io.parse_args()
+    model_script_lib_list, \
+    dump_best, \
+    load_best = safsearch_io.parse_args()
+
+    # you don't have to use dump_best or load_best,
+    # but they are mutually-exclusive
+    assert((not (dump_best and load_best)))
 
     log_taxo_component_search_space_discovery=False
     log_global_search_safinfer=False
@@ -169,5 +203,7 @@ if __name__=="__main__":
              model_script_lib_list, \
              log_taxo_component_search_space_discovery, \
              log_global_search_safinfer, \
-             log_global_search_safmodel)
+             log_global_search_safmodel, \
+             dump_best, \
+             load_best)
     closing_remark()

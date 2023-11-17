@@ -127,7 +127,8 @@ def global_search(global_search_space, \
             }
 
 
-def export_artifacts_from_search_result(global_search_space, \
+def export_artifacts_from_search_result(search_result, \
+                                        global_search_space, \
                                         arch, \
                                         mapping, \
                                         prob, \

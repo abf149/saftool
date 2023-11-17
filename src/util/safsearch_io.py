@@ -7,9 +7,12 @@ import util.notation.predicates as p_
 import solver.model.build_support.abstraction as ab
 import util.safinfer_io as safinfer_io, \
        util.safmodel_io as safmodel_io
+import pickle
 
 '''Config - condition the format of YAML file dumps'''
 yaml.Dumper.ignore_aliases = lambda *args : True
+
+best_config_dump_file='search_results.pkl'
 
 def log_control(setting):
     helper.enable_log=setting
@@ -97,7 +100,9 @@ def process_args(args):
            safinfer_user_attributes, \
            safmodel_user_attributes, \
            characterization_path_list, \
-           model_script_lib_list
+           model_script_lib_list,\
+           args.dump_best, \
+           args.load_best
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -124,6 +129,8 @@ def parse_args():
                         help='Path to high-level hardware construction language (HCL) code which generates the verilog.')
     parser.add_argument('-j','--dump-best', action='store_true', \
                         help='Dump best configuration to local directory.')
+    parser.add_argument('-J','--load-best', action='store_true', \
+                        help='Skip initial phases of SAFsearch, and load best configuration from local directory.')
     parser.add_argument('-k','--comp-out',default='ref_output/', \
                         help='Components output filename (TODO: not currently used).')
     parser.add_argument('-l','--saftaxolib',default='saflib/rulesets/taxo/')
@@ -152,3 +159,22 @@ def parse_args():
 
     processed_args = process_args(args)
     return processed_args
+
+def dump_best_config(best_config):
+    info(":: Dumping search results to file")
+    info("Filename:",best_config_dump_file)
+    info("Logging dictionary with keys",str(list(best_config.keys())))
+    with open(best_config_dump_file,'wb') as fp:
+        pickle.dump(best_config,fp)
+    warn(":: => Done, dumping search results to file")
+
+def load_best_config():
+    warn(":: Load search results from file")
+    info("Filename:",best_config_dump_file)
+    best_config=None
+    with open(best_config_dump_file,'rb') as fp:
+        best_config=pickle.load(fp)
+
+    info("Loaded dictionary with keys",str(list(best_config.keys())))
+    warn(":: => Done, dumping search results to file")
+    return best_config
