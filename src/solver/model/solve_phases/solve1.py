@@ -205,10 +205,12 @@ def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,f
 
     # Display results
     solution_dict={}
+    best_objective=-1.0
     if results.solver.status == SolverStatus.ok and results.solver.termination_condition == TerminationCondition.optimal:
+        best_objective=model.obj()
         info("  Raw solver solution output:")
         info("    Objective:",str(obj_expr))
-        info(f"    Objective value: {model.obj()}",also_stdout=True)
+        info(f"    Objective value: {best_objective}",also_stdout=True)
         warn("  Solution:")
 
         solution_dict={original:getattr(model, mapped)() for original, mapped in variable_mapping.items()}
@@ -219,7 +221,7 @@ def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,f
         info("Terminating.",also_stdout=True)
         assert(False)
 
-    return solution_dict
+    return solution_dict,best_objective
 
 def solve1_populate_analytical_primitive_model_attributes(minlp_solution_dict,scale_problem):
     info("-- Populating analytical primitive model attributes...")
@@ -320,13 +322,15 @@ def solve1_scale_inference(scale_problem):
     user_attributes=scale_problem["user_attributes"]
     solver_attributes=user_attributes["scale_inference_solver"]
 
-    minlp_solution_dict=solve1_scale_inference_simplified_problem(simplified_symbols,simplified_symbol_types, \
-                                                                  simplified_constraints,simplified_objective_function, \
-                                                                  yields,solver_man=solver_attributes['manager'], \
-                                                                  solver_opt=solver_attributes['solver'], \
-                                                                  args=solver_attributes['args'])
+    minlp_solution_dict, \
+    best_objective=solve1_scale_inference_simplified_problem(simplified_symbols,simplified_symbol_types, \
+                                                             simplified_constraints,simplified_objective_function, \
+                                                             yields,solver_man=solver_attributes['manager'], \
+                                                             solver_opt=solver_attributes['solver'], \
+                                                             args=solver_attributes['args'])
 
     # Duplicate solution_dict within problem struct for later reference
+    scale_problem['best_modeling_objective']=best_objective
     scale_problem['minlp_solution_dict']=minlp_solution_dict
 
     abstract_analytical_primitive_models_dict= \

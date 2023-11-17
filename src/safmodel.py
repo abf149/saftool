@@ -26,8 +26,9 @@ def setup(taxo_script_lib_list,characterization_path_list,model_script_lib_list,
     safio.load_parse_model_libs(model_script_lib_list)
     warn(":: => Done, setup")
 
-def pipeline(arch,taxo_uarch,sparseopts,user_attributes,characterization_path_list, \
-             model_script_lib_list,taxo_script_lib_list):
+def pipeline(arch,taxo_uarch,sparseopts,user_attributes,remarks=False):
+    if remarks:
+        opening_remark()
     warn(":: Scale inference",also_stdout=True)
     '''Build scale inference problem'''
     scale_prob=safcore.build_scale_inference_problem(arch, sparseopts, taxo_uarch, user_attributes=user_attributes)
@@ -38,9 +39,11 @@ def pipeline(arch,taxo_uarch,sparseopts,user_attributes,characterization_path_li
 
     warn(":: => Done, scale inference",also_stdout=True)
     warn("")
-
+    if remarks:
+        closing_remark()
     return abstract_analytical_primitive_models_dict, \
-           abstract_analytical_component_models_dict,scale_prob
+           abstract_analytical_component_models_dict, \
+           scale_prob
 
 def export_result(arch,comp_in,arch_out_path,comp_out_path,abstract_analytical_primitive_models_dict, \
                   abstract_analytical_component_models_dict,scale_prob,user_attributes):
@@ -75,8 +78,7 @@ if __name__=="__main__":
     setup(taxo_script_lib_list,characterization_path_list,model_script_lib_list)
     abstract_analytical_primitive_models_dict, \
     abstract_analytical_component_models_dict,scale_prob = \
-        pipeline(arch,taxo_uarch,sparseopts,user_attributes,characterization_path_list, \
-                 model_script_lib_list,taxo_script_lib_list)
+        pipeline(arch,taxo_uarch,sparseopts,user_attributes)
     export_result(arch,comp_in,arch_out_path,comp_out_path,abstract_analytical_primitive_models_dict, \
                   abstract_analytical_component_models_dict,scale_prob,user_attributes)
     closing_remark()

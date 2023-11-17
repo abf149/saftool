@@ -116,10 +116,14 @@ def parse_args():
                              'arch (--arch) and components (--comp-in) files must be explicit.')
     parser.add_argument('-D','--dir-out',default='', \
                         help='Output files directory.')
+    parser.add_argument('-e','--no-accelergy', action='store_true', \
+                        help='Do not output accelergy models as a final step.')
     parser.add_argument('-f','--log-file',default='./safsearch.log', \
                         help='Log filepath (requires -L/--log to enable logging).')
     parser.add_argument('-g','--hcl',action='append',default=['hw/chisel/src'], \
                         help='Path to high-level hardware construction language (HCL) code which generates the verilog.')
+    parser.add_argument('-j','--dump-best', action='store_true', \
+                        help='Dump best configuration to local directory.')
     parser.add_argument('-k','--comp-out',default='ref_output/', \
                         help='Components output filename (TODO: not currently used).')
     parser.add_argument('-l','--saftaxolib',default='saflib/rulesets/taxo/')

@@ -1,12 +1,20 @@
 ''' Helper functions '''
-import yaml,logging,os,warnings
+import yaml,logging,os,warnings,sys
 
 '''Logging'''
 log_configured=False
 enable_log=False
 enable_stdout=True
 enable_stderr=True
+tqdm_stdout=sys.stdout
+tqdm_devnull=open(os.devnull, 'w')
 log_path="./safinfer.log"
+
+def get_tqdm_outfile():
+    if enable_stdout:
+        return tqdm_stdout
+    else:
+        return tqdm_devnull
 
 def custom_warning_handler(message, category, filename, lineno, file=None, line=None):
     warn(f"{category.__name__}: {filename}:{lineno}: {message}")

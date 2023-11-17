@@ -81,39 +81,73 @@ def global_search(global_search_space, \
                     arch_out_path, \
                     comp_out_path, \
                     safinfer_user_attributes, \
+                    safmodel_user_attributes, \
                     characterization_path_list, \
                     model_script_lib_list, \
-                    log_taxo_component_search_space_discovery):
+                    log_global_search_safinfer, \
+                    log_global_search_safmodel):
     info(":: Searching...",also_stdout=True)
 
     search_point_id_to_config_list, \
     search_point_id_to_result_list, \
     best_search_point_id, \
-    best_objective = search(global_search_space, \
-                            arch, \
-                            mapping, \
-                            prob, \
-                            sparseopts, \
-                            reconfigurable_arch, \
-                            bind_out_path, \
-                            topo_out_path, \
-                            saflib_path, \
-                            do_logging,\
-                            log_fn, \
-                            taxo_script_lib_list, \
-                            taxo_uarch, \
-                            comp_in, \
-                            arch_out_path, \
-                            comp_out_path, \
-                            safinfer_user_attributes, \
-                            characterization_path_list, \
-                            model_script_lib_list, \
-                            log_taxo_component_search_space_discovery)
+    best_objective, \
+    best_state, \
+    best_global_search_point = search(global_search_space, \
+                                      arch, \
+                                      mapping, \
+                                      prob, \
+                                      sparseopts, \
+                                      reconfigurable_arch, \
+                                      bind_out_path, \
+                                      topo_out_path, \
+                                      saflib_path, \
+                                      do_logging,\
+                                      log_fn, \
+                                      taxo_script_lib_list, \
+                                      taxo_uarch, \
+                                      comp_in, \
+                                      arch_out_path, \
+                                      comp_out_path, \
+                                      safinfer_user_attributes, \
+                                      safmodel_user_attributes, \
+                                      characterization_path_list, \
+                                      model_script_lib_list, \
+                                      log_global_search_safinfer, \
+                                      log_global_search_safmodel)
     
     warn(":: => Done, searching...",also_stdout=True)
     return {
                 "search_point_id_to_config_list":search_point_id_to_config_list,
                 "search_point_id_to_result_list":search_point_id_to_result_list,
                 "best_search_point_id":best_search_point_id,
-                "best_objective":best_objective
+                "best_objective":best_objective,
+                "best_state":best_state,
+                "best_global_search_point":best_global_search_point
             }
+
+
+def export_artifacts_from_search_result(global_search_space, \
+                                        arch, \
+                                        mapping, \
+                                        prob, \
+                                        sparseopts, \
+                                        reconfigurable_arch, \
+                                        bind_out_path, \
+                                        topo_out_path, \
+                                        saflib_path, \
+                                        do_logging,\
+                                        log_fn, \
+                                        taxo_script_lib_list, \
+                                        taxo_uarch, \
+                                        comp_in, \
+                                        arch_out_path, \
+                                        comp_out_path, \
+                                        safinfer_user_attributes, \
+                                        safmodel_user_attributes, \
+                                        characterization_path_list, \
+                                        model_script_lib_list, \
+                                        log_global_search_safinfer, \
+                                        log_global_search_safmodel):
+    
+    pass

@@ -1,7 +1,7 @@
 import util.notation.predicates as p_
 import util.notation.model as mo_
 import sympy as sp
-from util.helper import info,warn,error
+from util.helper import info,warn,error,get_tqdm_outfile
 import csv, re
 import util.model.CasCompat as cc_
 import util.notation.characterization_support.expressions as ex_
@@ -574,7 +574,8 @@ class CharacterizationMetricModel:
         
         total_iterations = len(supported_variable_value_combos)
         info("--- Building "+self.getNameExpression()+" energy area latency table.")
-        pbar = tqdm(total=total_iterations, desc="Building "+self.getNameExpression()+" energy area latency table.")
+        pbar = tqdm(total=total_iterations, desc="Building "+self.getNameExpression()+" energy area latency table.", \
+                    file=get_tqdm_outfile())
 
         key_column_names=copy.copy(sym_list)
         key_column_names.append('latency')

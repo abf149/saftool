@@ -2,6 +2,20 @@
 from util.helper import info,warn,error
 import copy
 
+def build_search_point(per_comp_search_state_dict, \
+                       per_comp_search_space, \
+                       top_lvl_comp_list):
+    '''
+    Using the search state dictionary (comp. uri => comp. search-point idx)
+    to select component search-points, build global search-point as the 
+    concatenation of the component search-points
+    '''
+    return [sparse_match \
+                for tlcomp in top_lvl_comp_list \
+                    for sparse_match in per_comp_search_space[tlcomp][ \
+                                                                        per_comp_search_state_dict[tlcomp] \
+                                                                     ]]
+
 def assert_done(done, \
                 search_point_id, \
                 per_comp_search_state_dict, \
