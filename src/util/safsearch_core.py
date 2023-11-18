@@ -94,7 +94,9 @@ def global_search(global_search_space, \
     best_objective, \
     best_state, \
     best_global_search_point, \
-    top_N_tracker = search(global_search_space, \
+    top_N_tracker, \
+    best_safinfer_results, \
+    best_safmodel_results = search(global_search_space, \
                                       arch, \
                                       mapping, \
                                       prob, \
@@ -125,7 +127,9 @@ def global_search(global_search_space, \
                 "best_objective":best_objective,
                 "best_state":best_state,
                 "best_global_search_point":best_global_search_point,
-                "top_N_tracker":top_N_tracker
+                "top_N_tracker":top_N_tracker,
+                "best_safinfer_results":best_safinfer_results,
+                "best_safmodel_results":best_safmodel_results
             }
 
 

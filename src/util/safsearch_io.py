@@ -7,12 +7,12 @@ import util.notation.predicates as p_
 import solver.model.build_support.abstraction as ab
 import util.safinfer_io as safinfer_io, \
        util.safmodel_io as safmodel_io
-import pickle
+import dill as pickle
 
 '''Config - condition the format of YAML file dumps'''
 yaml.Dumper.ignore_aliases = lambda *args : True
 
-best_config_dump_file='search_results.pkl'
+best_config_dump_file='search_results.dill'
 
 def log_control(setting):
     helper.enable_log=setting
@@ -162,18 +162,20 @@ def parse_args():
 
 def dump_best_config(best_config):
     info(":: Dumping search results to file")
-    info("Filename:",best_config_dump_file)
-    info("Logging dictionary with keys",str(list(best_config.keys())))
-    with open(best_config_dump_file,'wb') as fp:
-        pickle.dump(best_config,fp)
+    info("Filename:", best_config_dump_file)
+    info("Logging dictionary with keys", str(list(best_config.keys())))
+    with open(best_config_dump_file, 'wb') as fp:
+        pickle.dump(best_config, fp)
     warn(":: => Done, dumping search results to file")
 
 def load_best_config():
     warn(":: Load search results from file")
-    info("Filename:",best_config_dump_file)
-    best_config=None
-    with open(best_config_dump_file,'rb') as fp:
-        best_config=pickle.load(fp)
+    info("Filename:", best_config_dump_file)
+    best_config = None
+    with open(best_config_dump_file, 'rb') as fp:
+        best_config = pickle.load(fp)
+
+    return best_config
 
     info("Loaded dictionary with keys",str(list(best_config.keys())))
     warn(":: => Done, dumping search results to file")
