@@ -131,7 +131,7 @@ def pipeline(arch, \
         safsearch_io.dump_best_config(best_config)
         return
 
-    safsearch_core.export_artifacts_from_search_result(best_config, \
+    safsearch_io.export_artifacts_from_search_result(best_config, \
                                                        top_N, \
                                                         model_top_x, \
                                                         arch, \

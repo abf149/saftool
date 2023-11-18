@@ -1,4 +1,5 @@
 '''SAFsearch IO library - CLI argparse and YAML dump routines'''
+import safinfer, safmodel
 from collections import deque
 import util.sparseloop_config_processor as sl_config, yaml, argparse
 from util.helper import info,warn,error
@@ -182,8 +183,70 @@ def load_best_config():
     with open(best_config_dump_file, 'rb') as fp:
         best_config = pickle.load(fp)
 
-    return best_config
-
     info("Loaded dictionary with keys",str(list(best_config.keys())))
     warn(":: => Done, dumping search results to file")
     return best_config
+
+def export_artifacts_from_search_result(best_config, \
+                                        top_N, \
+                                        model_top_x, \
+                                        arch, \
+                                        mapping, \
+                                        prob, \
+                                        sparseopts, \
+                                        reconfigurable_arch, \
+                                        bind_out_path, \
+                                        topo_out_path, \
+                                        saflib_path, \
+                                        do_logging,\
+                                        log_fn, \
+                                        taxo_script_lib_list, \
+                                        taxo_uarch, \
+                                        comp_in, \
+                                        arch_out_path, \
+                                        comp_out_path, \
+                                        safinfer_user_attributes, \
+                                        safmodel_user_attributes, \
+                                        characterization_path_list, \
+                                        model_script_lib_list, \
+                                        log_global_search_safinfer, \
+                                        log_global_search_safmodel):
+    info(":: Searching...",also_stdout=True)
+    info("Extracting top",model_top_x,"th search result.")
+    top_N_tracker=best_config['search_result']['top_N_tracker']
+    ranking=top_N_tracker.get_rank()
+    if model_top_x > len(ranking)-1:
+        error("Only",len(ranking),"results were found; cannot find result at index",model_top_x,"in ranking.")
+        info("Terminating.")
+        assert(False)
+    search_point_struct=ranking[model_top_x]
+    objective=search_point_struct['objective']
+    search_point_result=search_point_struct['result']
+    search_point_id=search_point_result['best_search_point_id']
+    state=search_point_result['best_state']
+    global_search_point=search_point_result['best_global_search_point']
+    safinfer_results=search_point_result['best_safinfer_results']
+    outcome=safinfer_results['outcome']
+    #component_iterations=safinfer_results['component_iterations']
+    #uri=safinfer_results['uri']
+    #failure_comp=safinfer_results['failure_comp']
+    safmodel_results=search_point_result['best_safmodel_results']
+    abstract_analytical_primitive_models_dict=safmodel_results['abstract_analytical_primitive_models_dict']
+    abstract_analytical_component_models_dict=safmodel_results['abstract_analytical_component_models_dict']
+    scale_prob=safmodel_results['scale_prob']
+    info("- Objective:",objective)
+    info("- Best search-point ID:",str(search_point_id))
+    if not outcome:
+        error("Invalid search result: SAFinfer failed")
+        info("Terminating.")
+        assert(False)
+    #taxo_uarch=component_iterations[-1]
+    warn("=> Done, extracting search result.")
+    info("Dumping SAFinfer results to",topo_out_path,"...")
+    safinfer.handle_outcome(safinfer_results,topo_out_path)
+    warn("=> Done, dumping SAFinfer results to file.")
+    info("Dumping SAFmodel results")
+    safmodel.export_result(arch,comp_in,arch_out_path,comp_out_path,abstract_analytical_primitive_models_dict, \
+                           abstract_analytical_component_models_dict,scale_prob,safmodel_user_attributes)
+    warn("=> Done, dumping SAFmodel results")
+    warn(":: => Exporting search result artifacts")

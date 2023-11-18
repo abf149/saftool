@@ -38,7 +38,7 @@ def pipeline(arch,mapping,prob,sparseopts,reconfigurable_arch,bind_out_path,safl
         closing_remark()
     return safcore.solve_saf_uarch_inference_problem(taxo_arch, saflib_path, user_attributes=user_attributes)
 
-def handle_outcome(result):
+def handle_outcome(result,topo_out_path):
     # Success: dump
     # Fail: exit
     #print(result[-1][0].getTopology().getComponentList()[-1])
@@ -87,5 +87,5 @@ if __name__=="__main__":
     result=pipeline(arch,mapping,prob,sparseopts,reconfigurable_arch,bind_out_path, \
                     saflib_path, user_attributes)
     #print(result)
-    handle_outcome(result)
+    handle_outcome(result,topo_out_path)
     closing_remark()
