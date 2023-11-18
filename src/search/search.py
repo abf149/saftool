@@ -5,7 +5,24 @@ import search.search_support.life_cycle as lc_
 from search.taxonomic.build.build_support.config_gen import build_user_attributes
 from search.taxonomic.build.build_support.frontend import safinfer_frontend
 from search.model.middle import safmodel_middle_layer
-import copy
+import copy,heapq
+
+class TopNSearchPointsCorrected:
+    def __init__(self, N):
+        self.N = N
+        self.heap = []
+
+    def push(self, search_point):
+        # Add the new search point to the heap
+        heapq.heappush(self.heap, (-search_point['objective'], search_point))
+
+        # If the heap size exceeds N, pop the highest 'objective' value
+        if len(self.heap) > self.N:
+            heapq.heappop(self.heap)
+
+    def get_rank(self):
+        # Return the elements of the heap sorted by their 'objective' values
+        return [search_point for _, search_point in sorted(self.heap, reverse=True)]
 
 def safinfer_frontend_with_search_point(global_search_point, \
                                         arch,mapping,prob,sparseopts,reconfigurable_arch, \
@@ -53,8 +70,9 @@ def search(global_search_space, \
             safmodel_user_attributes, \
             characterization_path_list, \
             model_script_lib_list, \
-            log_global_search_safinfer,
-            log_global_search_safmodel):
+            log_global_search_safinfer, \
+            log_global_search_safmodel, \
+            topN=2):
     
     per_comp_search_space=global_search_space["per_comp_search_space"]
     top_lvl_comp_list=global_search_space["top_lvl_comp_list"]
@@ -69,6 +87,7 @@ def search(global_search_space, \
     best_objective=float('inf')
     best_state=None
     best_global_search_point=None
+    topNTracker=TopNSearchPointsCorrected(topN)
 
     # Initialize search state
     search_point_id=0
@@ -98,8 +117,18 @@ def search(global_search_space, \
             best_search_point_id=search_point_id
             best_state=copy.copy(per_comp_search_state_dict)
             best_global_search_point=copy.copy(global_search_point)
+            # Hold onto previous best if topN > 1
+            topNTracker.push({
+                'objective':best_objective,
+                'result': {
+                    'best_search_point_id':best_search_point_id,
+                    'best_state':best_state,
+                    'best_global_search_point':best_global_search_point
+                }
+            })
             warn("New best:",best_objective)
-            info("- Objective:",best_objective,also_stdout=True)
+            info("- Objective:",best_objective,"Top -",str(topN),":", \
+                 str([r['objective'] for r in topNTracker.get_rank()]),also_stdout=True)
             info("- Search-point:",best_search_point_id)
 
         # Update results
@@ -127,9 +156,12 @@ def search(global_search_space, \
                     num_top_lvl_comps, \
                     global_space_size)
 
+    warn("Search outcome: top",str(topN),"=",str([r['objective'] for r in topNTracker.get_rank()]),also_stdout=True)
+
     return search_point_id_to_config_list, \
            search_point_id_to_result_list, \
            best_search_point_id, \
            best_objective, \
            best_state, \
-           best_global_search_point
+           best_global_search_point, \
+           topNTracker
