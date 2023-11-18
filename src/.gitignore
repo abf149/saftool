@@ -1,4 +1,5 @@
 # Top-level logs
+requirements.txt
 log.*
 *.log
 
@@ -9,6 +10,7 @@ log.*
 # Any zip or dump file
 *.zip
 *.pkl
+*.dill
 
 # # Byte-compiled / optimized / DLL files
 # __pycache__/

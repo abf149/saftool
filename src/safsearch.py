@@ -47,6 +47,8 @@ def pipeline(arch, \
              log_global_search_safmodel, \
              dump_best, \
              load_best, \
+             top_N, \
+             model_top_x, \
              remark=False):
     if remark:
         opening_remark()
@@ -54,7 +56,18 @@ def pipeline(arch, \
         warn(":: --dump-best selected; SAFsearch pipeline will terminate after search completes.")
     elif load_best:
         warn(":: --load-best selected; SAFsearch will skip search and load best configuration from file.")
-    
+
+    if not dump_best:
+        if model_top_x != 0:
+            if model_top_x > top_N-1:
+                error("Size of top-N search-result ranking is",str(top_N), \
+                      "(--top-N)","which is too small to synthesize a model for the top -", \
+                        str(model_top_x),"search result (--model-top-x)")
+                info("Terminating.")
+                assert(False)
+            warn(":: Model synthesis will target the top - ", \
+                 str(model_top_x),"th solution (--model-top-x =",str(model_top_x),")")
+
     global_search_space=None
     search_result=None
     best_config=None
@@ -100,7 +113,8 @@ def pipeline(arch, \
                                                     characterization_path_list, \
                                                     model_script_lib_list, \
                                                     log_global_search_safinfer, \
-                                                    log_global_search_safmodel)
+                                                    log_global_search_safmodel, \
+                                                    top_N)
         
         best_config = {
             "global_search_space":global_search_space,
@@ -117,8 +131,9 @@ def pipeline(arch, \
         safsearch_io.dump_best_config(best_config)
         return
 
-    safsearch_core.export_artifacts_from_search_result(search_result, \
-                                                        global_search_space, \
+    safsearch_core.export_artifacts_from_search_result(best_config, \
+                                                       top_N, \
+                                                        model_top_x, \
                                                         arch, \
                                                         mapping, \
                                                         prob, \
@@ -168,7 +183,9 @@ if __name__=="__main__":
     characterization_path_list, \
     model_script_lib_list, \
     dump_best, \
-    load_best = safsearch_io.parse_args()
+    load_best, \
+    top_N, \
+    model_top_x = safsearch_io.parse_args()
 
     # you don't have to use dump_best or load_best,
     # but they are mutually-exclusive
@@ -205,5 +222,7 @@ if __name__=="__main__":
              log_global_search_safinfer, \
              log_global_search_safmodel, \
              dump_best, \
-             load_best)
+             load_best, \
+             top_N, \
+             model_top_x)
     closing_remark()

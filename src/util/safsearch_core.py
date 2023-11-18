@@ -85,7 +85,8 @@ def global_search(global_search_space, \
                     characterization_path_list, \
                     model_script_lib_list, \
                     log_global_search_safinfer, \
-                    log_global_search_safmodel):
+                    log_global_search_safmodel, \
+                    top_N):
     info(":: Searching...",also_stdout=True)
 
     search_point_id_to_config_list, \
@@ -117,7 +118,8 @@ def global_search(global_search_space, \
                                       characterization_path_list, \
                                       model_script_lib_list, \
                                       log_global_search_safinfer, \
-                                      log_global_search_safmodel)
+                                      log_global_search_safmodel, \
+                                      top_N)
     
     warn(":: => Done, searching...",also_stdout=True)
     return {
@@ -133,8 +135,9 @@ def global_search(global_search_space, \
             }
 
 
-def export_artifacts_from_search_result(search_result, \
-                                        global_search_space, \
+def export_artifacts_from_search_result(best_config, \
+                                        top_N, \
+                                        model_top_x, \
                                         arch, \
                                         mapping, \
                                         prob, \
@@ -156,5 +159,38 @@ def export_artifacts_from_search_result(search_result, \
                                         model_script_lib_list, \
                                         log_global_search_safinfer, \
                                         log_global_search_safmodel):
+    info(":: Searching...",also_stdout=True)
+    info("Extracting top",model_top_x,"th search result.")
+    top_N_tracker=best_config['search_result']['top_N_tracker']
+    ranking=top_N_tracker.get_rank()
+    if model_top_x > len(ranking)-1:
+        error("Only",len(ranking),"results were found; cannot find result at index",model_top_x,"in ranking.")
+        info("Terminating.")
+        assert(False)
+    search_point_struct=ranking[model_top_x]
+    objective=search_point_struct['objective']
+    search_point_result=search_point_struct['result']
+    search_point_id=search_point_result['best_search_point_id']
+    state=search_point_result['best_state']
+    global_search_point=search_point_result['best_global_search_point']
+    safinfer_results=search_point_result['best_safinfer_results']
+    outcome=safinfer_results['outcome']
+    component_iterations=safinfer_results['component_iterations']
+    uri=safinfer_results['uri']
+    failure_comp=safinfer_results['failure_comp']
+    safmodel_results=search_point_result['best_safmodel_results']
+    abstract_analytical_primitive_models_dict=safmodel_results['abstract_analytical_primitive_models_dict']
+    abstract_analytical_component_models_dict=safmodel_results['abstract_analytical_component_models_dict']
+    scale_prob=safmodel_results['scale_prob']
+    info("- Objective:",objective)
+    info("- Best search-point ID:",str(search_point_id))
+    if not outcome:
+        error("Invalid search result: SAFinfer failed")
+        info("Terminating.")
+        assert(False)
+    taxo_uarch=component_iterations[-1]
+    info("=> Done, extracting search result.")
     
-    pass
+    print(list(safinfer_results.keys()))
+    print(list(safmodel_results.keys()))
+    warn(":: => Exporting search result artifacts")

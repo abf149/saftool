@@ -73,7 +73,9 @@ def search(global_search_space, \
             log_global_search_safinfer, \
             log_global_search_safmodel, \
             top_N=2):
-    
+    info("Beginning search process.")
+    info("- Searching for top -",top_N,"configurations (--top-N)")
+
     per_comp_search_space=global_search_space["per_comp_search_space"]
     top_lvl_comp_list=global_search_space["top_lvl_comp_list"]
     num_top_lvl_comps=global_search_space["num_top_lvl_comps"]
@@ -165,6 +167,7 @@ def search(global_search_space, \
 
     warn("Search outcome: top",str(top_N),"=",str([r['objective'] for r in top_N_tracker.get_rank()]),also_stdout=True)
 
+    warn("=> Done, search process.")
     return search_point_id_to_config_list, \
            search_point_id_to_result_list, \
            best_search_point_id, \
