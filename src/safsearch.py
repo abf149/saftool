@@ -38,6 +38,7 @@ def pipeline(arch, \
              comp_in, \
              arch_out_path, \
              comp_out_path, \
+             safsearch_user_attributes, \
              safinfer_user_attributes, \
              safmodel_user_attributes, \
              characterization_path_list, \
@@ -88,12 +89,13 @@ def pipeline(arch, \
                                                                         comp_in, \
                                                                         arch_out_path, \
                                                                         comp_out_path, \
+                                                                        safsearch_user_attributes, \
                                                                         safinfer_user_attributes, \
                                                                         characterization_path_list, \
                                                                         model_script_lib_list, \
                                                                         log_taxo_component_search_space_discovery)
         search_result=safsearch_core.global_search(global_search_space, \
-                                                arch, \
+                                                    arch, \
                                                     mapping, \
                                                     prob, \
                                                     sparseopts, \
@@ -178,6 +180,7 @@ if __name__=="__main__":
     comp_in, \
     arch_out_path, \
     comp_out_path, \
+    safsearch_user_attributes, \
     safinfer_user_attributes, \
     safmodel_user_attributes, \
     characterization_path_list, \
@@ -217,6 +220,7 @@ if __name__=="__main__":
              comp_in, \
              arch_out_path, \
              comp_out_path, \
+             safsearch_user_attributes, \
              safinfer_user_attributes, \
              safmodel_user_attributes, \
              characterization_path_list, \

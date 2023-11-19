@@ -141,8 +141,7 @@ def closing_remark_nonempty_settings_list(comp_uri,settings_list,component):
         info("---- Final settings:",component.getAttributes())
         warn("--- Done, forcing settings for",comp_uri)
 
-def make_safe_uris_before_recursion(arch,force_attr_spec,parent_uri):
-    arch_id=arch.getId()
+def make_safe_uris_before_recursion(arch_id,force_attr_spec,parent_uri=""):
     if parent_uri=="":
         new_force_attr_spec=copy.copy(force_attr_spec)
         for idx,settings_spec in enumerate(new_force_attr_spec):
@@ -151,7 +150,6 @@ def make_safe_uris_before_recursion(arch,force_attr_spec,parent_uri):
                 info("--- Detected wildcard (\'\\\') in component uri",uri,"while parsing user-provided settings.")
                 new_uri=uri.replace("/",arch_id)
                 warn("---- Inferred uri:",new_uri)
-                #info("---- From setting:",str(settings_spec))
                 settings=settings_spec['settings']
                 new_force_attr_spec[idx]={'uri':new_uri,'settings':settings}
         return new_force_attr_spec
@@ -164,15 +162,13 @@ def force_attributes(component,force_attr_spec,visited_set,parent_uri=""):
     '''
     comp_id=component.getId()
     comp_uri=ab_.uri(parent_uri,comp_id)
-    #print(comp_uri)
-
 
     if len(force_attr_spec)==0:
         info("-- No component attributes to force.")
         return component,visited_set, force_attr_spec
 
     opening_remark_before_recursion(parent_uri)
-    force_attr_spec=make_safe_uris_before_recursion(component,force_attr_spec,parent_uri)
+    force_attr_spec=make_safe_uris_before_recursion(component.getId(),force_attr_spec,parent_uri)
 
     # Force attributes if this component has not already been visited
     # and this component is not a top-level architecture.
@@ -193,7 +189,6 @@ def force_attributes(component,force_attr_spec,visited_set,parent_uri=""):
         subcomponent_list=topology.getComponentList()
         new_subcomponent_list=[]
         for subcomp in subcomponent_list:
-            #print("subcomp:",subcomp.getId())
             subcomp_update,visited_set,_ = \
                 force_attributes(subcomp,force_attr_spec,visited_set,parent_uri=comp_uri)
 

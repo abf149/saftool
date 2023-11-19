@@ -18,6 +18,7 @@ def build_taxonomic_search_space(arch, \
                                 comp_in, \
                                 arch_out_path, \
                                 comp_out_path, \
+                                safsearch_user_attributes, \
                                 safinfer_user_attributes, \
                                 characterization_path_list, \
                                 model_script_lib_list, \
@@ -26,29 +27,30 @@ def build_taxonomic_search_space(arch, \
                                 comp_tree_depth_sanity_limit=100):
 
     info(":: Building taxonomic search-space...",also_stdout=True)
-    per_comp_search_space=build_per_component_taxonomic_search_space(arch, \
-                                                                     mapping, \
-                                                                     prob, \
-                                                                     sparseopts, \
-                                                                     reconfigurable_arch, \
-                                                                     bind_out_path, \
-                                                                     topo_out_path, \
-                                                                     saflib_path, \
-                                                                     do_logging,\
-                                                                     log_fn, \
-                                                                     taxo_script_lib_list, \
-                                                                     taxo_uarch, \
-                                                                     comp_in, \
-                                                                     arch_out_path, \
-                                                                     comp_out_path, \
-                                                                     safinfer_user_attributes, \
-                                                                     characterization_path_list, \
-                                                                     model_script_lib_list, \
-                                                                     log_taxo_component_search_space_discovery, \
-                                                                     top_lvl_comp_cnt_sanity_limit= \
-                                                                     top_lvl_comp_cnt_sanity_limit, \
-                                                                     comp_tree_depth_sanity_limit= \
-                                                                     comp_tree_depth_sanity_limit)
+    per_comp_search_space,taxo_uarch_id=build_per_component_taxonomic_search_space(arch, \
+                                                                                    mapping, \
+                                                                                    prob, \
+                                                                                    sparseopts, \
+                                                                                    reconfigurable_arch, \
+                                                                                    bind_out_path, \
+                                                                                    topo_out_path, \
+                                                                                    saflib_path, \
+                                                                                    do_logging,\
+                                                                                    log_fn, \
+                                                                                    taxo_script_lib_list, \
+                                                                                    taxo_uarch, \
+                                                                                    comp_in, \
+                                                                                    arch_out_path, \
+                                                                                    comp_out_path, \
+                                                                                    safsearch_user_attributes, \
+                                                                                    safinfer_user_attributes, \
+                                                                                    characterization_path_list, \
+                                                                                    model_script_lib_list, \
+                                                                                    log_taxo_component_search_space_discovery, \
+                                                                                    top_lvl_comp_cnt_sanity_limit= \
+                                                                                    top_lvl_comp_cnt_sanity_limit, \
+                                                                                    comp_tree_depth_sanity_limit= \
+                                                                                    comp_tree_depth_sanity_limit)
 
     top_lvl_comp_list, \
     num_top_lvl_comps, \
@@ -57,6 +59,7 @@ def build_taxonomic_search_space(arch, \
 
     warn(":: => Done, building taxonomic search-space.",also_stdout=True)
     return {
+                "taxo_uarch_id":taxo_uarch_id,
                 "per_comp_search_space":per_comp_search_space,
                 "top_lvl_comp_list":top_lvl_comp_list,
                 "num_top_lvl_comps":num_top_lvl_comps,

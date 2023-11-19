@@ -65,10 +65,12 @@ def process_args(args):
     do_logging,\
     log_fn, \
     taxo_script_lib, \
-    safinfer_user_attributes = safinfer_io.process_args(args)
+    _ = safinfer_io.process_args(args)
 
     # TODO: fix
     safinfer_user_attributes=sl_config.load_config_yaml(args.safinfer_settings)
+
+    safsearch_user_attributes=sl_config.load_config_yaml(args.safsearch_settings)
 
     _, \
     taxo_uarch, \
@@ -98,6 +100,7 @@ def process_args(args):
            comp_in, \
            arch_out_path, \
            comp_out_path, \
+           safsearch_user_attributes, \
            safinfer_user_attributes, \
            safmodel_user_attributes, \
            characterization_path_list, \
@@ -153,6 +156,8 @@ def parse_args():
     parser.add_argument('-p','--prob',default='ref_input/prob.yaml')
     parser.add_argument('-q','--safinfer-settings',default='ref_input/safinfer_settings.yaml', \
                         help='safinfer configuration file.')
+    parser.add_argument('-Q','--safsearch-settings',default='ref_input/safsearch_settings.yaml', \
+                        help='safsearch configuration file.')
     parser.add_argument('-r','--rtl',action='append',default=['hw/rtl_out/'], \
                         help='Path to underlying RTL files associated with CSV EAT characterization table (-b/--char)')
     parser.add_argument('-R', '--reconfigurable-arch', action='store_true')

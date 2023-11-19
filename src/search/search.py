@@ -24,11 +24,12 @@ class TopNSearchPointsCorrected:
         # Return the elements of the heap sorted by their 'objective' values
         return [search_point for _, search_point in sorted(self.heap, reverse=True)]
 
-def safinfer_frontend_with_search_point(global_search_point, \
+def safinfer_frontend_with_search_point(taxo_uarch_id, \
+                                        global_search_point, \
                                         arch,mapping,prob,sparseopts,reconfigurable_arch, \
                                         bind_out_path,saflib_path,safinfer_user_attributes,log_safinfer=False
                                        ):
-    new_user_attributes=build_user_attributes(global_search_point, \
+    new_user_attributes=build_user_attributes(taxo_uarch_id,global_search_point, \
                                                   safinfer_user_attributes)
     return safinfer_frontend(arch,mapping,prob,sparseopts,reconfigurable_arch, \
                              bind_out_path,saflib_path,new_user_attributes,log_safinfer=log_safinfer)
@@ -74,6 +75,8 @@ def search(global_search_space, \
     info("Beginning search process.")
     info("- Searching for top -",top_N,"configurations (--top-N)")
 
+    taxo_uarch_id=global_search_space['taxo_uarch_id']
+
     per_comp_search_space=global_search_space["per_comp_search_space"]
     top_lvl_comp_list=global_search_space["top_lvl_comp_list"]
     num_top_lvl_comps=global_search_space["num_top_lvl_comps"]
@@ -104,7 +107,8 @@ def search(global_search_space, \
                                                    per_comp_search_space, \
                                                    top_lvl_comp_list)
 
-        safinfer_results=safinfer_frontend_with_search_point(global_search_point, \
+        safinfer_results=safinfer_frontend_with_search_point(taxo_uarch_id,
+                                                             global_search_point, \
                                                              arch,mapping,prob,sparseopts,reconfigurable_arch, \
                                                              bind_out_path,saflib_path,safinfer_user_attributes, \
                                                              log_safinfer=log_global_search_safinfer
