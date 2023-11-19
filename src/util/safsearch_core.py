@@ -21,10 +21,10 @@ def build_taxonomic_search_space(arch, \
                                 safinfer_user_attributes, \
                                 characterization_path_list, \
                                 model_script_lib_list, \
-                                log_taxo_component_search_space_discovery=False, \
+                                log_taxo_component_search_space_discovery, \
                                 top_lvl_comp_cnt_sanity_limit=100, \
                                 comp_tree_depth_sanity_limit=100):
-    
+
     info(":: Building taxonomic search-space...",also_stdout=True)
     per_comp_search_space=build_per_component_taxonomic_search_space(arch, \
                                                                      mapping, \

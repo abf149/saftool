@@ -194,9 +194,9 @@ if __name__=="__main__":
     # but they are mutually-exclusive
     assert((not (dump_best and load_best)))
 
-    log_taxo_component_search_space_discovery=False
-    log_global_search_safinfer=False
-    log_global_search_safmodel=False
+    #log_taxo_component_search_space_discovery=False
+    #log_global_search_safinfer=False
+    #log_global_search_safmodel=False
 
     log_config(do_logging,log_fn)
     opening_remark()

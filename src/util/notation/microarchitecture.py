@@ -498,7 +498,17 @@ class PrimitiveCategory:
                 self.applicable_taxo_instance_alias=alias_["alias"]
                 return
 
-        # Should be a match
+        # Crash if no match
+        error("SAFmodel cannot find supported-instance alias matching supported-instance id",inst_name,also_stdout=True)
+        info("- Component ID:",self.obj_id)
+        info("- Component category:",self.name_)
+        info("- URI prefix:",str(self.uri_prefix))
+        info("- Supported taxonomic instance aliases:")
+        for alias_ in self.taxonomic_instance_alias_list:
+            info("--",alias_["alias"],":")
+            for inst_name in alias_["instance_list"]:
+                info("---",inst_name)
+        info("Terminating.")
         assert(False)
 
     def set_uri_prefix(self,uri_prefix):
@@ -879,15 +889,19 @@ class PrimitiveCategory:
 
         if taxo_instance not in self.instance_to_implementations:
             error("Taxonomic instance",taxo_instance,"not found in model instance implementations.",also_stdout=True)
-            info("- uri prefix:",uri_prefix)
-            info("- supported instance aliases:",str(list(self.instance_to_implementations.keys())))
+            info("- Component ID:",self.obj_id)
+            info("- Component category:",self.name_)
+            info("- Component uri:",uri_prefix)
+            info("- Supported instance aliases:",str(list(self.instance_to_implementations.keys())))
             info("Terminating.")
             assert(False)
 
         if len(self.instance_to_implementations[taxo_instance])==0:
             error("No model implementation(s) specified for taxonomic instance",taxo_instance,also_stdout=True)
-            info("- uri prefix:",uri_prefix)
-            info("- supported instance aliases:",str(list(self.instance_to_implementations.keys())))
+            info("- Component ID:",self.obj_id)
+            info("- Component category:",self.name_)
+            info("- Component uri:",uri_prefix)
+            info("- Supported instance aliases:",str(list(self.instance_to_implementations.keys())))
             info("Terminating.")
             assert(False)
 
