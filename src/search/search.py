@@ -35,8 +35,6 @@ def safinfer_frontend_with_search_point(global_search_point, \
 
 def safmodel_middle_layer_get_objective(safinfer_results,arch,sparseopts,user_attributes,log_safmodel=False):
     taxo_uarch=safinfer_results['component_iterations'][-1]
-    # test
-    taxo_uarch.getId()
 
     abstract_analytical_primitive_models_dict, \
     abstract_analytical_component_models_dict, \

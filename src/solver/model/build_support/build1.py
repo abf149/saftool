@@ -83,8 +83,6 @@ def build1_graph_representation(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
         for dtype in dtype_list:
             flat_port_idx_to_dtype[buffer].extend([dtype]*len(fmt_iface_bindings[buffer][dtype]))
 
-    taxo_uarch=Architecture.fromDict(sl_config.load_config_yaml('ref_output/new_arch.yaml'))
-
     port_list, \
     port_attr_dict, \
     net_list, \

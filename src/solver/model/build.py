@@ -17,7 +17,6 @@ def build_scale_inference_problem(taxo_uarch,arch,fmt_iface_bindings,dtype_list,
         assert(False)
 
     constraints=user_attributes['constraints']
-
     problem_as_graph=build1_graph_representation(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
                                                  buffer_kept_dataspace_by_buffer,buff_dags,constraints)
 

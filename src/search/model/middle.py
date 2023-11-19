@@ -11,6 +11,7 @@ def safmodel_middle_layer(arch,taxo_uarch,sparseopts,user_attributes,log_safmode
     - abstract_analytical_component_models_dict
     - scale_prob
     '''
+
     stream_state=safsearch_io.disable_logs(disable_file_log=(not log_safmodel))
     return_args=safmodel.pipeline(arch,taxo_uarch,sparseopts,user_attributes,remarks=True)
     safsearch_io.revert_logs(stream_state)
