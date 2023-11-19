@@ -185,7 +185,10 @@ if __name__=="__main__":
     dump_best, \
     load_best, \
     top_N, \
-    model_top_x = safsearch_io.parse_args()
+    model_top_x, \
+    log_taxo_component_search_space_discovery, \
+    log_global_search_safinfer, \
+    log_global_search_safmodel = safsearch_io.parse_args()
 
     # you don't have to use dump_best or load_best,
     # but they are mutually-exclusive

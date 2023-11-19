@@ -105,7 +105,10 @@ def process_args(args):
            args.dump_best, \
            args.load_best, \
            int(args.top_N), \
-           int(args.model_top_x)
+           int(args.model_top_x), \
+           args.log_taxo_space_discovery, \
+           args.log_search_safinfer, \
+           args.log_search_safmodel
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -161,8 +164,14 @@ def parse_args():
     parser.add_argument('-T','--topology-out',default='ref_output/new_arch.yaml')
     parser.add_argument('-u','--sim',action='append',default=['hw/sim_data'], \
                         help='safmodel configuration file.')
+    parser.add_argument('-w','--log-taxo-space-discovery', action='store_true', \
+                        help='Log the process of discovering the taxonomic search-space.')
     parser.add_argument('-x','--model-top-x', default=0, \
                         help='Out of the top N (--top-N) search results, generate models for the single top xth model (0==best).')
+    parser.add_argument('-z','--log-search-safinfer', action='store_true', \
+                        help='Log the SAFinfer phase of each search-point.')
+    parser.add_argument('-Z','--log-search-safmodel', action='store_true', \
+                        help='Log the SAFmodel phase of each search-point.')
     args = parser.parse_args()
 
     processed_args = process_args(args)

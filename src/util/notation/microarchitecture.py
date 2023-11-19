@@ -872,6 +872,25 @@ class PrimitiveCategory:
 
     def build_objective_for_taxo_instance(self,taxo_instance,uri_prefix=""):
         #TODO: support multiple implementations
+        #print("taxo_instance:",taxo_instance)
+        #print("uri_prefix:",uri_prefix)
+        #print(self.instance_to_implementations[taxo_instance])
+        #print(self.instance_to_implementations)
+
+        if taxo_instance not in self.instance_to_implementations:
+            error("Taxonomic instance",taxo_instance,"not found in model instance implementations.",also_stdout=True)
+            info("- uri prefix:",uri_prefix)
+            info("- supported instance aliases:",str(list(self.instance_to_implementations.keys())))
+            info("Terminating.")
+            assert(False)
+
+        if len(self.instance_to_implementations[taxo_instance])==0:
+            error("No model implementation(s) specified for taxonomic instance",taxo_instance,also_stdout=True)
+            info("- uri prefix:",uri_prefix)
+            info("- supported instance aliases:",str(list(self.instance_to_implementations.keys())))
+            info("Terminating.")
+            assert(False)
+
         energy_metrics_model_expressions_dict=self.get_energy_metrics_model_expressions_dict()
         area_metrics_model_expressions_dict=self.get_area_metrics_model_expressions_dict()
         impl_=self.instance_to_implementations[taxo_instance][0]

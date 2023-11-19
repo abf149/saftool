@@ -1,4 +1,4 @@
-'''Wrapper for using SAFmodel as a backend for evaluating a search-point'''
+'''Wrapper for using SAFmodel as a middle-layer for evaluating a search-point'''
 import safmodel
 import util.safsearch_io as safsearch_io
 

@@ -137,8 +137,10 @@ def search(global_search_space, \
             best_safmodel_results=copy.copy(safmodel_results)
             # Hold onto previous best if topN > 1
             warn("New best:",best_objective)
+            rank_str='Ranking: [' + '|'.join(["#"+str(idx)+": id="+str(r['result']['best_search_point_id'])+", obj="+str(r['objective']) \
+                                              for idx,r in enumerate(top_N_tracker.get_rank())]) + ']'
             info("- Objective:",best_objective,"Top -",str(top_N),":", \
-                 str([r['objective'] for r in top_N_tracker.get_rank()]),also_stdout=True)
+                 rank_str,also_stdout=True)
             info("- Search-point:",best_search_point_id)
 
         # Update results
@@ -166,7 +168,9 @@ def search(global_search_space, \
                     num_top_lvl_comps, \
                     global_space_size)
 
-    warn("Search outcome: top",str(top_N),"=",str([r['objective'] for r in top_N_tracker.get_rank()]),also_stdout=True)
+    rank_str='[' + '|'.join(["#"+str(idx)+": id="+str(r['result']['best_search_point_id'])+", obj="+str(r['objective']) \
+               for idx,r in enumerate(top_N_tracker.get_rank())]) + ']'
+    warn("Search outcome: ",rank_str,also_stdout=True)
 
     warn("=> Done, search process.")
     return search_point_id_to_config_list, \

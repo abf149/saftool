@@ -4,9 +4,16 @@ modelscript_components:
     from_taxonomic_component: SkippingUarch
     export_attributes_to_model: true
     instance_aliases:
-    - alias: CLFNN
+    - alias: LFNN
       instances:
       - cp_lf_none_none
+      - b_lf_none_none
+    - alias: LFNF
+      instances:
+      - cp_lf_none_lut
+      - cp_lf_none_pbubble
+      - b_lf_none_lut
+      - b_lf_none_pbubble
     scale_parameters:
       - name: clock
         type: real
@@ -32,11 +39,19 @@ modelscript_components:
     actions:
       - name: fill_leader
         implementations:
-        - alias: CLFNN
+        - alias: LFNN
           subcomponents: 
           - name: IntersectionLF
             actions:
             - name: fill
+        - alias: LFNF
+          subcomponents: 
+          - name: IntersectionLF
+            actions:
+            - name: fill
+          - name: FillGateLeader
+            actions:
+            - name: idle
       - name: fill_follower
 #        subcomponents: 
 #        - name: IntersectionLF
@@ -49,17 +64,41 @@ modelscript_components:
 #          - name: fill      
       - name: skip_follower
         implementations:
-        - alias: CLFNN
+        - alias: LFNN
           subcomponents: 
           - name: IntersectionLF
             actions:
             - name: intersect
           - name: PgenFollower
             actions:
-            - name: gen      
+            - name: gen
+        - alias: LFNF
+          subcomponents: 
+          - name: IntersectionLF
+            actions:
+            - name: intersect
+          - name: PgenFollower
+            actions:
+            - name: gen
+          - name: FillGateLeader
+            actions:
+            - name: gate
     implementations:
-      - name: CLFNN
-        taxonomic_instance_alias: CLFNN
+      - name: LFNN
+        taxonomic_instance_alias: LFNN
+        objective:
+          actions:
+            - name: fill_leader
+              energy: 0
+            - name: fill_follower
+              energy: 0
+            - name: skip_leader
+              energy: 0
+            - name: skip_follower
+              energy: 0
+          area: 0
+      - name: LFNF
+        taxonomic_instance_alias: LFNF
         objective:
           actions:
             - name: fill_leader

@@ -59,7 +59,6 @@ modelscript_primitives:
                   - 64
                   - 128
                   - 256
-    implementations:
       - name: L
         taxonomic_instance_alias: L
         objective:
