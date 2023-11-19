@@ -114,6 +114,19 @@ def search(global_search_space, \
         safmodel_results = safmodel_middle_layer_get_objective(safinfer_results,arch,sparseopts,safmodel_user_attributes, \
                                                                 log_safmodel=log_global_search_safmodel)
         
+
+        # Update top-N tracker
+        top_N_tracker.push({
+            'objective':objective,
+            'result': {
+                'best_search_point_id':search_point_id,
+                'best_state':copy.copy(per_comp_search_state_dict),
+                'best_global_search_point':global_search_point,
+                'best_safinfer_results':safinfer_results,
+                'best_safmodel_results':safmodel_results
+            }
+        })
+
         # Update best
         if objective < best_objective:
             best_objective=objective
@@ -123,16 +136,6 @@ def search(global_search_space, \
             best_safinfer_results=copy.copy(safinfer_results)
             best_safmodel_results=copy.copy(safmodel_results)
             # Hold onto previous best if topN > 1
-            top_N_tracker.push({
-                'objective':best_objective,
-                'result': {
-                    'best_search_point_id':best_search_point_id,
-                    'best_state':best_state,
-                    'best_global_search_point':best_global_search_point,
-                    'best_safinfer_results':best_safinfer_results,
-                    'best_safmodel_results':best_safmodel_results
-                }
-            })
             warn("New best:",best_objective)
             info("- Objective:",best_objective,"Top -",str(top_N),":", \
                  str([r['objective'] for r in top_N_tracker.get_rank()]),also_stdout=True)

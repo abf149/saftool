@@ -33,6 +33,15 @@ classes:
   - name: intersect
   - name: gated_fill
   - name: gated_intersect
+- name: FillGateModel
+  attributes:
+    clock: must_specify
+    technology: must_specify
+    strategy: must_specify
+    pos_in_pr_thresh: must_specify
+  actions:
+  - name: idle
+  - name: gate
 - name: MetadataParserModel
   attributes:
     clock: must_specify

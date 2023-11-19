@@ -74,6 +74,10 @@ def step_state(search_point_id, \
             return search_point_id+1, \
                    per_comp_search_state_dict, \
                    False
+        
+    return None, \
+            None, \
+            True
 
 def update_results(objective, \
                    search_point_id, \
