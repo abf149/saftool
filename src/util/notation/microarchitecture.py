@@ -882,10 +882,6 @@ class PrimitiveCategory:
 
     def build_objective_for_taxo_instance(self,taxo_instance,uri_prefix=""):
         #TODO: support multiple implementations
-        #print("taxo_instance:",taxo_instance)
-        #print("uri_prefix:",uri_prefix)
-        #print(self.instance_to_implementations[taxo_instance])
-        #print(self.instance_to_implementations)
 
         if taxo_instance not in self.instance_to_implementations:
             error("Taxonomic instance",taxo_instance,"not found in model instance implementations.",also_stdout=True)
