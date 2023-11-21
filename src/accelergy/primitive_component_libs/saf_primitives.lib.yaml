@@ -4,6 +4,7 @@ classes:
   attributes:
     clock: must_specify
     technology: must_specify
+    area_multiplier: must_specify
     format: must_specify
     md_in_pr_thresh: must_specify
     md_in_pw_thresh: must_specify
@@ -20,6 +21,7 @@ classes:
   attributes:
     clock: must_specify
     technology: must_specify
+    area_multiplier: must_specify
     format_leader: must_specify
     strategy: must_specify
     md_in_leader_ww_thresh: must_specify
@@ -37,6 +39,7 @@ classes:
   attributes:
     clock: must_specify
     technology: must_specify
+    area_multiplier: must_specify
     strategy: must_specify
     pos_in_pr_thresh: must_specify
   actions:
@@ -46,6 +49,7 @@ classes:
   attributes:
     clock: must_specify
     technology: must_specify
+    area_multiplier: must_specify
     format: must_specify
     md_in_rw_thresh: must_specify
     md_in_pr_thresh: must_specify

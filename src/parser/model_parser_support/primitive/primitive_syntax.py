@@ -38,7 +38,10 @@ def parse_from_taxonomic_primitive(primitive, supported_instances):
 
 def parse_scale_parameters(primitive, model_instance):
     #info("--- Parsing scale parameters")
+    has_area_multiplier=False
     for scale_param in primitive.get('scale_parameters', []):
+        if scale_param['name']=='area_multiplier':
+            has_area_multiplier=True
         info(".scale_parameter(", \
              str(scale_param['name']),",", \
              str(scale_param['type']), \
@@ -50,6 +53,26 @@ def parse_scale_parameters(primitive, model_instance):
             yield_=scale_param['export_as_model_attribute'],
             inherit_=scale_param.get('inherit', False)
         )
+
+    if not has_area_multiplier:
+        scale_param_name='area_multiplier'
+        scale_param_type='real'
+        scale_param_export_as_model_attribute=True
+        scale_param_inherit=True
+        info("")
+        info("# Synthetic area_multiplier scale parameter")
+        info(".scale_parameter(", \
+             str(scale_param_name),",", \
+             str(scale_param_type), \
+            ",yield_=",str(scale_param_export_as_model_attribute), \
+            ",inherit_=",str(scale_param_inherit),")")
+        model_instance.scale_parameter(
+            scale_param_name,
+            scale_param_type,
+            yield_=scale_param_export_as_model_attribute,
+            inherit_=scale_param_inherit
+        )
+
     #warn("--- => Done, parsing scale parameters")
     return model_instance
 

@@ -355,6 +355,11 @@ def build_component_energy_objective(component_uri,implementation_id,sub_action_
                     
                     new_subcomp_action_dict=action_energy_tree.setdefault(action,{}) \
                                                               .setdefault(sub_component_uri,{})
+                    #if sub_action in new_subcomp_action_dict:
+                    #    print(sub_action)
+                    #    print(new_subcomp_action_dict)
+                    #    assert(False)
+
                     assert(sub_action not in new_subcomp_action_dict)
                     new_subcomp_action_dict[sub_action]=sub_action_config_spec
     info("------ => Done, building",component_uri,"action tree")
@@ -576,6 +581,20 @@ def build_global_area_objective(component_models,area_objectives,include_spec=No
 
     info("--- => Done, building buffer area objective.")
     return global_area_objective
+
+def compute_component_multiplier(buffer_action_tree):
+    component_multiplier_dict={}
+    for arch_buffer in buffer_action_tree:
+        arch_buffer_subtree=buffer_action_tree[arch_buffer]
+        for buffer_action in arch_buffer_subtree:
+            arch_buffer_action_subtree=arch_buffer_subtree[buffer_action]
+            for component_uri in arch_buffer_action_subtree:
+                if component_uri not in component_multiplier_dict:
+                    component_multiplier_dict[component_uri]=1
+                else:
+                    component_multiplier_dict[component_uri]+=1
+
+    return component_multiplier_dict
 
 def build_global_objective(expr,primitive_models,component_models,energy_objectives,area_objectives, \
                             buffer_action_graph,sub_action_graph,buffer_action_weight_dict,include_spec=None,exclude_spec=None):
@@ -824,6 +843,8 @@ def build2_system_of_relations(sclp,user_attributes,fmt_iface_bindings,dtype_lis
             build_global_objective(abstract_global_objective_expression,primitive_models,component_models, \
                                energy_objectives,area_objectives,buffer_action_graph,sub_action_graph, \
                                buffer_action_weight,include_spec=include_spec,exclude_spec=exclude_spec)
+
+    component_multiplier_dict=compute_component_multiplier(buffer_action_tree)
 
     simplified_global_objective=simplify_global_objective(global_objective)
 

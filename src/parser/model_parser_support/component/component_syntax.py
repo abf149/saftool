@@ -38,7 +38,10 @@ def parse_from_taxonomic_component(component, supported_instances):
 
 def parse_scale_parameters(component, model_instance):
     #info("--- Parsing scale parameters")
+    has_area_multiplier=False
     for scale_param in component.get('scale_parameters', []):
+        if scale_param['name']=='area_multiplier':
+            has_area_multiplier=True
         param_name=scale_param['name']
         param_type=scale_param['type']
         yield_=False
@@ -67,6 +70,26 @@ def parse_scale_parameters(component, model_instance):
             inherit_=inherit_,
             param_default=param_default
         )
+
+    if not has_area_multiplier:
+        scale_param_name='area_multiplier'
+        scale_param_type='real'
+        scale_param_export_as_model_attribute=True
+        scale_param_inherit=False
+        info("")
+        info("# Synthetic area_multiplier scale parameter")
+        info(".scale_parameter(", \
+             str(scale_param_name),",", \
+             str(scale_param_type), \
+            ",yield_=",str(scale_param_export_as_model_attribute), \
+            ",inherit_=",str(scale_param_inherit),")")
+        model_instance.scale_parameter(
+            scale_param_name,
+            scale_param_type,
+            yield_=scale_param_export_as_model_attribute,
+            inherit_=scale_param_inherit
+        )
+
     #warn("--- => Done, parsing scale parameters")
     return model_instance
 

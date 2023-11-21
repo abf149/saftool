@@ -292,6 +292,7 @@ class PrimitiveCategory:
         self.scale_parameter_vals=copy.deepcopy(self.scale_parameters)
 
         return self
+        
 
     def set_scale_parameter(self,param_name,val,param_type=None):
         if (param_type is None) or \
@@ -771,8 +772,12 @@ class PrimitiveCategory:
         # TODO: implementation-specific yields
         return superset_yield_symbols
 
-
+    def insert_area_multiplier_scale_parameter(self):
+        self.scale_parameter("area_multiplier",'real',yield_=True,inherit_=True,param_default=1.0)
+        
     def build_symbols(self,uri_prefix=""):
+        # Add a scale parameter for the area multiplier
+        #self.insert_area_multiplier_scale_parameter()
 
         # Top-level attributes - TODO
         # Port attributes
@@ -881,6 +886,24 @@ class PrimitiveCategory:
         return self
 
     def build_objective_for_taxo_instance(self,taxo_instance,uri_prefix=""):
+        '''
+        Computes Sympy-compatible mathematical expressions for energy and area objectives.\n\n
+
+        Energy objectives are per-action.\n\n
+
+        Objective expressions are in terms of primitive/component global scale-space symbols (peak/threshold attrs.)\n\n
+
+        The resultant objective expressions apply at the granularity of a particular implementation.\n\n
+
+        Arguments:\n
+        - taxo_instance -- an alias for a set of one or more supported instances of the taxonomic component
+        - uri_prefix -- URI terms which prefix the component id, will be subsituted for @ in objective expressions
+          to yield global scale-space symbols\n\n
+        
+        Return:\n
+        - dict[action] => energy objective expression string
+        - area objective expression string
+        '''
         #TODO: support multiple implementations
 
         if taxo_instance not in self.instance_to_implementations:
@@ -913,11 +936,37 @@ class PrimitiveCategory:
                                            area_metrics_model_expressions_dict)
 
     def build_objectives(self,uri_prefix=""):
+        '''
+        Sets energy_objective_dict, area_objective member variables to energy/area objective expressions
+        based on applicable_taxo_instance_alias member variables.\n\n
+
+        Calls self.build_objective_for_taxo_instance().\n\n
+
+        Arguments:\n
+        - uri_prefix -- The terms of the component URI prefixing the component id
+        '''
         self.energy_objective_dict,self.area_objective = \
             self.build_objective_for_taxo_instance(self.applicable_taxo_instance_alias,uri_prefix)
         return self
 
     def build_symbols_constraints_objectives_attributes(self,uri_prefix=""):
+        '''
+        Based on self.applicable_taxo_instance_alias, build optimization scale attribute symbols,
+        constraints, and objectives.\n\n
+
+        May entail building characterization metric models.\n\n
+
+        Note: if uri_prefix argument is None, default to self.uri_prefix.\n\n
+
+        Calls:\n
+        - self.build_characterization_metrics_models()\n
+        - self.build_symbols()\n
+        - self.build_constraints()\n
+        - self.build_objectives()\n\n
+
+        Arguments:\n
+        - uri_prefix -- The terms of the component URI prefixing the component id
+        '''
         if self.uri_prefix is not None:
             uri_prefix=self.uri_prefix
 
@@ -1183,6 +1232,29 @@ class ComponentCategory(PrimitiveCategory):
 
     def arch_buffer_action_map(self,buffer_upstream_of_port,upstream_action, \
                                downstream_action,alias_dict=mo_.std_buffer_action_aliases):
+        '''
+        Define a relationship between a particular architecture buffer action, and a particular
+        action against this component.\n\n
+
+        Note that while a component has a fixed set of *subcomponents* (contigent on the applicable
+        supported taxonomic instance), the IDs of the buffers which utilize this component are
+        use-case-dependent. Thus, this method identifies a architectural buffer based on which component
+        port the architectural buffer is "upstream" of (i.e. which buffer loads this component port
+        with signals.) The semantics of nets in SAFinfer forbids there being more than one arch. buffer
+        upstream of a port. \n\n
+
+        self.action_map_list captures all buffer action maps.\n\n
+
+        Buffer action maps are implementation-indendent.\n\n
+
+        Arguments:\n
+        - buffer_upstream_of_port -- id of a port on this component from which we discover an upstream architectural buffer.
+        - upstream_action -- the action id of an action which applies to the upstream architectural buffer.
+        - downstream_action -- the action id of an action which applies to this component.
+        - alias_dict -- in the event the architectural buffer has no action matching 'upstream_action', if 'upstream_action'
+          is a key in alias_dict with a value that is a list of alternative action ids, this method will try to find
+          architectural buffer actions matching any of the alternative action ids.
+        '''
 
         self.action_map_list.append({
             "buffer_upstream_of_port":buffer_upstream_of_port,
@@ -1214,57 +1286,15 @@ class ComponentCategory(PrimitiveCategory):
     def get_buffer_action_graph(self):
         return self.action_map_list
 
+    def insert_area_multiplier_scale_parameter(self):
+        # Component area multiplier must be set explicitly (or defaulted to 1.0)
+        # and thus inherit_=False
+        self.scale_parameter("area_multiplier",'real',yield_=True,inherit_=False,param_default=1.0)
+
     def build_symbols_constraints_objectives_attributes(self,uri_prefix=""):
         super().build_symbols_constraints_objectives_attributes(uri_prefix)
         self.build_subactions(uri_prefix)
         return self
-
-'''
-    def build_symbols_constraints_objectives_attributes(self,uri_prefix=""):
-        if self.uri_prefix is not None:
-            uri_prefix=self.uri_prefix
-
-        uri_prefix_with_self=ab_.uri(uri_prefix,self.obj_id)
-        self.symbol_list=[]
-        self.final_constraint_list=[]
-        #self.yield_symbol_dict
-        self.build_symbols(uri_prefix_with_self)
-        self.build_constraints(uri_prefix_with_self)
-        self.build_objectives(uri_prefix_with_self)
-        return self
-'''
-
-'''
-    def subactions(self,impl_,action_name_,sub_actions_={}):
-
-        Add a modeling action against this primitive component.\n\n
-
-        Arguments:\n
-        - impl_ -- The implementation which these sub-actions apply to.\n
-        - action_name_ -- The action against which these sub-actions apply\n
-        - sub_actions_ -- Sub-actions spec:\n\n
-
-            {\n
-                "<sub-component id>": {\n
-                    "<sub-component-action>": {\n
-                        "<activity-factor>":<float <= 1.0>,\n
-                        "argmap":{\n
-                            "<action-arg>":"<expression>",\n
-                            ...\n
-                        }
-                    },\n
-                    ...\n
-                },\n
-                ...\n
-            }\n\n
-
-            The expression should be in terms of the top-level action arg names.
-
-        sub_act_dict=self.sub_actions_.setdefault(impl_,{}).setdefault(action_name_,{})
-        for key_ in sub_actions_:
-            sub_act_dict[key_]=sub_actions_[key_]
-        return self
-'''
         
 class ArchitectureCategory(ComponentCategory):
 
