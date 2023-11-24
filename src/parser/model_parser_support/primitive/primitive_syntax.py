@@ -70,7 +70,8 @@ def parse_scale_parameters(primitive, model_instance):
             scale_param_name,
             scale_param_type,
             yield_=scale_param_export_as_model_attribute,
-            inherit_=scale_param_inherit
+            inherit_=scale_param_inherit,
+            param_default=1.0
         )
 
     #warn("--- => Done, parsing scale parameters")

@@ -41,6 +41,7 @@ def pipeline(arch,taxo_uarch,sparseopts,user_attributes,remarks=False):
     warn("")
     if remarks:
         closing_remark()
+
     return abstract_analytical_primitive_models_dict, \
            abstract_analytical_component_models_dict, \
            scale_prob

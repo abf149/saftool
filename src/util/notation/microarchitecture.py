@@ -290,6 +290,7 @@ class PrimitiveCategory:
         self.scale_parameters.append((param_name,param_type,yield_,inherit_))
         self.scale_default_parameters.append((param_name,param_default))
         self.scale_parameter_vals=copy.deepcopy(self.scale_parameters)
+        self.set_scale_parameter(param_name,param_default,param_type)
 
         return self
         

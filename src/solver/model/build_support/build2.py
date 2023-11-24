@@ -355,10 +355,6 @@ def build_component_energy_objective(component_uri,implementation_id,sub_action_
                     
                     new_subcomp_action_dict=action_energy_tree.setdefault(action,{}) \
                                                               .setdefault(sub_component_uri,{})
-                    #if sub_action in new_subcomp_action_dict:
-                    #    print(sub_action)
-                    #    print(new_subcomp_action_dict)
-                    #    assert(False)
 
                     assert(sub_action not in new_subcomp_action_dict)
                     new_subcomp_action_dict[sub_action]=sub_action_config_spec
@@ -582,19 +578,37 @@ def build_global_area_objective(component_models,area_objectives,include_spec=No
     info("--- => Done, building buffer area objective.")
     return global_area_objective
 
-def compute_component_multiplier(buffer_action_tree):
-    component_multiplier_dict={}
+def compute_area_multiplier(component_models,buffer_action_tree, component_yields):
+    area_multiplier_dict={}
+    # For each component (id'd by URI), build a set of architectural buffers
+    # which load the component.
     for arch_buffer in buffer_action_tree:
         arch_buffer_subtree=buffer_action_tree[arch_buffer]
         for buffer_action in arch_buffer_subtree:
             arch_buffer_action_subtree=arch_buffer_subtree[buffer_action]
             for component_uri in arch_buffer_action_subtree:
-                if component_uri not in component_multiplier_dict:
-                    component_multiplier_dict[component_uri]=1
+                if component_uri not in area_multiplier_dict:
+                    area_multiplier_dict[component_uri]={arch_buffer}
                 else:
-                    component_multiplier_dict[component_uri]+=1
+                    area_multiplier_dict[component_uri].add(arch_buffer)
 
-    return component_multiplier_dict
+    # Replace each set with an integer cardinality value
+    area_multiplier_dict={comp_uri:len(area_multiplier_dict[comp_uri]) \
+                                    for comp_uri in area_multiplier_dict}
+
+    # For each component (by uri), set area_multiplier scale attribute
+    for comp_uri in area_multiplier_dict:
+        component_model=component_models[comp_uri]
+        ratio=1.0/area_multiplier_dict[comp_uri]
+        component_models[comp_uri]=component_model.set_scale_parameter("area_multiplier", \
+                                                                       ratio, \
+                                                                       "real")
+        if 'area_multiplier' in component_yields[comp_uri]:
+            area_multiplier_spec=list(component_yields[comp_uri]['area_multiplier'])
+            non_value_spec_fields=area_multiplier_spec[1:]
+            component_yields[comp_uri]['area_multiplier']=tuple([ratio]+non_value_spec_fields)
+
+    return component_models,component_yields,area_multiplier_dict
 
 def build_global_objective(expr,primitive_models,component_models,energy_objectives,area_objectives, \
                             buffer_action_graph,sub_action_graph,buffer_action_weight_dict,include_spec=None,exclude_spec=None):
@@ -841,10 +855,12 @@ def build2_system_of_relations(sclp,user_attributes,fmt_iface_bindings,dtype_lis
     global_objective,global_energy_objective,global_area_objective, \
         buffer_action_tree,component_energy_action_tree,alias_dict = \
             build_global_objective(abstract_global_objective_expression,primitive_models,component_models, \
-                               energy_objectives,area_objectives,buffer_action_graph,sub_action_graph, \
-                               buffer_action_weight,include_spec=include_spec,exclude_spec=exclude_spec)
+                                    energy_objectives,area_objectives,buffer_action_graph,sub_action_graph, \
+                                    buffer_action_weight,include_spec=include_spec,exclude_spec=exclude_spec)
 
-    component_multiplier_dict=compute_component_multiplier(buffer_action_tree)
+    component_models, \
+    component_yields, \
+    area_multiplier_dict=compute_area_multiplier(component_models,buffer_action_tree,component_yields)
 
     simplified_global_objective=simplify_global_objective(global_objective)
 
@@ -857,4 +873,5 @@ def build2_system_of_relations(sclp,user_attributes,fmt_iface_bindings,dtype_lis
             "sub_action_graph":sub_action_graph, \
             "global_objective":simplified_global_objective,"global_energy_objective":global_energy_objective, \
             "global_area_objective":global_area_objective, \
-            "abstract_global_objective_expression":abstract_global_objective_expression,}
+            "abstract_global_objective_expression":abstract_global_objective_expression, \
+            "area_multiplier_dict":area_multiplier_dict}
