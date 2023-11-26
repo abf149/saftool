@@ -2,9 +2,10 @@ clock_period: 5ns
 #custom_taxo_to_model_mapping:
 #  buffers:
 #  - name: buffer_id
+#    type: format_interfaces
 #    format_interfaces:
-#    - dataspace: A
-#      index: 0
+#   - dataspace: A
+#     index: 0
 #      anchor: True
 #      constraints:
 #      - asdf

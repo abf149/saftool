@@ -1,14 +1,23 @@
 dataspaces:
   read_write_dataspace_id: Outputs
+custom_taxonomic_specifications:
+  dense_buffer_format_interfaces:
+  - name: psum
+    dataspaces:
+    - name: Outputs
+      dummy_format_interfaces:
+      #- "format":"UOP" 
+      - flattened-rankIDs: [ [ C ] ]
+      - flattened-rankIDs: [ [ M ] ] 
 force_attributes:
-#- uri: /.Skipping_iact_spad1_weight_spad0
-#  settings:
-#  - type: positional
-#    values:
-#    - position: 3
-#      value: 'none'
-#    - position: 4
-#      value: 'none'
+- uri: /.Skipping_iact_spad1_weight_spad0
+  settings:
+  - type: positional
+    values:
+    - position: 3
+      value: 'none'
+    - position: 4
+      value: 'none'
 #  - type: full
 #    values: [a,b,c,d]
 #  - type: positional
