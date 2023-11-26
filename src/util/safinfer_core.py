@@ -82,12 +82,12 @@ def build_saf_uarch_inference_problem(arch, \
 
 def assert_correct_user_attributes(user_attributes):
     info("- Validating user settings.")
-    if 'dataspaces' not in user_attributes:
+    if user_attributes is None or 'dataspaces' not in user_attributes:
         error("User settings must have a dataspaces key.",also_stdout=True)
         info("Terminating.")
         assert(False)
     dataspaces_spec=user_attributes['dataspaces']
-    if 'read_write_dataspace_id' not in dataspaces_spec:
+    if dataspaces_spec is None or 'read_write_dataspace_id' not in dataspaces_spec:
         error("dataspaces key must have read_write_dataspace_id subkey.",also_stdout=True)
         info("Terminating.")
         assert(False)
