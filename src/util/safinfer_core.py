@@ -17,7 +17,13 @@ default_ruleset_list = ['base_ruleset', \
                         'microarchitecture_from_saf']
 
 '''Routines - build and solve SAF microarchitecture inference problem'''
-def build_saf_uarch_inference_problem(arch, sparseopts, prob, mapping, reconfigurable_arch, bind_out_path):
+def build_saf_uarch_inference_problem(arch, \
+                                      sparseopts, \
+                                      prob, \
+                                      mapping, \
+                                      reconfigurable_arch, \
+                                      bind_out_path, \
+                                      user_attributes={}):
     '''
     Consume the raw Sparseloop arch/sparseopts/prob/mapping, and use the abstractions defined in 
     util.taxonomy to build a SAF microarchitecture topology with holes representing the
@@ -37,17 +43,21 @@ def build_saf_uarch_inference_problem(arch, sparseopts, prob, mapping, reconfigu
     '''
     # - Compute SAF microarchitecture bindings to architectural buffers    
     info("\nBuilding the SAF microarchitecture inference problem.")
+    assert_correct_user_attributes(user_attributes)
     info("- Computing SAF microarchitecture bindings to architectural buffers.")
     fmt_iface_bindings=[]
     action_bindings=[]
     data_space_dict_list=[]
     if not reconfigurable_arch:
         # "Typical" case: fixed architecture with sparseopts
-
         fmt_iface_bindings, \
         action_bindings, \
-        dtype_list, _, _ = sl_config.compute_fixed_arch_bindings(arch,sparseopts)
+        dtype_list, _, _ = sl_config.compute_fixed_arch_bindings(arch,sparseopts, \
+                                                                 user_attributes=user_attributes)
     else:
+        error("Reconfigurable architecture (i.e. SAFinfer exploiting prob, map) not yet supported.",also_stdout=True)
+        info("Terminating.")
+        assert(False)
         # "Special" case: reconfigurable architecture tuned for problem and mapping
         fmt_iface_bindings, \
         action_bindings, \
@@ -64,7 +74,27 @@ def build_saf_uarch_inference_problem(arch, sparseopts, prob, mapping, reconfigu
     # Problem- and mapping-independent, given fmt_iface_bindings, skip_bindings
     # and data_space_dict_list have already been computed
     info("- Realizing microarchitecture with topological holes, based on bindings.\n")
-    return build_taxonomic_arch_and_safs_from_bindings(arch, fmt_iface_bindings, action_bindings, dtype_list)
+    return build_taxonomic_arch_and_safs_from_bindings(arch, \
+                                                       fmt_iface_bindings, \
+                                                       action_bindings, \
+                                                       dtype_list, \
+                                                       user_attributes=user_attributes)
+
+def assert_correct_user_attributes(user_attributes):
+    info("- Validating user settings.")
+    if 'dataspaces' not in user_attributes:
+        error("User settings must have a dataspaces key.",also_stdout=True)
+        info("Terminating.")
+        assert(False)
+    dataspaces_spec=user_attributes['dataspaces']
+    if 'read_write_dataspace_id' not in dataspaces_spec:
+        error("dataspaces key must have read_write_dataspace_id subkey.",also_stdout=True)
+        info("Terminating.")
+        assert(False)
+    read_write_dataspace_id=dataspaces_spec['read_write_dataspace_id']
+    info("-- read_write_dataspace_id =",str(read_write_dataspace_id))
+    warn("- => Done, validating user settings")
+
 def solve_saf_uarch_inference_problem(taxo_arch, saflib_path, ruleset_names=default_ruleset_list, user_attributes={}):
     '''
     Trigger SAF microarchitecture solver against an input
@@ -79,7 +109,7 @@ def solve_saf_uarch_inference_problem(taxo_arch, saflib_path, ruleset_names=defa
     - result -- solver results structure, including success/failure and SAF microarchitecture taxonomy.
     '''
 
-    info("\nSolving the SAF microarchitecture inference problem.\n")    
+    info("\nSolving the SAF microarchitecture inference problem.\n")
     info("- Loading rules engine.")
     # Extend rulesnames with SAF taxonomic ruleset library directory path
     # prefix to get list of ruleset paths, then load rulesets into RulesEngine

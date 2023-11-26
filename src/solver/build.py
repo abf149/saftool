@@ -47,7 +47,12 @@ def get_buffer_stubs_and_format_safs(arch, fmt_iface_bindings, buffer_stub_list=
             buffer_stub_list.append((buffer,buffer_stub))
             saf_list.append(("format_saf",fmt_saf))    
     return buffer_stub_list, saf_list
-def get_skipping_SAFs_from_skip_bindings(arch, fmt_iface_bindings, skip_bindings, dtype_list, saf_list=[]):
+def get_skipping_SAFs_from_skip_bindings(arch, \
+                                         fmt_iface_bindings, \
+                                         skip_bindings, \
+                                         dtype_list, \
+                                         saf_list=[], \
+                                         user_attributes={}):
     #print("\n\n\n\n")
     #print(fmt_iface_bindings)
     #print("\n\n\n\n")
@@ -95,13 +100,26 @@ def get_skipping_SAFs_from_skip_bindings(arch, fmt_iface_bindings, skip_bindings
         saf_list.append(("skipping_saf",skipping_saf))
 
     return saf_list
-def get_buffer_stubs_and_SAFs_from_bindings(arch, fmt_iface_bindings, action_bindings, dtype_list):
+def get_buffer_stubs_and_SAFs_from_bindings(arch, \
+                                            fmt_iface_bindings, \
+                                            action_bindings, \
+                                            dtype_list, \
+                                            user_attributes={}):
     # Generate buffer stubs and format SAFs
     buffer_stub_list, \
     saf_list = get_buffer_stubs_and_format_safs(arch, fmt_iface_bindings)
-    saf_list = get_skipping_SAFs_from_skip_bindings(arch, fmt_iface_bindings, action_bindings, dtype_list, saf_list)
+    saf_list = get_skipping_SAFs_from_skip_bindings(arch, \
+                                                    fmt_iface_bindings, \
+                                                    action_bindings, \
+                                                    dtype_list, \
+                                                    saf_list, \
+                                                    user_attributes=user_attributes)
     return buffer_stub_list, saf_list
-def build_taxonomic_arch_and_safs_from_bindings(arch, fmt_iface_bindings, action_bindings, dtype_list):
+def build_taxonomic_arch_and_safs_from_bindings(arch, \
+                                                fmt_iface_bindings, \
+                                                action_bindings, \
+                                                dtype_list, \
+                                                user_attributes={}):
     '''
     Generate taxonomic representation of topology and SAF optimizations\n\n
 
@@ -147,7 +165,8 @@ def build_taxonomic_arch_and_safs_from_bindings(arch, fmt_iface_bindings, action
     buffer_stub_list, saf_list = get_buffer_stubs_and_SAFs_from_bindings(arch, \
                                                                          fmt_iface_bindings, \
                                                                          action_bindings, \
-                                                                         dtype_list)
+                                                                         dtype_list, \
+                                                                         user_attributes=user_attributes)
     return ArchitectureBase.copy() \
                            .topology(TopologyWrapper().components(buffer_stub_list)) \
                            .SAFs(saf_list) \

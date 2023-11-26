@@ -32,11 +32,14 @@ def pipeline(arch,mapping,prob,sparseopts,reconfigurable_arch,bind_out_path,safl
                                                           prob, \
                                                           mapping, \
                                                           reconfigurable_arch, \
-                                                          bind_out_path)
+                                                          bind_out_path, \
+                                                          user_attributes=user_attributes)
 
     if remarks:
         closing_remark()
-    return safcore.solve_saf_uarch_inference_problem(taxo_arch, saflib_path, user_attributes=user_attributes)
+    return safcore.solve_saf_uarch_inference_problem(taxo_arch, \
+                                                     saflib_path, \
+                                                     user_attributes=user_attributes)
 
 def handle_outcome(result,topo_out_path):
     # Success: dump

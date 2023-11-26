@@ -13,7 +13,7 @@ def get_sparseloop_arch_parameter_dict(arch):
         # Can't support multiple architectures at this time
         assert(False)
 
-def compute_fixed_arch_bindings(arch,sparseopts):
+def compute_fixed_arch_bindings(arch,sparseopts,user_attributes={}):
     skip_bindings=[]
     dtype_list=extract_dtypes(sparseopts)
     fmt_iface_bindings,buff_dags,buffer_kept_dataspace_by_buffer = \
