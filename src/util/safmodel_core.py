@@ -67,7 +67,7 @@ def complete_user_attributes(user_attributes,system_attributes):
 def build_scale_inference_problem(arch, sparseopts, taxo_uarch, user_attributes={}):
 
     fmt_iface_bindings, \
-    skip_bindings, \
+    action_bindings, \
     dtype_list, \
     buff_dags, \
     buffer_kept_dataspace_by_buffer = sl_config.compute_fixed_arch_bindings(arch,sparseopts)

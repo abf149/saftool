@@ -68,7 +68,9 @@ def get_uarch_port_mapping_to_buffer_port(obj):
     return mapping
 
 def build1_graph_representation(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
-                                buffer_kept_dataspace_by_buffer,buff_dags,constraints=[]):
+                                buffer_kept_dataspace_by_buffer,buff_dags,anchor_overrides, \
+                                constraints=[]):
+    
     warn("- Build phase 1: graph representation")
 
     flat_arch=sl_config.flatten_arch_wrapper(arch)
@@ -99,8 +101,10 @@ def build1_graph_representation(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
                                             buff_dags,dtype_list)
 
     llbs={dtype:[buff for idx,buff in enumerate(flat_arch) if buff_dags[dtype][idx][-1]] for dtype in dtype_list}
-    reln_list=rn.get_scale_boundary_conditions(gpthrpt,port_attr_dict,fmt_iface_bindings, \
-                                               flat_arch,buff_dags,dtype_list,constraints=constraints)
+    reln_list,anchor_dict \
+        =rn.get_scale_boundary_conditions(gpthrpt,port_attr_dict,fmt_iface_bindings, \
+                                          flat_arch,buff_dags,dtype_list,anchor_overrides, \
+                                          constraints=constraints)
 
     uarch_port_upstream_map=get_uarch_port_mapping_to_buffer_port(taxo_uarch)
 
@@ -109,4 +113,4 @@ def build1_graph_representation(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
     return {'reln_list':reln_list,'port_list':port_list,'port_attr_dict':port_attr_dict,'net_list':net_list, \
             'out_port_net_dict':out_port_net_dict,'in_port_net_dict':in_port_net_dict,'symbol_list':symbol_list,'uarch_symbol_list':uarch_symbol_list, \
             'obj_to_ports':obj_to_ports,'gpthrpt':gpthrpt,'obj_dict':obj_dict,'uarch_port_upstream_map':uarch_port_upstream_map, \
-            'buff_dags':buff_dags,'llbs':llbs}
+            'buff_dags':buff_dags,'llbs':llbs,'anchor_dict':anchor_dict,'anchor_overrides':anchor_overrides}

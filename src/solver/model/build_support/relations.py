@@ -4,6 +4,7 @@ for scale parameters at architecture buffer interfaces
 '''
 import solver.model.build_support.abstraction as ab, \
        solver.model.build_support.scale as sc
+from util.helper import info, warn, error
 
 def make_port_uri_attribute(arch_name,buffer_name,port_prefix,direction,idx,attribute):
     return ab.make_port_uri(arch_name,buffer_name,port_prefix,direction,idx)+"_"+attribute
@@ -83,7 +84,10 @@ def make_constraint_relations(constraints,relation_dict):
             )
 
 def get_scale_boundary_conditions(gpthrpt,port_attr_dict,fmt_iface_bindings,flat_arch, \
-                                  buff_dags,dtype_list,constraints=[]):
+                                  buff_dags,dtype_list,anchor_overrides_dict,constraints=[]):
+
+    anchor_dict={}
+
     relation_dict={}
     for buffer in flat_arch:
         fmt_iface=0
@@ -96,7 +100,15 @@ def get_scale_boundary_conditions(gpthrpt,port_attr_dict,fmt_iface_bindings,flat
     for bdx,buffer in enumerate(flat_arch):
         md_storage_width=sc.get_buff_md_storage_width(buffer,flat_arch)
         if md_storage_width>0:
+            anchor_dict_buffer=anchor_dict.setdefault(buffer,{})
             for dtype in dtype_list:
+                info("-- Initializing anchor values for buffer =",buffer,"dtype =",dtype)
+                num_fmt_ifaces=len(fmt_iface_bindings[buffer][dtype])
+                info("---",str(num_fmt_ifaces),"format interfaces to False")
+                anchor_dict_buffer_dtype = \
+                    anchor_dict_buffer \
+                        .setdefault(dtype,{rdx:False for rdx in range(num_fmt_ifaces)})
+                
                 if buff_dags[dtype][bdx][-1]:
                     # If last-level buffer for this datatype
                     last_rank=len(fmt_iface_bindings[buffer][dtype])-1
@@ -120,6 +132,8 @@ def get_scale_boundary_conditions(gpthrpt,port_attr_dict,fmt_iface_bindings,flat
                             make_pos_rate_relations("TestArchitecture",buffer,rdx,">=",gpthrpt,relation_dict)
                         else: # last rank
                             #print("last, last rank",buffer,dtype,rdx,mdwidth,poswidth,flagwidth,payloadwidth,md_storage_width,gpthrpt)
+                            anchor_dict_buffer_dtype[rdx]=True
+                            info("-- Strongly-anchored format interface: buffer =",buffer,"dtype =",dtype,"idx =",rdx)
                             make_read_width_relations("TestArchitecture",buffer,rdx,"==",md_storage_width,relation_dict)
                             make_pos_rate_relations("TestArchitecture",buffer,rdx,">=",gpthrpt,relation_dict)
                 else:
@@ -143,12 +157,29 @@ def get_scale_boundary_conditions(gpthrpt,port_attr_dict,fmt_iface_bindings,flat
                             make_pos_rate_relations("TestArchitecture",buffer,rdx,">=",0.0000000001,relation_dict)
                         else: # last rank
                             #print("non-last, last rank",buffer,dtype,rdx,mdwidth,poswidth,flagwidth,payloadwidth,md_storage_width,gpthrpt)
+                            anchor_dict_buffer_dtype[rdx]=True
+                            info("-- Strongly-anchored format interface: buffer =",buffer,"dtype =",dtype,"idx =",rdx)
                             make_read_width_relations("TestArchitecture",buffer,rdx,"==",md_storage_width,relation_dict)
                             make_pos_rate_relations("TestArchitecture",buffer,rdx,">=",0.0000000001,relation_dict)
         else:
             pass
 
+    # Apply user-provided anchor overrides
+    info("-- Anchor dict before overrides:",anchor_dict)
+
+    for buffer in anchor_overrides_dict:
+        for dtype in anchor_overrides_dict[buffer]:
+            for rdx in anchor_overrides_dict[buffer][dtype]:
+                info("--- Overwriting anchor @ buffer =",buffer,"dtype =",dtype,"idx =", \
+                     rdx,"from",anchor_dict[buffer][dtype][rdx],"to", \
+                     anchor_overrides_dict[buffer][dtype][rdx])
+                anchor_dict[buffer][dtype][rdx] = \
+                    anchor_overrides_dict[buffer][dtype][rdx]
+
+    info("-- Final anchor dict:",anchor_dict)
+    assert(False)
+
     # Include relations provided as user-specified constraints
     make_constraint_relations(constraints,relation_dict)
 
-    return relation_dict
+    return relation_dict,anchor_dict

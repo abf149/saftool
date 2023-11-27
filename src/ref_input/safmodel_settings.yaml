@@ -1,14 +1,30 @@
 clock_period: 5ns
-#custom_taxo_to_model_mapping:
-#  buffers:
-#  - name: buffer_id
-#    type: format_interfaces
-#    format_interfaces:
-#   - dataspace: A
-#     index: 0
-#      anchor: True
-#      constraints:
-#      - asdf
+custom_taxo_to_model_settings:
+  - type: buffer
+    settings:
+    - name: iact_spad
+      settings:
+      - type: format_interfaces
+        settings:
+        - dataspace: Inputs
+          index: 0
+          settings:
+            - name: anchor
+              value: True
+        - dataspace: Inputs
+          index: 1
+          settings:
+            - name: anchor
+              value: False
+    - name: weight_spad
+      settings:
+      - type: format_interfaces
+        settings:
+        - dataspace: Weights
+          index: 1
+          settings:
+            - name: anchor
+              value: False
 scale_inference_include_obj:
   energy: null
   area: null
