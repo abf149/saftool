@@ -793,6 +793,7 @@ def build2_system_of_relations(sclp,user_attributes,fmt_iface_bindings,dtype_lis
     obj_dict=sclp['obj_dict']
     uarch_port_upstream_map=sclp['uarch_port_upstream_map']
     llbs=sclp['llbs']
+    anchor_dict=sclp['anchor_dict']
     include_spec=None
     exclude_spec=None
     if 'scale_inference_include_obj' in user_attributes:
