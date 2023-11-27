@@ -1279,11 +1279,14 @@ class ComponentCategory(PrimitiveCategory):
                     "buffer_upstream_of_port":buffer_upstream_of_port,
                     "upstream_action":upstream_action,
                     "downstream_action":downstream_action['any'],
-                    "alias_dict":alias_dict
+                    "alias_dict":alias_dict,
+                    "strength":"any"
                 })
                 return self
             
+            at_least_one=False
             if 'strong' in downstream_action:
+                at_least_one=True
                 self.action_map_list.append({
                     "buffer_upstream_of_port":buffer_upstream_of_port,
                     "upstream_action":upstream_action,
@@ -1293,6 +1296,7 @@ class ComponentCategory(PrimitiveCategory):
                 })
 
             if 'weak' in downstream_action:
+                at_least_one=True
                 self.action_map_list.append({
                     "buffer_upstream_of_port":buffer_upstream_of_port,
                     "upstream_action":upstream_action,
@@ -1300,6 +1304,19 @@ class ComponentCategory(PrimitiveCategory):
                     "alias_dict":alias_dict,
                     "strength":"weak"
                 })
+
+            if not at_least_one:
+                error("If downstream_action is a dictionary, it must have EITHER \'any\' OR one or both of \'strong\' and \'weak\' as keys.", \
+                      also_stdout=True)
+                info("- Component ID:",self.obj_id)
+                info("- Component category:",self.name_)
+                info("- URI prefix:",str(self.uri_prefix))
+                info("- buffer_upstream_of_port:",buffer_upstream_of_port)
+                info("- upstream_action:",upstream_action)
+                info("- downstream_action:",downstream_action)
+                info("- alias_dict:",alias_dict)
+                info("Terminating.")
+                assert(False)
         else:
             self.action_map_list.append({
                 "buffer_upstream_of_port":buffer_upstream_of_port,

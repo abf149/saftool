@@ -7,6 +7,7 @@ import util.sparseloop_config_processor as sl_config
 import solver.model.build_support.abstraction as ab, \
        solver.model.build_support.scale as sc, \
        solver.model.build_support.relations as rn
+import solver.build_support.arch as ar_
 
 # This function takes an architecture object and returns a dictionary mapping uarch ports to buffer ports
 def get_uarch_port_mapping_to_buffer_port(obj):
@@ -28,6 +29,7 @@ def get_uarch_port_mapping_to_buffer_port(obj):
                 # Get the list of ports of the buffer stub
                 buffer_ports = component.getInterface()
                 # Loop through each port of the buffer stub
+                pdx=0
                 for buffer_port in buffer_ports:
                     # Get the uri of the buffer port
                     buffer_port_uri = ab_.uri(buffer_uri,buffer_port.getId())
@@ -41,7 +43,6 @@ def get_uarch_port_mapping_to_buffer_port(obj):
                         relevant_net=False
                         buffer_port_id=buffer_port.getId()
                         for net_port in net_ports:
-                            #print(net_port,buffer_port.getId())
                             if net_port==ab_.uri(buffer_id,buffer_port_id):
                                 relevant_net=True
 
@@ -62,7 +63,10 @@ def get_uarch_port_mapping_to_buffer_port(obj):
                                         # Get the uri of the uarch
                                         uarch_uri = ab_.uri(pref,net_component.getId())
                                         # Check if the uarch uri is already in the mapping
-                                        mapping.setdefault(uarch_uri,{}).setdefault(net_port,[]).append((buffer_uri, buffer_port_uri))
+                                        mapping.setdefault(uarch_uri,{}).setdefault(net_port,[]).append((buffer_uri, buffer_port_uri, pdx))
+
+                    # Format interface idx tracks port name subscript
+                    pdx=int(buffer_port.getId()[-1])
 
     # Return the mapping dictionary
     return mapping
@@ -82,7 +86,7 @@ def build1_graph_representation(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
     for buffer in buffer_hierarchy:
         flat_port_idx_to_dtype[buffer]=[]
         for dtype in dtype_list:
-            flat_port_idx_to_dtype[buffer].extend([dtype]*len(fmt_iface_bindings[buffer][dtype]))
+            flat_port_idx_to_dtype[buffer].extend([{'dtype':dtype,'idx':fdx} for fdx in range(len(fmt_iface_bindings[buffer][dtype]))])
 
     port_list, \
     port_attr_dict, \
@@ -113,4 +117,4 @@ def build1_graph_representation(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
     return {'reln_list':reln_list,'port_list':port_list,'port_attr_dict':port_attr_dict,'net_list':net_list, \
             'out_port_net_dict':out_port_net_dict,'in_port_net_dict':in_port_net_dict,'symbol_list':symbol_list,'uarch_symbol_list':uarch_symbol_list, \
             'obj_to_ports':obj_to_ports,'gpthrpt':gpthrpt,'obj_dict':obj_dict,'uarch_port_upstream_map':uarch_port_upstream_map, \
-            'buff_dags':buff_dags,'llbs':llbs,'anchor_dict':anchor_dict,'anchor_overrides':anchor_overrides}
+            'buff_dags':buff_dags,'llbs':llbs,'anchor_dict':anchor_dict,'anchor_overrides':anchor_overrides,'flat_port_idx_to_dtype':flat_port_idx_to_dtype}

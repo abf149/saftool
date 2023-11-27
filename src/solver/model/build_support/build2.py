@@ -215,9 +215,6 @@ def component_relations(obj_dict,user_attributes,fmt_iface_bindings,dtype_list, 
             raw_buffer_action_graph[comp_name]=comp_buffer_action_graph
             info("--- => Done,",comp_name,"component scale inference problem")
 
-    print(raw_buffer_action_graph)
-    assert(False)
-
     info("-- => Done, component scale inference problems.")
     return symbols,symbol_types,constraints,energy_objectives,area_objectives, \
            yields,component_models, sub_action_graph, raw_buffer_action_graph
@@ -705,7 +702,10 @@ def build_global_objective(expr,primitive_models,component_models,energy_objecti
            global_energy_objective,global_area_objective,buffer_action_tree, \
            component_energy_action_tree,alias_dict
 
-def resolve_buffer_action_graph(raw_buffer_action_graph,uarch_port_upstream_map):
+def resolve_buffer_action_graph(raw_buffer_action_graph, \
+                                uarch_port_upstream_map, \
+                                flat_port_idx_to_dtype, \
+                                anchor_dict):
     '''
     Substitute in the appropriate buffers which triggers components' actions.\n\n
 
@@ -717,24 +717,53 @@ def resolve_buffer_action_graph(raw_buffer_action_graph,uarch_port_upstream_map)
     - uarch_port_upstream_map -- dict[component uri] = {port uri:[(buffer uri,port uri),...], port uri:...}
     '''
 
+    info("-- Resolving buffer action graph.")
     buffer_action_graph={}
     for component_uri in raw_buffer_action_graph:
+        info("---",component_uri)
         buffer_action_graph[component_uri] = []
         _,component_id=ab_.split_uri(component_uri)
         buffer_action_map_list=raw_buffer_action_graph[component_uri]
+        info("----",str(len(buffer_action_map_list)),"buffer action maps.")
         for buffer_action_map in buffer_action_map_list:
+            info("---- Buffer action map:",buffer_action_map)
+            info("----- Upstream action:",buffer_action_map['upstream_action'])
+            info("----- Downstream action:",buffer_action_map['downstream_action'])
+            info("----- Alias dict:",buffer_action_map['alias_dict'])
             buffer_upstream_of_port=buffer_action_map['buffer_upstream_of_port']
             buffer_upstream_of_port_uri=ab_.uri(component_id,buffer_upstream_of_port)
+            info("----- Buffer upstream-of port uri:",buffer_upstream_of_port_uri)
             upstream_buffers_list=uarch_port_upstream_map[component_uri][buffer_upstream_of_port_uri]
+            info("----- Upstream buffers list:",upstream_buffers_list)
             assert(len(upstream_buffers_list)==1) #TODO: handle multiple taxonomically upstream buffers
-            upstream_buffer=upstream_buffers_list[0][0]
+            upstream_buffer_uri=upstream_buffers_list[0][0]
+            _,upstream_buffer_id=ab_.split_uri(upstream_buffer_uri)
+            upstream_port=upstream_buffers_list[0][1]
+            info("----- Upstream port:",upstream_port)
+            flat_fmt_iface=upstream_buffers_list[0][2]
+            info("------ Flat format interface:",flat_fmt_iface)
+            unflat_port_spec=flat_port_idx_to_dtype[upstream_buffer_id][flat_fmt_iface]
+            dtype=unflat_port_spec['dtype']
+            idx=unflat_port_spec['idx']
+            info("------ Unflat format interface: dtype =",str(dtype),"idx =",str(idx))
+            strong_anchor="strong" if anchor_dict[upstream_buffer_id][dtype][idx]  else "weak"
+            info("------ Anchoring:",strong_anchor)
+            anchor_req=buffer_action_map['strength']
+            info("----- Buffer action map anchor strength req:",anchor_req)
 
-            buffer_action_graph[component_uri].append({
-                'upstream_buffer':upstream_buffer, \
-                'upstream_action':buffer_action_map['upstream_action'], \
-                'downstream_action':buffer_action_map['downstream_action'], \
-                'alias_dict':buffer_action_map['alias_dict']
-            })
+            if strong_anchor==anchor_req or anchor_req=='any':
+                warn("----- => Integrating buffer action map into buffer action graph.")
+                buffer_action_graph[component_uri].append({
+                    'upstream_buffer':upstream_buffer_uri, \
+                    'upstream_action':buffer_action_map['upstream_action'], \
+                    'downstream_action':buffer_action_map['downstream_action'], \
+                    'alias_dict':buffer_action_map['alias_dict']
+                })
+            else:
+                warn("----- XX Anchor strength != anchor strenght req; skipping.")
+            info("---- => Done, buffer action map.")
+        warn("--- => Done,",component_uri,"buffer action graph.")
+    warn("-- => Done, resolving buffer action graph.")
 
     return buffer_action_graph
 
@@ -795,6 +824,7 @@ def build2_system_of_relations(sclp,user_attributes,fmt_iface_bindings,dtype_lis
     out_port_net_dict=sclp['out_port_net_dict']
     obj_dict=sclp['obj_dict']
     uarch_port_upstream_map=sclp['uarch_port_upstream_map']
+    flat_port_idx_to_dtype=sclp['flat_port_idx_to_dtype']
     llbs=sclp['llbs']
     anchor_dict=sclp['anchor_dict']
     include_spec=None
@@ -850,7 +880,10 @@ def build2_system_of_relations(sclp,user_attributes,fmt_iface_bindings,dtype_lis
     models.update(primitive_models)
     models.update(component_models)
 
-    buffer_action_graph=resolve_buffer_action_graph(raw_buffer_action_graph,uarch_port_upstream_map)
+    buffer_action_graph=resolve_buffer_action_graph(raw_buffer_action_graph, \
+                                                    uarch_port_upstream_map, \
+                                                    flat_port_idx_to_dtype, \
+                                                    anchor_dict)
 
     buffer_action_weight={}
 

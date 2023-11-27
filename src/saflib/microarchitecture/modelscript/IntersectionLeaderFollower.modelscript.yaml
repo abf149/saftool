@@ -103,7 +103,7 @@ modelscript_primitives:
         objective:
           actions:
             - name: fill
-              energy: 1e-10*(@md_out_rw_thresh + @md_out_pr_thresh + @md_out_ww_thresh + %(test_fxn))
+              energy: 2*(@md_out_rw_thresh + @md_out_pr_thresh + @md_out_ww_thresh + %(test_fxn))
             - name: intersect
               energy: 2*(@md_out_rw_thresh + @md_out_pr_thresh + @md_out_ww_thresh )
             - name: gated_fill

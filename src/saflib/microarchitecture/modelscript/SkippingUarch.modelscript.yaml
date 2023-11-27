@@ -26,21 +26,20 @@ modelscript_components:
     arch_buffer_action_map:
     - buffer_upstream_of_port: md_in_leader
       upstream_action: metadata_read
-      downstream_action: fill_leader
-      anchor: True
-      #aggregation: max_strength
+      downstream_action: 
+        any: fill_leader
     - buffer_upstream_of_port: md_in_follower
       upstream_action: metadata_read
-      downstream_action: fill_follower
-      anchor: True
+      downstream_action: 
+        any: fill_follower
     - buffer_upstream_of_port: pos_out_leader
       upstream_action: read
-      downstream_action: skip_leader
-      anchor: True
+      downstream_action: 
+        any: skip_leader
     - buffer_upstream_of_port: pos_out_follower
       upstream_action: read
-      downstream_action: skip_follower
-      anchor: True
+      downstream_action: 
+        any: skip_follower
     actions:
       - name: fill_leader
         implementations:
