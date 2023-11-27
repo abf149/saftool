@@ -64,7 +64,7 @@ def make_payloadwidth_relations(arch_name,buffer_name,idx,oper,mod_out_pw,relati
     )
 
 def make_constraint_relations(constraints,relation_dict):
-    #('TestArchitecture.weight_spad',0,'nc','<=',4)
+    info("-- Constructing user-provided relations, if any.")
     for cnst in constraints:
         uri_prefix=cnst[0]
         fmt_iface=cnst[1]
@@ -77,11 +77,23 @@ def make_constraint_relations(constraints,relation_dict):
             # Number of coordinates in rank
             port_types=['md_out','pos_in','at_bound_in']
 
+        info("--- Parsing user-provided constraint",cnst)
+        info("---- uri_prefix =",uri_prefix)
+        info("---- fmt_iface =",fmt_iface)
+        info("---- sym_suffix =",sym_suffix)
+        info("---- comparison =",comparison)
+        info("---- val =",val)
+        info("---- Applicable port types:",port_types)
+        info("--- Adding individual relations.")
         for port_type in port_types:
-            relation_dict[ab.uri(uri_prefix,port_type+str(fmt_iface))].append( \
-                reln(ab.uri(uri_prefix,port_type+str(fmt_iface))+"_"+sym_suffix, \
-                     comparison,val) \
-            )
+            new_reln=reln(ab.uri(uri_prefix,port_type+str(fmt_iface))+"_"+sym_suffix, \
+                          comparison,val)
+            info("---- New relation:",new_reln)
+            relation_dict[ab.uri(uri_prefix,port_type+str(fmt_iface))].append(new_reln)
+        warn("--- => Done, adding individual relations.")
+
+        warn("--- => Done, parsing user-provided constraint.")
+    warn("-- => Done, constructing user-provided relations.")
 
 def get_scale_boundary_conditions(gpthrpt,port_attr_dict,fmt_iface_bindings,flat_arch, \
                                   buff_dags,dtype_list,anchor_overrides_dict,constraints=[]):
@@ -177,7 +189,6 @@ def get_scale_boundary_conditions(gpthrpt,port_attr_dict,fmt_iface_bindings,flat
                     anchor_overrides_dict[buffer][dtype][rdx]
 
     info("-- Final anchor dict:",anchor_dict)
-    assert(False)
 
     # Include relations provided as user-specified constraints
     make_constraint_relations(constraints,relation_dict)
