@@ -197,6 +197,9 @@ def build_skipping_SAFs(action_to_fmt_iface_bindings, \
     condition_buffer=original_action_to_buffer_dtype_binding['condition']['buffer']
     condition_dtype=original_action_to_buffer_dtype_binding['condition']['dtype']
     bidirectional_setting=decode_is_bidirectional(original_action_to_buffer_dtype_binding['bidirectional'])
+    info("----- Bidirectional setting =",bidirectional_setting)
+    info("----- Target buffer =",target_buffer,", dataspace =",target_dtype)
+    info("----- Condition buffer =",condition_buffer,", dataspace =",condition_dtype)
     for action_binding in action_to_fmt_iface_bindings:
         info("----- Building Skipping SAF for",action_binding)
         target_fmt_iface=action_binding['target_fmt_iface']
