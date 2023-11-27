@@ -215,6 +215,9 @@ def component_relations(obj_dict,user_attributes,fmt_iface_bindings,dtype_list, 
             raw_buffer_action_graph[comp_name]=comp_buffer_action_graph
             info("--- => Done,",comp_name,"component scale inference problem")
 
+    print(raw_buffer_action_graph)
+    assert(False)
+
     info("-- => Done, component scale inference problems.")
     return symbols,symbol_types,constraints,energy_objectives,area_objectives, \
            yields,component_models, sub_action_graph, raw_buffer_action_graph

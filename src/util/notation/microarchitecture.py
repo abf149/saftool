@@ -1256,13 +1256,58 @@ class ComponentCategory(PrimitiveCategory):
           is a key in alias_dict with a value that is a list of alternative action ids, this method will try to find
           architectural buffer actions matching any of the alternative action ids.
         '''
+        if type(downstream_action).__name__ == 'dict':
+            # User has explicitly differentiated downstream action based on
+            # format interface anchor strength
+            if 'any' in downstream_action:
+                # Specifying downstream action for 'any' is equivalent to just passing
+                # the string id of a downstream action; no other anchor strength may be
+                # specified.
+                if len(downstream_action) > 1:
+                    error("Downstream_action has \'any\' key but also has other keys, which is not permitted. Options are to (1) pass a downstream action as a string (implicitly \'any\'), (2) explicitly specify downstream action for \'any\', (2) specify downstream action for either or both of \'strong\' and \'weak\' but not \'any\'", \
+                          also_stdout=True)
+                    info("- Component ID:",self.obj_id)
+                    info("- Component category:",self.name_)
+                    info("- URI prefix:",str(self.uri_prefix))
+                    info("- buffer_upstream_of_port:",buffer_upstream_of_port)
+                    info("- upstream_action:",upstream_action)
+                    info("- downstream_action:",downstream_action)
+                    info("- alias_dict:",alias_dict)
+                    info("Terminating.")
+                    assert(False)
+                self.action_map_list.append({
+                    "buffer_upstream_of_port":buffer_upstream_of_port,
+                    "upstream_action":upstream_action,
+                    "downstream_action":downstream_action['any'],
+                    "alias_dict":alias_dict
+                })
+                return self
+            
+            if 'strong' in downstream_action:
+                self.action_map_list.append({
+                    "buffer_upstream_of_port":buffer_upstream_of_port,
+                    "upstream_action":upstream_action,
+                    "downstream_action":downstream_action['strong'],
+                    "alias_dict":alias_dict,
+                    "strength":"strong"
+                })
 
-        self.action_map_list.append({
-            "buffer_upstream_of_port":buffer_upstream_of_port,
-            "upstream_action":upstream_action,
-            "downstream_action":downstream_action,
-            "alias_dict":alias_dict
-        })
+            if 'weak' in downstream_action:
+                self.action_map_list.append({
+                    "buffer_upstream_of_port":buffer_upstream_of_port,
+                    "upstream_action":upstream_action,
+                    "downstream_action":downstream_action['weak'],
+                    "alias_dict":alias_dict,
+                    "strength":"weak"
+                })
+        else:
+            self.action_map_list.append({
+                "buffer_upstream_of_port":buffer_upstream_of_port,
+                "upstream_action":upstream_action,
+                "downstream_action":downstream_action,
+                "alias_dict":alias_dict,
+                "strength":"any"
+            })
 
         return self
 
