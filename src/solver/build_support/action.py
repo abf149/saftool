@@ -65,7 +65,10 @@ def action_is_targeting_read_write_dataspace(target_dtype,user_attributes):
             read_write_dataspace_id: str dataspace id\n
     }
     '''
-    return False
+    read_write_dataspace=user_attributes['dataspaces']['read_write_dataspace_id']
+    if target_dtype==read_write_dataspace:
+        return True,read_write_dataspace
+    return False,read_write_dataspace
 
 def build_action_SAF_inference_problem_for_readonly_target(action_binding, \
                                                            fmt_iface_bindings):
@@ -315,7 +318,9 @@ def get_action_SAFs_from_action_bindings(arch, \
         info("--- Found \'",action_type,"\' action binding.")
         info("---- Binding:",action_binding)
         target_dtype=action_binding['target']['dtype']
-        if action_is_targeting_read_write_dataspace(target_dtype,user_attributes):
+        is_targeting_rw_dtype,read_write_dataspace = \
+            action_is_targeting_read_write_dataspace(target_dtype,user_attributes)
+        if is_targeting_rw_dtype:
             error("Targeting read-write dataspaces with actions not yet supported.",also_stdout=True)
             info("Action:",action_binding)
             info("Terminating.")

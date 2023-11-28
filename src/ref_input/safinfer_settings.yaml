@@ -6,7 +6,6 @@ custom_taxonomic_specifications:
     dataspaces:
     - name: Outputs
       dummy_format_interfaces:
-      #- "format":"UOP" 
       - flattened-rankIDs: [ [ C ] ]
       - flattened-rankIDs: [ [ M ] ] 
 force_attributes:
