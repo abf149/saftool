@@ -1,7 +1,11 @@
 from util.dense_bindings import flatten_arch_wrapper, \
                                 get_buffer_dataspace_to_fmt_layout_bindings_from_sparseopts
 from util.sparse_bindings_reconfigurable import compute_reconfigurable_arch_bindings
+from util.helper import info,warn,error
 import copy
+
+def buffer_keeps_dtype(dtype,buffer,fmt_iface_bindings):
+    return dtype in fmt_iface_bindings[buffer] and len(fmt_iface_bindings[buffer][dtype])>0
 
 def compute_fmt_iface_bindings(buffer_dataspace_to_fmt_access_binding, dtype_list):
     dummy_rank_idx=0

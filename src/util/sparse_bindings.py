@@ -3,6 +3,7 @@ from util.dense_bindings import flatten_arch_wrapper
 from util.sparse_bindings_reconfigurable import compute_reconfigurable_arch_bindings
 import util.bind_support.action as ac_, \
        util.bind_support.format as fm_
+from util.helper import info,warn,error
 
 def compute_fixed_arch_bindings(arch,sparseopts,user_attributes={}):
     skip_bindings=[]
