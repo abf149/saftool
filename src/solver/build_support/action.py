@@ -321,6 +321,7 @@ def get_action_SAFs_from_action_bindings(arch, \
         is_targeting_rw_dtype,read_write_dataspace = \
             action_is_targeting_read_write_dataspace(target_dtype,user_attributes)
         if is_targeting_rw_dtype:
+            print(action_binding)
             error("Targeting read-write dataspaces with actions not yet supported.",also_stdout=True)
             info("Action:",action_binding)
             info("Terminating.")

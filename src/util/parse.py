@@ -255,6 +255,29 @@ def get_buffer_dataspace_to_fmt_layout_bindings_from_sparseopts(sparseopts):
 
     return buffer_dataspace_to_fmt_layout_binding
 
+def extract_dtypes(sparseopts):
+    targets = set()
+
+    def recurse(node, in_dataspace=False, in_action_optimization=False):
+        if isinstance(node, dict):
+            for key, value in node.items():
+                if key == 'data-spaces':
+                    recurse(value, in_dataspace=True, in_action_optimization=in_action_optimization)
+                elif key == 'action-optimization':
+                    recurse(value, in_dataspace=in_dataspace, in_action_optimization=True)
+                elif key == 'name' and in_dataspace and isinstance(value, str):
+                    targets.add(value)
+                elif key == 'target' and in_action_optimization and isinstance(value, str):
+                    targets.add(value)
+                else:
+                    recurse(value, in_dataspace=in_dataspace, in_action_optimization=in_action_optimization)
+        elif isinstance(node, list):
+            for item in node:
+                recurse(item, in_dataspace=in_dataspace, in_action_optimization=in_action_optimization)
+
+    recurse(sparseopts)
+    return list(targets)
+
 #'''SAFmodel parsing routines'''
 #def get_buffer_bandwidth_info(arch):
 #    flat_arch = flatten_arch_wrapper(arch)

@@ -2,8 +2,20 @@
 import util.sparseloop_config_processor as sl_config
 from util.helper import info,warn,error
 
+def get_sparseloop_arch_parameter_dict(arch):
+    version_=arch['architecture']['version']
+    root_=arch['architecture']['subtree']
+    if len(root_) == 1:
+        return root_[0]['attributes']
+    elif len(root_) == 0:
+        return {}
+    else:
+        # Can't support multiple architectures at this time
+        assert(False)
+
 def get_buffer_hierarchy(arch):
     return [buffer for buffer in list(sl_config.flatten_arch_wrapper(arch).keys()) if buffer != 'MAC']
+
 def get_port_mappings_to_flattened_indices(arch,dtype_list,fmt_iface_bindings):
     # Extract buffer hierarchy
     buffer_hierarchy=get_buffer_hierarchy(arch)
