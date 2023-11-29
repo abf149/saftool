@@ -13,6 +13,39 @@
 # - Product expression - a single coefficient*problem_dimension term
 #     - Example: [coef_1,H] or [[M]] (implicit coefficient of 1)
 
+'''
+custom_taxonomic_specifications:
+  dense_buffer_format_interfaces:
+  - name: psum
+    dataspaces:
+    - name: Outputs
+      dummy_format_interfaces:
+      - flattened-rankIDs: [ [ C ] ]
+      - flattened-rankIDs: [ [ M ] ] 
+'''
+
+def flatten_SOP_ranks_list(lst):
+    # Flatten nested lists into a single list.
+    return [item for sublist in lst for item in \
+                (flatten_SOP_ranks_list(sublist) if isinstance(sublist, list) else [sublist])]
+
+def parse_dense_fmt_iface_settings(user_attributes):
+    res={}
+    dense_buffer_format_interfaces=user_attributes['custom_taxonomic_specifications']['dense_buffer_format_interfaces']
+    for buffer_settings in dense_buffer_format_interfaces:
+        buffer=buffer_settings['name']
+        dataspaces=buffer_settings['dataspaces']
+        for dtype_settings in dataspaces:
+            dtype=dtype_settings['name']
+            fmt_ifaces = \
+                [flatten_SOP_ranks_list(ranks_list_dict['flattened-rankIDs']) \
+                    for ranks_list_dict in dtype_settings['dummy_format_interfaces']]
+
+            res.setdefault(buffer,{})[dtype]=fmt_ifaces
+
+    return res
+
+
 def data_space_rank_list_from_product(product, prob_coeff_list):
     """ Extract a partial list of problem dimensions that project onto a dataspace rank, from a particular product expression. Excludes coefficients.
 

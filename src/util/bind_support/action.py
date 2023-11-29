@@ -58,6 +58,8 @@ def compute_read_write_action_binding(action, \
             "compute_optimization":compute_optimization
          }
     condition_dtype_list = option['condition-on'] if option['condition-on'] else None
+    condition_buffer_list = []
+    bdx_list = []
 
     if condition_dtype_list is None:
         error("None-valued condition_dtype_list not currently supported.",also_stdout=True)
@@ -71,9 +73,9 @@ def compute_read_write_action_binding(action, \
         assert(False)
     # Find the next buffer that holds the condition datatype prior to the target buffer
 
-    best_condition_dtype=None
-    best_condition_buffer=None
-    best_bdx=None
+    #best_condition_dtype=None
+    #best_condition_buffer=None
+    #best_bdx=None
 
     for condition_dtype in condition_dtype_list:
         condition_buffer, \
@@ -81,30 +83,46 @@ def compute_read_write_action_binding(action, \
                                     dtype_buffer_list, \
                                     target, \
                                     fmt_iface_bindings)
-        if (condition_buffer is not None) and (best_condition_buffer is None or bdx > best_bdx):
-            best_condition_dtype=condition_dtype
-            best_condition_buffer=condition_buffer
-            best_bdx=bdx
+        
+        condition_buffer_list.append(condition_buffer)
+        bdx_list.append(bdx)
+        #if (condition_buffer is not None) and (best_condition_buffer is None or bdx > best_bdx):
+        #    best_condition_dtype=condition_dtype
+        #    best_condition_buffer=condition_buffer
+        #    best_bdx=bdx
 
-    if best_condition_buffer is None:
-        error("Failed to find condition buffer for action targeting read-write dataspace.",also_stdout=True)
-        info("- action:",action)
-        info("- option:",option)
-        info("- dtype_buffer_list:",dtype_buffer_list)
-        info("- target:",target)
-        info("- fmt_iface_bindings:",fmt_iface_bindings)
-        info("- compute_optimization:",compute_optimization)
-        info("Terminating.")
-        assert(False)
+    #if best_condition_buffer is None:
+    #    error("Failed to find condition buffer for action targeting read-write dataspace.",also_stdout=True)
+    #    info("- action:",action)
+    #    info("- option:",option)
+    #    info("- dtype_buffer_list:",dtype_buffer_list)
+    #    info("- target:",target)
+    #    info("- fmt_iface_bindings:",fmt_iface_bindings)
+    #    info("- compute_optimization:",compute_optimization)
+    #    info("Terminating.")
+    #    assert(False)
     
-    must_discard = compute_optimization == 'skipping' and best_condition_buffer == dtype_buffer_list[best_condition_dtype][-1]
-    must_post_gate = compute_optimization == 'gating' and best_condition_buffer == dtype_buffer_list[best_condition_dtype][-1]
+    #must_discard = compute_optimization == 'skipping' and best_condition_buffer == dtype_buffer_list[best_condition_dtype][-1]
+    #must_post_gate = compute_optimization == 'gating' and best_condition_buffer == dtype_buffer_list[best_condition_dtype][-1]
+
+    # Step 1: Sort bdx_list in decreasing order and get the permutation associated with the sort
+    reverse_sort_w_permutation=sorted(enumerate(bdx_list), key=lambda x: x[1], reverse=True)
+    permutation=[tup[0] for tup in reverse_sort_w_permutation]
+    sorted_bdx_list=[tup[1] for tup in reverse_sort_w_permutation]
+
+    # Step 2: Permute the other two lists to match the sorting permutation applied to bdx_list
+    condition_dtype_list = [condition_dtype_list[i] for i in permutation]
+    condition_buffer_list = [condition_buffer_list[i] for i in permutation]
+
+    must_discard = False
+    must_post_gate = False
 
     return {
             'type': action['type'],
             'bidirectional': False,
             'target': {'buffer': target['name'], 'dtype': option['target']},
-            'condition': {'buffer': best_condition_buffer, 'dtype': best_condition_dtype},
+            'condition': {'buffer': condition_buffer_list[0], 'dtype': condition_dtype_list[0]},
+            'condition_list': {'buffer_list': condition_buffer_list, 'dtype_list': condition_dtype_list},
             'must_discard': must_discard,
             'must_post_gate': must_post_gate,
             'note':note
