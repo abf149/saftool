@@ -184,14 +184,70 @@ def getAccelergyComponentsLibrary(analytical_component_model_classes_dict, \
     return {"component_struct_list":component_struct_list, \
             "accelergy_version":backend_args['accelergy_version']}
 
-def getArchInstanceAndClass(buffer_id,flat_arch,flat_comp_dict):
+def search_for_primitive(arch_buff_subclass_name,backend_args):
+    library_search_paths=backend_args["library_search_paths"]
+    info("------- Architecture buffer subclass name:",arch_buff_subclass_name)
+    info("------- Library search paths:",library_search_paths)
+
+    for search_path in library_search_paths:
+        info("------- Searching",search_path)
+        try:
+            comp_lib=sl_config.load_config_yaml(search_path)
+            info("-------- Successfully loaded file...")
+            # Determine whether we are working with primitives or components
+            # and handle accordingly
+            classes=None
+            if 'compound_components' in comp_lib:
+                info("-------- (Accelergy components file)")
+                classes=comp_lib['compound_components']['classes']
+            else:
+                info("-------- (Accelergy primitives file)")
+                classes=comp_lib['classes']
+            assert(classes is not None)
+            info("-------- Scanning",len(classes),"classes...")
+            for cls_ in classes:
+                if cls_["name"] == arch_buff_subclass_name:
+                    warn("-------- => Found class",cls_["name"])
+                    info("--------",cls_)
+                    warn("------ => Done, searching more broadly for primitive/component")
+                    return cls_
+        except:
+            warn("-------- Could not open",search_path,"; skipping.")
+
+        error("Finished searching more broadly for component",arch_buff_subclass_name, \
+              "but could not find it.",also_stdout=True)
+        info("Terminating.")
+        assert(False)
+def getArchInstanceAndClass(buffer_id,flat_arch,flat_comp_dict,backend_args={}):
+    info("----- Getting architectural component instance and class")
+    info("------ buffer_id =",buffer_id)
+    info("------ len(flat_comp_dict) =",str(len(flat_comp_dict)))
     arch_buff=flat_arch[buffer_id]
     assert(arch_buff['class']=='storage')
     arch_buff_subclass_name=arch_buff['subclass']
     arch_buff_attributes=arch_buff['attributes']
-    buff_class_def=flat_comp_dict[arch_buff_subclass_name]
+    buff_class_def=None
+    if arch_buff_subclass_name not in flat_comp_dict:
+        # If architectural buffer subclass name is not immediately found in user-provided components,
+        # search in additional locations
+        if len(backend_args)>0 and "library_search_paths" in backend_args:
+            info("------ Could not find subclass",arch_buff_subclass_name,"in user-provided component files; search more broadly.")
+            buff_class_def=search_for_primitive(arch_buff_subclass_name,backend_args=backend_args)
+            warn("------ => Done, searching more broadly.")
+        else:
+            error("Could not find architectural buffer subclass",arch_buff_subclass_name, \
+                  "in user-specified components, and no other search locations were specified.",also_stdout=True)
+            info("- buffer_id:",buffer_id)
+            info("- flat_arch:",flat_arch)
+            info("- len(flat_comp_dict):",flat_comp_dict)
+            info("- backend_args:",backend_args)
+            info("Terminating.")
+            assert(False)
+    else:
+        buff_class_def=flat_comp_dict[arch_buff_subclass_name]
     buff_class_attributes=buff_class_def['attributes']
     actions_dict=buff_class_def['actions']
+    warn("----- => Done, getting architectural component instance and class")
     return arch_buff_subclass_name,arch_buff,arch_buff_attributes, \
            buff_class_def,buff_class_attributes,actions_dict
 
@@ -219,7 +275,7 @@ def getAccelergySingleBufferStructure(flat_arch, \
     spec_action_tree=buffer_action_tree[buffer_uri]
     arch_buff_subclass_id,arch_buff,arch_buff_attributes, \
         buff_class_def,buff_class_attributes,buff_class_actions_list= \
-            getArchInstanceAndClass(buffer_id,flat_arch,flat_comp_dict)
+            getArchInstanceAndClass(buffer_id,flat_arch,flat_comp_dict,backend_args=backend_args)
     buffer_wrapper_id=getBufferWrapperId(arch_buff_subclass_id,buffer_uri)
     wrapped_buffer_id=buffer_id+"_wrapped"
     # Augmented buffer with sparse microarchitecture

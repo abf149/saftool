@@ -148,7 +148,8 @@ def export_analytical_models(arch, \
         "accelergy_version":user_attributes["model_export_settings"]["accelergy_version"],
         "arch_out_path":arch_out_path,
         "comp_out_path":comp_out_path,
-        "component_single_file":user_attributes["model_export_settings"]["component_single_file"]
+        "component_single_file":user_attributes["model_export_settings"]["component_single_file"],
+        "library_search_paths":user_attributes["model_export_settings"]["library_search_paths"]
     }
 
     '''Augment scale inference problem structure with arch and flattened_arch'''
