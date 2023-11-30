@@ -190,8 +190,6 @@ def getArchInstanceAndClass(buffer_id,flat_arch,flat_comp_dict):
     arch_buff_subclass_name=arch_buff['subclass']
     arch_buff_attributes=arch_buff['attributes']
     buff_class_def=flat_comp_dict[arch_buff_subclass_name]
-    print(flat_comp_dict)
-    assert(False)
     buff_class_attributes=buff_class_def['attributes']
     actions_dict=buff_class_def['actions']
     return arch_buff_subclass_name,arch_buff,arch_buff_attributes, \

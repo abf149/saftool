@@ -47,3 +47,5 @@ scale_inference_solver:
 model_export_settings:
   accelergy_version: 0.3
   component_single_file: True
+  library_search_paths:
+  - /usr/local/share/accelergy/primitive_component_libs/primitive_component.lib.yaml
