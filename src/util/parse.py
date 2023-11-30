@@ -38,7 +38,7 @@ def parse_dense_fmt_iface_settings(user_attributes):
         for dtype_settings in dataspaces:
             dtype=dtype_settings['name']
             fmt_ifaces = \
-                [flatten_SOP_ranks_list(ranks_list_dict['flattened-rankIDs']) \
+                [ranks_list_dict['flattened-rankIDs'] \
                     for ranks_list_dict in dtype_settings['dummy_format_interfaces']]
 
             res.setdefault(buffer,{})[dtype]=fmt_ifaces
