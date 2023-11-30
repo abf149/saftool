@@ -2,6 +2,7 @@
                            from microarchitecture & Sparseloop problem description'''
 import saflib.microarchitecture.TaxoRegistry as tr_ # Initialize taxonomic registry (TODO: from files)
 import util.sparseloop_config_processor as sl_config
+import solver.build_support.arch as ar_
 #from util.safinfer_io import sprettyprint_taxo_uarch
 #from solver.build import get_buffer_hierarchy
 import solver.model.build as build
@@ -70,9 +71,9 @@ def build_scale_inference_problem(arch, sparseopts, taxo_uarch, user_attributes=
     action_bindings, \
     dtype_list, \
     buff_dags, \
-    buffer_kept_dataspace_by_buffer = sl_config.compute_fixed_arch_bindings(arch,sparseopts)
+    buffer_kept_dataspace_by_buffer = sl_config.compute_fixed_arch_bindings(arch,sparseopts,user_attributes)
 
-    system_attributes = sl_config.get_sparseloop_arch_parameter_dict(arch)
+    system_attributes = ar_.get_sparseloop_arch_parameter_dict(arch)
 
     user_attributes = complete_user_attributes(user_attributes,system_attributes)
 

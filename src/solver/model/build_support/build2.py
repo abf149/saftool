@@ -21,6 +21,7 @@ def transitive_dfs_from_primitive_port(root_port,src_port,port_list,net_list,por
                                        port_visited,transitive_closure_relns,reln_dict):
     root_is_buffer_stub_port=not port_attr_dict[root_port]['microarchitecture']
     root_is_primitive_port=port_attr_dict[root_port]['primitive']    
+    print(port_list)
     src_port_idx=port_list.index(src_port)
     if port_visited[src_port_idx] or ((not root_is_buffer_stub_port) and (not root_is_primitive_port)):
         # Port in-degree <= 1 and root port must belong to a primitive or a buffer stub

@@ -1,4 +1,14 @@
 clock_period: 5ns
+dataspaces:
+  read_write_dataspace_id: Outputs
+custom_taxonomic_specifications:
+  dense_buffer_format_interfaces:
+  - name: psum_spad
+    dataspaces:
+    - name: Outputs
+      dummy_format_interfaces:
+      - flattened-rankIDs: [ [ C ] ]
+      - flattened-rankIDs: [ [ M ] ] 
 custom_taxo_to_model_settings:
   - type: buffer
     settings:
@@ -25,6 +35,7 @@ custom_taxo_to_model_settings:
           settings:
             - name: anchor
               value: False
+#custom_model_specifications:
 scale_inference_include_obj:
   energy: null
   area: null

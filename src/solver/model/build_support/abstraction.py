@@ -41,7 +41,17 @@ def get_object_port_uris_and_attributes(obj,port_list,port_attr_dict,flat_arch,b
     if p_.isCategory(obj,"BufferStub"):
         # Architectural buffer stub
         if 'metadata_storage_width' in flat_arch[buffer]['attributes']:
+            # Buffer stub has at least some sparse ranks
             md_storage_width=flat_arch[buffer]['attributes']['metadata_storage_width']
+            for port_obj in obj_port_objlist:
+                port_uri=uri(obj_uri,port_obj.getId())
+                port_list.append(port_uri)
+                port_attr_dict[port_uri]={"obj":obj_uri,"ww":md_storage_width,"pw":md_storage_width, \
+                                          "microarchitecture":False,"primitive":True}
+        elif len(obj_port_objlist)>0:
+            # Entirely dense buffer stub with user-specified dense ranks
+            # Dummy value for md_storage_width
+            md_storage_width=1
             for port_obj in obj_port_objlist:
                 port_uri=uri(obj_uri,port_obj.getId())
                 port_list.append(port_uri)
