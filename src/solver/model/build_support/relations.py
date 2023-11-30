@@ -111,7 +111,9 @@ def get_scale_boundary_conditions(gpthrpt,port_attr_dict,fmt_iface_bindings,flat
 
     for bdx,buffer in enumerate(flat_arch):
         md_storage_width=sc.get_buff_md_storage_width(buffer,flat_arch)
-        if md_storage_width>0:
+        if md_storage_width>0 or any([len(fmt_iface_bindings[buffer][dtype])>0 for dtype in dtype_list]):
+            if md_storage_width==-1:
+                md_storage_width=1 # Dummy value for dense buffers
             anchor_dict_buffer=anchor_dict.setdefault(buffer,{})
             for dtype in dtype_list:
                 info("-- Initializing anchor values for buffer =",buffer,"dtype =",dtype)

@@ -20,8 +20,7 @@ def add_scale_param_eqns(root_port,dst_port,transitive_closure_relns):
 def transitive_dfs_from_primitive_port(root_port,src_port,port_list,net_list,port_net_dict,port_attr_dict, \
                                        port_visited,transitive_closure_relns,reln_dict):
     root_is_buffer_stub_port=not port_attr_dict[root_port]['microarchitecture']
-    root_is_primitive_port=port_attr_dict[root_port]['primitive']    
-    print(port_list)
+    root_is_primitive_port=port_attr_dict[root_port]['primitive']
     src_port_idx=port_list.index(src_port)
     if port_visited[src_port_idx] or ((not root_is_buffer_stub_port) and (not root_is_primitive_port)):
         # Port in-degree <= 1 and root port must belong to a primitive or a buffer stub
