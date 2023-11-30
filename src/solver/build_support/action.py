@@ -510,9 +510,6 @@ def get_action_SAFs_from_action_bindings(arch, \
                                             action_binding, \
                                             port_idx, \
                                             saf_list)
-            
-            print(saf_list)
-            assert(False)
         else:
             info("---- Targets read-only dataspace.")
             target_fmt_ifaces, \

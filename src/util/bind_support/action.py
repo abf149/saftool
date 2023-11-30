@@ -1,5 +1,6 @@
 from util.sparse_bindings_reconfigurable import compute_reconfigurable_arch_bindings
 import util.bind_support.format as fmt_
+import util.parse as pr_
 from util.helper import info,warn,error
 import copy
 

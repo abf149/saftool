@@ -8,8 +8,8 @@ def buffer_keeps_dtype(dtype,buffer,fmt_iface_bindings):
     return dtype in fmt_iface_bindings[buffer] and len(fmt_iface_bindings[buffer][dtype])>0
 
 def compute_fmt_iface_bindings(buffer_dataspace_to_fmt_access_binding, dtype_list):
-    dummy_rank_idx=0
 
+    dummy_rank_idx=0
     fmt_iface_bindings = {}
 
     for buffer, data in buffer_dataspace_to_fmt_access_binding.items():
@@ -29,7 +29,8 @@ def compute_fmt_iface_bindings(buffer_dataspace_to_fmt_access_binding, dtype_lis
 
                     fmt_iface_bindings[buffer][dtype].append({
                         'format': rank['format'],
-                        'fiber_layout': fiber_layout
+                        'fiber_layout': fiber_layout,
+                        'dense':rank['dense']
                     })
 
                     if 'metadata-word-bits' in rank:
@@ -138,20 +139,19 @@ def get_buffer_dataspace_to_fmt_access_bindings_from_buffer_dataspace_to_fmt_lay
 
     return buffer_dataspace_to_fmt_access_binding, buff_dags, buffer_kept_dataspace_by_buffer
 
-def bind_format_iface_to_fixed_arch(arch, sparseopts, dtype_list):
+def bind_format_iface_to_fixed_arch(arch, sparseopts, dtype_list, user_attributes={}):
     '''Bind format interfaces to buffers, loops, ranks, formats & address arithmetic'''
 
     # Extract data-space, mapping & flattened architecture info
     flat_arch=flatten_arch_wrapper(arch)
-    buffer_dataspace_to_fmt_layout_binding=get_buffer_dataspace_to_fmt_layout_bindings_from_sparseopts(sparseopts)
-    
+    buffer_dataspace_to_fmt_layout_binding=get_buffer_dataspace_to_fmt_layout_bindings_from_sparseopts(sparseopts,user_attributes)
 
     buffer_dataspace_to_fmt_access_binding, buff_dags, buffer_kept_dataspace_by_buffer = \
         get_buffer_dataspace_to_fmt_access_bindings_from_buffer_dataspace_to_fmt_layout_bindings_fixed_arch \
             (buffer_dataspace_to_fmt_layout_binding, flat_arch, dtype_list)
 
-    fmt_ifaces = compute_fmt_iface_bindings( \
+    fmt_iface_bindings = compute_fmt_iface_bindings( \
         copy.deepcopy(buffer_dataspace_to_fmt_access_binding), \
             dtype_list)
 
-    return fmt_ifaces, buff_dags, buffer_kept_dataspace_by_buffer
+    return fmt_iface_bindings, buff_dags, buffer_kept_dataspace_by_buffer

@@ -7,9 +7,10 @@ from util.helper import info,warn,error
 
 def compute_fixed_arch_bindings(arch,sparseopts,user_attributes={}):
     skip_bindings=[]
-    dtype_list=extract_dtypes(sparseopts)
+    dtype_list=extract_dtypes(sparseopts,user_attributes)
+
     fmt_iface_bindings,buff_dags,buffer_kept_dataspace_by_buffer = \
-        fm_.bind_format_iface_to_fixed_arch(arch, sparseopts, dtype_list)
+        fm_.bind_format_iface_to_fixed_arch(arch, sparseopts, dtype_list, user_attributes)
     dtype_buffer_list=transpose_bindings(fmt_iface_bindings)
     action_bindings=ac_.compute_action_bindings(sparseopts, fmt_iface_bindings, dtype_buffer_list, user_attributes)
 

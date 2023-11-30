@@ -1,5 +1,8 @@
 '''Parse Sparseloop YAML files'''
 
+import util.parse as pr_
+from util.helper import info,warn,error
+
 '''SAFInfer parsing routines'''
 # Data-space parsing routines
 # Terminology for dataspace projections
@@ -272,7 +275,9 @@ def buffer_loop_binding_from_sl_arch_and_map(arch, mapping, prob_instance_rank_s
 
 # Sparseopts parsing routines
 
-def get_buffer_dataspace_to_fmt_layout_bindings_from_sparseopts(sparseopts):
+def get_buffer_dataspace_to_fmt_layout_bindings_from_sparseopts(sparseopts,user_attributes={}):
+    dense_fmt_iface_settings=pr_.parse_dense_fmt_iface_settings(user_attributes)
+
     buffer_dataspace_to_fmt_layout_binding={}
     for target_buffer_dict in sparseopts['sparse_optimizations']['targets']:
         # Extract per-arch-level SAFs
@@ -283,12 +288,34 @@ def get_buffer_dataspace_to_fmt_layout_bindings_from_sparseopts(sparseopts):
             for target_data_space_dict in target_data_space_dicts:
                 target_data_space=target_data_space_dict['name']
                 buffer_dataspace_to_fmt_layout_binding[target_buffer]['representation-format'][target_data_space]={attrib:target_data_space_dict[attrib] for attrib in target_data_space_dict if attrib != 'name'}
+                if 'ranks' in buffer_dataspace_to_fmt_layout_binding[target_buffer]['representation-format'][target_data_space]:
+                    for rank in buffer_dataspace_to_fmt_layout_binding[target_buffer]['representation-format'][target_data_space]['ranks']:
+                        rank['dense']=False
         if 'action-optimization' in target_buffer_dict:
             buffer_dataspace_to_fmt_layout_binding[target_buffer]['action-optimization']=target_buffer_dict['action-optimization']
+        if len(dense_fmt_iface_settings)>0 and target_buffer in dense_fmt_iface_settings:
+
+            buffer_dense_fmt_iface_settings=dense_fmt_iface_settings[target_buffer]
+            buffer_fmt_iface=buffer_dataspace_to_fmt_layout_binding.setdefault(target_buffer,{}).setdefault('representation-format',{})
+            for dataspace in buffer_dense_fmt_iface_settings:
+                if dataspace in buffer_fmt_iface:
+                    error("User-specified dense format interfaces were provided for dataspace",dataspace, \
+                          "which already has a sparse format specification.",also_stdout=True)
+                    info("- Sparse format specification:",buffer_fmt_iface[dataspace])
+                    info("Terminating.")
+                    assert(False)
+                dense_ranks=buffer_dense_fmt_iface_settings[dataspace]
+
+                buffer_fmt_iface[dataspace] = \
+                    {'ranks':[ \
+                        {'format':'UOP','flattened-rankIDs':d_rank,'payload-word-bits':0,'dense':True} \
+                        for d_rank in dense_ranks
+                     ], \
+                     'rank-application-order':'inner-to-outer'}
 
     return buffer_dataspace_to_fmt_layout_binding
 
-def extract_dtypes(sparseopts):
+def extract_dtypes(sparseopts,user_attributes):
     targets = set()
 
     def recurse(node, in_dataspace=False, in_action_optimization=False):
