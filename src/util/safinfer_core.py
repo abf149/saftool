@@ -3,6 +3,7 @@ from util import sparseloop_config_processor as sl_config, safinfer_io as safio
 from solver.solve import Solver
 from solver.build import build_taxonomic_arch_and_safs_from_bindings
 from util.helper import info,warn,error
+import os
 
 '''Constants - default list of ruleset names to apply to SAF microarchitecture topology inference'''
 '''
@@ -114,7 +115,8 @@ def solve_saf_uarch_inference_problem(taxo_arch, saflib_path, ruleset_names=defa
     # Extend rulesnames with SAF taxonomic ruleset library directory path
     # prefix to get list of ruleset paths, then load rulesets into RulesEngine
     # and solve for SAF microarchitecture topology
-    ruleset_full_paths=[saflib_path+ruleset for ruleset in ruleset_names]
+    ruleset_full_paths=[os.path.join(saflib_path,ruleset) for ruleset in ruleset_names]
+
     rules_engine = Solver(ruleset_full_paths)
     rules_engine.preloadRules()
     info("\n\n- Solving.")    

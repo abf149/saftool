@@ -7,6 +7,7 @@ from util.helper import info,warn,error
 import saflib.microarchitecture.ModelRegistry as mr_
 import saflib.resources.char.ResourceRegistry as rr_
 import export.AnalyticalModelExport as am_exp
+import util.general_io as genio
 
 '''Config - condition the format of YAML file dumps'''
 #yaml.Dumper.ignore_aliases = lambda *args : True

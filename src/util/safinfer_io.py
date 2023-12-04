@@ -4,6 +4,7 @@ import util.sparseloop_config_processor as sl_config, yaml, argparse
 from util.helper import info,warn,error
 import util.notation.predicates as p_
 import solver.model.build_support.abstraction as ab
+import util.general_io as genio
 
 '''Config - condition the format of YAML file dumps'''
 yaml.Dumper.ignore_aliases = lambda *args : True
@@ -73,6 +74,10 @@ def process_args(args):
     print("- SAFinfer settings path:",args.settings)
     user_attributes=sl_config.load_config_yaml(args.settings)
 
+    # Convert saftaxolib repo relative directory to absolute directory
+    saftaxolib_path = genio.get_resource_filepath_or_dir('src/saflib/rulesets/taxo/')
+    saftaxolib_path = genio.get_abs_path_relative_to_cwd(saftaxolib_path)
+
     return arch, \
            mapping, \
            prob, \
@@ -80,7 +85,7 @@ def process_args(args):
            args.reconfigurable_arch, \
            bind_out_path, \
            topo_out_path, \
-           args.saftaxolib, \
+           saftaxolib_path, \
            do_logging, \
            args.log_file, \
            args.taxo_script_lib, \
@@ -105,7 +110,7 @@ def parse_args():
     '''
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-l','--saftaxolib',default='saflib/rulesets/taxo/')
+    #parser.add_argument('-l','--saftaxolib',default='saflib/rulesets/taxo/')
     parser.add_argument('-i','--dir-in',default='')
     parser.add_argument('-a','--arch',default='ref_input/arch.yaml')
     parser.add_argument('-m','--map',default='ref_input/map.yaml')

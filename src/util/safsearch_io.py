@@ -9,6 +9,7 @@ import solver.model.build_support.abstraction as ab
 import util.safinfer_io as safinfer_io, \
        util.safmodel_io as safmodel_io
 import dill as pickle
+import util.general_io as genio
 
 '''Config - condition the format of YAML file dumps'''
 yaml.Dumper.ignore_aliases = lambda *args : True

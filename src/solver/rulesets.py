@@ -35,7 +35,16 @@ class RuleSet(SerializableObject):
         info('-- Importing rule set context module',os.path.join(rule_set_path,"RuleSetContextModule.py"),'')
         exec_import_command=dirpath_to_import_expression(rule_set_path,'RuleSetContextModule','rule_set_context_module')
         info('--- Performing generated import command: ',exec_import_command)
-        exec(exec_import_command)
+        #exec(exec_import_command)
+        rule_set_context_module=None
+        from saflib.rulesets.taxo.microarchitecture_from_saf import RuleSetContextModule
+        if 'base_ruleset' in exec_import_command:
+            rule_set_context_module=RuleSetContextModule
+        from saflib.rulesets.taxo.base_ruleset import RuleSetContextModule
+        if 'microarchitecture_from_saf' in exec_import_command:
+            rule_set_context_module=RuleSetContextModule
+        assert(rule_set_context_module is not None)
+
         info('-- Done importing.')
         return rule_set_obj, rule_set_context_module #rule_set_context_module is loaded by exec() above
 
