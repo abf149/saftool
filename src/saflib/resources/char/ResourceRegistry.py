@@ -12,7 +12,12 @@ def registerCharacterizationTable(id_=None,filepath=""):
     global charactization_table_dict
     if id_ is None:
         # Default id is filename
-        id_ = filepath
+        if 'src/accelergy/data/primitives_table.csv' in filepath:
+            # Handle special case where the filepath is the repo-internal default characterization table
+            # and no id is specified.
+            id_='accelergy/data/primitives_table.csv'
+        else:
+            id_ = filepath
         # Alternatively - random id
         #import uuid
         #id_ = str(uuid.uuid4())

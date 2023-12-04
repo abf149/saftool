@@ -5,17 +5,20 @@ import util.model.CasCompat as cc_
 import yaml
 import pickle, shutil, os, copy
 import solver.model.build_support.abstraction as ab_
+import util.general_io as genio
 
 def dict_representer(dumper, data):
     return dumper.represent_mapping(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data.items())
 
 yaml.add_representer(dict, dict_representer)
 
-accelergy_root="accelergy/"
+accelergy_root="src/accelergy/"
 ERTART_fn="primitives_ERT_ART.pkl"
 lib_fn="saf_primitives.lib.yaml"
-obj_install_path=os.path.join(os.path.join(accelergy_root,"data/"),ERTART_fn)
-lib_install_path=os.path.join(os.path.join(accelergy_root,"primitive_component_libs/"),lib_fn)
+repo_obj_install_path=os.path.join(os.path.join(accelergy_root,"data/"),ERTART_fn)
+repo_lib_install_path=os.path.join(os.path.join(accelergy_root,"primitive_component_libs/"),lib_fn)
+obj_install_path=genio.get_abs_path_relative_to_cwd(repo_obj_install_path)
+lib_install_path=genio.get_abs_path_relative_to_cwd(repo_lib_install_path)
 
 def getDefaultInstallPath():
     global obj_install_path

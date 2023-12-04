@@ -48,4 +48,4 @@ model_export_settings:
   accelergy_version: 0.3
   component_single_file: True
   library_search_paths:
-  - accelergy/primitive_component_libs/primitive_component.lib.yaml
+  - :base
