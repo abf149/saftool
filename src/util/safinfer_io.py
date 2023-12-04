@@ -72,19 +72,19 @@ def process_args(args):
     if len(args.dir_in)>0:
         info("- arch:",args.dir_in+'arch.yaml')
         arch=sl_config.load_config_yaml(args.dir_in+'arch.yaml')
-        info("- map:",args.dir_in+'map.yaml')
-        mapping=sl_config.load_config_yaml(args.dir_in+'map.yaml')
-        info("- prob:",args.dir_in+'prob.yaml')
-        prob=sl_config.load_config_yaml(args.dir_in+'prob.yaml')
+        #info("- map:",args.dir_in+'map.yaml')
+        #mapping=sl_config.load_config_yaml(args.dir_in+'map.yaml')
+        #info("- prob:",args.dir_in+'prob.yaml')
+        #prob=sl_config.load_config_yaml(args.dir_in+'prob.yaml')
         info("- sparseopts:",args.dir_in+'sparseopts.yaml')
         sparseopts=sl_config.load_config_yaml(args.dir_in+'sparseopts.yaml')        
     else:    
         info("- arch:",args.arch)
         arch=sl_config.load_config_yaml(args.arch)
-        info("- map:",args.map)
-        mapping=sl_config.load_config_yaml(args.map)
-        info("- prob:",args.prob)
-        prob=sl_config.load_config_yaml(args.prob)
+        #info("- map:",args.map)
+        #mapping=sl_config.load_config_yaml(args.map)
+        #info("- prob:",args.prob)
+        #prob=sl_config.load_config_yaml(args.prob)
         info("- sparseopts:",args.sparseopts)
         sparseopts=sl_config.load_config_yaml(args.sparseopts)
 
@@ -111,9 +111,10 @@ def process_args(args):
     # Get user-provided taxonomic script library, or else use default from repo
     taxo_script_lib=process_taxo_script_lib_cli(args.taxo_script_lib)
 
+    # Note: mapping, prob are None
     return arch, \
-           mapping, \
-           prob, \
+           None, \
+           None, \
            sparseopts, \
            args.reconfigurable_arch, \
            bind_out_path, \
