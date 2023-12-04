@@ -144,7 +144,6 @@ def parse_args():
     '''
 
     parser = argparse.ArgumentParser()
-    #parser.add_argument('-l','--saftaxolib',default='saflib/rulesets/taxo/')
     parser.add_argument('-i','--dir-in',default='')
     parser.add_argument('-a','--arch',default='ref_input/arch.yaml')
     parser.add_argument('-m','--map',default='ref_input/map.yaml')
