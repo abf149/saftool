@@ -5,10 +5,18 @@ import os
 
 root_package_dir="src/"
 
+'''Library resource access routines'''
 def get_abs_path_relative_to_cwd(abs_path):
     return os.path.relpath(abs_path, os.getcwd())
 
-'''Load library resources'''
+def check_path_type(path):
+    if os.path.isdir(path):
+        return "directory"
+    elif os.path.isfile(path):
+        return "file"
+    else:
+        return "neither"
+
 def get_resource_filepath_or_dir(repo_filepath):
     def to_dotted_path(file_path, root_package_dir):
         relative_path = os.path.relpath(file_path, root_package_dir)

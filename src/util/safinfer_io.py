@@ -4,6 +4,8 @@ import util.sparseloop_config_processor as sl_config, yaml, argparse
 from util.helper import info,warn,error
 import util.notation.predicates as p_
 import solver.model.build_support.abstraction as ab
+import glob,os
+import parser.taxo_parser_core as tp_
 import util.general_io as genio
 
 '''Config - condition the format of YAML file dumps'''
@@ -11,13 +13,17 @@ yaml.Dumper.ignore_aliases = lambda *args : True
 
 '''Load & parse taxonomic libraries'''
 def load_parse_taxo_libs(taxo_script_lib_list):
-    #print(taxo_script_lib_list)
     # Parse taxoscript
-    import glob,yaml
-    import parser.taxo_parser_core as tp_
     lib_filepath_list=[]
     for taxo_script_lib in taxo_script_lib_list:
         lib_filepath_list.extend(glob.glob(taxo_script_lib))
+
+    if len(lib_filepath_list)==0:
+        error("Provided taxonomic script library paths do not point to any library files.",also_stdout=True)
+        info("- Path list:",str(taxo_script_lib_list))
+        info("Terminating.")
+        assert(False)
+
     info("Parsing taxoscript libraries (",len(lib_filepath_list),")...")
     #print(lib_filepath_list)
     # First pass - parse primitives
@@ -78,6 +84,28 @@ def process_args(args):
     saftaxolib_path = genio.get_resource_filepath_or_dir('src/saflib/rulesets/taxo/')
     saftaxolib_path = genio.get_abs_path_relative_to_cwd(saftaxolib_path)
 
+    # Get user-provided taxonomic script library, or else use default from repo
+    # 'saflib/microarchitecture/taxoscript/*.yaml'
+    base_taxo_script_lib=genio.get_resource_filepath_or_dir('src/saflib/microarchitecture/taxoscript/*.yaml')
+    
+    taxo_script_lib=None
+    if len(args.taxo_script_lib)==0:
+        taxo_script_lib=[str(base_taxo_script_lib)]
+    else:
+        taxo_script_lib=[lib.replace('!base',str(base_taxo_script_lib)) for lib in args.taxo_script_lib]
+
+    lib_is_valid_list=[os.path.isdir(os.path.dirname(lib_path)) for lib_path in taxo_script_lib]
+
+    if not all(lib_is_valid_list):
+        error("Provided taxonomic script library path list includes one or more non-existent paths.",also_stdout=True)
+        info("- Non-existent paths:",str([lib_ for lib_,valid_ in zip(taxo_script_lib,lib_is_valid_list) if not valid_]))
+        info("Terminating.")
+        assert(False)
+
+    for idx in range(len(taxo_script_lib)):
+        if genio.check_path_type(taxo_script_lib[idx]) == 'directory':
+            taxo_script_lib[idx]=os.path.join(taxo_script_lib[idx],"*.yaml")
+
     return arch, \
            mapping, \
            prob, \
@@ -88,7 +116,7 @@ def process_args(args):
            saftaxolib_path, \
            do_logging, \
            args.log_file, \
-           args.taxo_script_lib, \
+           taxo_script_lib, \
            user_attributes
 
 '''CLI argparse'''
@@ -118,7 +146,7 @@ def parse_args():
     parser.add_argument('-s','--sparseopts',default='ref_input/sparseopts.yaml')
     parser.add_argument('-o','--dir-out',default='')
     parser.add_argument('-b','--binding-out',default='ref_output/bindings.yaml')
-    parser.add_argument('-t','--taxo-script-lib',action='append',default=['saflib/microarchitecture/taxoscript/*.yaml'])
+    parser.add_argument('-t','--taxo-script-lib',action='append',default=['!base'])
     parser.add_argument('-T','--topology-out',default='ref_output/new_arch.yaml')
     parser.add_argument('-r', '--reconfigurable-arch', action='store_true')
     parser.add_argument('-L','--log', action='store_true')
