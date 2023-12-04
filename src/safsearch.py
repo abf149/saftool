@@ -164,7 +164,7 @@ def pipeline(arch, \
 def closing_remark():
     warn("<< Done, SAFsearch",also_stdout=True)
 
-if __name__=="__main__":
+def main():
     arch, \
     mapping, \
     prob, \
@@ -233,3 +233,6 @@ if __name__=="__main__":
              top_N, \
              model_top_x)
     closing_remark()
+
+if __name__=="__main__":
+    main()

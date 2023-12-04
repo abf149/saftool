@@ -6,7 +6,6 @@ setup(
     package_dir={'': 'src'},
     packages=find_packages(where='src'),
     package_data={
-        # Include any CSV files present in the `accelergy/data` directory within the package
         '': ['accelergy/data/*.csv'],
     },
     entry_points={
@@ -16,5 +15,4 @@ setup(
             'safsearch = safsearch:main'
         ]
     },
-    # Other necessary information like author, description, etc.
 )

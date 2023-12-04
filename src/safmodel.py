@@ -60,7 +60,7 @@ def export_result(arch,comp_in,arch_out_path,comp_out_path,abstract_analytical_p
 def closing_remark():
     warn("<< Done, SAFmodel",also_stdout=True)
 
-if __name__=="__main__":
+def main():
     arch, \
     taxo_uarch, \
     sparseopts, \
@@ -83,3 +83,6 @@ if __name__=="__main__":
     export_result(arch,comp_in,arch_out_path,comp_out_path,abstract_analytical_primitive_models_dict, \
                   abstract_analytical_component_models_dict,scale_prob,user_attributes)
     closing_remark()
+
+if __name__=="__main__":
+    main()

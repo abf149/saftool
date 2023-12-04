@@ -68,8 +68,7 @@ def closing_remark():
 based on CLI arguments and dump the inferred SAF microarchitecture
 topology to the YAML file at --topology-out
 '''
-if __name__=="__main__":
-
+def main():
     # Parse CLI arguments
     arch, \
     mapping, \
@@ -92,3 +91,6 @@ if __name__=="__main__":
     #print(result)
     handle_outcome(result,topo_out_path)
     closing_remark()
+
+if __name__=="__main__":
+    main()
