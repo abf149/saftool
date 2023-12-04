@@ -7,7 +7,7 @@ from util.helper import info,warn,error
 import saflib.microarchitecture.ModelRegistry as mr_
 import saflib.resources.char.ResourceRegistry as rr_
 import export.AnalyticalModelExport as am_exp
-import util.general_io as genio
+import util.general_io as genio, util.safinfer_io as safinfer_io
 
 '''Config - condition the format of YAML file dumps'''
 #yaml.Dumper.ignore_aliases = lambda *args : True
@@ -78,6 +78,9 @@ def process_args(args):
     print("- SAFModel settings path:",args.settings)
     user_attributes=sl_config.load_config_yaml(args.settings)
 
+    # Parse taxo_script_lib argument, accounting for package-relative filepaths
+    taxo_script_lib=safinfer_io.process_taxo_script_lib_cli(args.taxo_script_lib)
+
     return arch, \
            netlist, \
            sparseopts, \
@@ -89,7 +92,7 @@ def process_args(args):
            args.log_file,\
            args.char, \
            args.model_script_lib, \
-           args.taxo_script_lib
+           taxo_script_lib
 
 '''CLI argparse'''
 def parse_args():
@@ -99,7 +102,7 @@ def parse_args():
                         help='Sparseloop architecture file.')
     parser.add_argument('-b','--char',action='append',default=['accelergy/data/primitives_table.csv'], \
                         help='CSV EAT characterization table.')
-    parser.add_argument('-c', '--comp-in', action='append', default=['ref_input/compound_components.yaml'], \
+    parser.add_argument('-c', '--comp-in', action='append', default=[], \
                         help='One or more Accelergy component library YAML filenames.')
     parser.add_argument('-d','--rtl',action='append',default=['hw/rtl_out/'], \
                         help='Path to underlying RTL files associated with CSV EAT characterization table (-b/--char)')
@@ -124,7 +127,7 @@ def parse_args():
                         help='Output filename for Sparseloop arch augmented with SAF microarchitecture models.')
     parser.add_argument('-s','--sparseopts',default='ref_input/sparseopts.yaml', \
                         help='Sparseloop SAF specification file.')
-    parser.add_argument('-t','--taxo-script-lib',action='append',default=['saflib/microarchitecture/taxoscript/*.yaml'])
+    parser.add_argument('-t','--taxo-script-lib',action='append',default=['!base'])
     parser.add_argument('-T','--settings',default='ref_input/safmodel_settings.yaml', \
                         help='safmodel configuration file.')
     parser.add_argument('-u','--sim',action='append',default=['hw/sim_data'], \

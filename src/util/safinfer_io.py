@@ -40,6 +40,30 @@ def load_parse_taxo_libs(taxo_script_lib_list):
         _, _=tp_.parse_taxoscript(script_dict,components_only=True)
     warn("=> Done,")
 
+def process_taxo_script_lib_cli(args_taxo_script_lib):
+    # Get user-provided taxonomic script library, or else use default from repo
+    base_taxo_script_lib=genio.get_resource_filepath_or_dir('src/saflib/microarchitecture/taxoscript/*.yaml')
+    
+    taxo_script_lib=None
+    if len(args_taxo_script_lib)==0:
+        taxo_script_lib=[str(base_taxo_script_lib)]
+    else:
+        taxo_script_lib=[lib.replace('!base',str(base_taxo_script_lib)) for lib in args_taxo_script_lib]
+
+    lib_is_valid_list=[os.path.isdir(os.path.dirname(lib_path)) for lib_path in taxo_script_lib]
+
+    if not all(lib_is_valid_list):
+        error("Provided taxonomic script library path list includes one or more non-existent paths.",also_stdout=True)
+        info("- Non-existent paths:",str([lib_ for lib_,valid_ in zip(taxo_script_lib,lib_is_valid_list) if not valid_]))
+        info("Terminating.")
+        assert(False)
+
+    for idx in range(len(taxo_script_lib)):
+        if genio.check_path_type(taxo_script_lib[idx]) == 'directory':
+            taxo_script_lib[idx]=os.path.join(taxo_script_lib[idx],"*.yaml")
+
+    return taxo_script_lib
+
 def process_args(args):
     # Parse the CLI arguments
     info("SAFinfer.\n")    
@@ -85,26 +109,7 @@ def process_args(args):
     saftaxolib_path = genio.get_abs_path_relative_to_cwd(saftaxolib_path)
 
     # Get user-provided taxonomic script library, or else use default from repo
-    # 'saflib/microarchitecture/taxoscript/*.yaml'
-    base_taxo_script_lib=genio.get_resource_filepath_or_dir('src/saflib/microarchitecture/taxoscript/*.yaml')
-    
-    taxo_script_lib=None
-    if len(args.taxo_script_lib)==0:
-        taxo_script_lib=[str(base_taxo_script_lib)]
-    else:
-        taxo_script_lib=[lib.replace('!base',str(base_taxo_script_lib)) for lib in args.taxo_script_lib]
-
-    lib_is_valid_list=[os.path.isdir(os.path.dirname(lib_path)) for lib_path in taxo_script_lib]
-
-    if not all(lib_is_valid_list):
-        error("Provided taxonomic script library path list includes one or more non-existent paths.",also_stdout=True)
-        info("- Non-existent paths:",str([lib_ for lib_,valid_ in zip(taxo_script_lib,lib_is_valid_list) if not valid_]))
-        info("Terminating.")
-        assert(False)
-
-    for idx in range(len(taxo_script_lib)):
-        if genio.check_path_type(taxo_script_lib[idx]) == 'directory':
-            taxo_script_lib[idx]=os.path.join(taxo_script_lib[idx],"*.yaml")
+    taxo_script_lib=process_taxo_script_lib_cli(args.taxo_script_lib)
 
     return arch, \
            mapping, \
