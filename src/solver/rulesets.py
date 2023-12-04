@@ -38,10 +38,10 @@ class RuleSet(SerializableObject):
         #exec(exec_import_command)
         rule_set_context_module=None
         from saflib.rulesets.taxo.microarchitecture_from_saf import RuleSetContextModule
-        if 'base_ruleset' in exec_import_command:
+        if 'microarchitecture_from_saf' in exec_import_command:
             rule_set_context_module=RuleSetContextModule
         from saflib.rulesets.taxo.base_ruleset import RuleSetContextModule
-        if 'microarchitecture_from_saf' in exec_import_command:
+        if 'base_ruleset' in exec_import_command:
             rule_set_context_module=RuleSetContextModule
         assert(rule_set_context_module is not None)
 
