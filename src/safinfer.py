@@ -3,6 +3,7 @@ from core import safinfer_core as safcore, \
                  safinfer_io as safio
 from core.helper import info,warn,error
 import core.helper as helper
+import os
 
 def opening_remark():
     info(">> SAFinfer",also_stdout=True)  
@@ -92,5 +93,5 @@ def main():
     handle_outcome(result,topo_out_path)
     closing_remark()
 
-if __name__=="__main__":
+if __name__=="__main__" and not os.getenv("SPHINX_BUILD"):
     main()

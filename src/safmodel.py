@@ -4,6 +4,7 @@ from core.helper import info,warn,error
 from core import safmodel_core as safcore, \
                  safmodel_io as safio, \
                  safinfer_io
+import os
 
 def opening_remark():
     info(">> SAFmodel",also_stdout=True)  
@@ -84,5 +85,5 @@ def main():
                   abstract_analytical_component_models_dict,scale_prob,user_attributes)
     closing_remark()
 
-if __name__=="__main__":
+if __name__=="__main__" and not os.getenv("SPHINX_BUILD"):
     main()

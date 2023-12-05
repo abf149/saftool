@@ -1,7 +1,7 @@
 '''SAFmodel IO library - CLI argparse and YAML dump routines'''
 from core.taxonomy import designelement as de
-import os, argparse, test_data as td, copy, re
-import core.sparseloop_config_processor as sl_config, yaml, argparse
+import os, argparse
+import core.sparseloop_config_processor as sl_config, argparse
 from core.taxonomy.designelement import Architecture
 from core.helper import info,warn,error
 import saflib.microarchitecture.ModelRegistry as mr_
@@ -155,7 +155,7 @@ def process_args(args):
 def parse_args():
 
     parser = argparse.ArgumentParser(description='safmodel: SAF microarchitecture modeling generator.')
-    parser.add_argument('-a','--arch',default='ref_input/arch.yaml', \
+    parser.add_argument('-a','--arch',default='', \
                         help='Sparseloop architecture file.')
     parser.add_argument('-b','--char',action='append',default=['!base'], \
                         help='CSV EAT characterization table.')

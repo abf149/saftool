@@ -1,36 +1,39 @@
 # Returns:
 # - float list of [absolute total area, combinational area, non-combinational area, black-box area]
 # - area unit
+import os
 
-area_headers=['Combinational_Area','Noncombinational_Area','Buf/Inv_Area','Total_Buffer_Area', \
-                  'Total_Inverter_Area','Macro/Black_Box_Area','Net_Area']
+if not os.getenv("SPHINX_BUILD"):
 
-def parse_area(fn):
-    area_unit='um2'
+    area_headers=['Combinational_Area','Noncombinational_Area','Buf/Inv_Area','Total_Buffer_Area', \
+                    'Total_Inverter_Area','Macro/Black_Box_Area','Net_Area']
 
-    res={}
+    def parse_area(fn):
+        area_unit='um2'
 
-    with open(fn) as f:
-        lns=f.readlines()
+        res={}
 
-        found_area=False
-        found_divider=False
+        with open(fn) as f:
+            lns=f.readlines()
 
-        for ln in lns:
-            
-            if found_area:
-                if found_divider:
-                    if "----" in ln:
-                        return res, area_unit
+            found_area=False
+            found_divider=False
+
+            for ln in lns:
+                
+                if found_area:
+                    if found_divider:
+                        if "----" in ln:
+                            return res, area_unit
+                        else:
+                            ln_strip=ln.strip()
+                            field_value=ln_strip.split(":") #(field,value)
+                            fld=field_value[0].strip().replace(" ","_")
+                            vl=float(field_value[1].strip())
+                            res[fld]=vl
                     else:
-                        ln_strip=ln.strip()
-                        field_value=ln_strip.split(":") #(field,value)
-                        fld=field_value[0].strip().replace(" ","_")
-                        vl=float(field_value[1].strip())
-                        res[fld]=vl
+                        if "----" in ln:
+                            found_divider=True
                 else:
-                    if "----" in ln:
-                        found_divider=True
-            else:
-                if ln.strip()=="Area":
-                    found_area=True
+                    if ln.strip()=="Area":
+                        found_area=True

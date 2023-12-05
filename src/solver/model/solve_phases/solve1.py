@@ -1,7 +1,8 @@
 '''Solve a simplified scale inference problem'''
 import os
 import re
-from pyomo.environ import *
+from pyomo.environ import ConcreteModel, Var, Integers, NonNegativeReals, Constraint,  \
+                          Binary, Objective, minimize, SolverManagerFactory, SolverStatus, TerminationCondition
 from core.helper import info,warn,error
 import core.model.CasCompat as cc_
 import sympy as sp

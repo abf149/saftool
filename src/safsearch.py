@@ -1,6 +1,8 @@
 from core.helper import info,warn,error
 import core.helper as helper
 import safinfer,safmodel,core.safsearch_io as safsearch_io,core.safsearch_core as safsearch_core
+import os
+
 '''
 from util import safmodel_core as safcore, \
                  safmodel_io as safio, \
@@ -234,5 +236,5 @@ def main():
              model_top_x)
     closing_remark()
 
-if __name__=="__main__":
+if __name__=="__main__" and not os.getenv("SPHINX_BUILD"):
     main()

@@ -158,7 +158,7 @@ def parse_args():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-i','--dir-in',default='')
-    parser.add_argument('-a','--arch',default='ref_input/arch.yaml')
+    parser.add_argument('-a','--arch',default='')
     parser.add_argument('-m','--map',default='ref_input/map.yaml')
     parser.add_argument('-p','--prob',default='ref_input/prob.yaml')
     parser.add_argument('-s','--sparseopts',default='ref_input/sparseopts.yaml')

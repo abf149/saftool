@@ -8,7 +8,7 @@
 
 import os,sys
 
-#sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath(".."))
 
 project = 'SAFtools'
 copyright = '2023, Andrew Feldman'
@@ -21,7 +21,7 @@ release = '0.1'
 extensions = ['sphinx.ext.todo','sphinx.ext.viewcode','sphinx.ext.autodoc']
 
 templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store','./setup.py', '../src/parse_area.py', '../src/parse_latency.py', '../src/parse_power.py', '../src/parse_summary.py']
 
 
 
