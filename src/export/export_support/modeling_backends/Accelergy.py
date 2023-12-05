@@ -1,11 +1,11 @@
 '''Accelergy compatibility layer'''
-from util.helper import info,warn,error
-import util.sparseloop_config_processor as sl_config
-import util.model.CasCompat as cc_
+from core.helper import info,warn,error
+import core.sparseloop_config_processor as sl_config
+import core.model.CasCompat as cc_
 import yaml
 import pickle, shutil, os, copy
 import solver.model.build_support.abstraction as ab_
-import util.general_io as genio
+import core.general_io as genio
 
 def dict_representer(dumper, data):
     return dumper.represent_mapping(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data.items())

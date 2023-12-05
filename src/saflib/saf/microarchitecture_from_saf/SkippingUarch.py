@@ -1,8 +1,8 @@
 '''Skipping microarchitecture'''
-from util.taxonomy.expressions import *
-from util.taxonomy.designelement import *
-from util.notation import microarchitecture as m_, transform as t_
-from util.taxonomy.expressions import FormatType
+from core.taxonomy.expressions import *
+from core.taxonomy.designelement import *
+from core.notation import microarchitecture as m_, transform as t_
+from core.taxonomy.expressions import FormatType
 import saflib.microarchitecture.TaxoRegistry as tr_
 skipping_uarch_dict=tr_.getComponent("SkippingUarch")
 buildSkippingUarch=skipping_uarch_dict['constructor']

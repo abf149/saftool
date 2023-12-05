@@ -4,7 +4,7 @@ for scale parameters at architecture buffer interfaces
 '''
 import solver.model.build_support.abstraction as ab, \
        solver.model.build_support.scale as sc
-from util.helper import info, warn, error
+from core.helper import info, warn, error
 
 def make_port_uri_attribute(arch_name,buffer_name,port_prefix,direction,idx,attribute):
     return ab.make_port_uri(arch_name,buffer_name,port_prefix,direction,idx)+"_"+attribute

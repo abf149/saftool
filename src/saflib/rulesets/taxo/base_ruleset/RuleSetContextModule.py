@@ -1,9 +1,9 @@
 '''Base SAFInfer RuleSet'''
-from util.notation.generators import quantifiers as q_, boolean_operators as b_
-from util.notation import attributes as a_, objects as o_, predicates as p_, transform as t_
+from core.notation.generators import quantifiers as q_, boolean_operators as b_
+from core.notation import attributes as a_, objects as o_, predicates as p_, transform as t_
 import saflib.microarchitecture.TaxoRegistry as tr_
-from util.notation.generators import rules as r_
-from util.taxonomy.expressions import FormatType
+from core.notation.generators import rules as r_
+from core.taxonomy.expressions import FormatType
 
 ''' Topology validation rules'''
 ''' - AssertNetHasConsistentPortNetType: all ports connected by a Net should have a consistent NetType'''

@@ -1,6 +1,6 @@
-from util.taxonomy.serializableobject import SerializableObject
-from util.taxonomy.expressions import *
-from util.taxonomy.designelement import *
+from core.taxonomy.serializableobject import SerializableObject
+from core.taxonomy.expressions import *
+from core.taxonomy.designelement import *
 from solver.solve import *
 
 def genDummyComponent(break_net_type=False, break_format_type=False):

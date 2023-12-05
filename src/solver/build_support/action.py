@@ -1,10 +1,10 @@
 import solver.build_support.arch as ar_
 from saflib.saf.SkippingSAF import SkippingSAF
-import util.parse as pr_
+import core.parse as pr_
 import copy
 from collections import deque
 from functools import cmp_to_key
-from util.helper import info,warn,error
+from core.helper import info,warn,error
 
 def compare_action_to_fmt_iface_bindings(A,B):
     '''

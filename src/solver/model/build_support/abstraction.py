@@ -1,7 +1,7 @@
 '''
 Consistent abstractions for representing microarchitecture as a graph of ports
 '''
-import util.notation.predicates as p_
+import core.notation.predicates as p_
 import solver.model.build_support.scale as sc
 
 def uri(prfx,sffx):

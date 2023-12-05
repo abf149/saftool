@@ -2,8 +2,8 @@ import parser.taxo_parser_core as tp_
 import yaml
 import saflib.microarchitecture.TaxoRegistry as tr_
 #import util.notation.taxo as mo_
-from util.helper import info,warn,error
-from util import helper
+from core.helper import info,warn,error
+from core import helper
 
 yaml_fn=['saflib/microarchitecture/taxoscript/FillGate.taxoscript.yaml',
          'saflib/microarchitecture/taxoscript/IntersectionLeaderFollower.taxoscript.yaml',

@@ -1,8 +1,8 @@
-from util.helper import info, warn, error
+from core.helper import info, warn, error
 from solver.build_support.arch import get_buffer_hierarchy
-import util.notation.predicates as p_
+import core.notation.predicates as p_
 import solver.model.build_support.abstraction as ab_
-import util.sparseloop_config_processor as sl_config
+import core.sparseloop_config_processor as sl_config
 
 import solver.model.build_support.abstraction as ab, \
        solver.model.build_support.scale as sc, \

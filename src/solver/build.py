@@ -1,10 +1,10 @@
 '''Library for constructing a SAF microrarchitecture inference problem'''
 from saflib.architecture.taxo.Architecture import ArchitectureBase
-from util.notation.microarchitecture import TopologyWrapper
+from core.notation.microarchitecture import TopologyWrapper
 import solver.build_support.action as ac_
 import solver.build_support.arch as ar_
 import solver.build_support.format as fm_
-from util.helper import info,warn,error
+from core.helper import info,warn,error
 
 def get_buffer_stubs_and_SAFs_from_bindings(arch, \
                                             fmt_iface_bindings, \

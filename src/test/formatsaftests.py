@@ -1,9 +1,9 @@
 '''Format SAF regression testbench'''
 
 
-from util.taxonomy.serializableobject import SerializableObject
-from util.taxonomy.expressions import *
-from util.taxonomy.designelement import *
+from core.taxonomy.serializableobject import SerializableObject
+from core.taxonomy.expressions import *
+from core.taxonomy.designelement import *
 from solver.solve import *
 
 def genArch(buffer_stub, arch_saf_list):

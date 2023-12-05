@@ -1,5 +1,5 @@
 '''SAFsearch search functionality'''
-from util.helper import info,warn,error,get_tqdm_outfile
+from core.helper import info,warn,error,get_tqdm_outfile
 from tqdm import tqdm
 import search.search_support.life_cycle as lc_
 from search.taxonomic.build.build_support.config_gen import build_user_attributes

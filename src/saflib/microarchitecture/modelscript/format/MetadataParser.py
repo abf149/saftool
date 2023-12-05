@@ -1,5 +1,5 @@
 from ...taxo.format.MetadataParser import MetadataParser, md_parser_instances
-import util.notation.model as mo_
+import core.notation.model as mo_
 #import saflib.microarchitecture.model.model_registry as mr_
 
 md_parser_require_attrs=['pr','cr','nc','rw','ww']

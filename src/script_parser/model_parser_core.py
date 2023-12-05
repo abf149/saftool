@@ -2,8 +2,8 @@ import script_parser.model_parser_support.keywords as kw_
 import script_parser.model_parser_support.primitive.primitive_parser as prpr_
 import script_parser.model_parser_support.component.component_parser as cmpr_
 import saflib.microarchitecture.TaxoRegistry as tr_
-import util.notation.model as mo_
-from util.helper import info,warn,error
+import core.notation.model as mo_
+from core.helper import info,warn,error
 
 def parse_modelscript(script_dict):
     info("-- Parsing modelscript file.")

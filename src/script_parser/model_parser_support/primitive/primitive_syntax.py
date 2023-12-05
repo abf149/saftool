@@ -2,10 +2,10 @@
 import script_parser.model_parser_support.keywords as kw_
 import script_parser.model_parser_support.primitive.primitive_keywords as pkw_
 import saflib.microarchitecture.TaxoRegistry as tr_
-import util.notation.model as mo_
-import util.notation.characterization as ch_
+import core.notation.model as mo_
+import core.notation.characterization as ch_
 import saflib.resources.char.ResourceRegistry as rr_
-from util.helper import info,warn,error
+from core.helper import info,warn,error
 import re
 
 def parse_name(primitive):

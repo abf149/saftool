@@ -1,5 +1,5 @@
 '''Build a SAFModel throughput inference problem'''
-from util.helper import info,warn,error
+from core.helper import info,warn,error
 from solver.model.solve_phases.solve1 import solve1_scale_inference
 
 def solve(sclp):

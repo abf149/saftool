@@ -2,7 +2,7 @@ import script_parser.taxo_parser_support.keywords as kw_
 import script_parser.taxo_parser_support.primitive.primitive_parser as prpr_
 import script_parser.taxo_parser_support.component.component_parser as cmpr_
 import saflib.microarchitecture.TaxoRegistry as tr_
-from util.helper import info,warn,error
+from core.helper import info,warn,error
 
 def parse_taxoscript(script_dict,primitives_only=False,components_only=False):
     info("-- Parsing taxoscript file.")

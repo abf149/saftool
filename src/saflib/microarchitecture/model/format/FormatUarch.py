@@ -1,5 +1,5 @@
 from ...taxo.format.FormatUarch import FormatUarch, fmt_uarch_instances
-import util.notation.model as mo_
+import core.notation.model as mo_
 
 FormatUarchModel=FormatUarch \
     .copy() \

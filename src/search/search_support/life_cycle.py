@@ -1,5 +1,5 @@
 '''Routines for managing the life-cycle of the SAFsearch search process'''
-from util.helper import info,warn,error
+from core.helper import info,warn,error
 import copy
 
 def build_search_point(per_comp_search_state_dict, \

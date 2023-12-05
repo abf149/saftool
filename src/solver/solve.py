@@ -1,7 +1,7 @@
 '''SAFinfer solver library - solve SAF microarchitecture inference problem'''
-from util.taxonomy.serializableobject import SerializableObject
+from core.taxonomy.serializableobject import SerializableObject
 from solver.rulesets import RuleSet
-from util.helper import info, warn, error
+from core.helper import info, warn, error
 import solver.model.build_support.abstraction as ab_
 from solver.constraints import force_attributes
 #import os

@@ -1,10 +1,10 @@
 '''Taxoscript primitive parsing'''
-from util.helper import info,warn,error
+from core.helper import info,warn,error
 
 '''Taxoscript primitive parsing'''
 import script_parser.taxo_parser_support.primitive.primitive_keywords as pkw_
 import script_parser.taxo_parser_support.primitive.primitive_syntax as ps_
-from util.helper import info,warn,error
+from core.helper import info,warn,error
 
 def get_taxoscript_primitives(script_dict):
     if pkw_.taxoscript_primitives in script_dict:

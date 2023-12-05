@@ -1,12 +1,12 @@
 '''Format uarch RuleSet'''
 
 from functools import reduce
-from util.taxonomy.expressions import *
-from util.taxonomy.designelement import *
-from util.notation import predicates as p_, \
+from core.taxonomy.expressions import *
+from core.taxonomy.designelement import *
+from core.notation import predicates as p_, \
                           attributes as a_, \
                           transform as t_                    
-from util.notation.generators import boolean_operators as b_, \
+from core.notation.generators import boolean_operators as b_, \
                                      quantifiers as q_, \
                                      comparison as c_
 

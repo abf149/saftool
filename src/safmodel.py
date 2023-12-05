@@ -1,7 +1,7 @@
 '''SAFmodel - tool to build SAF models from SAF microarchitecture topologies'''
-import util.helper as helper
-from util.helper import info,warn,error
-from util import safmodel_core as safcore, \
+import core.helper as helper
+from core.helper import info,warn,error
+from core import safmodel_core as safcore, \
                  safmodel_io as safio, \
                  safinfer_io
 

@@ -1,6 +1,6 @@
 from ...taxo.skipping.IntersectionLeaderFollower import IntersectionLeaderFollower, intersection_instances
-import util.notation.model as mo_
-import util.notation.characterization as ch_
+import core.notation.model as mo_
+import core.notation.characterization as ch_
 import saflib.resources.char.ResourceRegistry as rr_
 
 ctbl=rr_.getCharacterizationTable('accelergy/data/primitives_table.csv')

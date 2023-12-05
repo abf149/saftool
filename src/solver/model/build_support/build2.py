@@ -1,10 +1,10 @@
 '''Solver phase 1: DFS'''
-from util.helper import info, warn, error
+from core.helper import info, warn, error
 import solver.model.build_support.relations as rn
 import solver.model.build_support.scale as sc
 import saflib.microarchitecture.ModelRegistry as mr
 import solver.model.build_support.abstraction as ab_
-import util.model.CasCompat as cc_
+import core.model.CasCompat as cc_
 import sympy as sp
 
 def subs_scale_param_boundary_conds(port_with_boundary_conds,subs_port,reln_dict,transitive_closure_relns):

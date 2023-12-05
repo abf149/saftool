@@ -3,7 +3,7 @@
 #from saflib.microarchitecture.taxo.skipping.IntersectionLeaderFollower import IntersectionLeaderFollower,buildIntersectionLeaderFollower,intersection_instances
 #from saflib.microarchitecture.taxo.format.FormatUarch import FormatUarch,buildFormatUarch,fmt_uarch_instances,fmt_uarch_topologies
 #from saflib.microarchitecture.taxo.skipping.SkippingUarch import SkippingUarch,buildSkippingUarch,skipping_uarch_instances,skipping_uarch_topologies
-from util.helper import info,warn,error
+from core.helper import info,warn,error
 
 primitive_taxo_description_dict={}
 primitive_taxo_constructor_dict={}

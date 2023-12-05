@@ -2,7 +2,7 @@
 Extract or synthesize key metrics for scale inference
 '''
 import numpy as np
-from util.helper import info,warn,error
+from core.helper import info,warn,error
 
 sym_suffixes=["rw","pr","cr","ww","pw","nc"]
 

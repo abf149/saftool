@@ -1,9 +1,9 @@
 import parser.taxo_parser_core as tp_
 import yaml
 import saflib.microarchitecture.TaxoRegistry as tr_
-import util.notation.model as mo_
-from util.helper import info,warn,error
-from util import helper
+import core.notation.model as mo_
+from core.helper import info,warn,error
+from core import helper
 
 yaml_fn='saflib/microarchitecture/modelscript/SkippingUarch.modelscript.yaml'
 log_fn='test_model_parser.log'

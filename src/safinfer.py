@@ -1,8 +1,8 @@
 '''SAFinfer - tool to build and solve SAF microarchitecture inference problem from Sparseloop inputs'''
-from util import safinfer_core as safcore, \
+from core import safinfer_core as safcore, \
                  safinfer_io as safio
-from util.helper import info,warn,error
-import util.helper as helper
+from core.helper import info,warn,error
+import core.helper as helper
 
 def opening_remark():
     info(">> SAFinfer",also_stdout=True)  

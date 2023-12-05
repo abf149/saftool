@@ -1,7 +1,7 @@
 '''SAFInfer rulesets library - wrappers for collections of categorically similar SAF microarchitecture inference rules'''
 from solver.rules import ValidationRule, RewriteRule, CompletionRule
-from util.taxonomy.serializableobject import SerializableObject
-from util.helper import dirpath_to_import_expression, info, warn, error
+from core.taxonomy.serializableobject import SerializableObject
+from core.helper import dirpath_to_import_expression, info, warn, error
 import os
 
 '''RuleSets'''

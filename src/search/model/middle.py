@@ -1,6 +1,6 @@
 '''Wrapper for using SAFmodel as a middle-layer for evaluating a search-point'''
 import safmodel
-import util.safsearch_io as safsearch_io
+import core.safsearch_io as safsearch_io
 
 def safmodel_middle_layer(arch,taxo_uarch,sparseopts,user_attributes,log_safmodel=False):
     '''

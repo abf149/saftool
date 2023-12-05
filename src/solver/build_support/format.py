@@ -1,7 +1,7 @@
 from saflib.architecture.taxo.stub_primitives.BufferStub import BufferStub
 from saflib.saf.FormatSAF import FormatSAF
 import solver.build_support.arch as ar_
-from util.helper import info,warn,error
+from core.helper import info,warn,error
 
 def get_buffer_stubs_and_format_safs(arch, fmt_iface_bindings, buffer_stub_list=[], saf_list=[]):
     info("-- Generating buffer stubs and Format SAFs")

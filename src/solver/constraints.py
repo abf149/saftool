@@ -1,8 +1,8 @@
 '''Apply constraints on SAFinfer search process'''
 import solver.model.build_support.abstraction as ab_
 import saflib.microarchitecture.TaxoRegistry as tr_
-import util.notation.predicates as pr_
-from util.helper import info, warn, error
+import core.notation.predicates as pr_
+from core.helper import info, warn, error
 import copy
 
 def assert_valid_force_attr_spec(force_attr_spec):

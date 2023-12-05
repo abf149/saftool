@@ -1,5 +1,5 @@
 import os
-from util import sparseloop_config_processor as sl_config
+from core import sparseloop_config_processor as sl_config
 import test_data as td
 from test_data import NO_EDGE, GENERIC_EDGE, PRIMITIVE_EDGE
 import copy

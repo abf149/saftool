@@ -1,5 +1,5 @@
-from util.helper import info, warn, error
-import util.model.CasCompat as cc_
+from core.helper import info, warn, error
+import core.model.CasCompat as cc_
 import sympy as sp
 import solver.model.build_support.abstraction as ab_
 

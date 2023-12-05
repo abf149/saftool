@@ -1,6 +1,6 @@
 import saflib.microarchitecture.TaxoRegistry as tr_
 #from ...taxo.address_primitives.PositionGenerator import PositionGenerator, pgen_instances
-import util.notation.model as mo_
+import core.notation.model as mo_
 
 pgen_attr_list=["pr","cr","pw","nc"]
 

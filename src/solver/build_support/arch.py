@@ -1,7 +1,7 @@
 '''Library for constructing a SAF microrarchitecture inference problem'''
-import util.sparseloop_config_processor as sl_config
-import util.parse as pr_
-from util.helper import info,warn,error
+import core.sparseloop_config_processor as sl_config
+import core.parse as pr_
+from core.helper import info,warn,error
 
 def get_sparseloop_arch_parameter_dict(arch):
     version_=arch['architecture']['version']

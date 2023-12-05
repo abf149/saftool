@@ -1,7 +1,7 @@
-from util.taxonomy import designelement as de
-import util.sparseloop_config_processor as sl_config
+from core.taxonomy import designelement as de
+import core.sparseloop_config_processor as sl_config
 import solver.model.build_support.abstraction as ab_
-import util.notation.predicates as p_
+import core.notation.predicates as p_
 
 # This function takes an architecture object and returns a dictionary mapping uarch ports to buffer ports
 def get_uarch_port_mapping_to_buffer_port(obj:de.Architecture):

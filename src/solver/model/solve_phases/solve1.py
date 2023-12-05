@@ -2,8 +2,8 @@
 import os
 import re
 from pyomo.environ import *
-from util.helper import info,warn,error
-import util.model.CasCompat as cc_
+from core.helper import info,warn,error
+import core.model.CasCompat as cc_
 import sympy as sp
 
 supported_neos_solver_opts=['couenne', 'cbc', 'cplex', 'filmint', 'mosek', 'octeract']

@@ -1,7 +1,7 @@
 '''Modelscript primitive parsing'''
 import script_parser.model_parser_support.primitive.primitive_keywords as pkw_
 import script_parser.model_parser_support.primitive.primitive_syntax as ps_
-from util.helper import info,warn,error
+from core.helper import info,warn,error
 
 def get_modelscript_primitives(script_dict):
     if pkw_.modelscript_primitives in script_dict:

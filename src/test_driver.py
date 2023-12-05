@@ -1,7 +1,7 @@
 '''Regression testbench'''
 
 import os
-from util.taxonomy.designelement import Port
+from core.taxonomy.designelement import Port
 from test import basictests, validationtests, formatuarchtests, incompleteuarchtests, formatsaftests
 
 os.system('rm -f *test.yaml')

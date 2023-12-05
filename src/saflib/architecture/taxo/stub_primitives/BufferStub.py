@@ -1,4 +1,4 @@
-import util.notation.microarchitecture as m_
+import core.notation.microarchitecture as m_
 
 BufferStub = m_.PrimitiveCategory().name("BufferStub") \
                                    .port_out("md_out$x","md","$v") \

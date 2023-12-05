@@ -2,7 +2,7 @@
 import script_parser.model_parser_support.primitive.primitive_keywords as pkw_
 import script_parser.model_parser_support.component.component_syntax as cs_
 import script_parser.model_parser_support.component.component_keywords as ckw_
-from util.helper import info,warn,error
+from core.helper import info,warn,error
 
 def get_modelscript_components(script_dict):
     if ckw_.modelscript_components in script_dict:

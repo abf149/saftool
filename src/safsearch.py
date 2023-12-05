@@ -1,6 +1,6 @@
-from util.helper import info,warn,error
-import util.helper as helper
-import safinfer,safmodel,util.safsearch_io as safsearch_io,util.safsearch_core as safsearch_core
+from core.helper import info,warn,error
+import core.helper as helper
+import safinfer,safmodel,core.safsearch_io as safsearch_io,core.safsearch_core as safsearch_core
 '''
 from util import safmodel_core as safcore, \
                  safmodel_io as safio, \

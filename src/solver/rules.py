@@ -1,6 +1,6 @@
 '''SAFInfer rules library - defines categories of SAF microarchitecture inference rules'''
-from util.taxonomy.serializableobject import SerializableObject
-from util.taxonomy.expressions import FunctionReference
+from core.taxonomy.serializableobject import SerializableObject
+from core.taxonomy.expressions import FunctionReference
 
 '''Rules'''
 class Rule(SerializableObject):

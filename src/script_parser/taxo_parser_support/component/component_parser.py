@@ -5,7 +5,7 @@ import script_parser.taxo_parser_support.primitive.primitive_syntax as ps_
 import script_parser.taxo_parser_support.component.component_syntax as cs_
 import script_parser.taxo_parser_support.component.component_keywords as ckw_
 import saflib.microarchitecture.TaxoRegistry as tr_
-from util.helper import info,warn,error
+from core.helper import info,warn,error
 
 def get_taxoscript_components(script_dict):
     if ckw_.taxoscript_components in script_dict:

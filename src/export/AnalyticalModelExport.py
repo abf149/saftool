@@ -2,7 +2,7 @@
 from .export_support.export1 import export1_backend_primitive_lib_objective_models, \
                                     export2_backend_component_lib, \
                                     export3_backend_arch_update
-from util.helper import info,warn,error
+from core.helper import info,warn,error
 
 def export_backend_modeling_suite(comp_in, \
                                   analytical_primitive_model_classes_dict, \

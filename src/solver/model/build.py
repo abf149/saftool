@@ -1,5 +1,5 @@
 '''Build a SAFModel throughput inference problem'''
-from util.helper import info, warn, error
+from core.helper import info, warn, error
 from .build_support.build1 import build1_graph_representation
 from .build_support.build2 import build2_system_of_relations
 from .build_support.build3 import build3_simplify_system

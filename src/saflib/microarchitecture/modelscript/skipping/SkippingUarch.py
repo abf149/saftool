@@ -1,5 +1,5 @@
 from ...taxo.skipping.SkippingUarch import SkippingUarch, skipping_uarch_instances
-import util.notation.model as mo_
+import core.notation.model as mo_
 
 SkippingUarchModel=SkippingUarch \
     .copy() \

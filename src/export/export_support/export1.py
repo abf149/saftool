@@ -1,7 +1,7 @@
 '''Export analytical model primitives'''
 
 import export.export_support.modeling_backends.Accelergy as acc_
-from util.helper import info,warn,error
+from core.helper import info,warn,error
 
 def getBackendPrimitiveLibraryRepresentation(analytical_model_classes_dict, \
                                              analytical_model_actions_dict, \

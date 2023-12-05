@@ -1,8 +1,8 @@
 '''Basic taxo primitive parsing commands'''
-from util.notation import microarchitecture as m_
-import util.taxonomy.designelement as de_
+from core.notation import microarchitecture as m_
+import core.taxonomy.designelement as de_
 import script_parser.taxo_parser_support.keywords as kw_
-from util.helper import info,warn,error
+from core.helper import info,warn,error
 
 def parse_name(primitive):
     if kw_.object_name not in primitive:
