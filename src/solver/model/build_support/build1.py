@@ -105,16 +105,23 @@ def build1_graph_representation(taxo_uarch,arch,fmt_iface_bindings,dtype_list, \
                                             buff_dags,dtype_list)
 
     llbs={dtype:[buff for idx,buff in enumerate(flat_arch) if buff_dags[dtype][idx][-1]] for dtype in dtype_list}
-    reln_list,anchor_dict \
+    reln_list_dict,anchor_dict \
         =rn.get_scale_boundary_conditions(gpthrpt,port_attr_dict,fmt_iface_bindings, \
                                           flat_arch,buff_dags,dtype_list,anchor_overrides, \
                                           constraints=constraints)
+
+    info("-- Boundary-condition relations:")
+    for port_uri in reln_list_dict:
+        info("---",port_uri,":")
+        reln_list=reln_list_dict[port_uri]
+        for reln in reln_list:
+            info("----",reln)
 
     uarch_port_upstream_map=get_uarch_port_mapping_to_buffer_port(taxo_uarch)
 
     warn("- => done, build phase 1.")
 
-    return {'reln_list':reln_list,'port_list':port_list,'port_attr_dict':port_attr_dict,'net_list':net_list, \
+    return {'reln_list':reln_list_dict,'port_list':port_list,'port_attr_dict':port_attr_dict,'net_list':net_list, \
             'out_port_net_dict':out_port_net_dict,'in_port_net_dict':in_port_net_dict,'symbol_list':symbol_list,'uarch_symbol_list':uarch_symbol_list, \
             'obj_to_ports':obj_to_ports,'gpthrpt':gpthrpt,'obj_dict':obj_dict,'uarch_port_upstream_map':uarch_port_upstream_map, \
             'buff_dags':buff_dags,'llbs':llbs,'anchor_dict':anchor_dict,'anchor_overrides':anchor_overrides,'flat_port_idx_to_dtype':flat_port_idx_to_dtype}

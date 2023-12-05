@@ -3,9 +3,9 @@ from collections import deque
 import util.sparseloop_config_processor as sl_config, yaml, argparse
 from util.helper import info,warn,error
 import util.notation.predicates as p_
+import script_parser.taxo_parser_core as tp_
 import solver.model.build_support.abstraction as ab
 import glob,os
-import parser.taxo_parser_core as tp_
 import util.general_io as genio
 
 '''Config - condition the format of YAML file dumps'''
@@ -42,7 +42,18 @@ def load_parse_taxo_libs(taxo_script_lib_list):
 
 def process_taxo_script_lib_cli(args_taxo_script_lib):
     # Get user-provided taxonomic script library, or else use default from repo
-    base_taxo_script_lib=genio.get_resource_filepath_or_dir('src/saflib/microarchitecture/taxoscript/*.yaml')
+
+    base_taxo_script_lib = 'src/saflib/microarchitecture/taxoscript/*.yaml'
+    temp = str(base_taxo_script_lib).split(os.path.basename(base_taxo_script_lib))[0]
+    temp = os.path.join(temp,"FillGate.taxoscript.yaml")
+    temp = genio.get_resource_filepath_or_dir(temp)
+    temp = str(temp).split('FillGate.taxoscript.yaml')[0]
+    base_taxo_script_lib = os.path.join(temp,os.path.basename(base_taxo_script_lib))
+
+    #print(base_taxo_script_lib)
+    #assert(False)
+
+    #base_taxo_script_lib=genio.get_resource_filepath_or_dir('src/saflib/microarchitecture/taxoscript/*.yaml')
     
     taxo_script_lib=None
     if len(args_taxo_script_lib)==0:
@@ -105,7 +116,9 @@ def process_args(args):
     user_attributes=sl_config.load_config_yaml(args.settings)
 
     # Convert saftaxolib repo relative directory to absolute directory
-    saftaxolib_path = genio.get_resource_filepath_or_dir('src/saflib/rulesets/taxo/')
+    saftaxolib_path = genio.get_resource_filepath_or_dir('src/saflib/rulesets/taxo/base_ruleset/rule_set.yaml')
+    saftaxolib_path = str(saftaxolib_path).split('base_ruleset/rule_set.yaml')[0]
+    #saftaxolib_path = genio.get_resource_filepath_or_dir('src/saflib/rulesets/taxo/')
     saftaxolib_path = genio.get_abs_path_relative_to_cwd(saftaxolib_path)
 
     # Get user-provided taxonomic script library, or else use default from repo

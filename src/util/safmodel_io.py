@@ -23,7 +23,7 @@ def register_characterization_resources(characterization_path_list):
 def load_parse_model_libs(model_script_lib_list):
     # Parse modelscript
     import glob,yaml
-    import parser.model_parser_core as tp_
+    import script_parser.model_parser_core as tp_
     lib_filepath_list=[]
     lib_filepath_list.extend(glob.glob(model_script_lib_list[0]))
     info("Parsing modelscript libraries (",len(lib_filepath_list),")...")
