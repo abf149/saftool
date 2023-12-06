@@ -27,4 +27,4 @@ sphinx:
 # Declare the Python requirements required to build your documentation
 python:
    install:
-   - requirements: requirements.txt  # Modify this line as needed
+   - requirements: doc_requirements.txt  # Modify this line as needed
