@@ -1,22 +1,15 @@
 version: 0.3
 classes:
-- name: PositionGeneratorModel
+- name: FillGateModel
   attributes:
     clock: must_specify
     technology: must_specify
     area_multiplier: must_specify
-    format: must_specify
-    md_in_pr_thresh: must_specify
-    md_in_pw_thresh: must_specify
-    md_in_nc_thresh: must_specify
-    md_in_cr_thresh: must_specify
-    pos_out_pr_thresh: must_specify
-    pos_out_pw_thresh: must_specify
-    pos_out_nc_thresh: must_specify
-    pos_out_cr_thresh: must_specify
+    strategy: must_specify
+    pos_in_pr_thresh: must_specify
   actions:
-  - name: gen
-  - name: gated_gen
+  - name: idle
+  - name: gate
 - name: IntersectionLeaderFollowerModel
   attributes:
     clock: must_specify
@@ -35,16 +28,6 @@ classes:
   - name: intersect
   - name: gated_fill
   - name: gated_intersect
-- name: FillGateModel
-  attributes:
-    clock: must_specify
-    technology: must_specify
-    area_multiplier: must_specify
-    strategy: must_specify
-    pos_in_pr_thresh: must_specify
-  actions:
-  - name: idle
-  - name: gate
 - name: MetadataParserModel
   attributes:
     clock: must_specify
@@ -60,3 +43,20 @@ classes:
   actions:
   - name: check_bound
   - name: gated_check_bound
+- name: PositionGeneratorModel
+  attributes:
+    clock: must_specify
+    technology: must_specify
+    area_multiplier: must_specify
+    format: must_specify
+    md_in_pr_thresh: must_specify
+    md_in_pw_thresh: must_specify
+    md_in_nc_thresh: must_specify
+    md_in_cr_thresh: must_specify
+    pos_out_pr_thresh: must_specify
+    pos_out_pw_thresh: must_specify
+    pos_out_nc_thresh: must_specify
+    pos_out_cr_thresh: must_specify
+  actions:
+  - name: gen
+  - name: gated_gen
