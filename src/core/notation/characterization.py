@@ -8,6 +8,7 @@ import core.notation.characterization_support.expressions as ex_
 import core.notation.characterization_support.fit as fit_
 import copy
 from tqdm import tqdm
+import numpy as np
 
 class CharacterizationTableView:
     def __init__(self,view_dict,name_expression,var_list,column_names,latency_lmbd):
@@ -711,6 +712,9 @@ class CharacterizationMetricModel:
                                                             overfit=True, \
                                                             show_progress=True)
             
+            energy_RNMSE=np.sqrt(NMSEs['energy'][best_degrees['energy']])
+            area_RNMSE=np.sqrt(NMSEs['area'][best_degrees['area']])
+
             X_scaler=scalers['X']
             energy_model=fitted_models['energy']
             energy_scaler=scalers['energy']
@@ -748,16 +752,29 @@ class CharacterizationMetricModel:
                                                              best_degrees)
 
             if mse_comparison['energy'] > 1e-10 or mse_comparison['area'] > 1e-10:
-                warn('Warning: mse_comparison[\'energy\'] ==', \
+                error('Warning: mse_comparison[\'energy\'] ==', \
                      mse_comparison['energy'], \
                      'mse_comparison[\'area\'] ==', \
                      mse_comparison['area'], \
                      also_stdout=True)
+                info("Terminating.")
+                assert(False)
+
+            if energy_RNMSE > 0.01 or area_RNMSE > 0.01:
+                error('Warning: energy RNMSE ==', \
+                     str(energy_RNMSE*100.0),'%', \
+                     'area RNMSE ==', \
+                     str(area_RNMSE*100.0),'%', \
+                     also_stdout=True)
+                info("Terminating.")
+                assert(False)      
 
             info(name_expression,"energy expression:\n",energy_expr)
             info("-",name_expression,"MSE energy error (symbolic vs numerical):",mse_comparison['energy'],also_stdout=True)
+            info("-",name_expression,"RNMSE energy error (numerical vs true):",str(int(energy_RNMSE*1000.0)/10.0),"%",also_stdout=True)
             info(name_expression,"area expression:\n",area_expr)
             info("-",name_expression,"MSE area error (symbolic vs numerical):",mse_comparison['area'],also_stdout=True)
+            info("-",name_expression,"RNMSE area error (numerical vs true):",str(int(area_RNMSE*1000.0)/10.0),"%",also_stdout=True)
     
             if self.isSingleLatency():
                 info("- Substituting in clock latency for latency independent variable...")

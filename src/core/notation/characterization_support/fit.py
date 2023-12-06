@@ -55,7 +55,13 @@ def polynomial_regression_generalized_v2(data_tuples, column_names, independent_
             y_scaled = y_scaler.transform(y.values.reshape(-1, 1)).ravel()
             poly_features = PolynomialFeatures(degree=max_degree, include_bias=False)
             X_poly = poly_features.fit_transform(pd.DataFrame(scaler_X.transform(data[independent_var_names]), columns=independent_var_names))
-            best_model = LinearRegression().fit(X_poly, y_scaled)
+            model = LinearRegression().fit(X_poly, y_scaled)
+            best_model = model
+            predictions = model.predict(X_poly)
+            mse = mean_squared_error(y_scaled, predictions)
+            nmse = mse / mean_squared_error([0]*len(y_scaled), y_scaled)
+            MSEs[target_name]=[0]*(max_degree)+[mse]
+            NMSEs[target_name]=[0]*(max_degree)+[nmse]
             best_degrees[target_name] = max_degree
             fitted_models[target_name] = best_model
     else:
