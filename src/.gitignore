@@ -1,4 +1,7 @@
 # Top-level logs
+
+single_comp_build.sh
+
 requirements.txt
 log.*
 *.log

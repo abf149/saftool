@@ -1,6 +1,9 @@
 saf_primitives.lib.yaml
 primitives_ERT_ART.pkl
 
+project
+.bsp
+
 # zips
 *.zip
 

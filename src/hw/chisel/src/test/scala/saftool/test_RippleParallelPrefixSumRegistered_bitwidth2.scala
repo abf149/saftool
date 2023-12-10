@@ -1,3 +1,4 @@
+import saftool._
 import chisel3._
 import chisel3.util._
 import chiseltest._
