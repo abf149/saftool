@@ -26,7 +26,7 @@ class BidirectionalCoordinatePayloadIntersectDecoupled(metaDataWidth: Int) exten
   val out_valid = RegInit(false.B)  
 
   // Combinatorical intersection unit
-  val intersectCombinational = Module(new IntersectFmtCDirBidirCombinational(metaDataWidth))
+  val intersectCombinational = Module(new IntersectFmtCDirBidirSingletonCombinational(metaDataWidth))
   intersectCombinational.reset := reset
   intersectCombinational.clock := clock
   intersectCombinational.io.in0 := in0_reg

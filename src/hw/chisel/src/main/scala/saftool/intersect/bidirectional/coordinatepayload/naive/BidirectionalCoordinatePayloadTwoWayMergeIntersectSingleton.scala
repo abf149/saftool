@@ -8,7 +8,7 @@ import chisel3.util.Decoupled
 import chisel3.util.{switch, is}
 
 // Intersect unit {Format: C, metadata orchestration: uncoupled}
-class IntersectFmtCDirBidirCombinational(metaDataWidth: Int) extends Module  with RequireSyncReset {
+class IntersectFmtCDirBidirSingletonCombinational(metaDataWidth: Int) extends Module  with RequireSyncReset {
   val io = IO(new Bundle {
     val in0 = Input(UInt(metaDataWidth.W))
     val in1 = Input(UInt(metaDataWidth.W))
