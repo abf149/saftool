@@ -7,7 +7,7 @@ import chisel3.experimental.ChiselEnum
 import chisel3.util.Decoupled
 import chisel3.util.{switch, is}
 
-class TagComparatorArray(numTags: Int, tagBitWidth: Int) extends Module with RequireSyncReset {
+class ScalarTagComparatorArray(numTags: Int, tagBitWidth: Int) extends Module with RequireSyncReset {
   val io = IO(new Bundle {
     val enable = Input(Bool())
     val tagQuery = Input(UInt(tagBitWidth.W))

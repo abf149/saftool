@@ -16,7 +16,7 @@ class VectorFillGatherReadMemory(bitWidth: Int, numRegisters: Int, readPorts: In
     val readAddresses = Input(Vec(readPorts, UInt(log2Ceil(numRegisters).W)))
     val readEnable = Input(Bool())
     val readData = Output(Vec(readPorts, UInt(bitWidth.W)))
-    val directRegisterOutputs = Output(Vec(numRegisters, UInt(bitWidth.W))) // New output
+    val directRegisterOutputs = Output(Vec(numRegisters, UInt(bitWidth.W)))
   })
 
   val buffers = Reg(Vec(2, Vec(numRegisters, UInt(bitWidth.W))))
