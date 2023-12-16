@@ -7,7 +7,7 @@ import chisel3.experimental.ChiselEnum
 import chisel3.util.Decoupled
 import chisel3.util.{switch, is}
 
-class VectorFillGatherReadMemory(bitWidth: Int, numRegisters: Int, readPorts: Int) extends Module {
+class VectorFillGatherReadMemory(bitWidth: Int, numRegisters: Int, readPorts: Int) extends Module  with RequireSyncReset  {
   val io = IO(new Bundle {
     val enable = Input(Bool())
     val writeEnable = Input(Bool())
@@ -16,6 +16,7 @@ class VectorFillGatherReadMemory(bitWidth: Int, numRegisters: Int, readPorts: In
     val readAddresses = Input(Vec(readPorts, UInt(log2Ceil(numRegisters).W)))
     val readEnable = Input(Bool())
     val readData = Output(Vec(readPorts, UInt(bitWidth.W)))
+    val directRegisterOutputs = Output(Vec(numRegisters, UInt(bitWidth.W))) // New output
   })
 
   val buffers = Reg(Vec(2, Vec(numRegisters, UInt(bitWidth.W))))
@@ -37,7 +38,8 @@ class VectorFillGatherReadMemory(bitWidth: Int, numRegisters: Int, readPorts: In
   for (i <- 0 until readPorts) {
     io.readData(i) := Mux(io.enable && io.readEnable, readBuffer(io.readAddresses(i)), 0.U)
   }
+
+  // Connect direct register outputs
+  io.directRegisterOutputs := readBuffer
 }
 
-// Usage example
-val memory = Module(new VectorFillGatherReadMemory(bitWidth = 32, numRegisters = 16, readPorts = 4))
