@@ -8,7 +8,8 @@ import chisel3.util.Decoupled
 import chisel3.util.{switch, is}
 import scala.math._
 
-class CombinedBundle(val idxWidth: Int, val orWidth: Int) extends Bundle {
+class CombinedBundle(idxWidth: Int, orWidth: Int) extends Bundle {
   val priorityIdx = UInt(idxWidth.W)
   val prefixOrOut = UInt(orWidth.W)
+  val valid = Bool()  // Add valid signal
 }

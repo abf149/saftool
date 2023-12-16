@@ -38,7 +38,7 @@ class Workload_ParallelDec2PriorityEncoderPrefixOr_Random(dut: ParallelDec2Prior
 class Test_Sim_ParallelDec2PriorityEncoderPrefixOr extends AnyFlatSpec with ChiselScalatestTester {
   behavior of "ParallelDec2PriorityEncoderPrefixOr"
   it should "inputbits32" in {
-    test(new ParallelDec2PriorityEncoderPrefixOr(inputbits = 4)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_ParallelDec2PriorityEncoderPrefixOr_Random(_))
+    test(new ParallelDec2PriorityEncoderPrefixOr(inputbits = 32)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_ParallelDec2PriorityEncoderPrefixOr_Random(_))
   }
   // ... Repeat for other input sizes
 }

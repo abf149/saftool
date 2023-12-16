@@ -73,6 +73,7 @@ class ParallelDec2PriorityEncoderPrefixOr(val inputbits: Int) extends Module wit
       }
     }
 
+    combinedOutput.valid := input =/= 0.U
     combinedOutput
   }
 
