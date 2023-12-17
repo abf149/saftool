@@ -20,7 +20,7 @@ class ScalarTagComparatorArray(numTags: Int, tagBitWidth: Int) extends Module wi
   // Combinational logic for tag comparison
   for (i <- 0 until numTags) {
     when(io.enable && io.lookupTrigger && !io.ignoreTags(i)) {
-      io.matchOutputs(i) := io.tagMemoryInterface(i) === io.tagQuery
+      io.matchOutputs(i) := io.tagQuery < io.tagMemoryInterface(i)
     } .otherwise {
       io.matchOutputs(i) := false.B
     }

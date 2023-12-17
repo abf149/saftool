@@ -34,6 +34,7 @@ class ParallelDec2PriorityEncoderPrefixOr(val inputbits: Int) extends Module wit
   require(isPow2(inputbits), "Input length must be a power of 2")
 
   val io = IO(new Bundle {
+    val enable = Input(Bool()) // Added enable input
     val in = Input(UInt(inputbits.W))
     val out = Output(new CombinedBundle(log2Ceil(inputbits), inputbits))
   })
@@ -41,7 +42,6 @@ class ParallelDec2PriorityEncoderPrefixOr(val inputbits: Int) extends Module wit
   def buildCombined(input: UInt, idxWidth: Int, orWidth: Int): CombinedBundle = {
     val combinedOutput = Wire(new CombinedBundle(log2Ceil(inputbits), inputbits))
 
-    // Check if all input bits are zero
     when(input === 0.U) {
       combinedOutput.priorityIdx := 0.U
       combinedOutput.prefixOrOut := 0.U
@@ -77,5 +77,13 @@ class ParallelDec2PriorityEncoderPrefixOr(val inputbits: Int) extends Module wit
     combinedOutput
   }
 
-  io.out := buildCombined(io.in, log2Ceil(inputbits) - 1, inputbits)
+  when(io.enable) {
+    val combinedResult = buildCombined(io.in, log2Ceil(inputbits) - 1, inputbits)
+    io.out := combinedResult
+    io.out.valid := combinedResult.valid // Ensure valid is set correctly when enabled
+  } .otherwise {
+    io.out.priorityIdx := 0.U
+    io.out.prefixOrOut := 0.U
+    io.out.valid := false.B
+  }
 }
