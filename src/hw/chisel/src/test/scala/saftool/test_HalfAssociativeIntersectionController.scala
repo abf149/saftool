@@ -19,13 +19,15 @@ class Workload_HalfAssociativeIntersectionController_Random(dut: HalfAssociative
   for (i <- 0 until 100) {
     val enableValue = if (i % 10 == 0) 0 else 1
     val triggerValue = rand.nextBoolean()
-    val tagInputValue = rand.nextInt(math.pow(2, dut.tagBitWidth).toInt)
+    val memReadTagValue = rand.nextInt(math.pow(2, dut.tagBitWidth).toInt) // Random value for memReadTag
     val disableComparatorMaskValue = rand.nextInt(math.pow(2, dut.numTags).toInt)
+    val tagInputValue = (memReadTagValue-1).max(0) //rand.nextInt(math.pow(2, dut.tagBitWidth).toInt)
 
     poke(dut.io.enable, enableValue)
     poke(dut.io.triggerInput, triggerValue)
     poke(dut.io.tagInput, tagInputValue)
     poke(dut.io.disableComparatorMask, disableComparatorMaskValue)
+    poke(dut.io.memReadTag, memReadTagValue) // Set memReadTag
 
     // Poke canned values into tagMemoryInterface
     cannedTagValues.zipWithIndex.foreach { case (value, index) =>
@@ -33,6 +35,10 @@ class Workload_HalfAssociativeIntersectionController_Random(dut: HalfAssociative
     }
 
     step(1)
+
+    // Optionally, you can add an assertion to check the value of peek_out
+    //val peekOutValue = peek(dut.io.peek_out)
+    //assert(peekOutValue == memReadTagValue, s"Expected peek_out to be $memReadTagValue, found $peekOutValue")
   }
 }
 

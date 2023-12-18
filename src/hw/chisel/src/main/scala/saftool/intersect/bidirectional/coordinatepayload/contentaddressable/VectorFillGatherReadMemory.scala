@@ -25,9 +25,9 @@ class VectorFillGatherReadMemory(bitWidth: Int, numRegisters: Int, readPorts: In
   // Logic for double-buffered write
   when(io.enable && io.writeEnable) {
     when(io.pingpongSelect) {
-      buffers(1) := io.writeData
-    } .otherwise {
       buffers(0) := io.writeData
+    } .otherwise {
+      buffers(1) := io.writeData
     }
   }
 
