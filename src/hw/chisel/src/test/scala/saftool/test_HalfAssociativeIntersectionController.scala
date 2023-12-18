@@ -19,15 +19,30 @@ class Workload_HalfAssociativeIntersectionController_Random(dut: HalfAssociative
   for (i <- 0 until 100) {
     val enableValue = if (i % 10 == 0) 0 else 1
     val triggerValue = rand.nextBoolean()
-    val memReadTagValue = rand.nextInt(math.pow(2, dut.tagBitWidth).toInt) // Random value for memReadTag
     val disableComparatorMaskValue = rand.nextInt(math.pow(2, dut.numTags).toInt)
-    val tagInputValue = (memReadTagValue-1).max(0) //rand.nextInt(math.pow(2, dut.tagBitWidth).toInt)
+    val tagInputValue = rand.nextInt(math.pow(2, dut.tagBitWidth).toInt)
+    val forcePeekValue = rand.nextBoolean()
+    val headInValue = rand.nextInt(dut.numTags)
 
     poke(dut.io.enable, enableValue)
     poke(dut.io.triggerInput, triggerValue)
     poke(dut.io.tagInput, tagInputValue)
     poke(dut.io.disableComparatorMask, disableComparatorMaskValue)
-    poke(dut.io.memReadTag, memReadTagValue) // Set memReadTag
+    poke(dut.io.force_peek, forcePeekValue)
+    poke(dut.io.head_in, headInValue)
+
+    // Simulate memory read based on memoryLookupAddress and memoryLookupEnable
+    val readAddress = if (peek(dut.io.memoryLookupEnable) == 1) {
+      peek(dut.io.memoryLookupAddress).toInt
+    } else {
+      -1 // Indicate no valid read
+    }
+    val memReadValue = if (readAddress >= 0 && readAddress < cannedTagValues.length) {
+      cannedTagValues(readAddress)
+    } else {
+      0 // Default value when read is not enabled or address is invalid
+    }
+    poke(dut.io.memReadTag, memReadValue)
 
     // Poke canned values into tagMemoryInterface
     cannedTagValues.zipWithIndex.foreach { case (value, index) =>
@@ -36,9 +51,14 @@ class Workload_HalfAssociativeIntersectionController_Random(dut: HalfAssociative
 
     step(1)
 
-    // Optionally, you can add an assertion to check the value of peek_out
-    //val peekOutValue = peek(dut.io.peek_out)
-    //assert(peekOutValue == memReadTagValue, s"Expected peek_out to be $memReadTagValue, found $peekOutValue")
+    // Assertions for new functionality (if applicable)
+    if (forcePeekValue) {
+      val peekOutValue = peek(dut.io.peek_out)
+      val expectedValue = cannedTagValues(headInValue)
+      //assert(peekOutValue == expectedValue, s"Expected peek_out to be $expectedValue, found $peekOutValue")
+      val headOutValue = peek(dut.io.head_out)
+      //assert(headOutValue == headInValue + 1, s"Expected head_out to be ${headInValue + 1}, found $headOutValue")
+    }
   }
 }
 
