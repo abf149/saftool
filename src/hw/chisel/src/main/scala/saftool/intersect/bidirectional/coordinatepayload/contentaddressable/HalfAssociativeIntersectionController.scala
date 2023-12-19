@@ -22,14 +22,6 @@ class HalfAssociativeIntersectionController(val numTags: Int, val tagBitWidth: I
     val tagMemoryInterface = Input(Vec(numTags, UInt(tagBitWidth.W)))
     val isMatch = Output(Bool())
 
-    val memWriteEnable = Output(Bool())
-    val memWriteData = Output(Vec(numTags, UInt(tagBitWidth.W)))
-    val memPingpongSelect = Output(Bool())
-
-    val writeEnable = Input(Bool())
-    val writeData = Input(Vec(numTags, UInt(tagBitWidth.W)))
-    val pingpongSelect = Input(Bool())
-
     val memReadTag = Input(UInt(tagBitWidth.W))
     val peek_out = Output(UInt(tagBitWidth.W))
 
@@ -92,9 +84,4 @@ class HalfAssociativeIntersectionController(val numTags: Int, val tagBitWidth: I
     // Module is disabled
     // Keep default values
   }
-
-  // Wiring for additional and mirror interfaces
-  io.memWriteEnable := io.writeEnable
-  io.memWriteData := io.writeData
-  io.memPingpongSelect := io.pingpongSelect
 }

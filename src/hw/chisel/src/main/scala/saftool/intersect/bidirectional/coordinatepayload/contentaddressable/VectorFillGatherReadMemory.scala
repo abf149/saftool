@@ -7,14 +7,14 @@ import chisel3.experimental.ChiselEnum
 import chisel3.util.Decoupled
 import chisel3.util.{switch, is}
 
-class VectorFillGatherReadMemory(bitWidth: Int, numRegisters: Int, readPorts: Int) extends Module  with RequireSyncReset  {
+class VectorFillGatherReadMemory(val bitWidth: Int, val numRegisters: Int, val readPorts: Int) extends Module with RequireSyncReset {
   val io = IO(new Bundle {
     val enable = Input(Bool())
     val writeEnable = Input(Bool())
     val pingpongSelect = Input(Bool())
     val writeData = Input(Vec(numRegisters, UInt(bitWidth.W)))
     val readAddresses = Input(Vec(readPorts, UInt(log2Ceil(numRegisters).W)))
-    val readEnable = Input(Bool())
+    val readEnable = Input(Vec(readPorts, Bool())) // Changed to Vec of Bool
     val readData = Output(Vec(readPorts, UInt(bitWidth.W)))
     val directRegisterOutputs = Output(Vec(numRegisters, UInt(bitWidth.W)))
   })
@@ -34,12 +34,11 @@ class VectorFillGatherReadMemory(bitWidth: Int, numRegisters: Int, readPorts: In
   // Select buffer for read
   readBuffer := Mux(io.pingpongSelect, buffers(1), buffers(0))
 
-  // Logic for gather read
+  // Updated Logic for gather read
   for (i <- 0 until readPorts) {
-    io.readData(i) := Mux(io.enable && io.readEnable, readBuffer(io.readAddresses(i)), 0.U)
+    io.readData(i) := Mux(io.enable && io.readEnable(i), readBuffer(io.readAddresses(i)), 0.U)
   }
 
   // Connect direct register outputs
   io.directRegisterOutputs := readBuffer
 }
-
