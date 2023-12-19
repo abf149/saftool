@@ -42,6 +42,8 @@ class VectorSkipAheadIntersectionUnit(val vectorLength: Int, val numTags: Int, v
 
     val is_match = Output(Bool())
     val match_tag = Output(UInt(tagBitWidth.W))
+
+    val num_matches = Output(UInt(log2Ceil(vectorLength + 1).W))    
   })
 
   val leftMemory = Module(new VectorFillGatherReadMemory(tagBitWidth, numTags, vectorLength))
@@ -121,4 +123,5 @@ class VectorSkipAheadIntersectionUnit(val vectorLength: Int, val numTags: Int, v
   io.skip_from_out := lastStage.skip_from_out
   io.is_match := lastStage.is_match
   io.match_tag := lastStage.match_tag
+  io.num_matches := matchCount(vectorLength)
 }
