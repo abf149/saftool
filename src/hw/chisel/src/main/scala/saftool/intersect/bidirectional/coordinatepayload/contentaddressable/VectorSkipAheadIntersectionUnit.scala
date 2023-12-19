@@ -49,7 +49,17 @@ class VectorSkipAheadIntersectionUnit(val vectorLength: Int, val numTags: Int, v
   val leftMemory = Module(new VectorFillGatherReadMemory(tagBitWidth, numTags, vectorLength))
   val rightMemory = Module(new VectorFillGatherReadMemory(tagBitWidth, numTags, vectorLength))
   val outMemory = Module(new VectorReadScatterWriteMemory(tagBitWidth, vectorLength, vectorLength))
-  val daisyChain = VecInit(Seq.fill(vectorLength)(Module(new SkipAheadIntersectionController(numTags, tagBitWidth)).io))
+  //val daisyChain = VecInit(Seq.fill(vectorLength)(Module(new SkipAheadIntersectionController(numTags, tagBitWidth)).io))
+  val daisyChain = VecInit(Seq.tabulate(vectorLength) { i =>
+    Module(new SkipAheadIntersectionController(numTags, tagBitWidth, if (i % 2 == 0) false else true)).io
+  })
+
+  io.left_disableNextStageMask := 0.U
+  io.right_disableNextStageMask := 0.U
+  io.left_head_out := 0.U
+  io.right_head_out := 0.U
+  io.left_is_empty := false.B
+  io.right_is_empty := false.B
 
   // Wiring for memories and controllers
   leftMemory.io.enable := io.enable
@@ -76,23 +86,23 @@ class VectorSkipAheadIntersectionUnit(val vectorLength: Int, val numTags: Int, v
     val nextStage = if (i < vectorLength - 1) daisyChain(i + 1) else null
 
     // Wire up the stage interfaces
-    stage.enable := io.enable && (if (i > 0) !daisyChain(i - 1).left.is_empty && !daisyChain(i - 1).right.is_empty else true.B)
-    stage.skip_from_in := io.skip_from_in
+    stage.enable := io.enable //&& (if (i > 0) !daisyChain(i - 1).left.is_empty && !daisyChain(i - 1).right.is_empty else true.B)
+    stage.skip_from_in := (if (i % 2 == 0) false.B else true.B) //io.skip_from_in
     stage.left.disableComparatorMask := (if (i == 0) io.left_disableComparatorMask else daisyChain(i - 1).left.disableNextStageMask)
     stage.right.disableComparatorMask := (if (i == 0) io.right_disableComparatorMask else daisyChain(i - 1).right.disableNextStageMask)
     stage.left.head_in := (if (i == 0) io.left_head_in else daisyChain(i - 1).left.head_out)
     stage.right.head_in := (if (i == 0) io.right_head_in else daisyChain(i - 1).right.head_out)
 
     // Wire up memory interfaces
-    stage.left.tagMemoryInterface := leftMemory.io.directRegisterOutputs
+    stage.left.tagMemoryInterface := leftMemory.io.directRegisterOutputs //(i)
     stage.left.memReadTag := leftMemory.io.readData(i)
-    stage.left.memoryLookupAddress := leftMemory.io.readAddresses(i)
-    stage.left.memoryLookupEnable := leftMemory.io.readEnable(i)
+    leftMemory.io.readAddresses(i) := stage.left.memoryLookupAddress
+    leftMemory.io.readEnable(i) := (if (i % 2 == 0) false.B else true.B) //io.skip_from_in //stage.left.memoryLookupEnable
 
-    stage.right.tagMemoryInterface := rightMemory.io.directRegisterOutputs
+    stage.right.tagMemoryInterface := rightMemory.io.directRegisterOutputs //(i)
     stage.right.memReadTag := rightMemory.io.readData(i)
-    stage.right.memoryLookupAddress := rightMemory.io.readAddresses(i)
-    stage.right.memoryLookupEnable := rightMemory.io.readEnable(i)
+    rightMemory.io.readAddresses(i) := stage.right.memoryLookupAddress
+    rightMemory.io.readEnable(i) := !(if (i % 2 == 0) false.B else true.B) //io.skip_from_in //stage.right.memoryLookupEnable
 
     // Wire up Out memory write logic
     outMemory.io.writeAddresses(i) := matchCount(i)
@@ -103,17 +113,30 @@ class VectorSkipAheadIntersectionUnit(val vectorLength: Int, val numTags: Int, v
     matchCount(i + 1) := matchCount(i) + stage.is_match.asUInt
 
     // Bypass logic for is_empty condition
-    when(stage.left.is_empty || stage.right.is_empty) {
-      for (j <- i + 1 until vectorLength) {
-        daisyChain(j).enable := false.B
+    if (nextStage != null) {
+      when(stage.left.is_empty || stage.right.is_empty) {
+        for (j <- i + 1 until vectorLength) {
+          daisyChain(j).enable := false.B
+        }
+        if (nextStage != null) {
+          when(io.enable) {
+            io.left_disableNextStageMask := stage.left.disableNextStageMask
+            io.right_disableNextStageMask := stage.right.disableNextStageMask
+            io.left_head_out := stage.left.head_out
+            io.right_head_out := stage.right.head_out
+            io.left_is_empty := stage.left.is_empty
+            io.right_is_empty := stage.right.is_empty
+          }
+        }
       }
-      if (nextStage != null) {
-        io.left_disableNextStageMask := stage.left.disableNextStageMask
-        io.right_disableNextStageMask := stage.right.disableNextStageMask
-        io.left_head_out := stage.left.head_out
-        io.right_head_out := stage.right.head_out
-        io.left_is_empty := stage.left.is_empty
-        io.right_is_empty := stage.right.is_empty
+    } else {
+      when((!(stage.left.is_empty || stage.right.is_empty))  && io.enable) {
+          io.left_disableNextStageMask := stage.left.disableNextStageMask
+          io.right_disableNextStageMask := stage.right.disableNextStageMask
+          io.left_head_out := stage.left.head_out
+          io.right_head_out := stage.right.head_out
+          io.left_is_empty := stage.left.is_empty
+          io.right_is_empty := stage.right.is_empty
       }
     }
   }

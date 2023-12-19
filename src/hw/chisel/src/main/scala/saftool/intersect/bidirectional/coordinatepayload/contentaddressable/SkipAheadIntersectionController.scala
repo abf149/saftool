@@ -8,7 +8,7 @@ import chisel3.util.Decoupled
 import chisel3.util.{switch, is}
 import scala.math._
 
-class SkipAheadIntersectionController(val numTags: Int, val tagBitWidth: Int) extends Module with RequireSyncReset {
+class SkipAheadIntersectionController(val numTags: Int, val tagBitWidth: Int, val SKIP_FROM_IN_PARAM: Boolean) extends Module with RequireSyncReset {
   require(isPow2(numTags), "Number of tags must be a power of 2")
 
   val io = IO(new Bundle {
@@ -23,7 +23,8 @@ class SkipAheadIntersectionController(val numTags: Int, val tagBitWidth: Int) ex
 
     // Additional interfaces for tag and trigger inputs
     //val tagInput = Input(UInt(tagBitWidth.W))
-    //val triggerInput = Input(Bool())
+    //val triggerLeft = Input(Bool())
+    //val triggerRight = Input(Bool())
   })
 
   val leftController = Module(new HalfAssociativeIntersectionController(numTags, tagBitWidth))
@@ -48,7 +49,7 @@ class SkipAheadIntersectionController(val numTags: Int, val tagBitWidth: Int) ex
     // Wiring for tagInput and triggerInput
     //intIO.tagInput := io.tagInput
     //intIO.triggerInput := io.triggerInput
-    intIO.triggerInput := true.B
+    //intIO.triggerInput := true.B
   }
 
   // Default initializations
@@ -61,21 +62,55 @@ class SkipAheadIntersectionController(val numTags: Int, val tagBitWidth: Int) ex
   leftController.io.force_peek := false.B
   rightController.io.force_peek := false.B
 
+  leftController.io.triggerInput := false.B
+  rightController.io.triggerInput := false.B
+
+  rightController.io.tagInput := 0.U
+  leftController.io.tagInput := 0.U
 
   when(io.enable) {
+    leftController.io.triggerInput := io.skip_from_in 
     leftController.io.force_peek := !io.skip_from_in
+    rightController.io.triggerInput := !io.skip_from_in
     rightController.io.force_peek := io.skip_from_in
 
-    rightController.io.tagInput := leftController.io.peek_out
-    leftController.io.tagInput := rightController.io.peek_out
+    
+    //when(io.skip_from_in) {
+    if (SKIP_FROM_IN_PARAM) {
+      leftController.io.tagInput := rightController.io.peek_out
+
+    } else {
+    //}.otherwise {
+      rightController.io.tagInput := leftController.io.peek_out
+    //}
+    }
+    
 
     val are_equal = leftController.io.peek_out === rightController.io.peek_out
 
-    io.left.head_out := Mux(io.skip_from_in && are_equal, leftController.io.head_out + 1.U, leftController.io.head_out)
-    io.right.head_out := Mux(!io.skip_from_in && are_equal, rightController.io.head_out + 1.U, rightController.io.head_out)
+    
 
-    io.is_match := leftController.io.isMatch && rightController.io.isMatch && are_equal
-    io.match_tag := Mux(are_equal, leftController.io.peek_out, 0.U)
+    //io.left.head_out := Mux(io.skip_from_in && are_equal, leftController.io.head_out + 1.U, leftController.io.head_out)
+    //io.right.head_out := Mux(!io.skip_from_in && are_equal, rightController.io.head_out + 1.U, rightController.io.head_out)
+
+
+
+
+
+    //io.match_tag := Mux(are_equal, leftController.io.peek_out, 0.U)
+    if (SKIP_FROM_IN_PARAM) {
+      io.left.head_out := Mux(are_equal, leftController.io.head_out + 1.U, leftController.io.head_out)
+      io.right.head_out := rightController.io.head_out + 1.U
+      io.is_match := leftController.io.isMatch && are_equal
+      io.match_tag := Mux(are_equal, leftController.io.peek_out, 0.U)
+    } else {
+    //}.otherwise {
+      io.left.head_out := leftController.io.head_out + 1.U
+      io.right.head_out := Mux(are_equal, rightController.io.head_out + 1.U, rightController.io.head_out)
+      io.is_match := rightController.io.isMatch && are_equal
+      io.match_tag := Mux(are_equal, rightController.io.peek_out, 0.U)
+    //}
+    }
 
     io.skip_from_out := !io.skip_from_in
   }.otherwise {
