@@ -9,7 +9,7 @@ import chisel3.util.{switch, is}
 
 // Intersect unit {Format: C, metadata orchestration: uncoupled}
 
-class CheckIfFinished(headWidth: Int, N: UInt) extends Module {
+class CheckIfFinished(headWidth: Int, N: UInt) extends Module with RequireSyncReset {
   val io = IO(new Bundle {
     // Enable signal
     val enable = Input(Bool())
@@ -31,7 +31,7 @@ class CheckIfFinished(headWidth: Int, N: UInt) extends Module {
 }
 
 
-class OperandPopDecider(headWidth: Int) extends Module {
+class OperandPopDecider(headWidth: Int) extends Module with RequireSyncReset {
   val io = IO(new Bundle {
     // Enable signal
     val enable = Input(Bool())
@@ -62,7 +62,7 @@ class OperandPopDecider(headWidth: Int) extends Module {
   }
 }
 
-class IntersectFmtCDirBidirStageCombinational(headWidth: Int, metaDataWidth: Int, arraySize: Int) extends Module {
+class IntersectFmtCDirBidirStageCombinational(headWidth: Int, metaDataWidth: Int, arraySize: Int) extends Module with RequireSyncReset {
   val io = IO(new Bundle {
     val enable_in = Input(Bool())
     val enable_out = Output(Bool())
@@ -74,16 +74,16 @@ class IntersectFmtCDirBidirStageCombinational(headWidth: Int, metaDataWidth: Int
     val new_out_head = Output(UInt(headWidth.W))
 
     // Read and Write Mux Interfaces
-    val readMux0 = new ReadMuxInterface(arraySize, metaDataWidth)
-    val readMux1 = new ReadMuxInterface(arraySize, metaDataWidth)
-    val writeMux = new WriteMuxInterface(arraySize, metaDataWidth)
+    val readMux0 = Flipped(new ReadMuxInterface(arraySize, metaDataWidth))
+    val readMux1 = Flipped(new ReadMuxInterface(arraySize, metaDataWidth))
+    val writeMux = Flipped(new WriteMuxInterface(arraySize, metaDataWidth))
   })
 
   // Instance of IntersectFmtCDirBidirSingletonCombinational
   val intersectUnit = Module(new IntersectFmtCDirBidirSingletonCombinational(metaDataWidth))
   intersectUnit.io.in0 := io.readMux0.selectedWire
   intersectUnit.io.in1 := io.readMux1.selectedWire
-  intersectUnit.io.out_intersect := io.writeMux.writeData // Assuming this connection is correct
+  //io.writeMux.writeData := intersectUnit.io.out_intersect // Assuming this connection is correct
 
   // Configure Read Mux Interfaces
   io.readMux0.controlSignal := io.in0_head
@@ -116,7 +116,7 @@ class IntersectFmtCDirBidirStageCombinational(headWidth: Int, metaDataWidth: Int
   io.enable_out := !checkIfFinished.io.isFinished && io.enable_in
 }
 
-class WholePipeline(metaDataWidth: Int, arraySize: Int) extends Module {
+class VectorTwoFingerMergeIntersection(metaDataWidth: Int, arraySize: Int) extends Module  with RequireSyncReset{
   val M = 2 * arraySize - 1
   val headWidth = log2Ceil(arraySize) // Assuming headWidth based on arraySize
 
