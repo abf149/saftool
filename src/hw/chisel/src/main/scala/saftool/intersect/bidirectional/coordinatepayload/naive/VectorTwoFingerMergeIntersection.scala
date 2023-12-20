@@ -123,16 +123,31 @@ class VectorTwoFingerMergeIntersection(metaDataWidth: Int, arraySize: Int) exten
   val io = IO(new Bundle {
     val enable_in = Input(Bool())
     val enable_out = Output(Bool())
+
+    val inputWireArrays = Input(Vec(2, Vec(arraySize, UInt(metaDataWidth.W))))
+    val outputWireArrays = Output(Vec(arraySize, UInt(metaDataWidth.W)))
+    //val outputFlagArrays = Output(Vec(arraySize, UInt(1.W)))
+
+    /*
     val inputWireArrays = Input(Vec(M, Vec(2, Vec(arraySize, UInt(metaDataWidth.W)))))
     val outputWireArrays = Output(Vec(M, Vec(arraySize, UInt(metaDataWidth.W))))
     val outputFlagArrays = Output(Vec(M, Vec(arraySize, UInt(1.W))))
+    */
   })
 
   // Create instances of pipeline stages, read muxes, and write muxes
   val pipelineStages = Seq.fill(M)(Module(new IntersectFmtCDirBidirStageCombinational(headWidth, metaDataWidth, arraySize)))
-  val readMuxes = Seq.fill(M)(Module(new VectorizedDynamicReadMux(arraySize, metaDataWidth)))
+  val readMuxes0 = Module(new VectorizedDynamicReadMux(M, arraySize, metaDataWidth))
+  val readMuxes1 = Module(new VectorizedDynamicReadMux(M, arraySize, metaDataWidth))
+  val writeMuxesData = Module(new VectorizedDynamicWriteMux(M, arraySize, metaDataWidth))
+  //val writeMuxesFlag = Module(new VectorizedDynamicWriteMux(arraySize, 1))
+
+  /*
+  val readMuxes0 = Seq.fill(M)(Module(new VectorizedDynamicReadMux(arraySize, metaDataWidth)))
+  val readMuxes1 = Seq.fill(M)(Module(new VectorizedDynamicReadMux(arraySize, metaDataWidth)))
   val writeMuxesData = Seq.fill(M)(Module(new VectorizedDynamicWriteMux(arraySize, metaDataWidth)))
   val writeMuxesFlag = Seq.fill(M)(Module(new VectorizedDynamicWriteMux(arraySize, 1)))
+  */
 
   // Initial head inputs and enable signal for the first stage
   pipelineStages.head.io.in0_head := 0.U
@@ -140,26 +155,30 @@ class VectorTwoFingerMergeIntersection(metaDataWidth: Int, arraySize: Int) exten
   pipelineStages.head.io.out_head := 0.U
   pipelineStages.head.io.enable_in := io.enable_in
 
+  // Connect read muxes to input wire arrays
+  readMuxes0.io.sharedWireArray := io.inputWireArrays(0)
+  readMuxes1.io.sharedWireArray := io.inputWireArrays(1)
+  io.outputWireArrays := writeMuxesData.io.sharedWriteArray
+  //io.outputFlagArrays := writeMuxesFlag.io.sharedWriteArray
+
   // Wire stages, read muxes, and write muxes
   for(i <- 0 until M) {
-    // Connect read muxes to input wire arrays
-    readMuxes(i).io.sharedWireArray := io.inputWireArrays(i)
 
     // Connect pipeline stage to read muxes
-    pipelineStages(i).io.readMux0 <> readMuxes(i).io.readMuxVec(0)
-    pipelineStages(i).io.readMux1 <> readMuxes(i).io.readMuxVec(1)
+    pipelineStages(i).io.readMux0 <> readMuxes0.io.readMuxVec(i)
+    pipelineStages(i).io.readMux1 <> readMuxes1.io.readMuxVec(i)
 
     // Connect pipeline stage to write muxes
-    pipelineStages(i).io.writeMux <> writeMuxesData(i).io.dynamicWriteMuxVec
-    writeMuxesData(i).io.sharedWriteArray := io.outputWireArrays(i)
-
+    pipelineStages(i).io.writeMux <> writeMuxesData.io.dynamicWriteMuxVec(i)
+    
     // Special handling for write mux flags
-    writeMuxesFlag(i).io.sharedWriteArray := io.outputFlagArrays(i)
+    /*
     writeMuxesFlag(i).io.dynamicWriteMuxVec.foreach { w =>
       w.enable := pipelineStages(i).io.writeMux.enable
-      w.writeData := pipelineStages(i).io.writeMux.enable
+      w.writeData := pipelineStages(i).io.writeMux.writeData
       w.writeAddress := pipelineStages(i).io.writeMux.writeAddress
     }
+    */
 
     // Chain stages
     if (i < M - 1) {

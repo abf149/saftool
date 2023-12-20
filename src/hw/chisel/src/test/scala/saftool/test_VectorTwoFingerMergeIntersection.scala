@@ -34,8 +34,8 @@ class TestVectorTwoFingerMergeIntersection extends AnyFlatSpec with ChiselScalat
       dut.io.enable_in.poke(true.B)
       
       for (i <- leftTestVector.indices) {
-        dut.io.inputWireArrays(0)(0)(i).poke(leftTestVector(i).U)
-        dut.io.inputWireArrays(0)(1)(i).poke(rightTestVector(i).U)
+        dut.io.inputWireArrays(0)(i).poke(leftTestVector(i).U)
+        dut.io.inputWireArrays(1)(i).poke(rightTestVector(i).U)
       }
 
       dut.clock.step(5) // Wait for input stabilization
@@ -46,7 +46,7 @@ class TestVectorTwoFingerMergeIntersection extends AnyFlatSpec with ChiselScalat
       if (checkOutputCorrectness) {
         val expectedResult = leftTestVector.intersect(rightTestVector).sorted.take(vectorLength)
         for (i <- expectedResult.indices) {
-          dut.io.outputWireArrays(0)(i).expect(expectedResult(i).U)
+          dut.io.outputWireArrays(i).expect(expectedResult(i).U)
         }
       }
 
