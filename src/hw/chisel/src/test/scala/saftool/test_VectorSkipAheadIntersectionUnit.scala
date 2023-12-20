@@ -13,12 +13,12 @@ class TestVectorSkipAheadIntersectionUnit extends AnyFlatSpec with ChiselScalate
   behavior of "VectorSkipAheadIntersectionUnit"
 
   it should "correctly intersect and output sorted common tag values" in {
-    test(new VectorSkipAheadIntersectionUnit(vectorLength = 16, numTags = 16, tagBitWidth = 5)).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
+    test(new VectorSkipAheadIntersectionUnit(vectorLength = 8, numTags = 8, tagBitWidth = 5)).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
       val rand = new Random
-      val numTags = 16
+      val numTags = 8
       val maxTagValue = (1.2 * numTags).toInt
       val checkOutputCorrectness = false // Flag to control output correctness checking
-      val vectorLength = 16
+      val vectorLength = 8
 
       // Function to generate a sorted list of unique random values
       def generateUniqueRandomList(size: Int, maxValue: Int): Seq[Int] = {
@@ -28,8 +28,6 @@ class TestVectorSkipAheadIntersectionUnit extends AnyFlatSpec with ChiselScalate
         }
         set.toSeq.sorted
       }
-
-
 
       // Generate unique test vectors
       val leftTestVector = generateUniqueRandomList(numTags, maxTagValue)
@@ -42,16 +40,11 @@ class TestVectorSkipAheadIntersectionUnit extends AnyFlatSpec with ChiselScalate
       dut.io.enable.poke(true.B)
       dut.io.left_writeEnable.poke(true.B)
       dut.io.right_writeEnable.poke(true.B)
-
-
       
       for (i <- leftTestVector.indices) {
         dut.io.left_writeData(i).poke(leftTestVector(i).U)
         dut.io.right_writeData(i).poke(rightTestVector(i).U)
       }
-
-
-
 
       // Allow time for writing to memories
       dut.clock.step(5)
@@ -68,7 +61,6 @@ class TestVectorSkipAheadIntersectionUnit extends AnyFlatSpec with ChiselScalate
 
       // Allow time for reading from memory
       dut.clock.step(5)
-
 
       // Check the expected result if flag is true
       if (checkOutputCorrectness) {

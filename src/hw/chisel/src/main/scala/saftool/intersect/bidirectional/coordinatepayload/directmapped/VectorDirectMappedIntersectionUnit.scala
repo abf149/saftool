@@ -19,14 +19,19 @@ class VectorDirectMappedIntersectionUnit(val vectorLength: Int, val fiberLength:
 
   val bitmask1 = Wire(Vec(fiberLength, Bool()))
   val bitmask2 = Wire(Vec(fiberLength, Bool()))
-  val tempCommonElements = Wire(Vec(fiberLength, UInt(tagBitWidth.W)))
-  //val matchCount = Wire(UInt(log2Ceil(fiberLength + 1).W))
+  val commonBitmask = Wire(Vec(fiberLength, Bool()))
+  commonBitmask := VecInit(Seq.fill(fiberLength)(false.B)) // Default initialization
+
+  // Default assignment for outputs
+  io.commonElements := VecInit(Seq.fill(vectorLength)(0.U(tagBitWidth.W)))
+  io.numMatches := 0.U
 
   when(io.enable) {
-    // Initialize and set bits in the bitmask based on list values
-    bitmask1 := VecInit(Seq.fill(fiberLength)(false.B))
-    bitmask2 := VecInit(Seq.fill(fiberLength)(false.B))
-    //matchCount := 0.U
+    // Reset and set bits in the bitmask based on list values
+    for(i <- 0 until fiberLength) {
+      bitmask1(i) := false.B
+      bitmask2(i) := false.B
+    }
 
     for(i <- 0 until vectorLength) {
       bitmask1(io.list1(i)) := true.B
@@ -34,35 +39,45 @@ class VectorDirectMappedIntersectionUnit(val vectorLength: Int, val fiberLength:
     }
 
     // Bitwise AND Operation
-    val commonBitmask = Wire(Vec(fiberLength, Bool()))
     for(i <- 0 until fiberLength) {
       commonBitmask(i) := bitmask1(i) & bitmask2(i)
     }
 
     // Parallel Prefix Sum
+    /*
     val prefixSumModule = Module(new ParallelKoggeStonePrefixSumCombinational(fiberLength))
     prefixSumModule.input.bitmask := commonBitmask.asUInt
     val prefixSums = prefixSumModule.output.sums
+    */
 
     // Compaction Logic
-    //val tempCommonElements = VecInit(Seq.fill(fiberLength)(0.U(tagBitWidth.W)))
+    val tempCommonElements = VecInit(Seq.fill(vectorLength)(0.U(tagBitWidth.W)))
     //var matchCount = 0.U
+    val matchCount = Wire(Vec(fiberLength + 1, UInt(log2Ceil(vectorLength + 1).W)))
+    matchCount(0) := 0.U
     for(i <- 0 until fiberLength) {
       when(commonBitmask(i)) {
-        tempCommonElements(prefixSums(i)) := i.U
-        //matchCount = matchCount + 1.U
+        tempCommonElements(matchCount(i)) := i.U
+        matchCount(i + 1) := matchCount(i) + 1.U
+      }.otherwise{
+        matchCount(i + 1) := matchCount(i)
       }
     }
 
     // Output Assignment
     for(i <- 0 until vectorLength) {
-      io.commonElements(i) := Mux(i.U < prefixSums(vectorLength-1), tempCommonElements(i), 0.U)
+      io.commonElements(i) := Mux(i.U < matchCount(vectorLength), tempCommonElements(i), 0.U)
     }
 
     // Output the number of matches
-    io.numMatches := prefixSums(vectorLength-1)
+    io.numMatches := matchCount(vectorLength)
   }.otherwise {
-    // Assign default values when not enabled
+    // Reset bitmasks when not enabled
+    for(i <- 0 until fiberLength) {
+      bitmask1(i) := false.B
+      bitmask2(i) := false.B
+    }
+
     io.commonElements := VecInit(Seq.fill(vectorLength)(0.U(tagBitWidth.W)))
     io.numMatches := 0.U
   }

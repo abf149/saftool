@@ -13,12 +13,12 @@ class TestVectorTwoFingerMergeIntersection extends AnyFlatSpec with ChiselScalat
   behavior of "VectorTwoFingerMergeIntersection"
 
   it should "correctly intersect and output sorted common tag values" in {
-    test(new VectorTwoFingerMergeIntersection(metaDataWidth = 5, arraySize = 16)).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
+    test(new VectorTwoFingerMergeIntersection(metaDataWidth = 5, arraySize = 8)).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
       val rand = new Random
-      val numTags = 16
+      val numTags = 8
       val maxTagValue = (1.2 * numTags).toInt
       val checkOutputCorrectness = false
-      val vectorLength = 16
+      val vectorLength = 8
 
       def generateUniqueRandomList(size: Int, maxValue: Int): Seq[Int] = {
         val set = mutable.Set[Int]()
