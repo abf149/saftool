@@ -44,11 +44,9 @@ class VectorDirectMappedIntersectionUnit(val vectorLength: Int, val fiberLength:
     }
 
     // Parallel Prefix Sum
-    /*
     val prefixSumModule = Module(new ParallelKoggeStonePrefixSumCombinational(fiberLength))
     prefixSumModule.input.bitmask := commonBitmask.asUInt
     val prefixSums = prefixSumModule.output.sums
-    */
 
     // Compaction Logic
     val tempCommonElements = VecInit(Seq.fill(vectorLength)(0.U(tagBitWidth.W)))
@@ -56,21 +54,26 @@ class VectorDirectMappedIntersectionUnit(val vectorLength: Int, val fiberLength:
     val matchCount = Wire(Vec(fiberLength + 1, UInt(log2Ceil(vectorLength + 1).W)))
     matchCount(0) := 0.U
     for(i <- 0 until fiberLength) {
+      matchCount(i + 1) := prefixSums(i)
+    }
+    
+    for(i <- 0 until fiberLength) {
       when(commonBitmask(i)) {
         tempCommonElements(matchCount(i)) := i.U
-        matchCount(i + 1) := matchCount(i) + 1.U
-      }.otherwise{
-        matchCount(i + 1) := matchCount(i)
+      //  matchCount(i + 1) := matchCount(i) + 1.U
       }
+      //.otherwise{
+      //  matchCount(i + 1) := matchCount(i)
+      //}
     }
 
     // Output Assignment
     for(i <- 0 until vectorLength) {
-      io.commonElements(i) := Mux(i.U < matchCount(vectorLength), tempCommonElements(i), 0.U)
+      io.commonElements(i) := Mux(i.U < matchCount(fiberLength), tempCommonElements(i), 0.U)
     }
 
     // Output the number of matches
-    io.numMatches := matchCount(vectorLength)
+    io.numMatches := matchCount(fiberLength)
   }.otherwise {
     // Reset bitmasks when not enabled
     for(i <- 0 until fiberLength) {
