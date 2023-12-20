@@ -5,8 +5,11 @@ import chiseltest._
 import chiseltest.iotesters._
 import treadle.WriteVcdAnnotation
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.flatspec.AnyFlatSpec
 import scala.util.Random
+import java.nio.file.{Paths, Files}
+import java.nio.charset.StandardCharsets
 import scala.collection.mutable
 
 class TestVectorSkipAheadIntersectionUnit extends AnyFlatSpec with ChiselScalatestTester with Matchers {
@@ -72,3 +75,16 @@ class TestVectorSkipAheadIntersectionUnit extends AnyFlatSpec with ChiselScalate
     }
   }
 }
+
+/*
+class Test_Emit_VectorSkipAheadIntersectionUnit extends AnyFreeSpec with ChiselScalatestTester {
+
+  var verilog_dir="src/verilog/"
+
+  "Emit_VectorSkipAheadIntersectionUnit_vectorLength8_numTags8_tagBitWidth5" in {
+      var filename="VectorSkipAheadIntersectionUnit_vectorLength8_numTags8_tagBitWidth5.v"
+      var intersect=chisel3.getVerilogString(new VectorSkipAheadIntersectionUnit(vectorLength = 8, numTags = 8, tagBitWidth = 5))
+      Files.write(Paths.get(verilog_dir+filename), intersect.getBytes(StandardCharsets.UTF_8))      
+  }
+}
+*/
