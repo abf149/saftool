@@ -109,7 +109,7 @@ class IntersectFmtCDirBidirStageCombinational(headWidth: Int, metaDataWidth: Int
   io.new_out_head := operandPopDecider.io.new_out_head
 
   // CheckIfFinished instance
-  val checkIfFinished = Module(new CheckIfFinished(headWidth, (2*arraySize - 1).U)) // Assuming N = arraySize - 1
+  val checkIfFinished = Module(new CheckIfFinished(headWidth, arraySize.U)) // Assuming N = arraySize - 1
   checkIfFinished.io.enable := io.enable_in
   checkIfFinished.io.new_in0_head := io.new_in0_head
   checkIfFinished.io.new_in1_head := io.new_in1_head
@@ -118,7 +118,7 @@ class IntersectFmtCDirBidirStageCombinational(headWidth: Int, metaDataWidth: Int
 
 class VectorTwoFingerMergeIntersection(metaDataWidth: Int, arraySize: Int) extends Module  with RequireSyncReset{
   val M = 2 * arraySize - 1
-  val headWidth = log2Ceil(arraySize) // Assuming headWidth based on arraySize
+  val headWidth = log2Ceil(arraySize)+1 // Assuming headWidth based on arraySize
 
   val io = IO(new Bundle {
     val enable_in = Input(Bool())
@@ -126,6 +126,8 @@ class VectorTwoFingerMergeIntersection(metaDataWidth: Int, arraySize: Int) exten
 
     val inputWireArrays = Input(Vec(2, Vec(arraySize, UInt(metaDataWidth.W))))
     val outputWireArrays = Output(Vec(arraySize, UInt(metaDataWidth.W)))
+
+    val num_matches = Output(UInt(log2Ceil(M + 1).W))   
     //val outputFlagArrays = Output(Vec(arraySize, UInt(1.W)))
 
     /*
@@ -161,9 +163,15 @@ class VectorTwoFingerMergeIntersection(metaDataWidth: Int, arraySize: Int) exten
   io.outputWireArrays := writeMuxesData.io.sharedWriteArray
   //io.outputFlagArrays := writeMuxesFlag.io.sharedWriteArray
 
+  val matchCount = Wire(Vec(M + 1, UInt(log2Ceil(M + 1).W)))
+  matchCount(0) := 0.U
+
   // Wire stages, read muxes, and write muxes
   for(i <- 0 until M) {
 
+    // Compute the match count
+    matchCount(i + 1) := matchCount(i) + writeMuxesData.io.dynamicWriteMuxVec(i).enable.asUInt    
+    
     // Connect pipeline stage to read muxes
     pipelineStages(i).io.readMux0 <> readMuxes0.io.readMuxVec(i)
     pipelineStages(i).io.readMux1 <> readMuxes1.io.readMuxVec(i)
@@ -191,4 +199,5 @@ class VectorTwoFingerMergeIntersection(metaDataWidth: Int, arraySize: Int) exten
 
   // Set enable_out for the last stage
   io.enable_out := pipelineStages.last.io.enable_out
+  io.num_matches := matchCount(arraySize + 1)
 }
