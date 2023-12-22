@@ -8,8 +8,8 @@ import chisel3.util.Decoupled
 import chisel3.util.{switch, is}
 import scala.math._
 
-// Fully combinational Ripple parallel prefix sum
-class RippleParallelPrefixSumCombinational(val bitwidth: Int) extends Module with RequireSyncReset {
+// Fully combinational Ripple prefix sum
+class BitmaskRipplePrefixSumCombinational(val bitwidth: Int) extends Module with RequireSyncReset {
   val output_wordbits = (log10(bitwidth)/log10(2.0)).toInt + 1
 
   val input = IO(new ParallelPrefixSumWrapperInputBundle(bitwidth))
