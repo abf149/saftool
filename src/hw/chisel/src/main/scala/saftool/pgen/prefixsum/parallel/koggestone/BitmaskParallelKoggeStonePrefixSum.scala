@@ -9,7 +9,7 @@ import chisel3.util.{switch, is}
 import scala.math._
 
 /* Combinational Kogge-Stone parallel prefix sum */
-class ParallelKoggeStonePrefixSumCombinational(val bitwidth: Int) extends Module with RequireSyncReset {
+class BitmaskParallelKoggeStonePrefixSumCombinational(val bitwidth: Int) extends Module with RequireSyncReset {
   val output_wordbits = (log10(bitwidth)/log10(2.0)).toInt + 1
 
   val input = IO(new ParallelPrefixSumWrapperInputBundle(bitwidth))

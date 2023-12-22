@@ -9,7 +9,7 @@ import chisel3.util.{switch, is}
 import scala.math._
 
 /* Registered interface wrapped around parallel prefix sum */
-class ParallelKoggeStonePrefixSumRegistered(val bitwidth: Int) extends Module with RequireSyncReset {
+class BitmaskParallelKoggeStonePrefixSumRegistered(val bitwidth: Int) extends Module with RequireSyncReset {
   val output_wordbits = (log10(bitwidth)/log10(2.0)).toInt+1
 
   val input = IO(new ParallelPrefixSumWrapperInputBundle(bitwidth))
@@ -20,7 +20,7 @@ class ParallelKoggeStonePrefixSumRegistered(val bitwidth: Int) extends Module wi
     //bitwidth,UInt(output_wordbits.W)))) //RegInit(Vec(Seq.fill(bitwidth)(0.U(output_wordbits.W))))
 
   // Combinational unit
-  val combinational_prefix_sum = Module(new ParallelKoggeStonePrefixSumCombinational(bitwidth))
+  val combinational_prefix_sum = Module(new BitmaskParallelKoggeStonePrefixSumCombinational(bitwidth))
 
   bitmask_reg := input.bitmask
   combinational_prefix_sum.input.bitmask := bitmask_reg

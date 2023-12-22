@@ -44,7 +44,7 @@ class VectorDirectMappedIntersectionUnit(val vectorLength: Int, val fiberLength:
     }
 
     // Parallel Prefix Sum
-    val prefixSumModule = Module(new ParallelKoggeStonePrefixSumCombinational(fiberLength))
+    val prefixSumModule = Module(new BitmaskParallelKoggeStonePrefixSumCombinational(fiberLength))
     prefixSumModule.input.bitmask := commonBitmask.asUInt
     val prefixSums = prefixSumModule.output.sums
 
