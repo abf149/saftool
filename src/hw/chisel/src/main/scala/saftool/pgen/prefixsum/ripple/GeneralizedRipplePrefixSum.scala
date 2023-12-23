@@ -18,14 +18,19 @@ class GeneralizedRipplePrefixSumCombinational(val vectorLength: Int, val inputBi
 
   partialSums(0) := input(0)
   for (i <- 1 until vectorLength) {
-    val prevAdderWidth = log2Ceil(i * inputBitWidth) + 1    
-    val adderWidth = log2Ceil((i + 1) * inputBitWidth) + 1
+    // Compute the minimum adder input/output bits required
+    // # input bits = previous stage # output bits
+    // # output bits = adderWidth
+    val prevAdderWidth = inputBitWidth + log2Ceil(i+1) //log2Ceil(i * inputBitWidth) + 1    
+    val adderWidth = inputBitWidth + log2Ceil(i + 1)
+    // Truncate previous partial sum to the number of output bits of previous-stage
+    // adder
     val widthMatch = Wire(UInt(prevAdderWidth.W))
     widthMatch := partialSums(i - 1)
-    val widthMatchReg = RegInit(0.U(prevAdderWidth.W))
-    widthMatchReg := widthMatch
+    // Compute sum, using minimum number of required output bits
     val sum = Wire(UInt(adderWidth.W))
-    sum := widthMatchReg + input(i)
+    sum := widthMatch + input(i)
+    // Pad out the number of bits
     partialSums(i) := sum
   }
 

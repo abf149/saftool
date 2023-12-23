@@ -9,7 +9,7 @@ import chisel3.util.{switch, is}
 import scala.math._
 
 class GeneralizedRipplePrefixSumRegistered(val vectorLength: Int, val inputBitWidth: Int) extends Module with RequireSyncReset {
-  val outputWordBits = inputBitWidth + log2Ceil(vectorLength) + 1
+  val outputWordBits = inputBitWidth + log2Ceil(vectorLength)
 
   val input = IO(Input(Vec(vectorLength, UInt(inputBitWidth.W))))
   val output = IO(Output(Vec(vectorLength, UInt(outputWordBits.W))))
