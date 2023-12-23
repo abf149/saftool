@@ -10,7 +10,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import java.nio.file.{Paths, Files}
 import java.nio.charset.StandardCharsets
 
-class Workload_GeneralizedKoggeStonePrefixSumRegistered_Random(pfsum: GeneralizedParallelKoggeStonePrefixSumRegistered) extends PeekPokeTester(pfsum) {
+class Workload_GeneralizedParallelKoggeStonePrefixSumRegistered_Random(pfsum: GeneralizedParallelKoggeStonePrefixSumRegistered) extends PeekPokeTester(pfsum) {
   val rand = new scala.util.Random
 
   reset(2)
@@ -27,10 +27,10 @@ class Workload_GeneralizedKoggeStonePrefixSumRegistered_Random(pfsum: Generalize
   }
 }
 
-class Test_Sim_GeneralizedKoggeStonePrefixSumRegistered extends AnyFlatSpec with ChiselScalatestTester {
+class Test_Sim_GeneralizedParallelKoggeStonePrefixSumRegistered extends AnyFlatSpec with ChiselScalatestTester {
   behavior of "GeneralizedKoggeStonePrefixSumRegistered"
   it should "vectorLength2_inputBitWidth3" in {
-    test(new GeneralizedParallelKoggeStonePrefixSumRegistered(vectorLength = 2, inputBitWidth = 3)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_GeneralizedKoggeStonePrefixSumRegistered_Random(_))
+    test(new GeneralizedParallelKoggeStonePrefixSumRegistered(vectorLength = 2, inputBitWidth = 3)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_GeneralizedParallelKoggeStonePrefixSumRegistered_Random(_))
   }    
   // Add additional test cases for different vectorLength and inputBitWidth values as needed
 }
