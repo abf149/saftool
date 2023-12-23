@@ -30,7 +30,7 @@ class Workload_GeneralizedParallelKoggeStonePrefixSumRegistered_Random(pfsum: Ge
 class Test_Sim_GeneralizedParallelKoggeStonePrefixSumRegistered extends AnyFlatSpec with ChiselScalatestTester {
   behavior of "GeneralizedKoggeStonePrefixSumRegistered"
   it should "vectorLength2_inputBitWidth3" in {
-    test(new GeneralizedParallelKoggeStonePrefixSumRegistered(vectorLength = 2, inputBitWidth = 3)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_GeneralizedParallelKoggeStonePrefixSumRegistered_Random(_))
+    test(new GeneralizedParallelKoggeStonePrefixSumRegistered(vectorLength = 8, inputBitWidth = 3)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_GeneralizedParallelKoggeStonePrefixSumRegistered_Random(_))
   }    
   // Add additional test cases for different vectorLength and inputBitWidth values as needed
 }

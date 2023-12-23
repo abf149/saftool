@@ -27,7 +27,7 @@ class GeneralizedParallelKoggeStonePrefixSumCombinational(val vectorLength: Int,
 
     for (jdx <- lvlStride until numElements) {
       newLevel(jdx) = Wire(UInt(bitsOut.W))
-      newLevel(jdx) := currentLevel(jdx) + currentLevel(jdx - lvlStride)
+      newLevel(jdx) := (currentLevel(jdx).pad(bitsOut) + currentLevel(jdx - lvlStride).pad(bitsOut))
     }
 
     newLevel
@@ -37,7 +37,7 @@ class GeneralizedParallelKoggeStonePrefixSumCombinational(val vectorLength: Int,
   var logicLvls: Array[Array[UInt]] = Array.ofDim[UInt](numLvls, vectorLength)
 
   logicLvls(0) = input.toArray
-  
+
   // Build successive Kogge-Stone layers
   for (idx <- 1 until numLvls) {
     logicLvls(idx) = doBuild(logicLvls(idx - 1), vectorLength, idx - 1)

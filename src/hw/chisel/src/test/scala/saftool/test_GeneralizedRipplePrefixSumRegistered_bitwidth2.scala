@@ -29,7 +29,7 @@ class Workload_GeneralizedRipplePrefixSumRegistered_Random(pfsum: GeneralizedRip
 class Test_Sim_GeneralizedRipplePrefixSumRegistered extends AnyFlatSpec with ChiselScalatestTester {
   behavior of "GeneralizedRipplePrefixSumRegistered"
   it should "vectorLength2_inputBitWidth3" in {
-    test(new GeneralizedRipplePrefixSumRegistered(vectorLength = 2, inputBitWidth = 3)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_GeneralizedRipplePrefixSumRegistered_Random(_))
+    test(new GeneralizedRipplePrefixSumRegistered(vectorLength = 8, inputBitWidth = 3)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_GeneralizedRipplePrefixSumRegistered_Random(_))
   }    
   // Add additional test cases for different vectorLength and inputBitWidth values as needed
 }
