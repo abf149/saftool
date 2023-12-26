@@ -9,11 +9,11 @@ import org.scalatest.flatspec.AnyFlatSpec
 import scala.util.Random
 import scala.collection.mutable
 
-class TestVectorTwoFingerMergeIntersection extends AnyFlatSpec with ChiselScalatestTester with Matchers {
-  behavior of "VectorTwoFingerMergeIntersection"
+class TestVectorTwoFingerMergeIntersectionRegistered extends AnyFlatSpec with ChiselScalatestTester with Matchers {
+  behavior of "VectorTwoFingerMergeIntersectionRegistered"
 
   it should "correctly intersect and output sorted common tag values" in {
-    test(new VectorTwoFingerMergeIntersection(metaDataWidth = 5, arraySize = 4)).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
+    test(new VectorTwoFingerMergeIntersectionRegistered(metaDataWidth = 5, arraySize = 4)).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
       val rand = new Random
       val numTags = 4
       val maxTagValue = (2 * numTags).toInt

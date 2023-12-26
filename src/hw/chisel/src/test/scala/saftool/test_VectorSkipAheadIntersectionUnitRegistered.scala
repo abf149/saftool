@@ -12,11 +12,11 @@ import java.nio.file.{Paths, Files}
 import java.nio.charset.StandardCharsets
 import scala.collection.mutable
 
-class TestVectorSkipAheadIntersectionUnit extends AnyFlatSpec with ChiselScalatestTester with Matchers {
-  behavior of "VectorSkipAheadIntersectionUnit"
+class TestVectorSkipAheadIntersectionUnitRegistered extends AnyFlatSpec with ChiselScalatestTester with Matchers {
+  behavior of "VectorSkipAheadIntersectionUnitRegistered"
 
   it should "correctly intersect and output sorted common tag values" in {
-    test(new VectorSkipAheadIntersectionUnit(vectorLength = 8, numTags = 8, tagBitWidth = 5)).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
+    test(new VectorSkipAheadIntersectionUnitRegistered(vectorLength = 8, numTags = 8, tagBitWidth = 5)).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
       val rand = new Random
       val numTags = 8
       val maxTagValue = (1.2 * numTags).toInt
@@ -75,16 +75,3 @@ class TestVectorSkipAheadIntersectionUnit extends AnyFlatSpec with ChiselScalate
     }
   }
 }
-
-/*
-class Test_Emit_VectorSkipAheadIntersectionUnit extends AnyFreeSpec with ChiselScalatestTester {
-
-  var verilog_dir="src/verilog/"
-
-  "Emit_VectorSkipAheadIntersectionUnit_vectorLength8_numTags8_tagBitWidth5" in {
-      var filename="VectorSkipAheadIntersectionUnit_vectorLength8_numTags8_tagBitWidth5.v"
-      var intersect=chisel3.getVerilogString(new VectorSkipAheadIntersectionUnit(vectorLength = 8, numTags = 8, tagBitWidth = 5))
-      Files.write(Paths.get(verilog_dir+filename), intersect.getBytes(StandardCharsets.UTF_8))      
-  }
-}
-*/

@@ -12,11 +12,11 @@ import java.nio.file.{Paths, Files}
 import java.nio.charset.StandardCharsets
 import scala.collection.mutable
 
-class TestVectorDirectMappedIntersectionUnit extends AnyFlatSpec with ChiselScalatestTester with Matchers {
-  behavior of "VectorDirectMappedIntersectionUnit"
+class TestVectorDirectMappedIntersectionUnitRegistered extends AnyFlatSpec with ChiselScalatestTester with Matchers {
+  behavior of "VectorDirectMappedIntersectionUnitRegistered"
 
   it should "correctly intersect and output sorted common tag values" in {
-    test(new VectorDirectMappedIntersectionUnit(vectorLength = 16, fiberLength = 32, tagBitWidth = 5)).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
+    test(new VectorDirectMappedIntersectionUnitRegistered(vectorLength = 16, fiberLength = 32, tagBitWidth = 5)).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
 
       val rand = new Random
       val numTags = 16
@@ -59,16 +59,3 @@ class TestVectorDirectMappedIntersectionUnit extends AnyFlatSpec with ChiselScal
     }
   }
 }
-
-/*
-class Test_Emit_VectorDirectMappedIntersectionUnit extends AnyFreeSpec with ChiselScalatestTester {
-
-  var verilog_dir="src/verilog/"
-
-  "Emit_VectorDirectMappedIntersectionUnit_vectorLength8_fiberLength32_tagBitWidth5" in {
-      var filename="VectorDirectMappedIntersectionUnit_vectorLength8_fiberLength32_tagBitWidth5.v"
-      var intersect=chisel3.getVerilogString(new VectorDirectMappedIntersectionUnit(vectorLength = 8, fiberLength = 32, tagBitWidth = 5))
-      Files.write(Paths.get(verilog_dir+filename), intersect.getBytes(StandardCharsets.UTF_8))      
-  }
-}
-*/
