@@ -7,7 +7,7 @@ import treadle.WriteVcdAnnotation
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.flatspec.AnyFlatSpec
-import java.nio.file.{Paths, Files}
+import java.nio.file.{Files, Paths, StandardOpenOption}
 import java.nio.charset.StandardCharsets
 
 class Workload_VectorParallelDec2PriorityEncoderRegistered_Random(penc: VectorParallelDec2PriorityEncoderRegistered) extends PeekPokeTester(penc) {
@@ -26,20 +26,42 @@ class Workload_VectorParallelDec2PriorityEncoderRegistered_Random(penc: VectorPa
 
 class Test_Sim_VectorParallelDec2PriorityEncoderRegistered extends AnyFlatSpec with ChiselScalatestTester {
   behavior of "VectorParallelDec2PriorityEncoderRegistered"
-  
-  it should "inputbits2_vectorLength2" in {
-    test(new VectorParallelDec2PriorityEncoderRegistered(vectorLength = 4, inputbits = 8)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_VectorParallelDec2PriorityEncoderRegistered_Random(_))
-  }
-  // Add additional test cases for different inputbits and vectorLength values as needed
-}
 
-class Test_Emit_VectorParallelDec2PriorityEncoderRegistered extends AnyFreeSpec with ChiselScalatestTester {
+  val chiselTestDir = sys.env.getOrElse("CHISEL_TEST_DIR", "src/test/scala/saftool") // Default path if the environment variable is not set
   var verilog_dir = "src/verilog/"
 
-  "Emit_VectorParallelDec2PriorityEncoderRegistered_inputbits2_vectorLength2" in {
-    var filename = "VectorParallelDec2PriorityEncoderRegistered_inputbits2_vectorLength2.v"
-    var intersect = chisel3.getVerilogString(new VectorParallelDec2PriorityEncoderRegistered(vectorLength = 2, inputbits = 2))
-    Files.write(Paths.get(verilog_dir + filename), intersect.getBytes(StandardCharsets.UTF_8))
+  val inputbitsValues = List(1, 2, 4, 8, 16, 32, 64)
+  val vectorLengthValues = List(1, 2, 4)
+
+  val combinations = for {
+    inputbits <- inputbitsValues
+    vectorLength <- vectorLengthValues
+    if inputbits >= vectorLength
+  } yield (inputbits, vectorLength)
+
+  def createTest(inputbits: Int, vectorLength: Int): Unit = {
+    val testName = s"test_VectorParallelDec2PriorityEncoderRegistered_inputbits${inputbits}_vectorLength${vectorLength}.scala"
+    val testFilePath = Paths.get(chiselTestDir, testName)
+
+    if (!Files.exists(testFilePath)) {
+      Files.createFile(testFilePath)
+    }
+
+    it should s"inputbits${inputbits}_vectorLength${vectorLength}" in {
+      test(new VectorParallelDec2PriorityEncoderRegistered(vectorLength, inputbits))
+        .withAnnotations(Seq(WriteVcdAnnotation))
+        .runPeekPoke(new Workload_VectorParallelDec2PriorityEncoderRegistered_Random(_))
+    }
+    emitVerilog(inputbits, vectorLength)
   }
-  // Add additional test cases for emitting Verilog for different inputbits and vectorLength values as needed
+
+  def emitVerilog(inputbits: Int, vectorLength: Int): Unit = {
+    val filename = s"VectorParallelDec2PriorityEncoderRegistered_inputbits${inputbits}_vectorLength${vectorLength}.v"
+    val verilogString = chisel3.getVerilogString(new VectorParallelDec2PriorityEncoderRegistered(vectorLength, inputbits))
+    Files.write(Paths.get(verilog_dir + filename), verilogString.getBytes(StandardCharsets.UTF_8))
+  }
+
+  combinations.foreach { case (inputbits, vectorLength) =>
+    createTest(inputbits, vectorLength)
+  }
 }

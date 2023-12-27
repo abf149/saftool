@@ -33,7 +33,7 @@ class ParallelDec2PriorityEncoderCombinational(val inputbits: Int) extends Modul
 
   val input = IO(new Bundle{val in = Input(UInt(inputbits.W))})
   val output = IO(new PriorityEncoderBundle(output_bits))
-  
+
   def doBuild(base_offset: Int, cur_inputbits: Int, cur_output: PriorityEncoderBundle): Unit =
     //val new_inputbits = (cur_inputbits/2).toInt 
 
@@ -55,5 +55,12 @@ class ParallelDec2PriorityEncoderCombinational(val inputbits: Int) extends Modul
       base_penc.input1.vld := input.in(base_offset+1)
     }
 
-  doBuild(0, output_bits-1, output)
+  if (inputbits == 1) {
+    // Base-case: valid = passthru, index = 0
+    output.vld := input.in
+    output.idx := 0.U
+  } else {
+    // General case: parallel priority encoder
+    doBuild(0, output_bits-1, output)
+  }
 }
