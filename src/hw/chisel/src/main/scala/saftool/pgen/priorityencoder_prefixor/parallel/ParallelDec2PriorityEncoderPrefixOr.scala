@@ -77,13 +77,20 @@ class ParallelDec2PriorityEncoderPrefixOr(val inputbits: Int) extends Module wit
     combinedOutput
   }
 
-  when(io.enable) {
-    val combinedResult = buildCombined(io.in, log2Ceil(inputbits) - 1, inputbits)
-    io.out := combinedResult
-    io.out.valid := combinedResult.valid // Ensure valid is set correctly when enabled
-  } .otherwise {
+  if (inputbits == 1) {
     io.out.priorityIdx := 0.U
-    io.out.prefixOrOut := 0.U
-    io.out.valid := false.B
+    io.out.prefixOrOut := io.in
+    io.out.valid := io.in.asBool()
+
+  } else {
+    when(io.enable) {
+      val combinedResult = buildCombined(io.in, log2Ceil(inputbits) - 1, inputbits)
+      io.out := combinedResult
+      io.out.valid := combinedResult.valid // Ensure valid is set correctly when enabled
+    } .otherwise {
+      io.out.priorityIdx := 0.U
+      io.out.prefixOrOut := 0.U
+      io.out.valid := false.B
+    }
   }
 }

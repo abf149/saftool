@@ -30,6 +30,12 @@ class Test_Sim_RegisteredSubtraction extends AnyFlatSpec with ChiselScalatestTes
   it should "bitwidth1" in {
     test(new RegisteredSubtraction(bitwidth = 1)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_RegisteredSubtraction_Random(_))
   }  
+  it should "bitwidth2" in {
+    test(new RegisteredSubtraction(bitwidth = 2)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_RegisteredSubtraction_Random(_))
+  }  
+  it should "bitwidth4" in {
+    test(new RegisteredSubtraction(bitwidth = 4)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_RegisteredSubtraction_Random(_))
+  }  
   it should "bitwidth8" in {
     test(new RegisteredSubtraction(bitwidth = 8)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_RegisteredSubtraction_Random(_))
   }    
@@ -51,6 +57,18 @@ class Test_Emit_RegisteredSubtraction extends AnyFreeSpec with ChiselScalatestTe
   "Emit_RegisteredSubtraction_bitwidth1" in {
       var filename="RegisteredSubtraction_bitwidth1.v"
       var intersect=chisel3.getVerilogString(new RegisteredSubtraction(bitwidth = 1))
+      Files.write(Paths.get(verilog_dir+filename), intersect.getBytes(StandardCharsets.UTF_8))      
+  }
+
+  "Emit_RegisteredSubtraction_bitwidth2" in {
+      var filename="RegisteredSubtraction_bitwidth2.v"
+      var intersect=chisel3.getVerilogString(new RegisteredSubtraction(bitwidth = 2))
+      Files.write(Paths.get(verilog_dir+filename), intersect.getBytes(StandardCharsets.UTF_8))      
+  }
+
+  "Emit_RegisteredSubtraction_bitwidth4" in {
+      var filename="RegisteredSubtraction_bitwidth4.v"
+      var intersect=chisel3.getVerilogString(new RegisteredSubtraction(bitwidth = 4))
       Files.write(Paths.get(verilog_dir+filename), intersect.getBytes(StandardCharsets.UTF_8))      
   }
 

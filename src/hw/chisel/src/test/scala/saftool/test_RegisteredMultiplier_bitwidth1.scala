@@ -30,6 +30,12 @@ class Test_Sim_RegisteredMultiplier extends AnyFlatSpec with ChiselScalatestTest
   it should "bitwidth1" in {
     test(new RegisteredMultiplier(bitwidth = 1)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_RegisteredMultiplier_Random(_))
   }  
+  it should "bitwidth2" in {
+    test(new RegisteredMultiplier(bitwidth = 2)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_RegisteredMultiplier_Random(_))
+  }  
+  it should "bitwidth4" in {
+    test(new RegisteredMultiplier(bitwidth = 4)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_RegisteredMultiplier_Random(_))
+  }  
   it should "bitwidth8" in {
     test(new RegisteredMultiplier(bitwidth = 8)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_RegisteredMultiplier_Random(_))
   }    
@@ -51,6 +57,18 @@ class Test_Emit_RegisteredMultiplier extends AnyFreeSpec with ChiselScalatestTes
   "Emit_RegisteredMultiplier_bitwidth1" in {
       var filename="RegisteredMultiplier_bitwidth1.v"
       var intersect=chisel3.getVerilogString(new RegisteredMultiplier(bitwidth = 1))
+      Files.write(Paths.get(verilog_dir+filename), intersect.getBytes(StandardCharsets.UTF_8))      
+  }
+
+  "Emit_RegisteredMultiplier_bitwidth2" in {
+      var filename="RegisteredMultiplier_bitwidth2.v"
+      var intersect=chisel3.getVerilogString(new RegisteredMultiplier(bitwidth = 2))
+      Files.write(Paths.get(verilog_dir+filename), intersect.getBytes(StandardCharsets.UTF_8))      
+  }
+
+  "Emit_RegisteredMultiplier_bitwidth4" in {
+      var filename="RegisteredMultiplier_bitwidth4.v"
+      var intersect=chisel3.getVerilogString(new RegisteredMultiplier(bitwidth = 4))
       Files.write(Paths.get(verilog_dir+filename), intersect.getBytes(StandardCharsets.UTF_8))      
   }
 

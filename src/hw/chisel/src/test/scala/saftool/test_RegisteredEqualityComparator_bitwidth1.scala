@@ -30,6 +30,12 @@ class Test_Sim_RegisteredEqualityComparator extends AnyFlatSpec with ChiselScala
   it should "bitwidth1" in {
     test(new RegisteredEqualityComparator(bitwidth = 1)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_RegisteredEqualityComparator_Random(_))
   }  
+  it should "bitwidth2" in {
+    test(new RegisteredEqualityComparator(bitwidth = 2)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_RegisteredEqualityComparator_Random(_))
+  }  
+  it should "bitwidth4" in {
+    test(new RegisteredEqualityComparator(bitwidth = 4)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_RegisteredEqualityComparator_Random(_))
+  }  
   it should "bitwidth8" in {
     test(new RegisteredEqualityComparator(bitwidth = 8)).withAnnotations(Seq(WriteVcdAnnotation)).runPeekPoke(new Workload_RegisteredEqualityComparator_Random(_))
   }    
@@ -51,6 +57,18 @@ class Test_Emit_RegisteredEqualityComparator extends AnyFreeSpec with ChiselScal
   "Emit_RegisteredEqualityComparator_bitwidth1" in {
       var filename="RegisteredEqualityComparator_bitwidth1.v"
       var intersect=chisel3.getVerilogString(new RegisteredEqualityComparator(bitwidth = 1))
+      Files.write(Paths.get(verilog_dir+filename), intersect.getBytes(StandardCharsets.UTF_8))      
+  }
+
+  "Emit_RegisteredEqualityComparator_bitwidth2" in {
+      var filename="RegisteredEqualityComparator_bitwidth2.v"
+      var intersect=chisel3.getVerilogString(new RegisteredEqualityComparator(bitwidth = 2))
+      Files.write(Paths.get(verilog_dir+filename), intersect.getBytes(StandardCharsets.UTF_8))      
+  }
+
+  "Emit_RegisteredEqualityComparator_bitwidth4" in {
+      var filename="RegisteredEqualityComparator_bitwidth4.v"
+      var intersect=chisel3.getVerilogString(new RegisteredEqualityComparator(bitwidth = 4))
       Files.write(Paths.get(verilog_dir+filename), intersect.getBytes(StandardCharsets.UTF_8))      
   }
 

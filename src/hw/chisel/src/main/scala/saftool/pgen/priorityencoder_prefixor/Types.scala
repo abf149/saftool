@@ -11,5 +11,5 @@ import scala.math._
 class CombinedBundle(idxWidth: Int, orWidth: Int) extends Bundle {
   val priorityIdx = UInt(idxWidth.W)
   val prefixOrOut = UInt(orWidth.W)
-  val valid = Bool()  // Add valid signal
+  val valid = Bool()
 }
