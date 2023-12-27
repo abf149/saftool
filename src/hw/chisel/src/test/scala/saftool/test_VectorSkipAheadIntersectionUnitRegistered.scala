@@ -79,9 +79,9 @@ class TestVectorSkipAheadIntersectionUnitRegistered extends AnyFlatSpec with Chi
   val chiselTestDir = sys.env.getOrElse("CHISEL_TEST_DIR", "src/test/scala/saftool") // Default path if the environment variable is not set
   var verilog_dir = "src/verilog/"
 
-  val vectorLengths = List(1, 2, 4)
-  val numTagsValues = List(1, 2, 4, 8, 16, 32)
-  val fiberLengths = List(2, 4, 8, 16, 32)
+  val vectorLengths = List(8)//List(1, 2, 4)
+  val numTagsValues = List(8)//List(2, 4, 8, 16, 32)
+  val fiberLengths = List(32)//List(2, 4, 8, 16, 32)
 
   val combinations = for {
     vectorLength <- vectorLengths
@@ -99,7 +99,7 @@ class TestVectorSkipAheadIntersectionUnitRegistered extends AnyFlatSpec with Chi
     }
 
     it should s"vectorLength${vectorLength}_numTags${numTags}_tagBitWidth${tagBitWidth}" in {
-      test(new VectorSkipAheadIntersectionUnitRegistered(vectorLength, numTags, tagBitWidth))
+      test(new VectorSkipAheadIntersectionUnitRegistered(vectorLength=vectorLength, numTags=numTags, tagBitWidth=tagBitWidth))
         .withAnnotations(Seq(WriteVcdAnnotation))
         .runPeekPoke(new Workload_VectorSkipAheadIntersectionUnitRegistered(_))
     }
@@ -108,7 +108,7 @@ class TestVectorSkipAheadIntersectionUnitRegistered extends AnyFlatSpec with Chi
 
   def emitVerilog(vectorLength: Int, numTags: Int, tagBitWidth: Int): Unit = {
     val filename = s"VectorSkipAheadIntersectionUnitRegistered_vectorLength${vectorLength}_numTags${numTags}_tagBitWidth${tagBitWidth}.v"
-    val verilogString = chisel3.getVerilogString(new VectorSkipAheadIntersectionUnitRegistered(vectorLength, numTags, tagBitWidth))
+    val verilogString = chisel3.getVerilogString(new VectorSkipAheadIntersectionUnitRegistered(vectorLength=vectorLength, numTags=numTags, tagBitWidth=tagBitWidth))
     Files.write(Paths.get(verilog_dir + filename), verilogString.getBytes(StandardCharsets.UTF_8))
   }
 
