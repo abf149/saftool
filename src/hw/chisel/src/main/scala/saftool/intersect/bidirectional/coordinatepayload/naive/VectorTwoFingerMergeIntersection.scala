@@ -116,7 +116,9 @@ class IntersectFmtCDirBidirStageCombinational(headWidth: Int, metaDataWidth: Int
   io.enable_out := !checkIfFinished.io.isFinished && io.enable_in
 }
 
-class VectorTwoFingerMergeIntersection(metaDataWidth: Int, arraySize: Int) extends Module  with RequireSyncReset{
+class VectorTwoFingerMergeIntersection(val metaDataWidth: Int, val arraySize: Int) extends Module  with RequireSyncReset{
+
+
   val M = 2 * arraySize - 1
   val headWidth = log2Ceil(arraySize)+1 // Assuming headWidth based on arraySize
 
@@ -199,5 +201,5 @@ class VectorTwoFingerMergeIntersection(metaDataWidth: Int, arraySize: Int) exten
 
   // Set enable_out for the last stage
   io.enable_out := pipelineStages.last.io.enable_out
-  io.num_matches := matchCount(arraySize + 1)
+  io.num_matches := matchCount(M)
 }

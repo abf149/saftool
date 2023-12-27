@@ -7,7 +7,7 @@ import chisel3.experimental.ChiselEnum
 import chisel3.util.Decoupled
 import chisel3.util.{switch, is}
 
-class VectorTwoFingerMergeIntersectionRegistered(metaDataWidth: Int, arraySize: Int) extends Module with RequireSyncReset {
+class VectorTwoFingerMergeIntersectionRegistered(val metaDataWidth: Int, val arraySize: Int) extends Module with RequireSyncReset {
   val M = 2 * arraySize - 1
   val headWidth = log2Ceil(arraySize) + 1
 
