@@ -8,7 +8,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.flatspec.AnyFlatSpec
 import scala.util.Random
-import java.nio.file.{Paths, Files}
+import java.nio.file.{Files, Paths, StandardOpenOption}
 import java.nio.charset.StandardCharsets
 import scala.collection.mutable
 
@@ -52,8 +52,13 @@ class Workload_VectorDirectMappedIntersectionUnitRegistered(dut: VectorDirectMap
 class Test_VectorDirectMappedIntersectionUnitRegistered extends AnyFlatSpec with ChiselScalatestTester {
   behavior of "VectorDirectMappedIntersectionUnitRegistered"
 
+  //val currentWorkingDirectory = Paths.get("").toAbsolutePath.toString
+  //assert(false,println(s"Current working directory: $currentWorkingDirectory"))
+
+
   val vectorLengths = List(1, 2, 4)
   val fiberLengths = List(8, 16, 32)
+  val chiselTestDir = sys.env.getOrElse("CHISEL_TEST_DIR", "src/test/scala/saftool") // Default path if the environment variable is not set
   var verilog_dir = "src/verilog/"
 
   val combinations = for {
@@ -64,6 +69,13 @@ class Test_VectorDirectMappedIntersectionUnitRegistered extends AnyFlatSpec with
   def createTest(vectorLength: Int, fiberLength: Int): Unit = {
     if (fiberLength > vectorLength) {
       val tagBitWidth = log2Ceil(fiberLength)
+      val testName = s"test_VectorDirectMappedIntersectionUnitRegistered_vectorLength${vectorLength}_fiberLength${fiberLength}_tagBitWidth${tagBitWidth}.scala"
+      val testFilePath = Paths.get(chiselTestDir, testName)
+
+      if (!Files.exists(testFilePath)) {
+        Files.createFile(testFilePath)
+      }
+
       it should s"vectorLength${vectorLength}_fiberLength${fiberLength}_tagBitWidth${tagBitWidth}" in {
         test(new VectorDirectMappedIntersectionUnitRegistered(vectorLength, fiberLength, tagBitWidth))
           .withAnnotations(Seq(WriteVcdAnnotation))
