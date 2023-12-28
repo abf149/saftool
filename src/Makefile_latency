@@ -1,0 +1,18 @@
+REMOTE_PATH := tmp/
+#CLOCK_PERIOD := 5 # 5ns
+SYNTH_LIB := /homes/abf149/pdk/ncsu-FreePDK45-1.4/FreePDK45/osu_soc/lib/files/gscl45nm.db
+CHISEL_PATH := hw/chisel/
+HW_PATH := hw/
+ACCELERGY_DATA_PATH := accelergy/data/
+VERILOG_OUTPUT_PATH := $(CHISEL_PATH)src/verilog/
+VERILOG_DEST_PATH := $(HW_PATH)rtl_out/
+SIM_DATA_OUTPUT_PATH := $(CHISEL_PATH)test_run_dir/
+SIM_DATA_DEST_PATH := $(HW_PATH)sim_data/
+
+STARTDIR:=$(shell pwd)
+
+EEMS_SERVER := peeta
+
+%:
+	rm -f $(SIM_DATA_DEST_PATH)$(notdir $(basename $@)).latency
+	sed -n -e "/Report : qor/,/  Cell Count/ p" $(SIM_DATA_DEST_PATH)$(notdir $(basename $@)).log | sed -e '1d;$d' > $(SIM_DATA_DEST_PATH)$(notdir $(basename $@)).latency

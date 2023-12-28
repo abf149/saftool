@@ -1,0 +1,23 @@
+REMOTE_PATH := tmp/
+#CLOCK_PERIOD := 5 # 5ns
+SYNTH_LIB := /homes/abf149/pdk/ncsu-FreePDK45-1.4/FreePDK45/osu_soc/lib/files/gscl45nm.db
+CHISEL_PATH := hw/chisel/
+HW_PATH := hw/
+ACCELERGY_DATA_PATH := accelergy/data/
+VERILOG_OUTPUT_PATH := $(CHISEL_PATH)src/verilog/
+VERILOG_DEST_PATH := $(HW_PATH)rtl_out/
+SIM_DATA_OUTPUT_PATH := $(CHISEL_PATH)test_run_dir/
+SIM_DATA_DEST_PATH := $(HW_PATH)sim_data/
+
+STARTDIR:=$(shell pwd)
+
+EEMS_SERVER := peeta
+
+%:
+	echo $@
+	rm -f $@
+	touch $@
+	echo "time CLOCK_PERIOD=$(CLOCK_PERIOD) DESIGN_RTL=mod.v DESIGN_TOPLEVEL=$(shell echo $(notdir $(basename $@)) | sed "s/_\(.*\)//") SYNTH_LIB=$(SYNTH_LIB) dc_shell -f build_dc_nsa.tcl" | ssh abf149@$(EEMS_SERVER).mit.edu "/bin/bash -c cat>$(REMOTE_PATH)build_shell_remote.sh"
+	cat scripts/build_dc_nsa.tcl | ssh abf149@$(EEMS_SERVER).mit.edu "/bin/bash -c cat>$(REMOTE_PATH)build_dc_nsa.tcl"	
+	scp hw/rtl_out/$(basename $(notdir $@)).v abf149@$(EEMS_SERVER).mit.edu:$(REMOTE_PATH)mod.v
+	ssh abf149@$(EEMS_SERVER).mit.edu "cd $(REMOTE_PATH); chmod +x build_shell_remote.sh; ./build_shell_remote.sh" | tee -a "$(SIM_DATA_DEST_PATH)/$(notdir $@)"

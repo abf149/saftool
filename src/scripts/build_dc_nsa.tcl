@@ -109,7 +109,7 @@ if { [catch {
   run_dc_cmd "optimize_registers"
   echo "======END COMPILATION=============================\n\n\n"
 
-  read_saif -input sim.saif -instance_name $env(DESIGN_TOPLEVEL) -verbose
+#  read_saif -input sim.saif -instance_name $env(DESIGN_TOPLEVEL) -verbose
 
   # NSA: added (to report all relevant results)
   run_dc_cmd "report_qor"
