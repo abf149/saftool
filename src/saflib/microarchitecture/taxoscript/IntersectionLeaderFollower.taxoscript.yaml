@@ -4,12 +4,12 @@ taxoscript_primitives:
     attributes:
     - format: format_leader=?
     - string: strategy=?
-      values: [none]
+      values: [passthrough]
     ports:
     - input: md_in_leader(md)=attributes.format_leader
     - output: md_out(md)=attributes.format_leader
     instances:
-    - unc_lf_none: [U,none]
-    - cp_lf_none: [C,none]
-    - b_lf_none: [B,none]
-    - r_lf_none: [R,none]
+    - U_passthrough: [U,passthrough]
+    - C_passthrough: [C,passthrough]
+    - B_passthrough: [B,passthrough]
+    - R_passthrough: [R,passthrough]
