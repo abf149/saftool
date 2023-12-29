@@ -1,0 +1,35 @@
+# Convert a single "source" stream of sparse format metadata into a single stream of positional offsets 
+# within a "destination" fiber's payload memory
+#
+# Typical use-case: consume the output metadata stream from an intersection unit, & compute
+# memory address offsets in order to read corresponding payloads.
+#
+# Sometimes (i.e. C_C_counter specialization) memory address offset cannot be computed from
+# intersection unit output metadata stream, without also referencing the original fiber metadata
+# that was fed into the intersection unit.
+#
+taxoscript_version: 0.1
+taxoscript_primitives:
+  - name: SinglePositionGenerator
+    attributes:
+    - format: format_src=? # Source stream metadata format
+    - format: format_dst=? # Destination fiber metadata format
+    - string: strategy=?
+      # passthrough - input wired to output directly
+      # counter - count input metadata words
+      values: [passthrough,counter]
+    ports:
+    - input: md_in(md)=attributes.format_src # Source metadata stream
+    - input: md_in_ref(md)=attributes.format_src # Original fiber metadata stream, for reference
+    - output: pos_out(pos)=addr # Payload memory address offset stream
+    instances:
+
+    # C_U_passthrough: md_in wired to pos_out directly, possibly with some implicit arithmetic; md_in_ref unused.
+    - C_U_passthrough: [C,U,passthrough] 
+
+    # C_C_counter: accumulate count of coordinate metadata words at md_in_ref; upon coordinate metadata word 
+    # arriving at md_in, write current total to pos_out stream.
+    - C_C_counter: [C,U,counter]
+
+    #- R_R_counter: [R,R,counter]
+    #- U_U_counter: [U,U,counter]

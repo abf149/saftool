@@ -1,0 +1,47 @@
+# Convert a two "source" streams of sparse format metadata into two streams of positional offsets 
+# within two "destination" fibers' payload memories.
+#
+# Typical use-case: consume the output metadata stream from an intersection unit, & compute
+# two streams of memory address offsets in order to read corresponding payloads from two operands
+# simultaneously.
+#
+# Sometimes (i.e. B_B_XXX_prefix_sum_YYY_priority_encoder) memory address offset cannot be computed from
+# intersection unit output metadata stream, without also referencing the original fiber metadata
+# that was fed into the intersection unit.
+#
+taxoscript_version: 0.1
+taxoscript_primitives:
+  - name: DoublePositionGenerator
+    attributes:
+    - format: format_src=? # Source stream metadata format
+    - format: format_dst=? # Destination fiber metadata format
+
+    - string: source_strategy=? # Strategy for processing source (md_in#) metadata stream
+      # kogge_stone_prefix_sum - Kogge-Stone log-depth prefix-sum
+      # ripple_prefix_sum - linear-depth ripple prefix-sum
+      values: [kogge_stone_prefix_sum,ripple_prefix_sum]
+
+    - string: reference_strategy=? # Strategy for processing reference (md_in#_ref) metadata streams
+      # parallel_dec2_priority_encoder - parallel decimation-by-2 priority encoder
+      values: [parallel_dec2_priority_encoder]
+
+    ports:
+    - input: md_in(md)=attributes.format_src # Source metadata stream
+    - input: md_in0_ref(md)=attributes.format_src # Original fiber 0 metadata stream, for reference
+    - input: md_in1_ref(md)=attributes.format_src # Original fiber 1 metadata stream, for reference
+    - output: pos_out0(pos)=addr # Fiber 0 payload memory address offset stream
+    - output: pos_out1(pos)=addr # Fiber 1 payload memory address offset stream
+    instances:
+    
+    # B_B_XXX_prefix_sum_YYY_priority_encoder: compute two sequences (0 and 1) of payload memory address offsets, via 
+    # XXX-style prefix-sums of md_in0_ref and md_in1_ref bitmask metadata streams, respectively; 
+    # simultanously, apply YYY-style priority encoder to md_in bitmask metadata stream in order to 
+    # yield a single sequence of "gather indices"; gather particular payload memory address offset values from 
+    # sequence0 by finding sequence0[gather_indices] & output them to pos_out0, and gather particular payload memory 
+    # address offset values from sequence1 by finding sequence1[gather_indices] & output them to pos_out1.
+    #
+    # For XXX \in {ripple prefix sum, kogge-stone prefix sum}
+    # For YYY \in {parallel decimation-by-2 priority encoder}
+    #
+    - B_B_ripple_prefix_sum_parallel_dec2_priority_encoder: [B,B,ripple_prefix_sum,parallel_dec2_priority_encoder]
+    - B_B_kogge_stone_prefix_sum_parallel_dec2_priority_encoder: [B,B,kogge_stone_prefix_sum,parallel_dec2_priority_encoder]
