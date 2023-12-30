@@ -1,8 +1,3 @@
-#from saflib.microarchitecture.taxo.address_primitives.PositionGenerator import PositionGenerator,buildPositionGenerator,pgen_instances
-#from saflib.microarchitecture.taxo.format.MetadataParser import MetadataParser,buildMetadataParser,md_parser_instances
-#from saflib.microarchitecture.taxo.skipping.IntersectionLeaderFollower import IntersectionLeaderFollower,buildIntersectionLeaderFollower,intersection_instances
-#from saflib.microarchitecture.taxo.format.FormatUarch import FormatUarch,buildFormatUarch,fmt_uarch_instances,fmt_uarch_topologies
-#from saflib.microarchitecture.taxo.skipping.SkippingUarch import SkippingUarch,buildSkippingUarch,skipping_uarch_instances,skipping_uarch_topologies
 from core.helper import info,warn,error
 
 primitive_taxo_description_dict={}
@@ -129,31 +124,26 @@ def getComponent(name_):
         'values':component_taxo_attribute_values_dict[name_]
     }
 
-'''
-registerPrimitive('PositionGenerator', \
-                  PositionGenerator, \
-                  buildPositionGenerator, \
-                  pgen_instances)
+def getPrimitiveTemplatesDict():
+    return primitive_taxo_description_dict
 
-registerPrimitive('MetadataParser', \
-                  MetadataParser, \
-                  buildMetadataParser, \
-                  md_parser_instances)
+def getPrimitiveTemplateParameterDeclarationsDict():
+    return primitive_taxo_attribute_values_dict
 
-registerPrimitive('IntersectionLeaderFollower', \
-                  IntersectionLeaderFollower, \
-                  buildIntersectionLeaderFollower, \
-                  intersection_instances)
+def getPrimitiveConstructorsDict():
+    return primitive_taxo_constructor_dict
 
-registerComponent('FormatUarch', \
-                  FormatUarch, \
-                  buildFormatUarch, \
-                  fmt_uarch_instances, \
-                  fmt_uarch_topologies)
+def getPrimitiveTemplateSpecializationsDict():
+    return primitive_taxo_instances_dict
 
-registerComponent('SkippingUarch', \
-                  SkippingUarch, \
-                  buildSkippingUarch, \
-                  skipping_uarch_instances, \
-                  skipping_uarch_topologies)
-'''
+def getComponentTemplatesDict():
+    return component_taxo_description_dict
+
+def getComponentTemplateParameterDeclarationsDict():
+    return component_taxo_attribute_values_dict
+
+def getComponentConstructorsDict():
+    return component_taxo_constructor_dict
+
+def getComponentTemplateSpecializationsDict():
+    return component_taxo_instances_dict
