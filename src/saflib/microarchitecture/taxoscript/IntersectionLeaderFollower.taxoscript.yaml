@@ -9,7 +9,10 @@ taxoscript_primitives:
     - input: md_in_leader(md)=attributes.format_leader
     - output: md_out(md)=attributes.format_leader
     instances:
-    - U_passthrough: [U,passthrough]
+
+    # XXX_passthrough: map leader fiber XXX-format metadata directly to follower
     - C_passthrough: [C,passthrough]
     - B_passthrough: [B,passthrough]
     - R_passthrough: [R,passthrough]
+
+    #- U_passthrough: [U,passthrough]

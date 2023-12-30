@@ -1,11 +1,56 @@
+# FillGate: gating of payload fills from higher arch. memory into lower arch.("fill-gating".)
+#
+# Typical use-case: leader-follower intersection will try to fill all leader operands into lower-level
+# memory (or MAC) even if corresponding follower fiber is empty, creating unnecessary leader operand fills
+# into lower-level memory. FillGate detects empty follower fibers and gates corresponding leader payload fills.
+#
+# **"Pipeline-bubble" fill-gating strategy**: Eyeriss v2 (Chen, Yang, et. al. 2019) may be described as having a 
+# leader-follower skipping SAF from the PE iact spad to the PE weight spad, which immediately precede the MAC. (Note
+# that the paper does not use SAF terminology.) When the follower payload is empty, the Eyeriss v2 PE pipeline stage preceding 
+# the MAC effectively discards the corresponding leader payload and stalls waiting for a non-empty follower payload.
+# Thus, although a leader (iact) value was read from iact spad, the application of this iact value
+# to the MAC is effectively gated. Nonetheless this fill-gating is consistent with the overall skipping SAF,
+# because the leader-follower intersection is not the rate-limiting pipeline stage: the time-cost of sourcing a
+# new iact value and intersecting it with the weight spad is hidden behind the latency of the preceding arithmetic operation, 
+# on a best-effort basis. The paper alludes to this eventuality, although the term "fill-gating" is not used explicitly.
+#
+# In GAMMA (Zhang, Attaluri, et. al. 2021), leader-follower intersection selects the follower row for
+# each corresponding leader element; leader elements are mapped by coordinate into a lookup table (LUT) in the PE,
+# follower rows are mapped by row coordinate into a collection of queues in the PE, and follower row metadata enters a merger. 
+# For each follower metadatum output by the merger, the corresponding leader element
+# is selected from the LUT, while the corresponding follower payload is popped from its queue, and both are sent to the MAC. 
+# Notably - if a leader element in the LUT corresponded to
+# an empty follower row, then that row's metadata will never be output by the merger, and thus that leader element will never 
+# be sent to the MAC. See Figure 6. 
+# This inspires the "LUT" fill-gating strategy. Note that again the terms "leader-follower' and "fill-gating" do not appear
+# in the paper. 
+#
+# FillGate theoretically requires two input signals: the index, within the stream of leader payloads being read
+# from higher leader memory, of the most recent leader payload that was read; and, a signal from follower memory,
+# of whether the corresponding follower fiber was empty. Due to the limitations of taxoscript v0.1, it is difficult
+# to represent the latter signal since taxoscript v0.1 only represents memory interfaces for reading sparse format
+# metadata; it does not represent memory interfaces for interacting with payloads, which would be required
+# in order to determine if a follower fiber is empty. Consequently the below FillGate
+# model has a single input pos_in for the payload's offset within the stream; the follower-fiber-empty signal is
+# left as a TODO.
+#
+# Note that the skipping microarchitecture will require a position generator that converts leader metadata into
+# leader payload stream offsets which may be supplied to pos_in.
+#
 taxoscript_version: 0.1
 taxoscript_primitives:
   - name: FillGate
     attributes:
-    - string: strategy=?
+    - string: strategy=? # Fill-gating strategy
+      # pipeline_bubble - Eyeriss v2-like
+      # lut - GAMMA-like
       values: [pipeline_bubble,lut]
     ports:
-    - input: pos_in(pos)
+    - input: pos_in(pos) # Payload offset within stream
     instances:
+
+    # Eyeriss v2-like
     - pipeline_bubble: [pipeline_bubble]
+
+    # GAMMA-like
     - lut: [lut]

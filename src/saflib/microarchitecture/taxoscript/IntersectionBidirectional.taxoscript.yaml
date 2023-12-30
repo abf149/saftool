@@ -2,17 +2,29 @@ taxoscript_version: 0.1
 taxoscript_primitives:
   - name: IntersectionBidirectional
     attributes:
-    - format: format_0=?
-    - format: format_1=?
-    - string: strategy=?
-      values: [none,operand_skip]
+    - format: format_0=? # Operand 0 sparse metadata format
+    - format: format_1=? # Operand 1 sparse metadata format
+    - string: strategy=? # Intersection strategy
+      # two_finger_merge - Naive-ExTensor-like two-finger merge
+      # skip_ahead - ExTensor-like "skip-ahead" associative intersection unit based on CAM
+      # direct_map - In parallel map C metadata into per-operand dense bit vectors; compact list of common coordinates
+      # bitwise_and - SparTen-like bitwise-AND intersection
+      values: [two_finger_merge,skip_ahead,direct_map,bitwise_and]
     ports:
-     - input: md_in_0(md)=format_0
-     - input: md_in_1(md)=format_1
-     - output: md_out(md)=format_0
+     - input: md_in_0(md)=attributes.format_0 # Operand 0 metadata
+     - input: md_in_1(md)=attributes.format_1 # Operand 1 metadata
+     - output: md_out(md)=attributes.format_0 # Metadata reflecting NZ payloads with common coordinates
     instances:
-    - unc_bd_none: [U,U,none]
-    - cp_bd_none: [C,C,none]
-    - cp_bd_opskip: [C,C,operand_skip]
-    - b_bd_none: [B,B,none]
-    - r_bd_none: [R,R,none]
+
+    # ExTensor-like
+    - C_C_two_finger_merge: [C,C,two_finger_merge]
+    - C_C_skip_ahead: [C,C,skip_ahead]
+
+    # Created for this work
+    - C_C_direct_map: [C,C,direct_map]
+
+    # SparTen-like
+    - B_B_bitwise_and: [B,B,bitwise_and]
+
+    #- r_bd_none: [R,R,none]
+    #- unc_bd_none: [U,U,none]
