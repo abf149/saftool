@@ -2,12 +2,37 @@ taxoscript_version: 0.1
 taxoscript_primitives:
   - name: MetadataParser
     attributes:
-    - format: format=?
+    - format: format=? # Fiber metadata format
+    - string: strategy=sentinel # How does MD parser detect end of fiber metadata?
+      # sentinel - unique *sentinel* symbol indicates end of fiber metadata
+      # counter_prefix - a count of the number of metadata words precedes the metadata memory
+      values: [sentinel,count_prefix]
+    - string: coordinate_arithmetic=no_arithmetic # Whether MD parser must support coordinate arithmetic?
+      # no_arithmetic - don't support coordinate arithmetic (default)
+      # yes_arithmetic - support coordinate arithmetic
+      values: [no_arithmetic,yes_arithmetic]
     ports:
-    - input: md_in(md)=attributes.format
-    - output: at_bound_out(flag)
+    - input: md_in(md)=attributes.format # fiber metadata in
+    - output: at_bound_out(flag) # flag indicating that the end of a fiber has been reached
     instances:
-    - uncompressed: [U]
-    - coordinate_payload: [C]
-    - bitmask: [B]
-    - run_length_encoding: [R]
+
+    # U metadata parsers
+    - U_no_arithmetic_sentinel: [U,no_arithmetic,sentinel]
+    - U_yes_arithmetic_sentinel: [U,yes_arithmetic,sentinel]
+    - U_no_arithmetic_count_prefix: [U,no_arithmetic,count_prefix]
+    - U_yes_arithmetic_count_prefix: [U,yes_arithmetic,count_prefix]
+
+    # C metadata parsers
+    - C_no_arithmetic_sentinel: [C,no_arithmetic,sentinel]
+    - C_yes_arithmetic_sentinel: [C,yes_arithmetic,sentinel]
+    - C_no_arithmetic_count_prefix: [C,no_arithmetic,count_prefix]
+    - C_yes_arithmetic_count_prefix: [C,yes_arithmetic,count_prefix]
+
+    # B metadata parsers
+    - B_no_arithmetic_sentinel: [B,no_arithmetic,sentinel]
+    - B_yes_arithmetic_sentinel: [B,yes_arithmetic,sentinel]
+    - B_no_arithmetic_count_prefix: [B,no_arithmetic,count_prefix]
+    - B_yes_arithmetic_count_prefix: [B,yes_arithmetic,count_prefix]
+
+    #- R_no_arithmetic: [R,no_arithmetic]
+    #- R_yes_arithmetic: [R,yes_arithmetic]
