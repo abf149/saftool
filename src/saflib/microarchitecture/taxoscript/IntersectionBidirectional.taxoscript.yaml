@@ -11,8 +11,8 @@ taxoscript_primitives:
       # bitwise_and - SparTen-like bitwise-AND intersection
       values: [two_finger_merge,skip_ahead,direct_map,bitwise_and]
     ports:
-     - input: md_in_0(md)=attributes.format_0 # Operand 0 metadata
-     - input: md_in_1(md)=attributes.format_1 # Operand 1 metadata
+     - input: md_in0(md)=attributes.format_0 # Operand 0 metadata
+     - input: md_in1(md)=attributes.format_1 # Operand 1 metadata
      - output: md_out(md)=attributes.format_0 # Metadata reflecting NZ payloads with common coordinates
     instances:
 

@@ -2,126 +2,102 @@ taxoscript_version: 0.1
 taxoscript_components:
   - name: SkippingUarch
     attributes:
-    - format: format_leader=?
-    - format: format_follower=?
-    - string: direction=bidirectional
+    - format: format_leader=? # Leader fiber/fiber 0 metadata format
+    - format: format_follower=? # Follower fiber/fiber 1 metadata format
+    - string: direction=bidirectional # SAF skip direction
+      # bidirectional - underlying SAF is bidirectional skip
+      # leader_follower - underlying SAF is leader/follower
       values: [bidirectional,leader_follower]
-    - string: skip_strategy=?
-      values: [none,operand_skip]
-    - string: fill_gate_strategy=?
-      values: [none,pipeline_bubble,lut]
+    - string: fill_gate=?
+      # no_fill_gate/yes_fill_gate - abscence/presence, respectively, of fill gate in topology
+      values: [no_fill_gate,yes_fill_gate]
     ports:
-    - input: md_in_leader(md)=attributes.format_leader
-    - input: md_in_follower(md)=attributes.format_follower
-    - output: pos_out_leader(pos)=addr
-    - output: pos_out_follower(pos)=addr
+    - input: md_in_leader(md)=attributes.format_leader # Leader fiber/fiber 0 metadata input
+    - input: md_in_follower(md)=attributes.format_follower # Follower fiber/fiber 1 metadata input
+    - output: pos_out_leader(pos)=addr # Leader fiber/fiber 0 payload memory address offset output
+    - output: pos_out_follower(pos)=addr # Follower fiber/fiber 1 payload memory address offset output
     instances:
-    - cp_bd_none_none: [C,C,bidirectional,none,none]
-    - cp_bd_opskip_none: [C,C,bidirectional,operand_skip,none]
-    - cp_lf_none_none: [C,U,leader_follower,none,none]
-    - cp_lf_none_pbubble: [C,U,leader_follower,none,pipeline_bubble]
-    - cp_lf_none_lut: [C,U,leader_follower,none,lut]
-    - b_bd_none_none: [B,B,bidirectional,none,none]
-    - b_lf_none_none: [B,U,leader_follower,none,none]
-    - b_lf_none_pbubble: [B,U,leader_follower,none,pipeline_bubble]
-    - b_lf_none_lut: [B,U,leader_follower,none,lut]
+
+    # C/C bidirectional skipping (ExTensor-like)
+    - C_C_bidirectional_no_fill_gate: [C,C,bidirectional,no_fill_gate]
+
+    # B/B bidirectional skipping (SparTen-like)
+    - B_B_bidirectional_no_fill_gate: [B,B,bidirectional,no_fill_gate]
+
+    # Eyeriss v2-like C->U leader-follower skipping with optional fill-gating
+    - C_U_leader_follower_no_fill_gate: [C,C,leader_follower,no_fill_gate]
+    - C_U_leader_follower_yes_fill_gate: [C,C,leader_follower,yes_fill_gate]
+
     topologies:
 
-      - name: cp_bd_none_none
-        components:
-        - IntersectionBidirectional: IntersectionBD(C,C,none)
-        - PositionGenerator: PgenLeader(C)
-        - PositionGenerator: PgenFollower(C)
-        netlist:
-        - md: [md_in_leader,IntersectionBD.md_in_0]
-        - md: [md_in_follower,IntersectionBD.md_in_1]
-        - md: [IntersectionBD.md_out,PgenLeader.md_in]
-        - md: [IntersectionBD.md_out,PgenFollower.md_in]
-        - pos: [PgenLeader.pos_out,pos_out_leader]
-        - pos: [PgenFollower.pos_out,pos_out_follower]
+      # X/X bidirectional skipping topologies
 
-      - name: cp_bd_opskip_none
+      - name: C_C_bidirectional_no_fill_gate # ExTensor-like
         components:
-        - IntersectionBidirectional: IntersectionBD(C,C,opskip)
-        - PositionGenerator: PgenLeader(C)
-        - PositionGenerator: PgenFollower(C)
+        - IntersectionBidirectional: IntersectionBD(C,C,?) # Unconstrained C/C intersection strategy
+        - SinglePositionGenerator: SinglePgenLeader(C,C,?) # Unconstrained C->C single pgen strategy
+        - SinglePositionGenerator: SinglePgenFollower(C,C,?) # Unconstrained C->C single pgen strategy
         netlist:
-        - md: [md_in_leader,IntersectionBD.md_in_0]
-        - md: [md_in_follower,IntersectionBD.md_in_1]
-        - md: [IntersectionBD.md_out,PgenLeader.md_in]
-        - md: [IntersectionBD.md_out,PgenFollower.md_in]
-        - pos: [PgenLeader.pos_out,pos_out_leader]
-        - pos: [PgenFollower.pos_out,pos_out_follower]
+        # Leader md. input -> intersection, leader pgen md. ref. input
+        - md: [md_in_leader,IntersectionBD.md_in0]
+        - md: [md_in_leader,SinglePgenLeader.md_in_ref]
+        # Follower md. input -> intersection, follower pgen md. ref. input
+        - md: [md_in_follower,IntersectionBD.md_in1]
+        - md: [md_in_follower,SinglePgenFollower.md_in_ref]
+        # Intersection output -> leader/follower pgen md. inputs
+        - md: [IntersectionBD.md_out,SinglePgenLeader.md_in]
+        - md: [IntersectionBD.md_out,SinglePgenFollower.md_in]
+        # Leader/follower pgen outputs -> leader/follower pos. outputs
+        - pos: [SinglePgenLeader.pos_out,pos_out_leader]
+        - pos: [SinglePgenFollower.pos_out,pos_out_follower]
 
-      - name: cp_lf_none_none
+      - name: B_B_bidirectional_no_fill_gate # SparTen-like
         components:
-        - IntersectionLeaderFollower: IntersectionLF(C,none)
-        - PositionGenerator: PgenFollower(C)
+        - IntersectionBidirectional: IntersectionBD(B,B,?) # B/B intersection, unconstrained strategy
+        - DoublePositionGenerator: DoublePgen(B,B,?,?) # B->B double-pgen, unconstrained source & reference strategies
         netlist:
+        # Leader md. input -> intersection md. input 0 & leader pgen md. ref. input
+        - md: [md_in_leader,IntersectionBD.md_in0]
+        - md: [md_in_leader,DoublePgen.md_in0_ref]
+        # Follower md. input -> intersection md. input 1 & follower pgen md. ref. input
+        - md: [md_in_follower,IntersectionBD.md_in1]
+        - md: [md_in_follower,DoublePgen.md_in1_ref]
+        # Intersection output -> leader/follower pgen md. inputs
+        - md: [IntersectionBD.md_out,DoublePgen.md_in]
+        # Leader/follower pgen outputs -> leader/follower pos. outputs
+        - pos: [DoublePgen.pos_out0,pos_out_leader]
+        - pos: [DoublePgen.pos_out1,pos_out_follower]
+
+      # X -> Y leader/follower skipping topologies
+
+      - name: C_U_leader_follower_no_fill_gate # Eyeriss v2-like sans fill-gate
+        components:
+        - IntersectionLeaderFollower: IntersectionLF(C,?) # C->C leader/follower intersection, unconstrained strategy
+        - SinglePositionGenerator: SinglePgenFollower(C,U,?) # C->U single pgen, unconstrained strategy
+        netlist:
+        # Leader md. input -> intersection md. input & follower pgen md. ref. input
         - md: [md_in_leader,IntersectionLF.md_in_leader]
-        - md: [IntersectionLF.md_out,PgenFollower.md_in]
-        - pos: [PgenFollower.pos_out,pos_out_follower]
+        - md: [md_in_leader,SinglePgenFollower.md_in_ref]
+        # Intersection md. output -> follower pgen md. input
+        - md: [IntersectionLF.md_out,SinglePgenFollower.md_in]
+        # Follower pgen pos. output -> pos. output
+        - pos: [SinglePgenFollower.pos_out,pos_out_follower]
 
-      - name: cp_lf_none_pbubble
+      - name: C_U_leader_follower_yes_fill_gate  # Eyeriss v2-like w/ fill-gate
         components:
-        - IntersectionLeaderFollower: IntersectionLF(C,none)
-        - PositionGenerator: PgenFollower(C)
-        - FillGate: FillGateLeader(pipeline_bubble)
+        - IntersectionLeaderFollower: IntersectionLF(C,?) # C->C leader/follower intersection, unconstrained strategy
+        - SinglePositionGenerator: SinglePgenFollower(C,U,?) # C->U single pgen, unconstrained strategy
+        - SinglePositionGenerator: SinglePgenLeader(C,C,?) # C->U single pgen, unconstrained strategy
+        - FillGate: FillGateLeader(?) # Fill-gate unit, unconstrained strategy
         netlist:
+        # Leader md. input -> intersection md. input & follower pgen md. ref. input & both leader pgen md. inputs
         - md: [md_in_leader,IntersectionLF.md_in_leader]
-        - md: [IntersectionLF.md_out,PgenFollower.md_in]
-        - pos: [PgenFollower.pos_out,pos_out_follower]
-
-      - name: cp_lf_none_lut
-        components:
-        - IntersectionLeaderFollower: IntersectionLF(C,none)
-        - PositionGenerator: PgenFollower(C)
-        - FillGate: FillGateLeader(lut)
-        netlist:
-        - md: [md_in_leader,IntersectionLF.md_in_leader]
-        - md: [IntersectionLF.md_out,PgenFollower.md_in]
-        - pos: [PgenFollower.pos_out,pos_out_follower]
-
-      - name: b_bd_none_none
-        components:
-        - IntersectionBidirectional: IntersectionBD(B,B,none)
-        - PositionGenerator: PgenLeader(B)
-        - PositionGenerator: PgenFollower(B)
-        netlist:
-        - md: [md_in_leader,IntersectionBD.md_in_0]
-        - md: [md_in_follower,IntersectionBD.md_in_1]
-        - md: [IntersectionBD.md_out,PgenLeader.md_in]
-        - md: [IntersectionBD.md_out,PgenFollower.md_in]
-        - pos: [PgenLeader.pos_out,pos_out_leader]
-        - pos: [PgenFollower.pos_out,pos_out_follower]
-
-      - name: b_lf_none_none
-        components:
-        - IntersectionLeaderFollower: IntersectionLF(B,none)
-        - PositionGenerator: PgenFollower(B)
-        netlist:
-        - md: [md_in_leader,IntersectionLF.md_in_leader]
-        - md: [IntersectionLF.md_out,PgenFollower.md_in]
-        - pos: [PgenFollower.pos_out,pos_out_follower]
-
-      - name: b_lf_none_pbubble
-        components:
-        - IntersectionLeaderFollower: IntersectionLF(B,none)
-        - PositionGenerator: PgenFollower(B)
-        - FillGate: FillGateLeader(pipeline_bubble)
-        netlist:
-        - md: [md_in_leader,IntersectionLF.md_in_leader]
-        - md: [IntersectionLF.md_out,PgenFollower.md_in]
-        - pos: [PgenFollower.pos_out,pos_out_followe]
-        - pos: [PgenLeader.pos_out,FillGateLeader.pos_in]
-
-      - name: b_lf_none_lut
-        components:
-        - IntersectionLeaderFollower: IntersectionLF(B,none)
-        - PositionGenerator: PgenFollower(B)
-        - FillGate: FillGateLeader(lut)
-        netlist:
-        - md: [md_in_leader,IntersectionLF.md_in_leader]
-        - md: [IntersectionLF.md_out,PgenFollower.md_in]
-        - pos: [PgenFollower.pos_out,pos_out_follower]
-        - pos: [PgenLeader.pos_out,FillGateLeader.pos_in]
+        - md: [md_in_leader,SinglePgenFollower.md_in_ref]
+        - md: [md_in_leader,SinglePgenLeader.md_in_ref]
+        - md: [md_in_leader,SinglePgenLeader.md_in]
+        # Intersection md. output -> follower pgen md. input
+        - md: [IntersectionLF.md_out,SinglePgenFollower.md_in]
+        # Leader pgen pos. output -> FillGate pos. input
+        - pos: [SinglePgenLeader.pos_out,FillGateLeader.pos_in]
+        # Follower pgen pos. output -> pos. output
+        - pos: [SinglePgenFollower.pos_out,pos_out_follower]
