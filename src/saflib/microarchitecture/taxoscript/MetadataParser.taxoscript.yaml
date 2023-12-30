@@ -6,7 +6,7 @@ taxoscript_primitives:
     - string: strategy=sentinel # How does MD parser detect end of fiber metadata?
       # sentinel - unique *sentinel* symbol indicates end of fiber metadata
       # counter_prefix - a count of the number of metadata words precedes the metadata memory
-      values: [sentinel,count_prefix]
+      values: [sentinel,length_field]
     - string: coordinate_arithmetic=no_arithmetic # Whether MD parser must support coordinate arithmetic?
       # no_arithmetic - don't support coordinate arithmetic (default)
       # yes_arithmetic - support coordinate arithmetic
@@ -19,20 +19,20 @@ taxoscript_primitives:
     # U metadata parsers
     - U_no_arithmetic_sentinel: [U,no_arithmetic,sentinel]
     - U_yes_arithmetic_sentinel: [U,yes_arithmetic,sentinel]
-    - U_no_arithmetic_count_prefix: [U,no_arithmetic,count_prefix]
-    - U_yes_arithmetic_count_prefix: [U,yes_arithmetic,count_prefix]
+    - U_no_arithmetic_length_field: [U,no_arithmetic,length_field]
+    - U_yes_arithmetic_length_field: [U,yes_arithmetic,length_field]
 
     # C metadata parsers
     - C_no_arithmetic_sentinel: [C,no_arithmetic,sentinel]
     - C_yes_arithmetic_sentinel: [C,yes_arithmetic,sentinel]
-    - C_no_arithmetic_count_prefix: [C,no_arithmetic,count_prefix]
-    - C_yes_arithmetic_count_prefix: [C,yes_arithmetic,count_prefix]
+    - C_no_arithmetic_length_field: [C,no_arithmetic,length_field]
+    - C_yes_arithmetic_length_field: [C,yes_arithmetic,length_field]
 
     # B metadata parsers
     - B_no_arithmetic_sentinel: [B,no_arithmetic,sentinel]
     - B_yes_arithmetic_sentinel: [B,yes_arithmetic,sentinel]
-    - B_no_arithmetic_count_prefix: [B,no_arithmetic,count_prefix]
-    - B_yes_arithmetic_count_prefix: [B,yes_arithmetic,count_prefix]
+    - B_no_arithmetic_length_field: [B,no_arithmetic,length_field]
+    - B_yes_arithmetic_length_field: [B,yes_arithmetic,length_field]
 
     #- R_no_arithmetic: [R,no_arithmetic]
     #- R_yes_arithmetic: [R,yes_arithmetic]

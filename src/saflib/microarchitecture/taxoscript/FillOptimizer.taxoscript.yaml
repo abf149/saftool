@@ -39,18 +39,18 @@
 #
 taxoscript_version: 0.1
 taxoscript_primitives:
-  - name: FillGate
+  - name: FillOptimizer
     attributes:
     - string: strategy=? # Fill-gating strategy
       # pipeline_bubble - Eyeriss v2-like
       # lut - GAMMA-like
-      values: [pipeline_bubble,lut]
+      values: [pipeline_bubble_gate,lut_skip]
     ports:
     - input: pos_in(pos) # Payload offset within stream
     instances:
 
     # Eyeriss v2-like
-    - pipeline_bubble: [pipeline_bubble]
+    - pipeline_bubble: [pipeline_bubble_gate]
 
     # GAMMA-like
-    - lut: [lut]
+    - lut: [lut_skip]

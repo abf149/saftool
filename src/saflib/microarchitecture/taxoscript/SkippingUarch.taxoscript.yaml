@@ -8,9 +8,9 @@ taxoscript_components:
       # bidirectional - underlying SAF is bidirectional skip
       # leader_follower - underlying SAF is leader/follower
       values: [bidirectional,leader_follower]
-    - string: fill_gate=?
-      # no_fill_gate/yes_fill_gate - abscence/presence, respectively, of fill gate in topology
-      values: [no_fill_gate,yes_fill_gate]
+    - string: optimize_fills=?
+      # no_opt_fills/yes_opt_fills - abscence/presence, respectively, of fill optimizer in topology
+      values: [no_opt_fills,yes_opt_fills]
     ports:
     - input: md_in_leader(md)=attributes.format_leader # Leader fiber/fiber 0 metadata input
     - input: md_in_follower(md)=attributes.format_follower # Follower fiber/fiber 1 metadata input
@@ -19,20 +19,20 @@ taxoscript_components:
     instances:
 
     # C/C bidirectional skipping (ExTensor-like)
-    - C_C_bidirectional_no_fill_gate: [C,C,bidirectional,no_fill_gate]
+    - C_C_bidirectional_no_opt_fills: [C,C,bidirectional,no_opt_fills]
 
     # B/B bidirectional skipping (SparTen-like)
-    - B_B_bidirectional_no_fill_gate: [B,B,bidirectional,no_fill_gate]
+    - B_B_bidirectional_no_opt_fills: [B,B,bidirectional,no_opt_fills]
 
     # Eyeriss v2-like C->U leader-follower skipping with optional fill-gating
-    - C_U_leader_follower_no_fill_gate: [C,C,leader_follower,no_fill_gate]
-    - C_U_leader_follower_yes_fill_gate: [C,C,leader_follower,yes_fill_gate]
+    - C_U_leader_follower_no_opt_fills: [C,C,leader_follower,no_opt_fills]
+    - C_U_leader_follower_yes_opt_fills: [C,C,leader_follower,yes_opt_fills]
 
     topologies:
 
       # X/X bidirectional skipping topologies
 
-      - name: C_C_bidirectional_no_fill_gate # ExTensor-like
+      - name: C_C_bidirectional_no_opt_fills # ExTensor-like
         components:
         - IntersectionBidirectional: IntersectionBD(C,C,?) # Unconstrained C/C intersection strategy
         - SinglePositionGenerator: SinglePgenLeader(C,C,?) # Unconstrained C->C single pgen strategy
@@ -51,7 +51,7 @@ taxoscript_components:
         - pos: [SinglePgenLeader.pos_out,pos_out_leader]
         - pos: [SinglePgenFollower.pos_out,pos_out_follower]
 
-      - name: B_B_bidirectional_no_fill_gate # SparTen-like
+      - name: B_B_bidirectional_no_opt_fills # SparTen-like
         components:
         - IntersectionBidirectional: IntersectionBD(B,B,?) # B/B intersection, unconstrained strategy
         - DoublePositionGenerator: DoublePgen(B,B,?,?) # B->B double-pgen, unconstrained source & reference strategies
@@ -70,7 +70,7 @@ taxoscript_components:
 
       # X -> Y leader/follower skipping topologies
 
-      - name: C_U_leader_follower_no_fill_gate # Eyeriss v2-like sans fill-gate
+      - name: C_U_leader_follower_no_opt_fills # Eyeriss v2-like sans fill optimizer
         components:
         - IntersectionLeaderFollower: IntersectionLF(C,?) # C->C leader/follower intersection, unconstrained strategy
         - SinglePositionGenerator: SinglePgenFollower(C,U,?) # C->U single pgen, unconstrained strategy
@@ -83,12 +83,12 @@ taxoscript_components:
         # Follower pgen pos. output -> pos. output
         - pos: [SinglePgenFollower.pos_out,pos_out_follower]
 
-      - name: C_U_leader_follower_yes_fill_gate  # Eyeriss v2-like w/ fill-gate
+      - name: C_U_leader_follower_yes_opt_fills  # Eyeriss v2-like w/ fill optimizer
         components:
         - IntersectionLeaderFollower: IntersectionLF(C,?) # C->C leader/follower intersection, unconstrained strategy
         - SinglePositionGenerator: SinglePgenFollower(C,U,?) # C->U single pgen, unconstrained strategy
         - SinglePositionGenerator: SinglePgenLeader(C,C,?) # C->U single pgen, unconstrained strategy
-        - FillGate: FillGateLeader(?) # Fill-gate unit, unconstrained strategy
+        - FillOptimizer: FillOptimizerLeader(?) # Fill-optimizer unit, unconstrained strategy
         netlist:
         # Leader md. input -> intersection md. input & follower pgen md. ref. input & both leader pgen md. inputs
         - md: [md_in_leader,IntersectionLF.md_in_leader]
@@ -97,7 +97,7 @@ taxoscript_components:
         - md: [md_in_leader,SinglePgenLeader.md_in]
         # Intersection md. output -> follower pgen md. input
         - md: [IntersectionLF.md_out,SinglePgenFollower.md_in]
-        # Leader pgen pos. output -> FillGate pos. input
-        - pos: [SinglePgenLeader.pos_out,FillGateLeader.pos_in]
+        # Leader pgen pos. output -> FillOptimizer pos. input
+        - pos: [SinglePgenLeader.pos_out,FillOptimizerLeader.pos_in]
         # Follower pgen pos. output -> pos. output
         - pos: [SinglePgenFollower.pos_out,pos_out_follower]
