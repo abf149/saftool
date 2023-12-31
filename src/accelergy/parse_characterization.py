@@ -101,3 +101,36 @@ def extract_supported_param_combinations(csv_file_path, component_names, paramet
             param_combinations[(component_name, clock_latency)].add(param_values)
 
     return param_combinations
+
+def extract_simulation_metrics(csv_file_path, component_names, parameters_ordering, clock_latencies):
+    """
+    Scans the CSV file and outputs a data structure representing the mapping from 
+    (ComponentName, <specific parameter values>, <clock latency>) to a list of simulation metrics.
+
+    Parameters:
+    csv_file_path (str): The file path to a CSV file.
+    component_names (set): A set of ComponentNames.
+    parameters_ordering (dict): A dictionary of parameter orderings for each component.
+    clock_latencies (dict): A dictionary of supported clock latencies for each component.
+
+    Returns:
+    dict: A dictionary representing the mapping to simulation metrics.
+    """
+    df = pd.read_csv(csv_file_path)
+    simulation_metrics = defaultdict(dict)
+
+    for _, row in df.iterrows():
+        component_id = row['name']
+        component_name = component_id.split('_')[0]
+        if component_name in component_names:
+            clock_latency = float(row['critical_path_clock_latency'])
+            param_order = parameters_ordering[component_name][1]
+            param_values = tuple(int(value) for _, value in re.findall(r'_(\D+?)(\d+)', component_id))
+            # Mapping parameter values according to their canonical ordering
+            ordered_param_values = tuple(param_values[param_order.index(param)] for param in param_order)
+
+            # Excluding clock latency from the metrics
+            metrics = row.drop(labels=['name', 'critical_path_clock_latency']).tolist()
+            simulation_metrics[(component_name, ordered_param_values, clock_latency)] = metrics
+
+    return simulation_metrics
