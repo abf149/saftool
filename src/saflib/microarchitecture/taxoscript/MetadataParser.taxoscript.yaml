@@ -17,22 +17,22 @@ taxoscript_primitives:
     instances:
 
     # U metadata parsers
-    - U_no_arithmetic_sentinel: [U,no_arithmetic,sentinel]
-    - U_yes_arithmetic_sentinel: [U,yes_arithmetic,sentinel]
-    - U_no_arithmetic_length_field: [U,no_arithmetic,length_field]
-    - U_yes_arithmetic_length_field: [U,yes_arithmetic,length_field]
+    - U_no_arithmetic_sentinel: [U,sentinel,no_arithmetic]
+    - U_yes_arithmetic_sentinel: [U,sentinel,yes_arithmetic]
+    - U_no_arithmetic_length_field: [U,length_field,no_arithmetic]
+    - U_yes_arithmetic_length_field: [U,length_field,yes_arithmetic]
 
     # C metadata parsers
-    - C_no_arithmetic_sentinel: [C,no_arithmetic,sentinel]
-    - C_yes_arithmetic_sentinel: [C,yes_arithmetic,sentinel]
-    - C_no_arithmetic_length_field: [C,no_arithmetic,length_field]
-    - C_yes_arithmetic_length_field: [C,yes_arithmetic,length_field]
+    - C_no_arithmetic_sentinel: [C,sentinel,no_arithmetic]
+    - C_yes_arithmetic_sentinel: [C,sentinel,yes_arithmetic]
+    - C_no_arithmetic_length_field: [C,length_field,no_arithmetic]
+    - C_yes_arithmetic_length_field: [C,length_field,yes_arithmetic]
 
     # B metadata parsers
-    - B_no_arithmetic_sentinel: [B,no_arithmetic,sentinel]
-    - B_yes_arithmetic_sentinel: [B,yes_arithmetic,sentinel]
-    - B_no_arithmetic_length_field: [B,no_arithmetic,length_field]
-    - B_yes_arithmetic_length_field: [B,yes_arithmetic,length_field]
+    - B_no_arithmetic_sentinel: [B,sentinel,no_arithmetic]
+    - B_yes_arithmetic_sentinel: [B,sentinel,yes_arithmetic]
+    - B_no_arithmetic_length_field: [B,length_field,no_arithmetic]
+    - B_yes_arithmetic_length_field: [B,length_field,yes_arithmetic]
 
     #- R_no_arithmetic: [R,no_arithmetic]
     #- R_yes_arithmetic: [R,yes_arithmetic]

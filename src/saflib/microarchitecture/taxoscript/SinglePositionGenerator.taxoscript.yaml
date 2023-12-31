@@ -29,7 +29,7 @@ taxoscript_primitives:
 
     # C_C_counter: accumulate count of coordinate metadata words at md_in_ref; upon coordinate metadata word 
     # arriving at md_in, write current total to pos_out stream.
-    - C_C_counter: [C,U,counter]
+    - C_C_counter: [C,C,counter]
 
     #- R_R_counter: [R,R,counter]
     #- U_U_counter: [U,U,counter]
