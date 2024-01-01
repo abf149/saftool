@@ -62,6 +62,13 @@ class Solver:
                 subcomp_id=subcomponent.getId()
                 subcomp_uri=ab_.uri(uri,subcomp_id)
                 info('\n-- STARTING: recurse against subcomponent',subcomponent.getId(),'')
+
+
+                print(subcomp_id)
+                print(subcomp_uri)
+                print(subcomponent)
+                print(rule_type)
+
                 recursive_result_dict=self.evaluateRuleSet(subcomponent, rule_type=rule_type, \
                                                            recurse=recurse, uri=subcomp_uri)
                 result_dict['result_validate']=result_dict['result_validate'] and recursive_result_dict['result_validate']

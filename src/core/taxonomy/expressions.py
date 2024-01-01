@@ -63,6 +63,9 @@ class FormatType(SolvableConstant):
         if type(format_type_1).__name__ == 'str':
             format_type_1=FormatType.fromIdValue('format_type_1',format_type_1)
 
+        print(format_type_0)
+        print(format_type_1)
+
         if unknowns_wild and (format_type_0.getValue() == '?' or format_type_1.getValue() == '?'):
             # Implement unknowns wild
             return True
