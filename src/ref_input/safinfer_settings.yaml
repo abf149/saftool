@@ -8,31 +8,32 @@ custom_taxonomic_specifications:
       dummy_format_interfaces:
       - flattened-rankIDs: [ [ C ] ]
       - flattened-rankIDs: [ [ M ] ] 
-force_attributes:
-- uri: /.Skipping_iact_spad1_psum_spad0
-  settings:
-  - type: positional
-    values:
-    - position: 3
-      value: 'none'
-    - position: 4
-      value: 'none'
-- uri: /.Skipping_weight_spad1_psum_spad1
-  settings:
-  - type: positional
-    values:
-    - position: 3
-      value: 'none'
-    - position: 4
-      value: 'none'
-- uri: /.Skipping_iact_spad1_weight_spad0
-  settings:
-  - type: positional
-    values:
-    - position: 3
-      value: 'none'
-    - position: 4
-      value: 'none'
+# force_attributes:
+# - uri: /.Skipping_iact_spad1_psum_spad0
+#   settings:
+#   - type: positional
+#     values:
+#     - position: 3
+#       value: 'none'
+#     - position: 4
+#       value: 'none'
+# - uri: /.Skipping_weight_spad1_psum_spad1
+#   settings:
+#   - type: positional
+#     values:
+#     - position: 3
+#       value: 'none'
+#     - position: 4
+#       value: 'none'
+# - uri: /.Skipping_iact_spad1_weight_spad0
+#   settings:
+#   - type: positional
+#     values:
+#     - position: 3
+#       value: 'none'
+#     - position: 4
+#       value: 'none'
+
 #  - type: full
 #    values: [a,b,c,d]
 #  - type: positional

@@ -93,10 +93,12 @@ def apply_setting_to_component(component,setting):
         component.setAttributes(values)
     elif setting_type=='positional':
         attributes_list=component.getAttributes()
+
         for attr_spec in values:
             assert_valid_positional_attr_spec(attr_spec,comp_id)
             info("-----",str(attr_spec['position']),":",str(attr_spec['value']))
             attributes_list[int(attr_spec['position'])]=attr_spec['value']
+
         component.setAttributes(attributes_list)
     elif setting_type=='keyword':
         attributes_list=component.getAttributes()
