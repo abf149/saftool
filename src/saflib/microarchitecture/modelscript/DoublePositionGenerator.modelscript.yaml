@@ -1,7 +1,7 @@
 modelscript_version: 0.1
 modelscript_primitives:
-  - name: PositionGeneratorModel
-    from_taxonomic_primitive: PositionGenerator
+  - name: DoublePositionGeneratorModel
+    from_taxonomic_primitive: DoublePositionGenerator
     export_attributes_to_model: true
     instance_aliases:
     - alias: C
