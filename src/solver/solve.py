@@ -64,10 +64,10 @@ class Solver:
                 info('\n-- STARTING: recurse against subcomponent',subcomponent.getId(),'')
 
 
-                print(subcomp_id)
-                print(subcomp_uri)
-                print(subcomponent)
-                print(rule_type)
+                #print(subcomp_id)
+                #print(subcomp_uri)
+                #print(subcomponent)
+                #print(rule_type)
 
                 recursive_result_dict=self.evaluateRuleSet(subcomponent, rule_type=rule_type, \
                                                            recurse=recurse, uri=subcomp_uri)

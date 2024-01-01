@@ -65,9 +65,6 @@ class FormatType(SolvableConstant):
         if type(format_type_1).__name__ == 'str':
             format_type_1=FormatType.fromIdValue('format_type_1',format_type_1)
 
-        #print(format_type_0)
-        #print(format_type_1)
-
         if format_type_1 is None or format_type_0 is None:
             error("While comparing format values for equality, detected a None-valued format. One possible cause for this error is if a positional (pos) port is declared without a default format, i.e. \"- output: pos_out(pos)\"; one possible fix for this is to assign a default format type, i.e. \"- output: pos_out(pos)=addr\", although this is not necessarily the root cause.",also_stdout=True)
             info("- Additional info:")

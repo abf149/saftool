@@ -85,9 +85,9 @@ taxoscript_components:
 
       - name: C_U_leader_follower_yes_opt_fills  # Eyeriss v2-like w/ fill optimizer
         components:
-        - IntersectionLeaderFollower: IntersectionLF(C,passthrough) # C->C leader/follower intersection, unconstrained strategy
-        - SinglePositionGenerator: SinglePgenFollower(C,U,passthrough) # C->U single pgen, unconstrained strategy
-        - SinglePositionGenerator: SinglePgenLeader(C,C,counter) # C->U single pgen, unconstrained strategy
+        - IntersectionLeaderFollower: IntersectionLF(C,?) # C->C leader/follower intersection, unconstrained strategy
+        - SinglePositionGenerator: SinglePgenFollower(C,U,?) # C->U single pgen, unconstrained strategy
+        - SinglePositionGenerator: SinglePgenLeader(C,C,?) # C->U single pgen, unconstrained strategy
         - FillOptimizer: FillOptimizerLeader(pipeline_bubble_gate) # Fill-optimizer unit, unconstrained strategy
         netlist:
         # Leader md. input -> intersection md. input & follower pgen md. ref. input & both leader pgen md. inputs
