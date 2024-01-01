@@ -245,6 +245,11 @@ def parse_ports(primitive,taxo_instance):
             port_net_type, \
             port_default, \
             port_attr_ref=parse_port_expression(port_dict)
+
+            if port_net_type=='pos' and port_default is None:
+                # None should be ?
+                port_default='?'
+
             print_port_expression(port_name,port_dir,port_net_type, \
                                   port_default,port_attr_ref)
             if port_dir==kw_.port_input:

@@ -37,6 +37,40 @@ def sameForNetPorts(attr_, comparator=lambda x,y:x==y):
             if net_type is None:
                 net_type = attr_(port, "port")
             else:
+
+                def error_info(port,net,port_id,net_type):
+                    info("port:",port)
+                    info("net:",net)
+                    info("port_id:",port_id)
+                    info("port:",port)
+                    info("net_type:",net_type)
+                    info("Terminating.")
+                    assert(False)
+
+                if net_type is None:
+                    error("While comparing net types, found None-valued net type.",also_stdout=True)
+                    error_info(port,net,port_id,net_type)
+
+                if port is None:
+                    error("While comparing net types, found None-valued port.",also_stdout=True)
+                    error_info(port,net,port_id,net_type)
+
+                if port_id is None:
+                    error("While comparing net types, found None-valued port ID.",also_stdout=True)
+                    error_info(port,net,port_id,net_type)
+
+                if net is None:
+                    error("While comparing net types, found None-valued net.",also_stdout=True)
+                    error_info(port,net,port_id,net_type)
+
+                if net_type is None:
+                    error("While comparing net types, found None-valued net type.",also_stdout=True)
+                    error_info(port,net,port_id,net_type)
+
+                if attr_(port, "port") is None:
+                    error("While comparing net types, found None-valued net-type attribute of port.",also_stdout=True)
+                    error_info(port,net,port_id,net_type)
+
                 if not comparator(attr_(port, "port"), net_type):
                     return False
         return True

@@ -87,7 +87,7 @@ taxoscript_components:
         components:
         - IntersectionLeaderFollower: IntersectionLF(C,passthrough) # C->C leader/follower intersection, unconstrained strategy
         - SinglePositionGenerator: SinglePgenFollower(C,U,passthrough) # C->U single pgen, unconstrained strategy
-        - SinglePositionGenerator: SinglePgenLeader(C,C,passthrough) # C->U single pgen, unconstrained strategy
+        - SinglePositionGenerator: SinglePgenLeader(C,C,counter) # C->U single pgen, unconstrained strategy
         - FillOptimizer: FillOptimizerLeader(pipeline_bubble_gate) # Fill-optimizer unit, unconstrained strategy
         netlist:
         # Leader md. input -> intersection md. input & follower pgen md. ref. input & both leader pgen md. inputs
