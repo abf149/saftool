@@ -25,8 +25,8 @@ taxoscript_components:
     - B_B_bidirectional_no_opt_fills: [B,B,bidirectional,no_opt_fills]
 
     # Eyeriss v2-like C->U leader-follower skipping with optional fill-gating
-    - C_U_leader_follower_no_opt_fills: [C,C,leader_follower,no_opt_fills]
-    - C_U_leader_follower_yes_opt_fills: [C,C,leader_follower,yes_opt_fills]
+    - C_U_leader_follower_no_opt_fills: [C,U,leader_follower,no_opt_fills]
+    - C_U_leader_follower_yes_opt_fills: [C,U,leader_follower,yes_opt_fills]
 
     topologies:
 
