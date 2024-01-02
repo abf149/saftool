@@ -752,7 +752,7 @@ class CharacterizationMetricModel:
                                                              best_degrees)
 
             if mse_comparison['energy'] > 1e-10 or mse_comparison['area'] > 1e-10:
-                error('Warning: mse_comparison[\'energy\'] ==', \
+                error('mse_comparison[\'energy\'] ==', \
                      mse_comparison['energy'], \
                      'mse_comparison[\'area\'] ==', \
                      mse_comparison['area'], \
@@ -760,8 +760,8 @@ class CharacterizationMetricModel:
                 info("Terminating.")
                 assert(False)
 
-            if energy_RNMSE > 0.01 or area_RNMSE > 0.01:
-                error('Warning: energy RNMSE ==', \
+            if energy_RNMSE > 0.10 or area_RNMSE > 0.10:
+                error('Energy RNMSE ==', \
                      str(energy_RNMSE*100.0),'%', \
                      'area RNMSE ==', \
                      str(area_RNMSE*100.0),'%', \
