@@ -31,6 +31,13 @@ force_attributes:
     values:
     - position: 3
       value: 'yes_opt_fills'
+
+- uri: /.Skipping_iact_spad1_weight_spad0.FillOptimizerLeader
+  settings:
+  - type: positional
+    values:
+    - position: 0
+      value: 'pipeline_bubble_gate'
 #    - position: 4
 #      value: 'none'
 
