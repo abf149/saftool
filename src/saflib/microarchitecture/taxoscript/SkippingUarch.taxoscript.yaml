@@ -87,17 +87,20 @@ taxoscript_components:
         components:
         - IntersectionLeaderFollower: IntersectionLF(C,?) # C->C leader/follower intersection, unconstrained strategy
         - SinglePositionGenerator: SinglePgenFollower(C,U,?) # C->U single pgen, unconstrained strategy
-        - SinglePositionGenerator: SinglePgenLeader(C,C,?) # C->U single pgen, unconstrained strategy
+        - SinglePositionGenerator: SinglePgenFillOptSupport(C,U,?) # C->U single pgen, unconstrained strategy
         - FillOptimizer: FillOptimizerLeader(?) # Fill-optimizer unit, unconstrained strategy
         netlist:
         # Leader md. input -> intersection md. input & follower pgen md. ref. input & both leader pgen md. inputs
         - md: [md_in_leader,IntersectionLF.md_in_leader]
-        - md: [md_in_leader,SinglePgenFollower.md_in_ref]
-        - md: [md_in_leader,SinglePgenLeader.md_in_ref]
-        - md: [md_in_leader,SinglePgenLeader.md_in]
-        # Intersection md. output -> follower pgen md. input
+        - md: [md_in_follower,SinglePgenFillOptSupport.md_in]
+        - md: [md_in_follower,SinglePgenFillOptSupport.md_in_ref]
+        #- md: [md_in_leader,SinglePgenFollower.md_in_ref]
+        #- md: [md_in_leader,SinglePgenLeader.md_in_ref]
+        #- md: [md_in_leader,SinglePgenLeader.md_in]
+        # Intersection md. output -> follower pgen md. input & ref input
         - md: [IntersectionLF.md_out,SinglePgenFollower.md_in]
-        # Leader pgen pos. output -> FillOptimizer pos. input
-        - pos: [SinglePgenLeader.pos_out,FillOptimizerLeader.pos_in]
+        - md: [IntersectionLF.md_out,SinglePgenFollower.md_in_ref]
         # Follower pgen pos. output -> pos. output
         - pos: [SinglePgenFollower.pos_out,pos_out_follower]
+        # Leader pgen pos. output -> FillOptimizer pos. input
+        #- pos: [SinglePgenLeader.pos_out,FillOptimizerLeader.pos_in]
