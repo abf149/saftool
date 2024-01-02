@@ -1,15 +1,15 @@
 modelscript_version: 0.1
 modelscript_primitives:
-  - name: FillGateModel
-    from_taxonomic_primitive: FillGate
+  - name: FillOptimizerModel
+    from_taxonomic_primitive: FillOptimizer
     export_attributes_to_model: true
     instance_aliases:
-    - alias: P
+    - alias: pipeline_bubble_gate
       instances:
-      - pipeline_bubble
-    - alias: L
+      - pipeline_bubble_gate
+    - alias: lut_skip
       instances:
-      - lut
+      - lut_skip
     scale_parameters:
       - name: clock
         type: real
@@ -19,66 +19,43 @@ modelscript_primitives:
         type: string
         export_as_model_attribute: true
         inherit: true
-    load_symbols:
-      - port: pos_in
-        symbol_types:
-        - type: level
-          load_tensors:
-          - load_tensor: position
-            load_ranks:
-            - load_rank: positions_per_cycle
-        - type: peak
-          load_tensors:
-          - load_tensor: position
-            load_ranks:
-            - load_rank: positions_per_cycle
+    load_symbols: []
     actions:
       - name: idle
       - name: gate
     implementations:
-      - name: P
-        taxonomic_instance_alias: P
+      - name: pipeline_bubble_gate
+        taxonomic_instance_alias: pipeline_bubble_gate
         objective:
           actions:
             - name: idle
-              energy: 0.1
+              energy: 0
             - name: gate
-              energy: 2*(@pos_in_pr_thresh)
-          area: 3*(@pos_in_pr_thresh)
-        constraints:
-          - type: values
-            list:
-              - symbol: pos_in.peak.position.positions_per_cycle
-                values:
-                  - 1
-                  - 2
-                  - 4
-                  - 8
-                  - 16
-                  - 32
-                  - 64
-                  - 128
-                  - 256
-      - name: L
-        taxonomic_instance_alias: L
-        objective:
-          actions:
-            - name: idle
-              energy: 0.1
-            - name: gate
-              energy: 7*(@pos_in_pr_thresh)
-          area: 2.5*(@pos_in_pr_thresh)
-        constraints:
-          - type: values
-            list:
-              - symbol: pos_in.peak.position.positions_per_cycle
-                values:
-                  - 1
-                  - 2
-                  - 4
-                  - 8
-                  - 16
-                  - 32
-                  - 64
-                  - 128
-                  - 256
+              energy: 0
+          area: 0
+        constraints: []
+
+
+      # - name: lut_skip
+      #   taxonomic_instance_alias: lut_skip
+      #   objective:
+      #     actions:
+      #       - name: idle
+      #         energy: 0.1
+      #       - name: gate
+      #         energy: 7*(@pos_in_pr_thresh)
+      #     area: 2.5*(@pos_in_pr_thresh)
+      #   constraints:
+      #     - type: values
+      #       list:
+      #         - symbol: pos_in.peak.position.positions_per_cycle
+      #           values:
+      #             - 1
+      #             - 2
+      #             - 4
+      #             - 8
+      #             - 16
+      #             - 32
+      #             - 64
+      #             - 128
+      #             - 256
