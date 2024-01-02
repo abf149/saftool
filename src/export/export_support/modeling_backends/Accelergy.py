@@ -225,7 +225,7 @@ def getArchInstanceAndClass(buffer_id,flat_arch,flat_comp_dict,backend_args={}):
     info("----- Getting architectural component instance and class")
     info("------ buffer_id =",buffer_id)
     info("------ len(flat_comp_dict) =",str(len(flat_comp_dict)))
-    arch_buff=flat_arch[buffer_id]
+    arch_buff=copy.deepcopy(flat_arch[buffer_id])
     assert(arch_buff['class']=='storage')
     arch_buff_subclass_name=arch_buff['subclass']
     arch_buff_attributes=arch_buff['attributes']
@@ -282,7 +282,7 @@ def getAccelergySingleBufferStructure(flat_arch, \
     buffer_wrapper_id=getBufferWrapperId(arch_buff_subclass_id,buffer_uri)
     wrapped_buffer_id=buffer_id+"_wrapped"
     # Augmented buffer with sparse microarchitecture
-    buffer_subcomponent=copy.copy(arch_buff)
+    buffer_subcomponent=copy.deepcopy(arch_buff)
     buffer_subcomponent['name']=wrapped_buffer_id
     buffer_wrapper={
         'name':buffer_wrapper_id,
@@ -406,6 +406,7 @@ def transformArchTier(sub_arch,buffer_model_map):
         local_buffers=sub_arch['local']
         info("----- Found",len(local_buffers),"local buffers.")
         for idx,buffer_spec in enumerate(local_buffers):
+
             buffer_name=buffer_spec['name']
             info("-------",buffer_name,"(",str(idx),")")
             if buffer_name in buffer_model_map:
