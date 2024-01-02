@@ -21,16 +21,16 @@ modelscript_primitives:
         inherit: true
     load_symbols: []
     actions:
-      - name: idle
-      - name: gate
+      - name: gated_allow
+      - name: allow
     implementations:
       - name: pipeline_bubble_gate
         taxonomic_instance_alias: pipeline_bubble_gate
         objective:
           actions:
-            - name: idle
+            - name: gated_allow
               energy: 0
-            - name: gate
+            - name: allow
               energy: 0
           area: 0
         constraints: []
