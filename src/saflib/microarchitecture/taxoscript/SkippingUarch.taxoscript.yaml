@@ -102,5 +102,5 @@ taxoscript_components:
         - md: [IntersectionLF.md_out,SinglePgenFollower.md_in_ref]
         # Follower pgen pos. output -> pos. output
         - pos: [SinglePgenFollower.pos_out,pos_out_follower]
-        # Leader pgen pos. output -> FillOptimizer pos. input
-        #- pos: [SinglePgenLeader.pos_out,FillOptimizerLeader.pos_in]
+        # Fill-optimization-support pgen pos. output -> FillOptimizer pos. input
+        - pos: [SinglePgenFillOptSupport.pos_out,FillOptimizerLeader.pos_in]
