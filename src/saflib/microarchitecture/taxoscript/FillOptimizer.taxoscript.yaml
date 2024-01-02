@@ -50,7 +50,7 @@ taxoscript_primitives:
     instances:
 
     # Eyeriss v2-like
-    - pipeline_bubble: [pipeline_bubble_gate]
+    - pipeline_bubble_gate: [pipeline_bubble_gate]
 
     # GAMMA-like
-    - lut: [lut_skip]
+    - lut_skip: [lut_skip]

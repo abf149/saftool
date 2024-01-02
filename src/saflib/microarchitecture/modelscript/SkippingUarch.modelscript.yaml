@@ -7,6 +7,9 @@ modelscript_components:
     - alias: C_U_leader_follower_yes_opt_fills
       instances:
       - C_U_leader_follower_yes_opt_fills
+    - alias: C_U_leader_follower_no_opt_fills
+      instances:
+      - C_U_leader_follower_no_opt_fills
     scale_parameters:
       - name: clock
         type: real
@@ -50,6 +53,14 @@ modelscript_components:
           - name: FillOptimizerLeader
             actions:
             - name: gated_allow
+        - alias: C_U_leader_follower_no_opt_fills
+          subcomponents: 
+          - name: IntersectionLF
+            actions:
+            - name: fill
+          - name: SinglePgenFollower
+            actions:
+            - name: gated_gen
       - name: fill_follower
 #        subcomponents: 
 #        - name: IntersectionLF
@@ -72,6 +83,15 @@ modelscript_components:
           - name: FillOptimizerLeader
             actions:
             - name: gated_allow
+        - alias: C_U_leader_follower_no_opt_fills
+          subcomponents: 
+          - name: IntersectionLF
+            actions:
+            - name: intersect
+          - name: SinglePgenFollower
+            actions:
+            - name: gen
+            - name: count_ref
       - name: skip_follower
         implementations:
         - alias: C_U_leader_follower_yes_opt_fills
@@ -89,9 +109,30 @@ modelscript_components:
           - name: FillOptimizerLeader
             actions:
             - name: allow
+        - alias: C_U_leader_follower_no_opt_fills
+          subcomponents: 
+          - name: IntersectionLF
+            actions:
+            - name: gated_intersect
+          - name: SinglePgenFollower
+            actions:
+            - name: gated_gen
     implementations:
       - name: C_U_leader_follower_yes_opt_fills
         taxonomic_instance_alias: C_U_leader_follower_yes_opt_fills
+        objective:
+          actions:
+            - name: fill_leader
+              energy: 0
+            - name: fill_follower
+              energy: 0
+            - name: skip_leader
+              energy: 0
+            - name: skip_follower
+              energy: 0
+          area: 0
+      - name: C_U_leader_follower_no_opt_fills
+        taxonomic_instance_alias: C_U_leader_follower_no_opt_fills
         objective:
           actions:
             - name: fill_leader
