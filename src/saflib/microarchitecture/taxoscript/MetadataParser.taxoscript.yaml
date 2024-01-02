@@ -7,7 +7,7 @@ taxoscript_primitives:
       # sentinel - unique *sentinel* symbol indicates end of fiber metadata
       # counter_prefix - a count of the number of metadata words precedes the metadata memory
       values: [sentinel,length_field]
-    - string: coordinate_arithmetic=no_arithmetic # Whether MD parser must support coordinate arithmetic?
+    - string: coordinate_arithmetic=yes_arithmetic # Whether MD parser must support coordinate arithmetic?
       # no_arithmetic - don't support coordinate arithmetic (default)
       # yes_arithmetic - support coordinate arithmetic
       values: [no_arithmetic,yes_arithmetic]

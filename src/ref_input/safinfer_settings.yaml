@@ -39,7 +39,20 @@ force_attributes:
     - position: 0
       value: 'pipeline_bubble_gate'
 
-      
+- uri: /.weight_spad_datatype_format_uarch.TestMetadataParser1
+  settings:
+  - type: positional
+    values:
+    - position: 2
+      value: 'no_arithmetic'
+
+- uri: /.iact_spad_datatype_format_uarch.TestMetadataParser1
+  settings:
+  - type: positional
+    values:
+    - position: 2
+      value: 'no_arithmetic'
+
 #    - position: 4
 #      value: 'none'
 
