@@ -12,7 +12,7 @@ taxoscript_components:
     topologies:
       - name: all
         components:
-        - MetadataParser: TestMetadataParser$x(?,sentinel,yes_arithmetic)
+        - MetadataParser: TestMetadataParser$x(?,sentinel,no_arithmetic)
         netlist:
         - md: [md_in$x,TestMetadataParser$x.md_in]
         - flag: [at_bound_out$x,TestMetadataParser$x.at_bound_out]

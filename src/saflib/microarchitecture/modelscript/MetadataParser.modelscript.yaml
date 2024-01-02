@@ -4,12 +4,33 @@ modelscript_primitives:
     from_taxonomic_primitive: MetadataParser
     export_attributes_to_model: true
     instance_aliases:
-    - alias: C
+    # Coordinate-payload metadata parsers
+    - alias: C_no_arithmetic_sentinel
       instances:
-      - coordinate_payload
-    - alias: U
+      - C_no_arithmetic_sentinel
+    - alias: C_yes_arithmetic_sentinel
       instances:
-      - uncompressed
+      - C_yes_arithmetic_sentinel
+    - alias: C_no_arithmetic_length_field
+      instances:
+      - C_no_arithmetic_length_field
+    - alias: C_yes_arithmetic_length_field
+      instances:
+      - C_yes_arithmetic_length_field
+    # Uncompressed-offset-pair metadata parsers
+    - alias: U_no_arithmetic_sentinel
+      instances:
+      - U_no_arithmetic_sentinel
+    - alias: U_yes_arithmetic_sentinel
+      instances:
+      - U_yes_arithmetic_sentinel
+    - alias: U_X_length_field
+      instances:
+      # The marginal cost of supporting coordinate arithmetic in top
+      # of length-field MDparser strategy is ~0 since MDparser is tracking
+      # the position/coordinate offset within the U fiber anyway
+      - U_no_arithmetic_length_field
+      - U_yes_arithmetic_length_field
     scale_parameters:
       - name: clock
         type: real
@@ -65,34 +86,60 @@ modelscript_primitives:
           - load_tensor: bandwidth
             load_ranks:
             - load_rank: metadata_read_width
-        - type: peak
-          load_tensors:
-          - load_tensor: bandwidth
-            load_ranks:
-            - load_rank: metadata_read_width
-          - load_tensor: position
-            load_ranks:
-            - load_rank: positions_per_cycle
-          - load_tensor: datatype
-            load_ranks:
-            - load_rank: metadata_word_width
+
     actions:
       - name: check_bound
       - name: gated_check_bound
+
+    characterization_metric_models:
+      - name: scalar_sentinel_detector
+        # C_C_counter accumulator is a registered adder
+        approximation: poly
+        table_id: accelergy/data/primitives_table.csv
+        rtl_id_expression: RegisteredEqualityComparator_bitwidth$(u)
+        symbol_map:
+          - variable: u
+            # Reference input metadata word width (md_in_ref_ww) maps to adder bitwidth
+            symbol: md_in.peak.datatype.metadata_word_width
+        latency:
+          # Critical path length complies with clock latency
+          parameter_id: clock
+          single_latency: true
+          latency_column_name: critical_path_clock_latency
+        energy:
+            # Convert characterized total power to energy, assuming the component is un-gated
+            # for a duration equal to its critical path length (worst-case)
+          - expression: combinational_total_power+register_total_power+clock_network_total_power
+            type: power
+        area:
+          - expression: Combinational_Area+Noncombinational_Area
+            type: area
+        # Generate constraints on md_in_ref_ww to match characertized adder bitwidth values
+        generate_constraints: true
+
     implementations:
-      - name: C
-        taxonomic_instance_alias: C
+      - name: C_no_arithmetic_sentinel
+        taxonomic_instance_alias: C_no_arithmetic_sentinel
         objective:
           actions:
+            # SIMD equality comparator energy
             - name: check_bound
-              energy: 2*(@md_in_rw_thresh + @md_in_pr_thresh + @md_in_ww_thresh)
+              energy: ( @md_in_pr_thresh ) * ( %(scalar_sentinel_detector) )
+            # Gated SIMD equality comparator energy
             - name: gated_check_bound
               energy: 0
-          area: 2*(@md_in_rw_thresh + @md_in_pr_thresh + @md_in_ww_thresh)
+          # SIMD equality comparator area
+          area: ( @md_in_pr_thresh ) * ( %(scalar_sentinel_detector) )
         constraints:
+          - type: characterization_metrics_model
+            list:
+            # Import ref_counter constraints on md_in_ref_ww
+            - scalar_sentinel_detector
           - type: custom
             list:
-              - ( @at_bound_out_pr ) == ( @md_in_cr/@md_in_nc )
+              - ( @md_in_nc ) * ( @at_bound_out_pr ) == ( @md_in_cr )
+              - ( @at_bound_out_rw ) == 1
+              - ( @md_in_rw_thresh ) >= ( @md_in_pr_thresh ) * ( @md_in_ww_thresh )
           - type: passthrough
             list:
               - port_in: md_in
@@ -100,49 +147,63 @@ modelscript_primitives:
                 suffixes:
                   - level.coordinate.dense_data_rank_size
                   - level.coordinate.nodes_per_cycle
+                  - level.datatype.metadata_word_width
           - type: values
             list:
               - symbol: md_in.peak.bandwidth.metadata_read_width
                 values:
                   - 1
+                  - 2
+                  - 4
                   - 8
-                  - 64
-                  - 256
+                  - 16
+                  - 32
               - symbol: md_in.peak.position.positions_per_cycle
                 values:
                   - 1
+                  - 2
+                  - 4
                   - 8
-                  - 64
-                  - 256
               - symbol: md_in.peak.datatype.metadata_word_width
                 values:
                   - 1
+                  - 2
+                  - 4
                   - 8
-                  - 64
-                  - 256
+                  - 16
 
-              - symbol: at_bound_out.peak.bandwidth.metadata_read_width
-                values:
-                  - 1
-              - symbol: at_bound_out.peak.position.positions_per_cycle
-                values:
-                  - 1
-              - symbol: at_bound_out.peak.datatype.metadata_word_width
-                values:
-                  - 1
-      - name: U
-        taxonomic_instance_alias: U
+              # - symbol: at_bound_out.peak.bandwidth.metadata_read_width
+              #   values:
+              #     - 1
+              # - symbol: at_bound_out.peak.position.positions_per_cycle
+              #   values:
+              #     - 1
+              # - symbol: at_bound_out.peak.datatype.metadata_word_width
+              #   values:
+              #     - 1
+
+      - name: U_no_arithmetic_sentinel
+        taxonomic_instance_alias: U_no_arithmetic_sentinel
         objective:
           actions:
+            # SIMD equality comparator energy
             - name: check_bound
-              energy: 2*(@md_in_rw_thresh + @md_in_pr_thresh + @md_in_ww_thresh)
+              energy: ( @md_in_pr_thresh ) * ( %(scalar_sentinel_detector) )
+            # Gated SIMD equality comparator energy
             - name: gated_check_bound
               energy: 0
-          area: 2*(@md_in_rw_thresh + @md_in_pr_thresh + @md_in_ww_thresh)
+          # SIMD equality comparator area
+          area: ( @md_in_pr_thresh ) * ( %(scalar_sentinel_detector) )
         constraints:
+          - type: characterization_metrics_model
+            list:
+            # Import ref_counter constraints on md_in_ref_ww
+            - scalar_sentinel_detector
           - type: custom
             list:
-              - ( @at_bound_out_pr ) == ( @md_in_cr/@md_in_nc )
+              - ( @md_in_nc ) * ( @at_bound_out_pr ) == ( @md_in_cr )
+              - ( @at_bound_out_rw ) == 1
+              - ( @md_in_rw_thresh ) >= ( @md_in_pr_thresh ) * ( @md_in_ww_thresh )
           - type: passthrough
             list:
               - port_in: md_in
@@ -150,33 +211,27 @@ modelscript_primitives:
                 suffixes:
                   - level.coordinate.dense_data_rank_size
                   - level.coordinate.nodes_per_cycle
+                  - level.datatype.metadata_word_width
           - type: values
             list:
               - symbol: md_in.peak.bandwidth.metadata_read_width
                 values:
                   - 1
+                  - 2
+                  - 4
                   - 8
-                  - 64
-                  - 256
+                  - 16
+                  - 32
               - symbol: md_in.peak.position.positions_per_cycle
                 values:
                   - 1
+                  - 2
+                  - 4
                   - 8
-                  - 64
-                  - 256
               - symbol: md_in.peak.datatype.metadata_word_width
                 values:
                   - 1
+                  - 2
+                  - 4
                   - 8
-                  - 64
-                  - 256
-
-              - symbol: at_bound_out.peak.bandwidth.metadata_read_width
-                values:
-                  - 1
-              - symbol: at_bound_out.peak.position.positions_per_cycle
-                values:
-                  - 1
-              - symbol: at_bound_out.peak.datatype.metadata_word_width
-                values:
-                  - 1
+                  - 16

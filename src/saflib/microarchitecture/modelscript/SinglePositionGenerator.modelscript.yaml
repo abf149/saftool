@@ -166,7 +166,7 @@ modelscript_primitives:
               - port_in: md_in
                 port_out: pos_out
                 suffixes:
-                  # Passthru pr,nc,cr, md_in -> pos_out
+                  # Passthru pr,nc,cr, from md_in -> pos_out
                   - level.position.positions_per_cycle # Output throughput matches input throughput (pr)
                   - level.coordinate.dense_data_rank_size # Fiber size hasn't changed (nc)
                   - level.coordinate.nodes_per_cycle # Still striding through fiber coordinates at same average rate
@@ -177,23 +177,14 @@ modelscript_primitives:
               # By default, @md_in_ref_ww_thresh >= @md_in_ref_ww in order for the registered adder to have enough bits.
               # Override this with another inequality which enforces strictly-greater-than
               - ( @md_in_ref_ww_thresh ) > ( @md_in_ref_ww )
+              # Require output bandwidth (in bits by default) >= output throughput, converted to bits
+              - ( @pos_out_rw ) >= ( @pos_out_pr ) * ( @pos_out_pw )
           - type: values
             list:
               - symbol: md_in_ref.peak.datatype.metadata_word_width #md_in_ref_ww_thresh possible values (transitively applies to adder bitwidth)
                 values:
                   - 1
                   - 2
-                  - 3
                   - 4
-                  - 5
-                  - 6
-                  - 7
                   - 8
-                  - 9
-                  - 10
-                  - 11
-                  - 12
-                  - 13
-                  - 14
-                  - 15
                   - 16
