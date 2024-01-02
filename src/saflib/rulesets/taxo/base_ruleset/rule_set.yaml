@@ -123,6 +123,30 @@ rewrite_rule_set:
       id: predicate
       value: predicateIsComponentHasTopologicalHoleHasValidAttributesWithNoUnknowns
 
+
+
+  - classtype: RewriteRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: transform
+      value: transformTopologicalHoleToIntersectionTopology
+    id: TransformTopologicalHoleToIntersectionTopology
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsComponentHasTopologicalHoleHasValidAttributesWithNoUnknowns
+
+  - classtype: RewriteRule
+    conditionally_evaluated_expression:
+      classtype: FunctionReference
+      id: transform
+      value: transformToSinglePossibility
+    id: transformToSinglePossibility
+    predicate:
+      classtype: FunctionReference
+      id: predicate
+      value: predicateIsComponentOrPrimitiveNotArchitectureHasUnknownsIsSupportedWithOnePossibility
+
 #predicateIsComponent
 
 

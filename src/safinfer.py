@@ -57,9 +57,9 @@ def handle_outcome(result,topo_out_path):
     else:
         error("  => FAILURE",also_stdout=True)
         safio.dump_saf_uarch_topology(inferred_arch,topo_out_path + ".fail")
-        info("Failure component:")
-        info("- Component:",uri)
-        info("- Attributes:",failure_comp.getAttributes())
+        info("Failure component:",also_stdout=True)
+        info("- Component:",uri,also_stdout=True)
+        info("- Attributes:",failure_comp.getAttributes(),also_stdout=True)
     warn(":: => Done, taxonomic inference",also_stdout=True)
 
 def closing_remark():

@@ -32,6 +32,10 @@ def isPrimitive(obj):
     '''    
     x=type(obj).__name__ == 'Primitive'
     return x
+
+def isBufferStub(obj):
+    return isCategory(obj,"BufferStub")
+
 def isCategory(obj,category):
     return obj.getCategory()==category
 

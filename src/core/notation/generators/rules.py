@@ -26,6 +26,7 @@ def allObjAttributesMatchInstanceAttributes(obj_attributes,instance_attributes,a
     - instance_attributes -- list of instance attributes.\n
     - wildcard -- instance attribute value not subject to validation; automatic match unless None
     - unknown -- object attribute value representing unknown value; automatic match unless None
+    - strict -- only permit 'unknown' as a match if False
 
     Returns:\n
     - True if all applicable non-unknown object attributes match corresponding applicable non-wildcard instance attributes
