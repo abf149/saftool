@@ -81,6 +81,7 @@ def main():
     abstract_analytical_primitive_models_dict, \
     abstract_analytical_component_models_dict,scale_prob = \
         pipeline(arch,taxo_uarch,sparseopts,user_attributes)
+
     export_result(arch,comp_in,arch_out_path,comp_out_path,abstract_analytical_primitive_models_dict, \
                   abstract_analytical_component_models_dict,scale_prob,user_attributes)
     closing_remark()
