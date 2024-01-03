@@ -34,7 +34,7 @@ def parse_from_taxonomic_primitive(primitive, supported_instances):
     info(".copy()")
     #supported_instances.extend(instances)
     #warn("--- => Done, parsing taxonomic primitive reference")
-    return model_instance, instances
+    return model_instance, instances, taxonomic_primitive
 
 def parse_scale_parameters(primitive, model_instance):
     #info("--- Parsing scale parameters")

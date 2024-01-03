@@ -6,6 +6,7 @@ import yaml
 import pickle, shutil, os, copy
 import solver.model.build_support.abstraction as ab_
 import core.general_io as genio
+import saflib.microarchitecture.ModelRegistry as mr_
 
 def dict_representer(dumper, data):
     return dumper.represent_mapping(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data.items())
@@ -84,7 +85,7 @@ def buildSubcomponentsStructure(comp_uri, \
         [
             {
                 "name":subcomp_name,
-                "class":abstract_analytical_primitive_models_dict[subcomp_uri]['category'],
+                "class":mr_.getModelIdFromTaxonomicId(abstract_analytical_primitive_models_dict[subcomp_uri]['category']),
                 "attributes": {
                     attr_:abstract_analytical_primitive_models_dict[subcomp_uri]['attributes'][attr_]
                         for attr_ in abstract_analytical_primitive_models_dict[subcomp_uri]['attributes']
@@ -295,6 +296,16 @@ def getAccelergySingleBufferStructure(flat_arch, \
     for attr_ in buff_class_attributes:
         buffer_wrapper['attributes'][attr_] = buff_class_def['attributes'][attr_]
         buffer_subcomponent['attributes'][attr_] = attr_
+
+    # The subclass field of architectural buffers is unnecessary as a field of subcomponents;
+    # thus, subclass -> class and delete the subclass field
+
+    if 'subclass' in buffer_subcomponent:
+        warn("----- Wrapped buffer class =",buffer_subcomponent['class'],"subclass =",buffer_subcomponent['subclass'], \
+             'being converted to class =',buffer_subcomponent['subclass'],'and deleting subclass field')
+        buffer_subcomponent['class']=buffer_subcomponent['subclass']
+        del buffer_subcomponent['subclass']
+
     # - Set subcomponents & action tree
     uarch_subcomp_uri_list={}
     buffer_wrapper['subcomponents'].append(buffer_subcomponent) # wrapped buffer

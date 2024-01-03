@@ -21,8 +21,9 @@ def parse_modelscript(script_dict):
     
     # Primitives
     primitives_dict={}
+    primitive_taxo_id_to_model_id={}
     if num_modelscript_primitives>0:
-        primitives_dict=prpr_.parse_modelscript_primitives(modelscript_primitives)
+        primitives_dict,primitive_taxo_id_to_model_id=prpr_.parse_modelscript_primitives(modelscript_primitives)
 
     # Components
     components_dict={}
@@ -31,7 +32,7 @@ def parse_modelscript(script_dict):
 
     warn("-- => Done, parsing modelscript.")
 
-    return primitives_dict, components_dict
+    return primitives_dict, components_dict, primitive_taxo_id_to_model_id
 
 # Example usage:
 # yaml_file_path = 'path_to_yaml_file.yaml'

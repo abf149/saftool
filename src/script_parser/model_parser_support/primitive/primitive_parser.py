@@ -21,7 +21,7 @@ def parse_modelscript_primitive(primitive):
     characterization_metric_models = ps_.parse_characterization_metric_models(primitive)
     info("")
     info("")
-    model_instance, supported_instances = ps_.parse_from_taxonomic_primitive(primitive, supported_instances)
+    model_instance, supported_instances, taxonomic_primitive = ps_.parse_from_taxonomic_primitive(primitive, supported_instances)
     model_instance = ps_.parse_scale_parameters(primitive, model_instance)
     model_instance = ps_.parse_actions(primitive, model_instance)
     model_instance = ps_.register_characterization_metric_models(characterization_metric_models, model_instance)
@@ -33,7 +33,7 @@ def parse_modelscript_primitive(primitive):
     model_instance = ps_.parse_implementations(primitive, model_instance)
 
     warn("---- => Done, parsing",id_)
-    return id_,model_instance #{"primitive":model_instance,"instances":supported_instances}
+    return id_,model_instance,taxonomic_primitive #{"primitive":model_instance,"instances":supported_instances}
 
 def parse_modelscript_primitives(primitives_list):
     '''
@@ -45,9 +45,11 @@ def parse_modelscript_primitives(primitives_list):
     '''
     info("--- Parsing primitives...")
     primitives_dict={}
+    taxo_id_to_model_id={}
     assert(len(primitives_list)>0)
     for primitive_spec in primitives_list:
-        id_,primitive = parse_modelscript_primitive(primitive_spec)
+        id_,primitive,taxonomic_primitive_id = parse_modelscript_primitive(primitive_spec)
         primitives_dict[id_]=primitive
+        taxo_id_to_model_id[taxonomic_primitive_id]=id_
     warn("--- => Done, parsing primitives...")
-    return primitives_dict
+    return primitives_dict,taxo_id_to_model_id
