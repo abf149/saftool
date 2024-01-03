@@ -208,7 +208,7 @@ def export_analytical_models(arch, \
     
     # accelergy/primitive_component_libs/primitive_component.lib.yaml
     base_library_search_path = \
-        genio.get_abs_path_relative_to_cwd('src/accelergy/primitive_component_libs/primitive_component.lib.yaml')
+        os.path.join(os.path.dirname(__file__),"../accelergy/reference/primitive_component.lib.yaml")
     library_search_paths=user_attributes["model_export_settings"]["library_search_paths"]
     library_search_paths=[lib.replace(":base",base_library_search_path) for lib in library_search_paths]
 

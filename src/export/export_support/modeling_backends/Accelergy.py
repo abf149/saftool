@@ -215,7 +215,8 @@ def search_for_primitive(arch_buff_subclass_name,backend_args):
                     warn("------ => Done, searching more broadly for primitive/component")
                     return cls_
         except:
-            warn("-------- Could not open",search_path,"; skipping.")
+            warn("-------- Could not open",search_path,"; skipping.",also_stdout=True)
+            assert(False)
 
         error("Finished searching more broadly for component",arch_buff_subclass_name, \
               "but could not find it.",also_stdout=True)
