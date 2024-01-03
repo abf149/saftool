@@ -8,7 +8,7 @@ import solver.model.build_support.abstraction as ab_
 from core.helper import info,warn,error
 import sympy as sp, copy
 
-fmt_str_convert={"UOP":"U", "RLE":"R", "C":"C","B":"B"}
+fmt_str_convert={"UOP":"U", "RLE":"R", "C":"C","B":"B","CP":"C"}
 
 class TopologyWrapper:
     def __init__(self,component_list=[],net_list=[],generator_type=None,topological_hole=True):
