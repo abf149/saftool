@@ -26,7 +26,7 @@ sparse_optimizations:
             - format: UOP             
               payload-word-bits:  4
               flattened-rankIDs: [ [ R ] ] 
-            - format: C      
+            - format: CP      
               metadata-word-bits: 4
               flattened-rankIDs: [ [ C ] ] 
           rank-application-order: inner-to-outer
@@ -43,7 +43,7 @@ sparse_optimizations:
             - format: UOP
               payload-word-bits:  7
               flattened-rankIDs: [ [ C, R ] ] 
-            - format: C
+            - format: CP
               metadata-word-bits: 4
               flattened-rankIDs: [ [ M  ] ]
           rank-application-order: inner-to-outer
@@ -56,7 +56,7 @@ sparse_optimizations:
             - format: UOP             
               payload-word-bits:  4
               flattened-rankIDs: [ [ R ] ] 
-            - format: C         # C0
+            - format: CP         # C0
               metadata-word-bits: 4
               flattened-rankIDs: [ [ C ] ] 
           rank-application-order: inner-to-outer
@@ -69,7 +69,7 @@ sparse_optimizations:
             - format: UOP
               payload-word-bits:  7
               flattened-rankIDs: [ [ C, R ] ] 
-            - format: C
+            - format: CP
               metadata-word-bits: 4
               flattened-rankIDs: [ [ M  ] ]
           rank-application-order: inner-to-outer
@@ -91,7 +91,7 @@ sparse_optimizations:
       data-spaces:
         - name: Inputs
           ranks: 
-            - format: C
+            - format: CP
               metadata-word-bits: 4
           rank-application-order: inner-to-outer
 
