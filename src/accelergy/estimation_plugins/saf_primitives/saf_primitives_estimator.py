@@ -41,7 +41,7 @@ CRITICAL_PATH_LENGTH_IDX = 14
 
 default_install_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.join('..', '..', './data/primitives_ERT_ART.pkl')))
 
-print("DEFAULT_INSTALL_PATH:",default_install_path)
+#print("DEFAULT_INSTALL_PATH:",default_install_path)
 
 class SAFPrimitives(object):
     """
@@ -62,7 +62,7 @@ class SAFPrimitives(object):
         #        self.primitives_table.append(row)
 
     def category_supported(self,instance_category):
-        print("self.ERTART:",self.ERTART)
+        #print("self.ERTART:",self.ERTART)
 
         return instance_category in self.ERTART
 
@@ -74,9 +74,9 @@ class SAFPrimitives(object):
             return interface['class_name'],interface['attributes']
 
     def match_interface_to_category_ERTART(self,instance_attributes_dict,instance_category):
-        print("MATCH")
+        #print("MATCH")
         if self.category_supported(instance_category):
-            print("ONE")
+            #print("ONE")
             cat_ERTART=self.ERTART[instance_category]
             for attribute_values_tuple in cat_ERTART:
                 ERTART_=cat_ERTART[attribute_values_tuple]
@@ -85,13 +85,13 @@ class SAFPrimitives(object):
                             for idx,attr_name in enumerate(attribute_names_tuple)]):
                     # Category & instance match!
 
-                    print("RES:",{'ERT':ERTART_['ERT'],'ART':ERTART_['ART'], \
-                            'names':attribute_names_tuple, 'values':attribute_values_tuple})
+                    #print("RES:",{'ERT':ERTART_['ERT'],'ART':ERTART_['ART'], \
+                    #        'names':attribute_names_tuple, 'values':attribute_values_tuple})
 
                     return {'ERT':ERTART_['ERT'],'ART':ERTART_['ART'], \
                             'names':attribute_names_tuple, 'values':attribute_values_tuple}
         else:
-            print("TWO")
+            #print("TWO")
             # No class_name match
             return None
 
@@ -112,20 +112,20 @@ class SAFPrimitives(object):
         :return return the accuracy if supported, return 0 if not
         :rtype: int
         """
-        print("INTERFACE:",interface)
+        #print("INTERFACE:",interface)
 
         category, \
         attributes_dict, \
         action_name, \
         _ = self.interface_breakout(interface)
 
-        print("CATEGORY:",category)
-        print("ATTRIBUTES_DICT:",attributes_dict)
-        print("ACTION_NAME:",action_name)
+        #print("CATEGORY:",category)
+        #print("ATTRIBUTES_DICT:",attributes_dict)
+        #print("ACTION_NAME:",action_name)
 
         instance_ERTART=self.match_interface_to_category_ERTART(attributes_dict,category)
         if instance_ERTART is None:
-            print("NOT SUPPORTED")
+            #print("NOT SUPPORTED")
             # Instance mismatch
             return 0
         else:
@@ -178,13 +178,13 @@ class SAFPrimitives(object):
         :rtype: int
         """
 
-        print("INTERFACE:",interface)
+        #print("INTERFACE:",interface)
 
         category, \
         attributes_dict = self.interface_breakout(interface,energy=False)
 
-        print("CATEGORY:")
-        print("ATTRIBUTES_DICT:",attributes_dict)
+        #print("CATEGORY:")
+        #print("ATTRIBUTES_DICT:",attributes_dict)
         #print("ACTION_NAME:",action_name)
 
         instance_ERTART=self.match_interface_to_category_ERTART(attributes_dict,category)
