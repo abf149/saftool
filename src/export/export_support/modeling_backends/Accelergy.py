@@ -138,8 +138,8 @@ def getAccelergySingleComponentStructure(comp_uri, \
                         "name":cc_.create_safe_symbol(comp_uri),
                         "attributes": { \
                             yield_: "must_specify" \
-                            for yield_ in yield_list \
-                                if type(yield_).__name__ != "list"
+                            for yield_ in yield_list #\
+                                #if type(yield_).__name__ != "list"
                         }, \
                         "subcomponents": \
                             buildSubcomponentsStructure(comp_uri, \
@@ -367,9 +367,11 @@ def getAccelergySingleBufferStructure(flat_arch, \
             "name":subcomp_inst_id,
             "class":class_id,
             "attributes": { \
-                yield_: subcomp_attr_dict[yield_] \
-                for yield_ in subcomp_attr_dict \
-                    if type(subcomp_attr_dict[yield_]).__name__ != "list"
+                yield_: ( subcomp_attr_dict[yield_] \
+                            if type(subcomp_attr_dict[yield_]).__name__ != "list" \
+                                else \
+                                    "".join([fmt.getValue() for fmt in subcomp_attr_dict[yield_]])) \
+                for yield_ in subcomp_attr_dict
             }
         })
 
