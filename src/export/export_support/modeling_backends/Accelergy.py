@@ -6,6 +6,7 @@ import yaml
 import pickle, shutil, os, copy
 import solver.model.build_support.abstraction as ab_
 import core.general_io as genio
+import saflib.microarchitecture.ModelRegistry as mr_
 
 def dict_representer(dumper, data):
     return dumper.represent_mapping(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data.items())
@@ -84,7 +85,7 @@ def buildSubcomponentsStructure(comp_uri, \
         [
             {
                 "name":subcomp_name,
-                "class":abstract_analytical_primitive_models_dict[subcomp_uri]['category'],
+                "class":mr_.getModelIdFromTaxonomicId(abstract_analytical_primitive_models_dict[subcomp_uri]['category']),
                 "attributes": {
                     attr_:abstract_analytical_primitive_models_dict[subcomp_uri]['attributes'][attr_]
                         for attr_ in abstract_analytical_primitive_models_dict[subcomp_uri]['attributes']
@@ -137,8 +138,8 @@ def getAccelergySingleComponentStructure(comp_uri, \
                         "name":cc_.create_safe_symbol(comp_uri),
                         "attributes": { \
                             yield_: "must_specify" \
-                            for yield_ in yield_list \
-                                if type(yield_).__name__ != "list"
+                            for yield_ in yield_list #\
+                                #if type(yield_).__name__ != "list"
                         }, \
                         "subcomponents": \
                             buildSubcomponentsStructure(comp_uri, \
@@ -270,6 +271,7 @@ def getAccelergySingleBufferStructure(flat_arch, \
                                       abstract_analytical_component_models_dict, \
                                       abstract_analytical_primitive_models_dict, \
                                       analytical_component_model_actions_dict, \
+                                      component_energy_action_tree, \
                                       buffer_action_tree, \
                                       backend_args={}):
 
@@ -295,6 +297,16 @@ def getAccelergySingleBufferStructure(flat_arch, \
     for attr_ in buff_class_attributes:
         buffer_wrapper['attributes'][attr_] = buff_class_def['attributes'][attr_]
         buffer_subcomponent['attributes'][attr_] = attr_
+
+    # The subclass field of architectural buffers is unnecessary as a field of subcomponents;
+    # thus, subclass -> class and delete the subclass field
+
+    if 'subclass' in buffer_subcomponent:
+        warn("----- Wrapped buffer class =",buffer_subcomponent['class'],"subclass =",buffer_subcomponent['subclass'], \
+             'being converted to class =',buffer_subcomponent['subclass'],'and deleting subclass field')
+        buffer_subcomponent['class']=buffer_subcomponent['subclass']
+        del buffer_subcomponent['subclass']
+
     # - Set subcomponents & action tree
     uarch_subcomp_uri_list={}
     buffer_wrapper['subcomponents'].append(buffer_subcomponent) # wrapped buffer
@@ -314,11 +326,18 @@ def getAccelergySingleBufferStructure(flat_arch, \
             ]
         }
 
-        if 'arguments' in action_spec:
+        if 'arguments' in action_spec and False: # Disable this section because arguments a not high priority
             # Arguments dict: arg -> range
             class_args_dict=action_spec['arguments']
             action_struct['subcomponents'][0]['actions'][0]['arguments'] = \
                 wrapper_args_dict={arg_:arg_ for arg_ in class_args_dict}
+            
+            if 'arguments' not in action_struct:
+                action_struct['arguments']={}
+
+            for arg_ in class_args_dict:
+                if arg_ not in action_struct['arguments']:
+                    action_struct['arguments'][arg_] = "0..1000"
         
         if action_id in spec_action_tree:
             subcomp_dict=spec_action_tree[action_id]
@@ -332,11 +351,20 @@ def getAccelergySingleBufferStructure(flat_arch, \
                     _,subcomp_class_id=ab_.split_uri(subcomp_uri)
                     info("------",subcomp_class_id)
                     subaction_list=subcomp_dict[subcomp_uri]
-                    action_struct['subcomponents'].append({
-                        'name':uarchModelInstanceId,
-                        'actions':[{'name':uarch_action_id} \
-                                   for uarch_action_id in subaction_list]
-                    })
+
+                    #component_energy_action_tree[comp_uri]
+
+                    # Confirm that the particular subcomponent actions are actually defined
+                    defined_actions=[uarch_action_id for uarch_action_id in subaction_list \
+                                        if uarch_action_id in component_energy_action_tree[subcomp_uri]]
+
+                    if len(defined_actions) > 0:
+                        # Only add component & subactions if the component has any defined subactions
+                        action_struct['subcomponents'].append({
+                            'name':uarchModelInstanceId,
+                            'actions':[{'name':uarch_action_id} \
+                                    for uarch_action_id in defined_actions]
+                        })
             else:
                 warn("----- Buffer action",action_id,"references no microarchitecture actions")
         else:
@@ -356,9 +384,11 @@ def getAccelergySingleBufferStructure(flat_arch, \
             "name":subcomp_inst_id,
             "class":class_id,
             "attributes": { \
-                yield_: subcomp_attr_dict[yield_] \
-                for yield_ in subcomp_attr_dict \
-                    if type(subcomp_attr_dict[yield_]).__name__ != "list"
+                yield_: ( subcomp_attr_dict[yield_] \
+                            if type(subcomp_attr_dict[yield_]).__name__ != "list" \
+                                else \
+                                    "".join([fmt.getValue() for fmt in subcomp_attr_dict[yield_]])) \
+                for yield_ in subcomp_attr_dict
             }
         })
 
@@ -372,6 +402,7 @@ def getAccelergyBufferLibrary(flat_arch, \
                               analytical_component_model_actions_dict, \
                               abstract_analytical_primitive_models_dict, \
                               abstract_analytical_component_models_dict, \
+                              component_energy_action_tree, \
                               buffer_action_tree, \
                               backend_args={}):
     info("--- Building Accelergy buffer model component library")
@@ -389,6 +420,7 @@ def getAccelergyBufferLibrary(flat_arch, \
                                                         abstract_analytical_component_models_dict, \
                                                         abstract_analytical_primitive_models_dict, \
                                                         analytical_component_model_actions_dict, \
+                                                        component_energy_action_tree, \
                                                         buffer_action_tree, \
                                                         backend_args=backend_args)
         _,buffer_id=ab_.split_uri(buffer_uri)

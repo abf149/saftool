@@ -27,12 +27,16 @@ def load_parse_model_libs(model_script_lib_list):
     lib_filepath_list=[]
     lib_filepath_list.extend(glob.glob(model_script_lib_list[0]))
     info("Parsing modelscript libraries (",len(lib_filepath_list),")...")
+    primitive_taxo_id_to_model_id={}
     for lib_filepath in lib_filepath_list:
         info("-",lib_filepath)
         lib_struct=None
         with open(lib_filepath, 'r') as file:
             lib_struct= yaml.safe_load(file)
-        primitives_dict, components_dict=tp_.parse_modelscript(lib_struct)
+        primitives_dict, components_dict, partial_primitive_taxo_id_to_model_id=tp_.parse_modelscript(lib_struct)
+        for k in partial_primitive_taxo_id_to_model_id:
+            primitive_taxo_id_to_model_id[k]=partial_primitive_taxo_id_to_model_id[k]
+
         if len(primitives_dict)>0:
             info("-- Registering primitives")
             for primitive_id in primitives_dict:
@@ -51,6 +55,9 @@ def load_parse_model_libs(model_script_lib_list):
             warn("-- => Done, registering components")
         else:
             info("-- No components to register")
+
+    mr_.registerTaxonomicToModelIdMappingDict(primitive_taxo_id_to_model_id)
+    
     warn("=> Done,")
 
 def process_model_script_lib_cli(args_model_script_lib):

@@ -66,6 +66,7 @@ def getBackendBufferLibraryRepresentation(flat_comp_dict, \
                                           analytical_primitive_model_actions_dict, \
                                           abstract_analytical_primitive_models_dict, \
                                           abstract_analytical_component_models_dict, \
+                                          component_energy_action_tree, \
                                           buffer_action_tree, \
                                           backend="accelergy", \
                                           backend_args={}):
@@ -85,6 +86,7 @@ def getBackendBufferLibraryRepresentation(flat_comp_dict, \
                                            analytical_component_model_actions_dict, \
                                            abstract_analytical_primitive_models_dict, \
                                            abstract_analytical_component_models_dict, \
+                                           component_energy_action_tree, \
                                            buffer_action_tree, \
                                            backend_args=backend_args)
     else:
@@ -359,6 +361,7 @@ def export2_backend_component_lib(comp_in, \
                                                                  analytical_primitive_model_actions_dict, \
                                                                  abstract_analytical_primitive_models_dict, \
                                                                  abstract_analytical_component_models_dict, \
+                                                                 component_energy_action_tree, \
                                                                  buffer_action_tree, \
                                                                  backend=backend, \
                                                                  backend_args=backend_args)
