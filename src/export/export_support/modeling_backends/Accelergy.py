@@ -271,6 +271,7 @@ def getAccelergySingleBufferStructure(flat_arch, \
                                       abstract_analytical_component_models_dict, \
                                       abstract_analytical_primitive_models_dict, \
                                       analytical_component_model_actions_dict, \
+                                      component_energy_action_tree, \
                                       buffer_action_tree, \
                                       backend_args={}):
 
@@ -325,11 +326,18 @@ def getAccelergySingleBufferStructure(flat_arch, \
             ]
         }
 
-        if 'arguments' in action_spec:
+        if 'arguments' in action_spec and False: # Disable this section because arguments a not high priority
             # Arguments dict: arg -> range
             class_args_dict=action_spec['arguments']
             action_struct['subcomponents'][0]['actions'][0]['arguments'] = \
                 wrapper_args_dict={arg_:arg_ for arg_ in class_args_dict}
+            
+            if 'arguments' not in action_struct:
+                action_struct['arguments']={}
+
+            for arg_ in class_args_dict:
+                if arg_ not in action_struct['arguments']:
+                    action_struct['arguments'][arg_] = "0..1000"
         
         if action_id in spec_action_tree:
             subcomp_dict=spec_action_tree[action_id]
@@ -343,11 +351,20 @@ def getAccelergySingleBufferStructure(flat_arch, \
                     _,subcomp_class_id=ab_.split_uri(subcomp_uri)
                     info("------",subcomp_class_id)
                     subaction_list=subcomp_dict[subcomp_uri]
-                    action_struct['subcomponents'].append({
-                        'name':uarchModelInstanceId,
-                        'actions':[{'name':uarch_action_id} \
-                                   for uarch_action_id in subaction_list]
-                    })
+
+                    #component_energy_action_tree[comp_uri]
+
+                    # Confirm that the particular subcomponent actions are actually defined
+                    defined_actions=[uarch_action_id for uarch_action_id in subaction_list \
+                                        if uarch_action_id in component_energy_action_tree[subcomp_uri]]
+
+                    if len(defined_actions) > 0:
+                        # Only add component & subactions if the component has any defined subactions
+                        action_struct['subcomponents'].append({
+                            'name':uarchModelInstanceId,
+                            'actions':[{'name':uarch_action_id} \
+                                    for uarch_action_id in defined_actions]
+                        })
             else:
                 warn("----- Buffer action",action_id,"references no microarchitecture actions")
         else:
@@ -385,6 +402,7 @@ def getAccelergyBufferLibrary(flat_arch, \
                               analytical_component_model_actions_dict, \
                               abstract_analytical_primitive_models_dict, \
                               abstract_analytical_component_models_dict, \
+                              component_energy_action_tree, \
                               buffer_action_tree, \
                               backend_args={}):
     info("--- Building Accelergy buffer model component library")
@@ -402,6 +420,7 @@ def getAccelergyBufferLibrary(flat_arch, \
                                                         abstract_analytical_component_models_dict, \
                                                         abstract_analytical_primitive_models_dict, \
                                                         analytical_component_model_actions_dict, \
+                                                        component_energy_action_tree, \
                                                         buffer_action_tree, \
                                                         backend_args=backend_args)
         _,buffer_id=ab_.split_uri(buffer_uri)
