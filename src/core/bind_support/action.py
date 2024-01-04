@@ -5,17 +5,15 @@ from core.helper import info,warn,error
 import copy
 
 def find_condition_buffer(condition_dtype,dtype_buffer_list,target,fmt_iface_bindings):
+
     condition_buffer = None
     idx = None
     for jdx,buffer in enumerate(dtype_buffer_list[condition_dtype]):
-        if buffer == target['name']:
-            if condition_buffer is None:
-                condition_buffer = buffer
-                idx = jdx
-            break
         if fmt_.buffer_keeps_dtype(condition_dtype,buffer,fmt_iface_bindings):
             condition_buffer = buffer
             idx = jdx
+        if buffer == target['name']:
+            break
 
     return condition_buffer,idx
 
@@ -167,14 +165,16 @@ def compute_action_bindings(sparseopts, fmt_iface_bindings, dtype_buffer_list, u
                             action_bindings.append(action_binding)
 
     # Finally, check for bidirectional actions
-    bidirectional_actions = []
+    redundant_bidirectional_actions = []
     for i in range(len(action_bindings)):
         for j in range(i+1, len(action_bindings)):
             if action_bindings[i]['target'] == action_bindings[j]['condition'] and action_bindings[i]['condition'] == action_bindings[j]['target'] and action_bindings[i]['type'] == action_bindings[j]['type']:
                 action_bindings[i]['bidirectional'] = True
-                bidirectional_actions.append(action_bindings[i])
+                #bidirectional_actions.append(action_bindings[i])
+                redundant_bidirectional_actions.append(j)
 
     # Filter out the unidirectional counterparts of bidirectional actions
-    action_bindings = [action for action in action_bindings if not (action['bidirectional'] and action not in bidirectional_actions)]
+    action_bindings = [action_bindings[idx] for idx in range(len(action_bindings)) \
+                            if idx not in redundant_bidirectional_actions]
 
     return action_bindings
