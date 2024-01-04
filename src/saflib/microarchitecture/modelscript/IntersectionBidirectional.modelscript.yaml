@@ -107,7 +107,7 @@ modelscript_primitives:
         # C_C_two_finger_merge intersection unit is an ExTensor-like radix-two-merge-based intersection unit
         approximation: poly
         table_id: accelergy/data/primitives_table.csv
-        rtl_id_expression: VectorTwoFingerMergeIntersectionRegistered_metaDataWidth${u}_arraySize${v}
+        rtl_id_expression: VectorTwoFingerMergeIntersectionRegistered_metaDataWidth$(u)_arraySize$(v)
         symbol_map:
           # RTL scale parameter -> primitive scale parameter mappings.
           # Note: additional custom constraints (provided further below)
