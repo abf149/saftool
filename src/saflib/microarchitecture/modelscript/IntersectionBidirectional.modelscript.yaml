@@ -161,12 +161,12 @@ modelscript_primitives:
             list:
               # Transitively map RTL metaDataWidth to all ports' metadata_word_width scale parameters
               # (the mapping to md_in0 was already accomplished when the RTL model was imported further above)
-              - ( @md_in1_ww_thresh ) = ( @md_in0_ww_thresh )
-              - ( @md_out_ww_thresh ) = ( @md_in0_ww_thresh )
+              - ( @md_in1_ww_thresh ) == ( @md_in0_ww_thresh )
+              - ( @md_out_ww_thresh ) == ( @md_in0_ww_thresh )
               # Transitively map RTL arraySize to all ports' metadata_read_width scale parameters
               # (the mapping to md_in0 was already accomplished when the RTL model was imported further above)
-              - ( @md_in1_rw_thresh ) = ( @md_in0_rw_thresh )
-              - ( @md_out_rw_thresh ) = ( @md_in0_rw_thresh )
+              - ( @md_in1_rw_thresh ) == ( @md_in0_rw_thresh )
+              - ( @md_out_rw_thresh ) == ( @md_in0_rw_thresh )
               # At all ports, interface bandwidth (converted from bits/cyc to word/cyc) scale param. must meet or exceed throughput (words/cyc) load
               - ( @md_in0_rw_thresh ) >= ( @md_in0_pr ) * ( @md_in0_ww_thresh )
               - ( @md_in1_rw_thresh ) >= ( @md_in1_pr ) * ( @md_in1_ww_thresh )
