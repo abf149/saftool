@@ -1,0 +1,303 @@
+TestArchitecture(Architecture):
+- Components:
+  - BackingStorage(BufferStub)
+  - iact_spad(BufferStub)
+  - weight_spad(BufferStub)
+  - psum_spad(BufferStub)
+  - reg(BufferStub)
+  - BackingStorage_datatype_format_uarch(FormatUarch)
+  - iact_spad_datatype_format_uarch(FormatUarch)
+  - weight_spad_datatype_format_uarch(FormatUarch)
+  - reg_datatype_format_uarch(FormatUarch)
+  - Skipping_iact_spad1_weight_spad0(SkippingUarch)
+  - Skipping_weight_spad1_psum_spad1(SkippingUarch)
+  - Skipping_iact_spad1_psum_spad0(SkippingUarch)
+- Nets:
+ - ['BackingStorage.md_out0', 'BackingStorage_datatype_format_uarch.md_in0']
+ - ['BackingStorage.at_bound_in0', 'BackingStorage_datatype_format_uarch.at_bound_out0']
+ - ['BackingStorage.md_out1', 'BackingStorage_datatype_format_uarch.md_in1']
+ - ['BackingStorage.at_bound_in1', 'BackingStorage_datatype_format_uarch.at_bound_out1']
+ - ['BackingStorage.md_out2', 'BackingStorage_datatype_format_uarch.md_in2']
+ - ['BackingStorage.at_bound_in2', 'BackingStorage_datatype_format_uarch.at_bound_out2']
+ - ['BackingStorage.md_out3', 'BackingStorage_datatype_format_uarch.md_in3']
+ - ['BackingStorage.at_bound_in3', 'BackingStorage_datatype_format_uarch.at_bound_out3']
+ - ['BackingStorage.md_out4', 'BackingStorage_datatype_format_uarch.md_in4']
+ - ['BackingStorage.at_bound_in4', 'BackingStorage_datatype_format_uarch.at_bound_out4']
+ - ['BackingStorage.md_out5', 'BackingStorage_datatype_format_uarch.md_in5']
+ - ['BackingStorage.at_bound_in5', 'BackingStorage_datatype_format_uarch.at_bound_out5']
+ - ['BackingStorage.md_out6', 'BackingStorage_datatype_format_uarch.md_in6']
+ - ['BackingStorage.at_bound_in6', 'BackingStorage_datatype_format_uarch.at_bound_out6']
+ - ['BackingStorage.md_out7', 'BackingStorage_datatype_format_uarch.md_in7']
+ - ['BackingStorage.at_bound_in7', 'BackingStorage_datatype_format_uarch.at_bound_out7']
+ - ['BackingStorage.md_out8', 'BackingStorage_datatype_format_uarch.md_in8']
+ - ['BackingStorage.at_bound_in8', 'BackingStorage_datatype_format_uarch.at_bound_out8']
+ - ['iact_spad.md_out0', 'iact_spad_datatype_format_uarch.md_in0']
+ - ['iact_spad.at_bound_in0', 'iact_spad_datatype_format_uarch.at_bound_out0']
+ - ['iact_spad.md_out1', 'iact_spad_datatype_format_uarch.md_in1']
+ - ['iact_spad.at_bound_in1', 'iact_spad_datatype_format_uarch.at_bound_out1']
+ - ['weight_spad.md_out0', 'weight_spad_datatype_format_uarch.md_in0']
+ - ['weight_spad.at_bound_in0', 'weight_spad_datatype_format_uarch.at_bound_out0']
+ - ['weight_spad.md_out1', 'weight_spad_datatype_format_uarch.md_in1']
+ - ['weight_spad.at_bound_in1', 'weight_spad_datatype_format_uarch.at_bound_out1']
+ - ['reg.md_out0', 'reg_datatype_format_uarch.md_in0']
+ - ['reg.at_bound_in0', 'reg_datatype_format_uarch.at_bound_out0']
+ - ['iact_spad.md_out1', 'Skipping_iact_spad1_weight_spad0.md_in_leader']
+ - ['iact_spad.pos_in1', 'Skipping_iact_spad1_weight_spad0.pos_out_leader']
+ - ['weight_spad.md_out0', 'Skipping_iact_spad1_weight_spad0.md_in_follower']
+ - ['weight_spad.pos_in0', 'Skipping_iact_spad1_weight_spad0.pos_out_follower']
+ - ['weight_spad.md_out1', 'Skipping_weight_spad1_psum_spad1.md_in_leader']
+ - ['weight_spad.pos_in1', 'Skipping_weight_spad1_psum_spad1.pos_out_leader']
+ - ['psum_spad.md_out1', 'Skipping_weight_spad1_psum_spad1.md_in_follower']
+ - ['psum_spad.pos_in1', 'Skipping_weight_spad1_psum_spad1.pos_out_follower']
+ - ['iact_spad.md_out1', 'Skipping_iact_spad1_psum_spad0.md_in_leader']
+ - ['iact_spad.pos_in1', 'Skipping_iact_spad1_psum_spad0.pos_out_leader']
+ - ['psum_spad.md_out0', 'Skipping_iact_spad1_psum_spad0.md_in_follower']
+ - ['psum_spad.pos_in0', 'Skipping_iact_spad1_psum_spad0.pos_out_follower']
+
+
+TestArchitecture.BackingStorage(BufferStub):
+- Attributes:
+  - (fibertree) ['U', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U']
+
+
+TestArchitecture.iact_spad(BufferStub):
+- Attributes:
+  - (fibertree) ['U', 'C']
+
+
+TestArchitecture.weight_spad(BufferStub):
+- Attributes:
+  - (fibertree) ['U', 'C']
+
+
+TestArchitecture.psum_spad(BufferStub):
+- Attributes:
+  - (fibertree) ['U', 'U']
+
+
+TestArchitecture.reg(BufferStub):
+- Attributes:
+  - (fibertree) ['C']
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch(FormatUarch):
+- Attributes:
+  - (fibertree) ['U', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U']
+- Components:
+  - TestMetadataParser0(MetadataParser)
+  - TestMetadataParser1(MetadataParser)
+  - TestMetadataParser2(MetadataParser)
+  - TestMetadataParser3(MetadataParser)
+  - TestMetadataParser4(MetadataParser)
+  - TestMetadataParser5(MetadataParser)
+  - TestMetadataParser6(MetadataParser)
+  - TestMetadataParser7(MetadataParser)
+  - TestMetadataParser8(MetadataParser)
+- Nets:
+ - ['md_in0', 'TestMetadataParser0.md_in']
+ - ['at_bound_out0', 'TestMetadataParser0.at_bound_out']
+ - ['md_in1', 'TestMetadataParser1.md_in']
+ - ['at_bound_out1', 'TestMetadataParser1.at_bound_out']
+ - ['md_in2', 'TestMetadataParser2.md_in']
+ - ['at_bound_out2', 'TestMetadataParser2.at_bound_out']
+ - ['md_in3', 'TestMetadataParser3.md_in']
+ - ['at_bound_out3', 'TestMetadataParser3.at_bound_out']
+ - ['md_in4', 'TestMetadataParser4.md_in']
+ - ['at_bound_out4', 'TestMetadataParser4.at_bound_out']
+ - ['md_in5', 'TestMetadataParser5.md_in']
+ - ['at_bound_out5', 'TestMetadataParser5.at_bound_out']
+ - ['md_in6', 'TestMetadataParser6.md_in']
+ - ['at_bound_out6', 'TestMetadataParser6.at_bound_out']
+ - ['md_in7', 'TestMetadataParser7.md_in']
+ - ['at_bound_out7', 'TestMetadataParser7.at_bound_out']
+ - ['md_in8', 'TestMetadataParser8.md_in']
+ - ['at_bound_out8', 'TestMetadataParser8.at_bound_out']
+
+
+TestArchitecture.iact_spad_datatype_format_uarch(FormatUarch):
+- Attributes:
+  - (fibertree) ['U', 'C']
+- Components:
+  - TestMetadataParser0(MetadataParser)
+  - TestMetadataParser1(MetadataParser)
+- Nets:
+ - ['md_in0', 'TestMetadataParser0.md_in']
+ - ['at_bound_out0', 'TestMetadataParser0.at_bound_out']
+ - ['md_in1', 'TestMetadataParser1.md_in']
+ - ['at_bound_out1', 'TestMetadataParser1.at_bound_out']
+
+
+TestArchitecture.weight_spad_datatype_format_uarch(FormatUarch):
+- Attributes:
+  - (fibertree) ['U', 'C']
+- Components:
+  - TestMetadataParser0(MetadataParser)
+  - TestMetadataParser1(MetadataParser)
+- Nets:
+ - ['md_in0', 'TestMetadataParser0.md_in']
+ - ['at_bound_out0', 'TestMetadataParser0.at_bound_out']
+ - ['md_in1', 'TestMetadataParser1.md_in']
+ - ['at_bound_out1', 'TestMetadataParser1.at_bound_out']
+
+
+TestArchitecture.reg_datatype_format_uarch(FormatUarch):
+- Attributes:
+  - (fibertree) ['C']
+- Components:
+  - TestMetadataParser0(MetadataParser)
+- Nets:
+ - ['md_in0', 'TestMetadataParser0.md_in']
+ - ['at_bound_out0', 'TestMetadataParser0.at_bound_out']
+
+
+TestArchitecture.Skipping_iact_spad1_weight_spad0(SkippingUarch):
+- Attributes:
+  - (format) C
+  - (format) U
+  - leader_follower
+  - none
+  - none
+- Components:
+  - IntersectionLF(IntersectionLeaderFollower)
+  - PgenFollower(PositionGenerator)
+- Nets:
+ - ['md_in_leader', 'IntersectionLF.md_in_leader']
+ - ['IntersectionLF.md_out', 'PgenFollower.md_in']
+ - ['PgenFollower.pos_out', 'pos_out_follower']
+
+
+TestArchitecture.Skipping_weight_spad1_psum_spad1(SkippingUarch):
+- Attributes:
+  - (format) C
+  - (format) U
+  - leader_follower
+  - none
+  - none
+- Components:
+  - IntersectionLF(IntersectionLeaderFollower)
+  - PgenFollower(PositionGenerator)
+- Nets:
+ - ['md_in_leader', 'IntersectionLF.md_in_leader']
+ - ['IntersectionLF.md_out', 'PgenFollower.md_in']
+ - ['PgenFollower.pos_out', 'pos_out_follower']
+
+
+TestArchitecture.Skipping_iact_spad1_psum_spad0(SkippingUarch):
+- Attributes:
+  - (format) C
+  - (format) U
+  - leader_follower
+  - none
+  - none
+- Components:
+  - IntersectionLF(IntersectionLeaderFollower)
+  - PgenFollower(PositionGenerator)
+- Nets:
+ - ['md_in_leader', 'IntersectionLF.md_in_leader']
+ - ['IntersectionLF.md_out', 'PgenFollower.md_in']
+ - ['PgenFollower.pos_out', 'pos_out_follower']
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser0(MetadataParser):
+- Attributes:
+  - (format) U
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser1(MetadataParser):
+- Attributes:
+  - (format) U
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser2(MetadataParser):
+- Attributes:
+  - (format) U
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser3(MetadataParser):
+- Attributes:
+  - (format) U
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser4(MetadataParser):
+- Attributes:
+  - (format) U
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser5(MetadataParser):
+- Attributes:
+  - (format) U
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser6(MetadataParser):
+- Attributes:
+  - (format) U
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser7(MetadataParser):
+- Attributes:
+  - (format) U
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser8(MetadataParser):
+- Attributes:
+  - (format) U
+
+
+TestArchitecture.iact_spad_datatype_format_uarch.TestMetadataParser0(MetadataParser):
+- Attributes:
+  - (format) U
+
+
+TestArchitecture.iact_spad_datatype_format_uarch.TestMetadataParser1(MetadataParser):
+- Attributes:
+  - (format) C
+
+
+TestArchitecture.weight_spad_datatype_format_uarch.TestMetadataParser0(MetadataParser):
+- Attributes:
+  - (format) U
+
+
+TestArchitecture.weight_spad_datatype_format_uarch.TestMetadataParser1(MetadataParser):
+- Attributes:
+  - (format) C
+
+
+TestArchitecture.reg_datatype_format_uarch.TestMetadataParser0(MetadataParser):
+- Attributes:
+  - (format) C
+
+
+TestArchitecture.Skipping_iact_spad1_weight_spad0.IntersectionLF(IntersectionLeaderFollower):
+- Attributes:
+  - (format) C
+  - none
+
+
+TestArchitecture.Skipping_iact_spad1_weight_spad0.PgenFollower(PositionGenerator):
+- Attributes:
+  - (format) C
+
+
+TestArchitecture.Skipping_weight_spad1_psum_spad1.IntersectionLF(IntersectionLeaderFollower):
+- Attributes:
+  - (format) C
+  - none
+
+
+TestArchitecture.Skipping_weight_spad1_psum_spad1.PgenFollower(PositionGenerator):
+- Attributes:
+  - (format) C
+
+
+TestArchitecture.Skipping_iact_spad1_psum_spad0.IntersectionLF(IntersectionLeaderFollower):
+- Attributes:
+  - (format) C
+  - none
+
+
+TestArchitecture.Skipping_iact_spad1_psum_spad0.PgenFollower(PositionGenerator):
+- Attributes:
+  - (format) C
+
+

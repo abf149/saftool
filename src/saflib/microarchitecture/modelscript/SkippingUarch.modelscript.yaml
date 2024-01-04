@@ -77,7 +77,7 @@ modelscript_components:
             - name: fill
           - name: SinglePgenLeader
             actions:
-            - name: gen_ref
+            - name: count_ref
           - name: SinglePgenFollower
             actions:
             - name: gated_gen
@@ -98,7 +98,7 @@ modelscript_components:
             - name: gated_gen
           - name: SinglePgenFollower
             actions:
-            - name: gen_ref
+            - name: count_ref
 
       - name: skip_leader
         implementations:
