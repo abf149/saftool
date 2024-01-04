@@ -29,6 +29,25 @@ classes:
   actions:
   - name: gated_allow
   - name: allow
+- name: IntersectionBidirectionalModel
+  attributes:
+    clock: must_specify
+    technology: must_specify
+    area_multiplier: must_specify
+    format_0: must_specify
+    format_1: must_specify
+    strategy: must_specify
+    md_in0_ww_thresh: must_specify
+    md_in0_rw_thresh: must_specify
+    md_in1_ww_thresh: must_specify
+    md_in1_rw_thresh: must_specify
+    md_out_ww_thresh: must_specify
+    md_out_rw_thresh: must_specify
+  actions:
+  - name: fill
+  - name: intersect
+  - name: gated_fill
+  - name: gated_intersect
 - name: IntersectionLeaderFollowerModel
   attributes:
     clock: must_specify

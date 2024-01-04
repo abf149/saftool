@@ -1,0 +1,159 @@
+TestArchitecture(Architecture):
+- Components:
+  - BackingStorage(BufferStub)
+  - Buffer(BufferStub)
+  - Reg(BufferStub)
+  - BackingStorage_datatype_format_uarch(FormatUarch)
+  - Buffer_datatype_format_uarch(FormatUarch)
+  - Skipping_Buffer2_Buffer0(SkippingUarch)
+  - Skipping_Buffer0_Reg0(SkippingUarch)
+- Nets:
+ - ['BackingStorage.md_out0', 'BackingStorage_datatype_format_uarch.md_in0']
+ - ['BackingStorage.at_bound_in0', 'BackingStorage_datatype_format_uarch.at_bound_out0']
+ - ['BackingStorage.md_out1', 'BackingStorage_datatype_format_uarch.md_in1']
+ - ['BackingStorage.at_bound_in1', 'BackingStorage_datatype_format_uarch.at_bound_out1']
+ - ['Buffer.md_out0', 'Buffer_datatype_format_uarch.md_in0']
+ - ['Buffer.at_bound_in0', 'Buffer_datatype_format_uarch.at_bound_out0']
+ - ['Buffer.md_out1', 'Buffer_datatype_format_uarch.md_in1']
+ - ['Buffer.at_bound_in1', 'Buffer_datatype_format_uarch.at_bound_out1']
+ - ['Buffer.md_out2', 'Buffer_datatype_format_uarch.md_in2']
+ - ['Buffer.at_bound_in2', 'Buffer_datatype_format_uarch.at_bound_out2']
+ - ['Buffer.md_out2', 'Skipping_Buffer2_Buffer0.md_in_leader']
+ - ['Buffer.pos_in2', 'Skipping_Buffer2_Buffer0.pos_out_leader']
+ - ['Buffer.md_out0', 'Skipping_Buffer2_Buffer0.md_in_follower']
+ - ['Buffer.pos_in0', 'Skipping_Buffer2_Buffer0.pos_out_follower']
+ - ['Buffer.md_out0', 'Skipping_Buffer0_Reg0.md_in_leader']
+ - ['Buffer.pos_in0', 'Skipping_Buffer0_Reg0.pos_out_leader']
+ - ['Reg.md_out0', 'Skipping_Buffer0_Reg0.md_in_follower']
+ - ['Reg.pos_in0', 'Skipping_Buffer0_Reg0.pos_out_follower']
+
+
+TestArchitecture.BackingStorage(BufferStub):
+- Attributes:
+  - (fibertree) ['U', 'U']
+
+
+TestArchitecture.Buffer(BufferStub):
+- Attributes:
+  - (fibertree) ['C', 'U', 'C']
+
+
+TestArchitecture.Reg(BufferStub):
+- Attributes:
+  - (fibertree) ['U']
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch(FormatUarch):
+- Attributes:
+  - (fibertree) ['U', 'U']
+- Components:
+  - TestMetadataParser0(MetadataParser)
+  - TestMetadataParser1(MetadataParser)
+- Nets:
+ - ['md_in0', 'TestMetadataParser0.md_in']
+ - ['at_bound_out0', 'TestMetadataParser0.at_bound_out']
+ - ['md_in1', 'TestMetadataParser1.md_in']
+ - ['at_bound_out1', 'TestMetadataParser1.at_bound_out']
+
+
+TestArchitecture.Buffer_datatype_format_uarch(FormatUarch):
+- Attributes:
+  - (fibertree) ['C', 'U', 'C']
+- Components:
+  - TestMetadataParser0(MetadataParser)
+  - TestMetadataParser1(MetadataParser)
+  - TestMetadataParser2(MetadataParser)
+- Nets:
+ - ['md_in0', 'TestMetadataParser0.md_in']
+ - ['at_bound_out0', 'TestMetadataParser0.at_bound_out']
+ - ['md_in1', 'TestMetadataParser1.md_in']
+ - ['at_bound_out1', 'TestMetadataParser1.at_bound_out']
+ - ['md_in2', 'TestMetadataParser2.md_in']
+ - ['at_bound_out2', 'TestMetadataParser2.at_bound_out']
+
+
+TestArchitecture.Skipping_Buffer2_Buffer0(SkippingUarch):
+- Attributes:
+  - (format) C
+  - (format) C
+  - bidirectional
+  - no_opt_fills
+- Components:
+  - IntersectionBD(IntersectionBidirectional)
+  - SinglePgenLeader(SinglePositionGenerator)
+  - SinglePgenFollower(SinglePositionGenerator)
+- Nets:
+ - ['md_in_leader', 'IntersectionBD.md_in0']
+ - ['md_in_leader', 'SinglePgenLeader.md_in_ref']
+ - ['md_in_follower', 'IntersectionBD.md_in1']
+ - ['md_in_follower', 'SinglePgenFollower.md_in_ref']
+ - ['IntersectionBD.md_out', 'SinglePgenLeader.md_in']
+ - ['IntersectionBD.md_out', 'SinglePgenFollower.md_in']
+ - ['SinglePgenLeader.pos_out', 'pos_out_leader']
+ - ['SinglePgenFollower.pos_out', 'pos_out_follower']
+
+
+TestArchitecture.Skipping_Buffer0_Reg0(SkippingUarch):
+- Attributes:
+  - (format) C
+  - (format) U
+  - leader_follower
+  - ?
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser0(MetadataParser):
+- Attributes:
+  - (format) U
+  - sentinel
+  - no_arithmetic
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser1(MetadataParser):
+- Attributes:
+  - (format) U
+  - sentinel
+  - no_arithmetic
+
+
+TestArchitecture.Buffer_datatype_format_uarch.TestMetadataParser0(MetadataParser):
+- Attributes:
+  - (format) C
+  - sentinel
+  - no_arithmetic
+
+
+TestArchitecture.Buffer_datatype_format_uarch.TestMetadataParser1(MetadataParser):
+- Attributes:
+  - (format) U
+  - sentinel
+  - no_arithmetic
+
+
+TestArchitecture.Buffer_datatype_format_uarch.TestMetadataParser2(MetadataParser):
+- Attributes:
+  - (format) C
+  - sentinel
+  - no_arithmetic
+
+
+TestArchitecture.Skipping_Buffer2_Buffer0.IntersectionBD(IntersectionBidirectional):
+- Attributes:
+  - (format) C
+  - (format) C
+  - two_finger_merge
+
+
+TestArchitecture.Skipping_Buffer2_Buffer0.SinglePgenLeader(SinglePositionGenerator):
+- Attributes:
+  - (format) C
+  - (format) C
+  - counter
+
+
+TestArchitecture.Skipping_Buffer2_Buffer0.SinglePgenFollower(SinglePositionGenerator):
+- Attributes:
+  - (format) C
+  - (format) C
+  - counter
+
+
