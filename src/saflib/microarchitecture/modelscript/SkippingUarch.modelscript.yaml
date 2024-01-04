@@ -10,6 +10,9 @@ modelscript_components:
     - alias: C_U_leader_follower_no_opt_fills
       instances:
       - C_U_leader_follower_no_opt_fills
+    - alias: C_C_bidirectional_no_opt_fills
+      instances:
+      - C_C_bidirectional_no_opt_fills
     scale_parameters:
       - name: clock
         type: real
@@ -39,6 +42,8 @@ modelscript_components:
     actions:
       - name: fill_leader
         implementations:
+
+        # Skipping.fill_leader, C_U_leader_follower_yes_opt_fills
         - alias: C_U_leader_follower_yes_opt_fills
           subcomponents: 
           - name: IntersectionLF
@@ -53,6 +58,8 @@ modelscript_components:
           - name: FillOptimizerLeader
             actions:
             - name: gated_allow
+
+        # Skipping.fill_leader, C_U_leader_follower_no_opt_fills
         - alias: C_U_leader_follower_no_opt_fills
           subcomponents: 
           - name: IntersectionLF
@@ -61,13 +68,42 @@ modelscript_components:
           - name: SinglePgenFollower
             actions:
             - name: gated_gen
+
+        # Skipping.fill_leader, C_C_bidirectional_no_opt_fills
+        - alias: C_C_bidirectional_no_opt_fills
+          subcomponents: 
+          - name: IntersectionBD
+            actions:
+            - name: fill
+          - name: SinglePgenLeader
+            actions:
+            - name: gen_ref
+          - name: SinglePgenFollower
+            actions:
+            - name: gated_gen
+
       - name: fill_follower
-#        subcomponents: 
-#        - name: IntersectionLF
-#          actions:
-#          - name: fill
+        implementations:
+
+        # No actions triggered for C_U_leader_follower_yes_opt_fills, C_U_leader_follower_no_opt_fills
+
+        # Skipping.fill_follower, C_C_bidirectional_no_opt_fills
+        - alias: C_C_bidirectional_no_opt_fills
+          subcomponents: 
+          - name: IntersectionBD
+            actions:
+            - name: fill
+          - name: SinglePgenLeader
+            actions:
+            - name: gated_gen
+          - name: SinglePgenFollower
+            actions:
+            - name: gen_ref
+
       - name: skip_leader
         implementations:
+
+        # Skipping.skip_leader, C_U_leader_follower_no_opt_fills
         - alias: C_U_leader_follower_yes_opt_fills
           subcomponents: 
           - name: IntersectionLF
@@ -83,6 +119,8 @@ modelscript_components:
           - name: FillOptimizerLeader
             actions:
             - name: gated_allow
+
+        # Skipping.skip_leader, C_U_leader_follower_no_opt_fills
         - alias: C_U_leader_follower_no_opt_fills
           subcomponents: 
           - name: IntersectionLF
@@ -92,8 +130,24 @@ modelscript_components:
             actions:
             - name: gen
             - name: count_ref
+
+        # Skipping.skip_leader, C_C_bidirectional_no_opt_fills
+        - alias: C_C_bidirectional_no_opt_fills
+          subcomponents: 
+          - name: IntersectionBD
+            actions:
+            - name: intersect
+          - name: SinglePgenLeader
+            actions:
+            - name: gen
+          - name: SinglePgenFollower
+            actions:
+            - name: gated_gen
+
       - name: skip_follower
         implementations:
+
+        # Skipping.skip_follower, C_U_leader_follower_yes_opt_fills
         - alias: C_U_leader_follower_yes_opt_fills
           subcomponents: 
           - name: IntersectionLF
@@ -109,6 +163,8 @@ modelscript_components:
           - name: FillOptimizerLeader
             actions:
             - name: allow
+
+        # Skipping.skip_follower, C_U_leader_follower_no_opt_fills
         - alias: C_U_leader_follower_no_opt_fills
           subcomponents: 
           - name: IntersectionLF
@@ -117,6 +173,20 @@ modelscript_components:
           - name: SinglePgenFollower
             actions:
             - name: gated_gen
+
+        # Skipping.skip_follower, C_C_bidirectional_no_opt_fills
+        - alias: C_C_bidirectional_no_opt_fills
+          subcomponents: 
+          - name: IntersectionBD
+            actions:
+            - name: intersect
+          - name: SinglePgenLeader
+            actions:
+            - name: gated_gen
+          - name: SinglePgenFollower
+            actions:
+            - name: gen
+
     implementations:
       - name: C_U_leader_follower_yes_opt_fills
         taxonomic_instance_alias: C_U_leader_follower_yes_opt_fills
@@ -144,16 +214,16 @@ modelscript_components:
             - name: skip_follower
               energy: 0
           area: 0
-      # - name: LFNF
-      #   taxonomic_instance_alias: LFNF
-      #   objective:
-      #     actions:
-      #       - name: fill_leader
-      #         energy: 0
-      #       - name: fill_follower
-      #         energy: 0
-      #       - name: skip_leader
-      #         energy: 0
-      #       - name: skip_follower
-      #         energy: 0
-      #     area: 0
+      - name: C_C_bidirectional_no_opt_fills
+        taxonomic_instance_alias: C_C_bidirectional_no_opt_fills
+        objective:
+          actions:
+            - name: fill_leader
+              energy: 0
+            - name: fill_follower
+              energy: 0
+            - name: skip_leader
+              energy: 0
+            - name: skip_follower
+              energy: 0
+          area: 0

@@ -1,0 +1,200 @@
+modelscript_version: 0.1
+modelscript_primitives:
+  - name: IntersectionBidirectionalModel
+    from_taxonomic_primitive: IntersectionBidirectional
+    export_attributes_to_model: true
+    instance_aliases:
+    - alias: C_C_two_finger_merge
+      instances:
+      - C_C_two_finger_merge
+    scale_parameters:
+      - name: clock
+        type: real
+        export_as_model_attribute: true
+        inherit: true
+      - name: technology
+        type: string
+        export_as_model_attribute: true
+        inherit: true
+    load_symbols:
+
+      - port: md_in0
+        symbol_types:
+        - type: level
+          load_tensors:
+          - load_tensor: datatype
+            load_ranks:
+            - load_rank: metadata_word_width
+          - load_tensor: coordinate
+            load_ranks:
+            - load_rank: dense_data_rank_size
+            - load_rank: nodes_per_cycle
+          - load_tensor: position
+            load_ranks:
+            - load_rank: positions_per_cycle
+          - load_tensor: bandwidth
+            load_ranks:
+            - load_rank: metadata_read_width
+        - type: peak
+          load_tensors:
+          - load_tensor: datatype
+            load_ranks:
+            - load_rank: metadata_word_width
+          - load_tensor: bandwidth
+            load_ranks:
+            - load_rank: metadata_read_width
+
+      - port: md_in1
+        symbol_types:
+        - type: level
+          load_tensors:
+          - load_tensor: datatype
+            load_ranks:
+            - load_rank: metadata_word_width
+          - load_tensor: coordinate
+            load_ranks:
+            - load_rank: dense_data_rank_size
+            - load_rank: nodes_per_cycle
+          - load_tensor: position
+            load_ranks:
+            - load_rank: positions_per_cycle
+          - load_tensor: bandwidth
+            load_ranks:
+            - load_rank: metadata_read_width
+        - type: peak
+          load_tensors:
+          - load_tensor: datatype
+            load_ranks:
+            - load_rank: metadata_word_width
+          - load_tensor: bandwidth
+            load_ranks:
+            - load_rank: metadata_read_width
+
+      - port: md_out
+        symbol_types:
+        - type: level
+          load_tensors:
+          - load_tensor: datatype
+            load_ranks:
+            - load_rank: metadata_word_width
+          - load_tensor: coordinate
+            load_ranks:
+            - load_rank: dense_data_rank_size
+            - load_rank: nodes_per_cycle
+          - load_tensor: position
+            load_ranks:
+            - load_rank: positions_per_cycle
+          - load_tensor: bandwidth
+            load_ranks:
+            - load_rank: metadata_read_width
+        - type: peak
+          load_tensors:
+          - load_tensor: datatype
+            load_ranks:
+            - load_rank: metadata_word_width
+          - load_tensor: bandwidth
+            load_ranks:
+            - load_rank: metadata_read_width
+
+    actions:
+      - name: fill
+      - name: intersect
+      - name: gated_fill
+      - name: gated_intersect
+
+    characterization_metric_models:
+      - name: two_fingered_intersection
+        # C_C_two_finger_merge intersection unit is an ExTensor-like radix-two-merge-based intersection unit
+        approximation: poly
+        table_id: accelergy/data/primitives_table.csv
+        rtl_id_expression: VectorTwoFingerMergeIntersectionRegistered_metaDataWidth${u}_arraySize${v}
+        symbol_map:
+          # RTL scale parameter -> primitive scale parameter mappings.
+          # Note: additional custom constraints (provided further below)
+          # will transitively map metaDataWidth and arraySize to md_in1
+          # and md_out as well
+          - variable: u
+            # Metadata input 0 word width max (md_in0_ww_thresh) maps to intersection_unit.metaDataWidth
+            symbol: md_in0.peak.datatype.metadata_word_width
+          - variable: v
+            # Metadata input 0 read bandwidth max (md_in0_rw_thresh) maps to intersection_unit.arraySize
+            symbol: md_in0.peak.bandwidth.metadata_read_width
+        latency:
+          # Critical path length complies with clock latency
+          parameter_id: clock
+          single_latency: true
+          latency_column_name: critical_path_clock_latency
+        energy:
+            # Convert characterized total power to energy, assuming the component is un-gated
+            # for a duration equal to its critical path length (worst-case)
+          - expression: combinational_total_power+register_total_power+clock_network_total_power
+            type: power
+        area:
+          - expression: Combinational_Area+Noncombinational_Area
+            type: area
+        # Generate constraints on md_in0_ww_thresh, md_in0_rw_thresh to match RTL scale parameters
+        generate_constraints: true
+
+    implementations:
+      - name: C_C_two_finger_merge
+        taxonomic_instance_alias: C_C_two_finger_merge
+        objective:
+          actions:
+            # Heuristically, I am dividing the power consumption between the operand 0 fills and the
+            # operand 1 fills. Ever intersection entails a fill of both operands i.e. two fills, which will have a total
+            # energy of ( %(two_fingered_intersection) )
+            - name: fill
+              energy: ( %(two_fingered_intersection) ) / 2.0
+            - name: intersect
+              energy: 0 # No need to model the intersection as consuming any energy, but keep this anyway
+            - name: gated_fill
+              energy: 0
+            - name: gated_intersect
+              energy: 0
+          area: ( %(two_fingered_intersection) )
+        constraints:
+          - type: characterization_metrics_model
+            list:
+            # Import ref_counter constraints on md_in_ref_ww
+            - two_fingered_intersection
+          - type: custom
+            list:
+              # Transitively map RTL metaDataWidth to all ports' metadata_word_width scale parameters
+              # (the mapping to md_in0 was already accomplished when the RTL model was imported further above)
+              - ( @md_in1_ww_thresh ) = ( @md_in0_ww_thresh )
+              - ( @md_out_ww_thresh ) = ( @md_in0_ww_thresh )
+              # Transitively map RTL arraySize to all ports' metadata_read_width scale parameters
+              # (the mapping to md_in0 was already accomplished when the RTL model was imported further above)
+              - ( @md_in1_rw_thresh ) = ( @md_in0_rw_thresh )
+              - ( @md_out_rw_thresh ) = ( @md_in0_rw_thresh )
+              # At all ports, interface bandwidth (converted from bits/cyc to word/cyc) scale param. must meet or exceed throughput (words/cyc) load
+              - ( @md_in0_rw_thresh ) >= ( @md_in0_pr ) * ( @md_in0_ww_thresh )
+              - ( @md_in1_rw_thresh ) >= ( @md_in1_pr ) * ( @md_in1_ww_thresh )
+              - ( @md_out_rw_thresh ) >= ( @md_out_pr ) * ( @md_out_ww_thresh )
+              # Transfer relation (load): intersection vectorization scale parameters must be sufficient to source the required output 
+              # throughput load, given the operand sparsities (ratio of operand positional throughput load to operand coordinate throughput load.)
+              # This is derived from an analytical model of the relationship between input throughput, output throughput, vectorization and sparsity
+              # for a two-fingered merge. Specifically:
+              #
+              # md_out throughput <= (operand 0 sparsity)*(intersection unit vectorization at input 1)
+              # md_out throughput <= (operand 1 sparsity)*(intersection unit vectorization at input 0)
+              #
+              # Note: these constraints implicitly enforce an additional requirement, that the vectorization of both inputs must be greater
+              # than or equal to the throughput requirement at the output, because the number of intersections discovered per cycle can never
+              # exceed the degree of vectorization: for example, intersecting two length-4 vectors, you will never get more than 4 intersections
+              # per cycle at the output.
+              #
+              - ( @md_out_pr ) * ( @md_in0_cr ) * ( md_in1_ww_thresh ) <= ( @md_in0_pr ) * ( @md_in1_rw_thresh )
+              - ( @md_out_pr ) * ( @md_in1_cr ) * ( md_in0_ww_thresh ) <= ( @md_in1_pr ) * ( @md_in0_rw_thresh )
+
+          - type: passthrough
+            list:
+              - port_in: md_in0
+                port_out: md_out
+                suffixes:
+                  # Additional transfer relations: md_in0 -> md_out passthru relations
+                  # These quantities are necessarily the same at md_in0, md_in1,
+                  # so we only need to enforce md_in0 -> md_out
+                  - level.coordinate.dense_data_rank_size # md_in0_nc = md_out_nc
+                  - level.datatype.metadata_word_width # md_in0_ww = md_out_ww
+                  - level.coordinate.nodes_per_cycle # md_in0_cr = md_out_cr
