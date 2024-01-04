@@ -336,8 +336,4 @@ def extract_dtypes(sparseopts,user_attributes):
                 recurse(item, in_dataspace=in_dataspace, in_action_optimization=in_action_optimization)
 
     recurse(sparseopts)
-    return list(targets)
-
-#'''SAFmodel parsing routines'''
-#def get_buffer_bandwidth_info(arch):
-#    flat_arch = flatten_arch_wrapper(arch)
+    return sorted(list(targets))

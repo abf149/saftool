@@ -6,6 +6,7 @@ import core.bind_support.action as ac_, \
 from core.helper import info,warn,error
 
 def compute_fixed_arch_bindings(arch,sparseopts,user_attributes={}):
+
     skip_bindings=[]
     dtype_list=extract_dtypes(sparseopts,user_attributes)
 
