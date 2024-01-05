@@ -176,7 +176,7 @@ modelscript_primitives:
               - ( @pos_out_pw ) == ( @md_in_ww )
               # By default, @md_in_ref_ww_thresh >= @md_in_ref_ww in order for the registered adder to have enough bits.
               # Override this with another inequality which enforces strictly-greater-than
-              - ( @md_in_ref_ww_thresh ) > ( @md_in_ref_ww )
+              - ( @md_in_ref_ww_thresh ) >= ( @md_in_ref_ww ) + 1
               # Require output bandwidth (in bits by default) >= output throughput, converted to bits
               - ( @pos_out_rw ) >= ( @pos_out_pr ) * ( @pos_out_pw )
           - type: values

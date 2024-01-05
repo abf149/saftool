@@ -102,11 +102,13 @@ def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,f
     # Process constraints
     for jdx,constraint in enumerate(final_constraints):
         # If the constraint is a regular inequality/equality:
+        #print(constraint)
         if 'in(' not in constraint and '|' not in constraint and '&' not in constraint:
             # Transform the constraint with the new variable names
             for original in sorted_symbols:
                 mapped = variable_mapping[original]
                 constraint = constraint.replace(original, f"model.{mapped}")
+            #print("-",constraint)
             constr_expr = eval(constraint)
             setattr(model, f'constr_{str(jdx)}', Constraint(expr=constr_expr))
 

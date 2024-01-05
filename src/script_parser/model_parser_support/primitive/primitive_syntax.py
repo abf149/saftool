@@ -438,8 +438,14 @@ def parse_passthrough_constraint(passthru_constraint):
     '''
     constraints_list=[]
     suffix_list=passthru_constraint['suffixes']
-    port_in=passthru_constraint['port_in']
-    port_out=passthru_constraint['port_out']
+
+    uri_placeholder="@"
+
+    port_in=uri_placeholder + passthru_constraint['port_in']
+    port_out=uri_placeholder + passthru_constraint['port_out']
+
+
+
     for suffix_sym in suffix_list:
         suffix_sym_dict=kw_.parse_symbol(suffix_sym)
         constraints_list.append(

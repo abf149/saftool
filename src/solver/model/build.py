@@ -114,6 +114,14 @@ def build_scale_inference_problem(taxo_uarch,arch,fmt_iface_bindings,dtype_list,
 
     problem_as_system=build2_system_of_relations(problem_as_graph,user_attributes,fmt_iface_bindings,dtype_list)
 
+    '''
+    simplified_system=copy.deepcopy(problem_as_system)
+
+    simplified_system['simplified_symbols'] = copy.deepcopy(simplified_system['symbols'])
+    simplified_system['simplified_symbol_types'] = copy.deepcopy(simplified_system['symbol_types'])
+    simplified_system['simplified_constraints'] = copy.deepcopy(simplified_system['constraints'])
+    '''
+
     simplified_system=build3_simplify_system(problem_as_system)
 
     simplified_system['user_attributes']=user_attributes

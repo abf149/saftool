@@ -8,6 +8,7 @@ def build3_simplify_system(problem_as_system):
     info("-- Simplifying...")
 
     symbols=problem_as_system["symbols"]
+
     symbol_types=problem_as_system["symbol_types"]
     constraints=problem_as_system["constraints"]
     yields=problem_as_system["yields"]
@@ -37,27 +38,41 @@ def build3_simplify_system(problem_as_system):
     # Convert the modified constraints into Sympy expressions.
     sympy_constraints = [convert_to_sympy_expr(c, sympy_symbols) for c in modified_constraints]
 
+    # OPEN ELIDE
+
     # Extract and use the equality constraints to substitute and reduce the number of symbols.
-    equalities = [c for c in sympy_constraints if isinstance(c, sp.Eq)]
-    others = [c for c in sympy_constraints if not isinstance(c, sp.Eq)]
+    # equalities = [c for c in sympy_constraints if isinstance(c, sp.Eq)]
+    # others = [c for c in sympy_constraints if not isinstance(c, sp.Eq)]
 
-    substitutions = {}
-    for eq in equalities:
-        substitutions[eq.lhs] = eq.rhs
+    # substitutions = {}
+    # for eq in equalities:
+    #     substitutions[eq.lhs] = eq.rhs
 
-    simplified_constraints = []
-    for c in others:
-        if isinstance(c, (sp.Expr, sp.Basic)):  # Ensure c is a sympy object
-            simplified_constraints.append(c.subs(substitutions))
-        else:
-            print(f"Unexpected non-sympy object: {c} of type {type(c)}")
+    # simplified_constraints = []
+    # for c in others:
+    #     if isinstance(c, (sp.Expr, sp.Basic)):  # Ensure c is a sympy object
+    #         simplified_constraints.append(c.subs(substitutions))
+    #     else:
+    #         print(f"Unexpected non-sympy object: {c} of type {type(c)}")
+    # CLOSE ELIDE
+
+    simplified_constraints = sympy_constraints
 
     # Generate a simplified list of constraints.
-    simplified_strings = [sp.sstr(c) for c in simplified_constraints]
+    # ELIDE
+    #simplified_strings = [sp.sstr(c) for c in simplified_constraints]
+    simplified_strings = [str(c) for c in simplified_constraints]
 
     # Convert double-underscores back to periods
-    final_constraints = [cc_.adjust_set_membership_syntax(cc_.recover_unsafe_symbol(s)) \
-                            for s in simplified_strings]
+    final_constraints=[]
+    for s in simplified_strings:
+        temp_s = sp.sympify(s)
+        if isinstance(temp_s, sp.Eq):
+            converted_str = f"{temp_s.lhs} == {temp_s.rhs}"
+            warn("-- Converted",str(s),"to",converted_str)
+            final_constraints.append(cc_.adjust_set_membership_syntax(cc_.recover_unsafe_symbol(converted_str)))
+        else:
+            final_constraints.append(cc_.adjust_set_membership_syntax(cc_.recover_unsafe_symbol(s)))
 
     simplified_strings_no_bool=[simplified_strings[idx] \
                                         for idx,c in enumerate(final_constraints)  \
@@ -67,198 +82,250 @@ def build3_simplify_system(problem_as_system):
     assert(len(simplified_strings_no_bool)==len(final_constraints))
 
     # Remove duplicate constraints
+
+    # OPEN ELIDE
+
+    # simplified_strings_no_bools_no_repeats=[]
+    # new_final_constraints=[]
+    # for c,safe_c in zip(final_constraints,simplified_strings_no_bool):
+    #     if c not in new_final_constraints:
+    #         simplified_strings_no_bools_no_repeats.append(safe_c)
+    #         new_final_constraints.append(c)
     
-    simplified_strings_no_bools_no_repeats=[]
-    new_final_constraints=[]
-    for c,safe_c in zip(final_constraints,simplified_strings_no_bool):
-        if c not in new_final_constraints:
-            simplified_strings_no_bools_no_repeats.append(safe_c)
-            new_final_constraints.append(c)
-    
-    final_constraints=new_final_constraints
-    #final_constraints = list(set(final_constraints))
+    # final_constraints=new_final_constraints
 
-    # First-pass: compute a mapping from symbols to lists of indices of constraints containing those symbols
-    # (considering all of the simplified constraints)
-    constraint_syms=[]
-    constraint_non_yield_syms=[]
-    sym_to_const_idxs={}
-    new_simplified_constraints=[]
-    for idx,_ in enumerate(final_constraints):
-        #if "in" not in c_unsafe and (not("And(" in c_unsafe or "Or(" in c_unsafe)):
-        c_safe=simplified_strings_no_bools_no_repeats[idx]
-        #c_safe=revert_set_membership_syntax(create_safe_constraint(c_unsafe))
-        s_exp=convert_to_sympy_expr(c_safe, sympy_symbols) 
-        new_simplified_constraints.append(s_exp)
-        syms=s_exp.atoms(sp.Symbol)
+    # CLOSE ELIDE
+
+    # OPEN ELIDE
+
+    # #final_constraints = list(set(final_constraints))
+
+    # # First-pass: compute a mapping from symbols to lists of indices of constraints containing those symbols
+    # # (considering all of the simplified constraints)
+    # constraint_syms=[]
+    # constraint_non_yield_syms=[]
+    # sym_to_const_idxs={}
+    # new_simplified_constraints=[]
+    # for idx,_ in enumerate(final_constraints):
+    #     #if "in" not in c_unsafe and (not("And(" in c_unsafe or "Or(" in c_unsafe)):
+    #     c_safe=simplified_strings_no_bools_no_repeats[idx]
+    #     #c_safe=revert_set_membership_syntax(create_safe_constraint(c_unsafe))
+    #     s_exp=convert_to_sympy_expr(c_safe, sympy_symbols) 
+    #     new_simplified_constraints.append(s_exp)
+    #     syms=s_exp.atoms(sp.Symbol)
         
-        sym_name_list=[]
-        non_yield_sym_name_list=[]
-        non_yield_sym_count=0
-        for sym in syms:
-            sym_name=str(sym)
-            sym_name_list.append(sym_name)
-            if cc_.create_safe_symbol(sym_name) not in flat_yields:
-                non_yield_sym_name_list.append(sym_name)
-                non_yield_sym_count+=1
-                if sym_name not in sym_to_const_idxs:
-                    sym_to_const_idxs[sym_name]=[idx]
-                else:
-                    sym_to_const_idxs[sym_name].append(idx)
+    #     sym_name_list=[]
+    #     non_yield_sym_name_list=[]
+    #     non_yield_sym_count=0
+    #     for sym in syms:
+    #         sym_name=str(sym)
+    #         sym_name_list.append(sym_name)
+    #         if cc_.create_safe_symbol(sym_name) not in flat_yields:
+    #             non_yield_sym_name_list.append(sym_name)
+    #             non_yield_sym_count+=1
+    #             if sym_name not in sym_to_const_idxs:
+    #                 sym_to_const_idxs[sym_name]=[idx]
+    #             else:
+    #                 sym_to_const_idxs[sym_name].append(idx)
 
-        constraint_syms.append(sym_name_list)
-        constraint_non_yield_syms.append(non_yield_sym_name_list)
+    #     constraint_syms.append(sym_name_list)
+    #     constraint_non_yield_syms.append(non_yield_sym_name_list)
 
-    # Second-pass: remove a constraint if it is the only constraint which utilizes a particular non-yield symbol
-    discarded_constraints=[]
-    for non_yield_sym_name in sym_to_const_idxs:
-        const_idx_list=sym_to_const_idxs[non_yield_sym_name]
-        if len(const_idx_list)==1:
-            const_idx=const_idx_list[0]
-            const=final_constraints[const_idx]
-            if const is not None:
-                discarded_constraints.append(final_constraints[const_idx])
-                final_constraints[const_idx]=None
+    # # Second-pass: remove a constraint if it is the only constraint which utilizes a particular non-yield symbol
+    # discarded_constraints=[]
+    # for non_yield_sym_name in sym_to_const_idxs:
+    #     const_idx_list=sym_to_const_idxs[non_yield_sym_name]
+    #     if len(const_idx_list)==1:
+    #         const_idx=const_idx_list[0]
+    #         const=final_constraints[const_idx]
+    #         if const is not None:
+    #             discarded_constraints.append(final_constraints[const_idx])
+    #             final_constraints[const_idx]=None
 
-    # Third-pass: 
-    lb_dict={}
-    for non_yield_sym_name in sym_to_const_idxs:
+    # # Third-pass: 
+    # lb_dict={}
+    # for non_yield_sym_name in sym_to_const_idxs:
 
-        const_idx_list=sym_to_const_idxs[non_yield_sym_name]
-        if len(const_idx_list)>=1:
-            add_lb_const=False
-            lb_val=-1
-            lb_idxs=[]
+    #     const_idx_list=sym_to_const_idxs[non_yield_sym_name]
+    #     if len(const_idx_list)>=1:
+    #         add_lb_const=False
+    #         lb_val=-1
+    #         lb_idxs=[]
 
-            yield_sym_ub_set=set()
-            yield_sym_lb_set=set()
-            non_yield_sym_ub_set=set()
-            non_yield_sym_lb_set=set()
+    #         yield_sym_ub_set=set()
+    #         yield_sym_lb_set=set()
+    #         non_yield_sym_ub_set=set()
+    #         non_yield_sym_lb_set=set()
 
-            if all([(new_simplified_constraints[idx] is None) or \
-                    (new_simplified_constraints[idx].is_Relational and \
-                    ("/" not in str(new_simplified_constraints[idx])) and \
-                        (("-" not in str(new_simplified_constraints[idx])) \
-                         or \
-                         ("e-" == str(new_simplified_constraints[idx])[(str(new_simplified_constraints[idx]).index("-")-1):][0:2])))
-                            for idx in const_idx_list]):
+    #         if all([(new_simplified_constraints[idx] is None) or \
+    #                 (new_simplified_constraints[idx].is_Relational and \
+    #                 ("/" not in str(new_simplified_constraints[idx])) and \
+    #                     (("-" not in str(new_simplified_constraints[idx])) \
+    #                      or \
+    #                      ("e-" == str(new_simplified_constraints[idx])[(str(new_simplified_constraints[idx]).index("-")-1):][0:2])))
+    #                         for idx in const_idx_list]):
 
-                for idx in const_idx_list:
-                    const_=new_simplified_constraints[idx]
-                    if const_ is not None:
-                        # Skip constraints which are None
-                        #syms=new_simplified_constraints[idx].atoms(sp.Symbol)
-                        lhs_=const_.lhs
-                        rhs_=const_.rhs
-                        lhs_syms=lhs_.atoms(sp.Symbol)
-                        rhs_syms=rhs_.atoms(sp.Symbol)
-                        oper=""
-                        if "<=" in str(const_):
-                            oper="<="
-                        elif "<" in str(const_):
-                            oper="<"
-                        elif ">=" in str(const_):
-                            oper=">="
-                        elif ">" in str(const_):
-                            oper=">"
-                        else:
-                            assert(False)
+    #             for idx in const_idx_list:
+    #                 const_=new_simplified_constraints[idx]
+    #                 if const_ is not None:
+    #                     # Skip constraints which are None
+    #                     #syms=new_simplified_constraints[idx].atoms(sp.Symbol)
+    #                     lhs_=const_.lhs
+    #                     rhs_=const_.rhs
+    #                     lhs_syms=lhs_.atoms(sp.Symbol)
+    #                     rhs_syms=rhs_.atoms(sp.Symbol)
+    #                     oper=""
+    #                     if "<=" in str(const_):
+    #                         oper="<="
+    #                     elif "<" in str(const_):
+    #                         oper="<"
+    #                     elif ">=" in str(const_):
+    #                         oper=">="
+    #                     elif ">" in str(const_):
+    #                         oper=">"
+    #                     else:
+    #                         assert(False)
 
-                        for s in rhs_syms:
-                            s_unsafe_str=cc_.recover_unsafe_symbol(str(s))
-                            if oper=="<=" or oper=="<":
-                                if s_unsafe_str in flat_yields:
-                                    yield_sym_ub_set.add(s)
-                                else:
-                                    if len(lhs_syms)==0:
-                                        # <float> < x or <float> <= x
-                                        add_lb_const=True
-                                        lb_val=max(lb_val,float(lhs_))
-                                        lb_idxs.append(idx)
-                                    else:
-                                        non_yield_sym_ub_set.add(s)
-                            else: #">=" or ">"
-                                if s_unsafe_str in flat_yields:
-                                    yield_sym_lb_set.add(s)
-                                else:
-                                    non_yield_sym_lb_set.add(s)                            
+    #                     for s in rhs_syms:
+    #                         s_unsafe_str=cc_.recover_unsafe_symbol(str(s))
+    #                         if oper=="<=" or oper=="<":
+    #                             if s_unsafe_str in flat_yields:
+    #                                 yield_sym_ub_set.add(s)
+    #                             else:
+    #                                 if len(lhs_syms)==0:
+    #                                     # <float> < x or <float> <= x
+    #                                     add_lb_const=True
+    #                                     lb_val=max(lb_val,float(lhs_))
+    #                                     lb_idxs.append(idx)
+    #                                 else:
+    #                                     non_yield_sym_ub_set.add(s)
+    #                         else: #">=" or ">"
+    #                             if s_unsafe_str in flat_yields:
+    #                                 yield_sym_lb_set.add(s)
+    #                             else:
+    #                                 non_yield_sym_lb_set.add(s)                            
 
-                        for s in lhs_syms:
-                            s_unsafe_str=cc_.recover_unsafe_symbol(str(s))
-                            if oper=="<=" or oper=="<":
-                                if s_unsafe_str in flat_yields:
-                                    yield_sym_lb_set.add(s)
-                                else:
-                                    non_yield_sym_lb_set.add(s)
-                            else: #">=" or ">"
-                                if s_unsafe_str in flat_yields:
-                                    yield_sym_ub_set.add(s)
-                                else:
-                                    if len(rhs_syms)==0:
-                                        # x > <float> or x >= <float>
-                                        add_lb_const=True
-                                        lb_val=max(lb_val,float(rhs_))
-                                        lb_idxs.append(idx)
-                                    else:
-                                        non_yield_sym_ub_set.add(s)                          
+    #                     for s in lhs_syms:
+    #                         s_unsafe_str=cc_.recover_unsafe_symbol(str(s))
+    #                         if oper=="<=" or oper=="<":
+    #                             if s_unsafe_str in flat_yields:
+    #                                 yield_sym_lb_set.add(s)
+    #                             else:
+    #                                 non_yield_sym_lb_set.add(s)
+    #                         else: #">=" or ">"
+    #                             if s_unsafe_str in flat_yields:
+    #                                 yield_sym_ub_set.add(s)
+    #                             else:
+    #                                 if len(rhs_syms)==0:
+    #                                     # x > <float> or x >= <float>
+    #                                     add_lb_const=True
+    #                                     lb_val=max(lb_val,float(rhs_))
+    #                                     lb_idxs.append(idx)
+    #                                 else:
+    #                                     non_yield_sym_ub_set.add(s)                          
 
-            n_y_lb=len(non_yield_sym_lb_set)
-            n_y_ub=len(non_yield_sym_ub_set)
-            y_lb=len(yield_sym_lb_set)
-            y_ub=len(yield_sym_ub_set)
+    #         n_y_lb=len(non_yield_sym_lb_set)
+    #         n_y_ub=len(non_yield_sym_ub_set)
+    #         y_lb=len(yield_sym_lb_set)
+    #         y_ub=len(yield_sym_ub_set)
         
-            if (n_y_lb==1 and n_y_ub==0 and y_lb==0) or \
-                    (n_y_lb==0 and n_y_ub==1 and y_ub==0):
-                # Eliminate all constraints associated with a non-yield symbol if
-                # - The non-yield symbol is not part of a non-relation expression
-                # - AND The non-yield symbol is not part of an expression with division or negation
-                # - AND It is the only non-yield symbol in all of the relations it is part of
-                # - AND one of the following is true: non-yield symbol is ALWAYS just one of gt, gte, lt, or lte
-                # - AND if non-yield symbol is {gt or gte,lt or lte} then yield symbol(s) are {lt or lte,gt or gte}
-                #
-                # In which case, delete all relations associated with the non-yield symbol
-                if add_lb_const:
-                    # But! there happens to be a lower-bound expression for the non-yield symbol
-                    # under consideration.
-                    for idx in lb_idxs:
-                        # Discard <float> < x or <float> <= x or x > <float> or x >= <float>
-                        discarded_constraints.append(final_constraints[idx])
-                        final_constraints[idx]=None
-                        new_simplified_constraints[idx]=None
+    #         if (n_y_lb==1 and n_y_ub==0 and y_lb==0) or \
+    #                 (n_y_lb==0 and n_y_ub==1 and y_ub==0):
+    #             # Eliminate all constraints associated with a non-yield symbol if
+    #             # - The non-yield symbol is not part of a non-relation expression
+    #             # - AND The non-yield symbol is not part of an expression with division or negation
+    #             # - AND It is the only non-yield symbol in all of the relations it is part of
+    #             # - AND one of the following is true: non-yield symbol is ALWAYS just one of gt, gte, lt, or lte
+    #             # - AND if non-yield symbol is {gt or gte,lt or lte} then yield symbol(s) are {lt or lte,gt or gte}
+    #             #
+    #             # In which case, delete all relations associated with the non-yield symbol
+    #             if add_lb_const:
+    #                 # But! there happens to be a lower-bound expression for the non-yield symbol
+    #                 # under consideration.
+    #                 for idx in lb_idxs:
+    #                     # Discard <float> < x or <float> <= x or x > <float> or x >= <float>
+    #                     discarded_constraints.append(final_constraints[idx])
+    #                     final_constraints[idx]=None
+    #                     new_simplified_constraints[idx]=None
 
-                    # Save the lower-bound value to be substituted later
-                    lb_dict[non_yield_sym_name]=lb_val
-                else:
-                    # Non lower-bound expression
-                    for idx in const_idx_list:
-                        discarded_constraints.append(final_constraints[idx])
-                        final_constraints[idx]=None
-                        new_simplified_constraints[idx]=None
+    #                 # Save the lower-bound value to be substituted later
+    #                 lb_dict[non_yield_sym_name]=lb_val
+    #             else:
+    #                 # Non lower-bound expression
+    #                 for idx in const_idx_list:
+    #                     discarded_constraints.append(final_constraints[idx])
+    #                     final_constraints[idx]=None
+    #                     new_simplified_constraints[idx]=None
 
-    # Substitute any lower-bounds discovered above
-    for idx,c_sympy in enumerate(new_simplified_constraints):
-        c=final_constraints[idx]
-        if (c_sympy is not None) and (c is not None) and c_sympy.is_Relational:
-            new_c_sympy=c_sympy.subs(lb_dict)
-            new_c=cc_.adjust_set_membership_syntax(cc_.recover_unsafe_symbol(str(new_c_sympy)))
-            new_simplified_constraints[idx]=new_c_sympy
-            final_constraints[idx]=new_c
+    # # Substitute any lower-bounds discovered above
+    # for idx,c_sympy in enumerate(new_simplified_constraints):
+    #     c=final_constraints[idx]
+    #     if (c_sympy is not None) and (c is not None) and c_sympy.is_Relational:
+    #         new_c_sympy=c_sympy.subs(lb_dict)
+    #         new_c=cc_.adjust_set_membership_syntax(cc_.recover_unsafe_symbol(str(new_c_sympy)))
+    #         new_simplified_constraints[idx]=new_c_sympy
+    #         final_constraints[idx]=new_c
 
-    # Finally
-    new_simplified_constraints=[new_simplified_constraints[idx] \
-                                    for idx,c in enumerate(final_constraints) \
-                                        if (c is not None) and (c != 'True')]
+    # # Finally
+    # new_simplified_constraints=[new_simplified_constraints[idx] \
+    #                                 for idx,c in enumerate(final_constraints) \
+    #                                     if (c is not None) and (c != 'True')]
     final_constraints=[c for c in final_constraints if (c is not None) and (c != 'True')]
 
+
+
+    # CLOSE ELIDE
+
     assert(len([c for c in final_constraints if c == 'False'])==0)
-    assert(len(new_simplified_constraints)==len(final_constraints))
+
+    # ELIDE assert(len(new_simplified_constraints)==len(final_constraints))
 
     #assert(False)
 
     # Determine which symbols from the original list are present in the final constraints
-    final_sympy_symbols_set = set()
-    for c in new_simplified_constraints:
-        final_sympy_symbols_set.update({str(sym) for sym in c.atoms(sp.Symbol)})
+
+
+    # OPEN ELIDE
+    final_sympy_symbols_set = set([cc_.create_safe_symbol(x) for x in symbols])
+
+    for x in final_sympy_symbols_set:
+        if len(x) < 2:
+            print(x)
+            assert(False)
+
+
+    for c in final_constraints: # WAS new_simplified_constraints
+        if "in(" in c:
+            set_in_sym = cc_.create_safe_symbol(c.split("in(")[1].split(",")[0])
+            final_sympy_symbols_set.add(set_in_sym)
+        else:
+
+            Eq_split=c.split("==")
+            c_maybe_Eq = c if "==" not in c else "Eq("+Eq_split[0]+","+Eq_split[1]+")"
+
+            c_sympy=sp.sympify(cc_.create_safe_constraint(c_maybe_Eq))
+            final_sympy_symbols_set.update({str(sym) for sym in c_sympy.atoms(sp.Symbol)})
+
+
+        for x in final_sympy_symbols_set:
+            if len(x) < 2:
+                print(x)
+                assert(False)
+
+    additional_symbols=final_sympy_symbols_set - set([cc_.create_safe_symbol(x) for x in symbols])
+
+    if len(additional_symbols) > 0:
+        warn("-- During simplification, detected the following additional symbols:")
+        info("\n\n",additional_symbols,also_stdout=True)
+
+    #print(len(symbols))
+    #print(len(final_sympy_symbols_set))
+
+    #[print(l) for l in final_sympy_symbols_set]
+
+    # CLOSE ELIDE
+        
+    #final_sympy_symbols_set = set(symbols)
 
     for y in flat_yields:
         final_sympy_symbols_set.update({cc_.create_safe_symbol(y),})
@@ -297,7 +364,8 @@ def build3_simplify_system(problem_as_system):
 
     assert(len(final_symbols)==len(final_symbol_types))
 
-    assert(len([s for s in final_symbols if ("_thresh" not in s) or (s not in flat_yields)])==0)
+    # ELIDE
+    #assert(len([s for s in final_symbols if ("_thresh" not in s) or (s not in flat_yields)])==0)
 
     warn("-- => done simplifying.")
     warn("-- SIMPLIFY RESULTS:")
@@ -329,12 +397,16 @@ def build3_simplify_system(problem_as_system):
         '  ',''.join('%s\n' % cnst for cnst in final_constraints), \
         '  ------------------\n')
 
-    non_none_discards=[cnst for cnst in discarded_constraints if cnst is not None]
-    info("  Discarded constraints (",len(non_none_discards),")")
-    info('\n', \
-        '  ------------------\n', \
-        '  ',''.join('%s\n' % cnst for cnst in non_none_discards), \
-        '  ------------------\n')
+    # OPEN ELIDE
+
+    # non_none_discards=[cnst for cnst in discarded_constraints if cnst is not None]
+    # info("  Discarded constraints (",len(non_none_discards),")")
+    # info('\n', \
+    #     '  ------------------\n', \
+    #     '  ',''.join('%s\n' % cnst for cnst in non_none_discards), \
+    #     '  ------------------\n')
+
+    # CLOSE ELIDE
 
     warn("- => done, build phase 3.")
 

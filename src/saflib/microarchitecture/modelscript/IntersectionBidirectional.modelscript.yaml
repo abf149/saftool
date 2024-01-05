@@ -184,8 +184,8 @@ modelscript_primitives:
               # exceed the degree of vectorization: for example, intersecting two length-4 vectors, you will never get more than 4 intersections
               # per cycle at the output.
               #
-              - ( @md_out_pr ) * ( @md_in0_cr ) * ( md_in1_ww_thresh ) <= ( @md_in0_pr ) * ( @md_in1_rw_thresh )
-              - ( @md_out_pr ) * ( @md_in1_cr ) * ( md_in0_ww_thresh ) <= ( @md_in1_pr ) * ( @md_in0_rw_thresh )
+              - ( @md_out_pr ) * ( @md_in0_cr ) * ( @md_in1_ww_thresh ) <= ( @md_in0_pr ) * ( @md_in1_rw_thresh )
+              - ( @md_out_pr ) * ( @md_in1_cr ) * ( @md_in0_ww_thresh ) <= ( @md_in1_pr ) * ( @md_in0_rw_thresh )
 
           - type: passthrough
             list:
