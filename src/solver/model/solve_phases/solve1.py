@@ -165,6 +165,11 @@ def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,f
     #obj_expr=sum(getattr(model, variable_mapping[sym]) for sym in final_symbols)
     model.obj = Objective(expr=obj_expr, sense=minimize)
 
+    for constraint in model.component_objects(Constraint, active=True):
+        constraint_object = getattr(model, constraint.name)
+        for index in constraint_object:
+            print(f"Constraint {constraint.name}[{index}]: {constraint_object[index].expr}")
+
     # Solve the model
     if solver_man=='neos':
         # Tier 1: filmint

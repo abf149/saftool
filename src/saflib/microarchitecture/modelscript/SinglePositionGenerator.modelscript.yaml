@@ -179,12 +179,12 @@ modelscript_primitives:
               - ( @md_in_ref_ww_thresh ) >= ( @md_in_ref_ww ) + 1
               # Require output bandwidth (in bits by default) >= output throughput, converted to bits
               - ( @pos_out_rw ) >= ( @pos_out_pr ) * ( @pos_out_pw )
-          - type: values
-            list:
-              - symbol: md_in_ref.peak.datatype.metadata_word_width #md_in_ref_ww_thresh possible values (transitively applies to adder bitwidth)
-                values:
-                  - 1
-                  - 2
-                  - 4
-                  - 8
-                  - 16
+          #- type: values
+          #  list:
+          #    - symbol: md_in_ref.peak.datatype.metadata_word_width #md_in_ref_ww_thresh possible values (transitively applies to adder bitwidth)
+          #      values:
+          #        - 1
+          #        - 2
+          #        - 4
+          #        - 8
+          #        - 16
