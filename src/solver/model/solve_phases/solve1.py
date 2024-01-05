@@ -165,33 +165,10 @@ def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,f
     #obj_expr=sum(getattr(model, variable_mapping[sym]) for sym in final_symbols)
     model.obj = Objective(expr=obj_expr, sense=minimize)
 
-    '''
     for constraint in model.component_objects(Constraint, active=True):
         constraint_object = getattr(model, constraint.name)
         for index in constraint_object:
             print(f"Constraint {constraint.name}[{index}]: {constraint_object[index].expr}")
-    '''
-
-    # Assuming variable_mapping is your existing dictionary from real names to encoded names
-    # Create a reverse mapping from encoded names to real names
-
-    # Assuming variable_mapping is your existing dictionary from real names to encoded names
-    # Create a reverse mapping from encoded names to real names
-    reverse_mapping = {v: k for k, v in variable_mapping.items()}
-
-    for constraint in model.component_objects(Constraint, active=True):
-        constraint_object = getattr(model, constraint.name)
-        for index in constraint_object:
-            # Get the string representation of the constraint expression
-            expr_str = str(constraint_object[index].expr)
-
-            # Replace encoded variable names with real names using regular expressions
-            for encoded_name, real_name in reverse_mapping.items():
-                expr_str = re.sub(r'\b' + re.escape(encoded_name) + r'\b', real_name, expr_str)
-
-            print(f"Constraint {constraint.name}[{index}]: {expr_str}")
-
-
 
     # Solve the model
     if solver_man=='neos':

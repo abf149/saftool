@@ -164,13 +164,13 @@ modelscript_primitives:
                   - 2
                   - 4
                   - 8
-              # - symbol: md_in.peak.datatype.metadata_word_width
-              #   values:
-              #     - 1
-              #     - 2
-              #     - 4
-              #     - 8
-              #     - 16
+              - symbol: md_in.peak.datatype.metadata_word_width
+                values:
+                  - 1
+                  - 2
+                  - 4
+                  - 8
+                  - 16
 
               # - symbol: at_bound_out.peak.bandwidth.metadata_read_width
               #   values:
@@ -228,10 +228,10 @@ modelscript_primitives:
                   - 2
                   - 4
                   - 8
-              # - symbol: md_in.peak.datatype.metadata_word_width
-              #   values:
-              #     - 1
-              #     - 2
-              #     - 4
-              #     - 8
-              #     - 16
+              - symbol: md_in.peak.datatype.metadata_word_width
+                values:
+                  - 1
+                  - 2
+                  - 4
+                  - 8
+                  - 16

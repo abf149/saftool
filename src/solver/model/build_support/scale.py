@@ -43,11 +43,7 @@ def get_global_positional_throughput(flat_arch,buffer_hierarchy,buffer_kept_data
 
         return data_storage_width/datawidth/len(buffer_kept_dataspace_by_buffer[buffer])
 
-    gpthrpt=1
-    if len([buff_thrpt(buffer,flat_arch,buffer_kept_dataspace_by_buffer) for buffer in ll_buffers]) >0:
-        gpthrpt=min([buff_thrpt(buffer,flat_arch,buffer_kept_dataspace_by_buffer) for buffer in ll_buffers])
-    else:
-        assert(False)
+    gpthrpt=min([buff_thrpt(buffer,flat_arch,buffer_kept_dataspace_by_buffer) for buffer in ll_buffers])
 
     return gpthrpt
 

@@ -14,7 +14,7 @@ architecture:
           data_storage_width: 64 
           datawidth: 8
           metadata_storage_depth: 16384
-          metadata_storage_width: 14
+          metadata_storage_width: 28
           read_bandwidth: 8
 
       subtree:                        # architecture level 0
@@ -29,7 +29,7 @@ architecture:
               datawidth: 8
               block_size: 1
               metadata_storage_depth: 256
-              metadata_storage_width: 14
+              metadata_storage_width: 28
               n_banks: 2
               metadata_n_banks: 2
               write_bandwidth: 2
