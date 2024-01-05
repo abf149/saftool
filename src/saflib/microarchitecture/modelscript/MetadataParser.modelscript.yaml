@@ -211,7 +211,6 @@ modelscript_primitives:
                 suffixes:
                   - level.coordinate.dense_data_rank_size
                   - level.coordinate.nodes_per_cycle
-                  - level.datatype.metadata_word_width
           - type: values
             list:
               - symbol: md_in.peak.bandwidth.metadata_read_width

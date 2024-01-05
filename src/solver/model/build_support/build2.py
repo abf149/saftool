@@ -65,6 +65,9 @@ def transitive_closure_dfs(port_list,net_list,out_port_net_dict,port_attr_dict,r
     transitive_closure_relns={"eq":[],"ineq":[]}
     port_visited=[False]*len(port_list)
 
+    print(reln_dict)
+    assert(False)
+
     for root_port in port_list:
         transitive_dfs_from_primitive_port(root_port,root_port,port_list,net_list,out_port_net_dict,port_attr_dict, \
                                            port_visited,transitive_closure_relns,reln_dict)
@@ -861,6 +864,18 @@ def build2_system_of_relations(sclp,user_attributes,fmt_iface_bindings,dtype_lis
     # Get additional relations which express connections between primitives
     transitive_relations = \
            transitive_closure_dfs(port_list,net_list,out_port_net_dict,port_attr_dict,rlns) 
+
+    info("  Transitive relations, Eq (",len(transitive_relations['eq']),")")
+    info('\n', \
+        '  ------------------\n', \
+        '  ',''.join('%s\n' % cnst for cnst in transitive_relations['eq']), \
+        '  ------------------\n')
+    
+    info("  Transitive relations, Ineq (",len(transitive_relations['ineq']),")")
+    info('\n', \
+        '  ------------------\n', \
+        '  ',''.join('%s\n' % cnst for cnst in transitive_relations['ineq']), \
+        '  ------------------\n')
 
     symbols=primitive_symbols+component_symbols
     symbol_types=primitive_symbol_types+component_symbol_types

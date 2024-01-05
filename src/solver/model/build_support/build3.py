@@ -11,6 +11,14 @@ def build3_simplify_system(problem_as_system):
 
     symbol_types=problem_as_system["symbol_types"]
     constraints=problem_as_system["constraints"]
+
+
+    info("  Pre-simplification constraints (",len(constraints),")")
+    info('\n', \
+        '  ------------------\n', \
+        '  ',''.join('%s\n' % cnst for cnst in constraints), \
+        '  ------------------\n')
+
     yields=problem_as_system["yields"]
     flat_yields=[yields[comp_name][attr_][0] \
                     for comp_name in yields \
