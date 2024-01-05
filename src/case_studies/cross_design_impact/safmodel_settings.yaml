@@ -39,7 +39,7 @@ scale_inference_include_obj:
   area: null
 scale_inference_solver:
   manager: neos
-  solver: couenne #filmint
+  solver: couenne
   args:
     neos_email: abf149@mit.edu
 model_export_settings:
