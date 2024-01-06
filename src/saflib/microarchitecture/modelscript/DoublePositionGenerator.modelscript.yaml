@@ -4,9 +4,12 @@ modelscript_primitives:
     from_taxonomic_primitive: DoublePositionGenerator
     export_attributes_to_model: true
     instance_aliases:
-    - alias: C
+    - alias: B_B_ripple_prefix_sum_parallel_dec2_priority_encoder
       instances:
-      - coordinate_payload
+      - B_B_ripple_prefix_sum_parallel_dec2_priority_encoder
+    - alias: B_B_kogge_stone_prefix_sum_parallel_dec2_priority_encoder
+      instances:
+      - B_B_kogge_stone_prefix_sum_parallel_dec2_priority_encoder
     scale_parameters:
       - name: clock
         type: real
@@ -20,102 +23,350 @@ modelscript_primitives:
       - port: md_in
         symbol_types:
         - type: level
-          load_tensors: all
-        - type: peak
           load_tensors:
           - load_tensor: position
             load_ranks:
             - load_rank: positions_per_cycle
-            - load_rank: position_word_width
           - load_tensor: coordinate
             load_ranks:
             - load_rank: dense_data_rank_size
             - load_rank: nodes_per_cycle
-      - port: pos_out
+          - load_tensor: datatype
+            load_ranks:
+            - load_rank: metadata_word_width
+          - load_tensor: bandwidth
+            load_ranks:
+            - load_rank: metadata_read_width
+        - type: peak
+          load_tensors:
+          - load_tensor: datatype
+            load_ranks:
+            - load_rank: metadata_word_width
+          - load_tensor: bandwidth
+            load_ranks:
+            - load_rank: metadata_read_width
+
+      - port: md_in0_ref
         symbol_types:
         - type: level
-          load_tensors: all
-        - type: peak
           load_tensors:
           - load_tensor: position
             load_ranks:
             - load_rank: positions_per_cycle
-            - load_rank: position_word_width
           - load_tensor: coordinate
             load_ranks:
             - load_rank: dense_data_rank_size
             - load_rank: nodes_per_cycle
+          - load_tensor: datatype
+            load_ranks:
+            - load_rank: metadata_word_width
+          - load_tensor: bandwidth
+            load_ranks:
+            - load_rank: metadata_read_width
+        - type: peak
+          load_tensors:
+          - load_tensor: datatype
+            load_ranks:
+            - load_rank: metadata_word_width
+          - load_tensor: bandwidth
+            load_ranks:
+            - load_rank: metadata_read_width
+
+      - port: md_in1_ref
+        symbol_types:
+        - type: level
+          load_tensors:
+          - load_tensor: position
+            load_ranks:
+            - load_rank: positions_per_cycle
+          - load_tensor: coordinate
+            load_ranks:
+            - load_rank: dense_data_rank_size
+            - load_rank: nodes_per_cycle
+          - load_tensor: datatype
+            load_ranks:
+            - load_rank: metadata_word_width
+          - load_tensor: bandwidth
+            load_ranks:
+            - load_rank: metadata_read_width
+        - type: peak
+          load_tensors:
+          - load_tensor: datatype
+            load_ranks:
+            - load_rank: metadata_word_width
+          - load_tensor: bandwidth
+            load_ranks:
+            - load_rank: metadata_read_width
+
+      - port: pos_out0
+        symbol_types:
+        - type: level
+          - load_tensor: position
+            load_ranks:
+            - load_rank: position_word_width
+            - load_rank: positions_per_cycle
+          - load_tensor: coordinate
+            load_ranks:
+            - load_rank: dense_data_rank_size
+            - load_rank: nodes_per_cycle
+          - load_tensor: bandwidth
+            load_ranks:
+            - load_rank: metadata_read_width
+        - type: peak
+          load_tensors:
+          - load_tensor: bandwidth
+            load_ranks:
+            - load_rank: metadata_read_width
     actions:
       - name: gen
+      - name: count_ref
       - name: gated_gen
+
+    characterization_metric_models:
+
+      - name: pri_encoder
+        # B_B_X_parallel_dec2_priority_encoder encodes a bitmask (i.e. bitmask intersection unit output)
+        # as a vector of indices
+        approximation: poly
+        table_id: accelergy/data/primitives_table.csv
+        rtl_id_expression: VectorParallelDec2PriorityEncoderRegistered_inputbits$(u)_vectorLength$(v)
+        symbol_map:
+          - variable: u
+            # Input metadata read width (md_in_rw) maps to priority encoder input bitmask.
+            symbol: md_in.peak.bandwidth.metadata_read_width
+          - variable: v
+            # Reference input metadata read with (md_in1_ref_rw) maps to priority encoder vector pipeline
+            # depth.
+            symbol: md_in1_ref.peak.bandwidth.metadata_read_width
+        latency:
+          # Critical path length complies with clock latency
+          parameter_id: clock
+          single_latency: true
+          latency_column_name: critical_path_clock_latency
+        energy:
+            # Convert characterized total power to energy, assuming the component is un-gated
+            # for a duration equal to its critical path length (worst-case)
+          - expression: combinational_total_power+register_total_power+clock_network_total_power
+            type: power
+        area:
+          - expression: Combinational_Area+Noncombinational_Area
+            type: area
+        # Generate constraints on md_in_rw and md_in0_ref_rw to match characertized adder
+        # bitwidth values
+        generate_constraints: true
+
+      - name: ref_psum_kogge_stone
+        # B_B_ripple_prefix_sum_x computes position from reference bitmask metadata using
+        # Kogge-Stone log-depth prefix-sum
+        approximation: poly
+        table_id: accelergy/data/primitives_table.csv
+        rtl_id_expression: GeneralizedParallelKoggeStonePrefixSumRegistered_vectorLength$(u)_inputBitWidth$(v)
+        symbol_map:
+          - variable: u
+            # Reference input metadata read width (md_in0_ref_rw) maps to reference psum vector length
+            symbol: md_in0_ref.peak.bandwidth.metadata_read_width
+          - variable: v
+            # Reference input metadata word width (md_in0_ref_ww) maps to reference psum inputBitWidth
+            # Note that further below, input metadata word width will be constrained to 1
+            symbol: md_in0_ref.peak.datatype.metadata_word_width
+        latency:
+          # Critical path length complies with clock latency
+          parameter_id: clock
+          single_latency: true
+          latency_column_name: critical_path_clock_latency
+        energy:
+            # Convert characterized total power to energy, assuming the component is un-gated
+            # for a duration equal to its critical path length (worst-case)
+          - expression: combinational_total_power+register_total_power+clock_network_total_power
+            type: power
+        area:
+          - expression: Combinational_Area+Noncombinational_Area
+            type: area
+        # Generate constraints on md_in0_ref_rw and md_in0_ref_ww to match characertized adder
+        # bitwidth values
+        generate_constraints: true
+
+      - name: ref_psum_ripple
+        # B_B_ripple_prefix_sum_x computes position from reference bitmask metadata using ripple prefix sum
+        approximation: poly
+        table_id: accelergy/data/primitives_table.csv
+        rtl_id_expression: GeneralizedRipplePrefixSumRegistered_vectorLength$(u)_inputBitWidth$(v)
+        symbol_map:
+          - variable: u
+            # Reference input metadata read width (md_in0_ref_rw) maps to reference psum vector length
+            symbol: md_in0_ref.peak.bandwidth.metadata_read_width
+          - variable: v
+            # Reference input metadata word width (md_in0_ref_ww) maps to reference psum inputBitWidth
+            # Note that further below, input metadata word width will be constrained to 1
+            symbol: md_in0_ref.peak.datatype.metadata_word_width
+        latency:
+          # Critical path length complies with clock latency
+          parameter_id: clock
+          single_latency: true
+          latency_column_name: critical_path_clock_latency
+        energy:
+            # Convert characterized total power to energy, assuming the component is un-gated
+            # for a duration equal to its critical path length (worst-case)
+          - expression: combinational_total_power+register_total_power+clock_network_total_power
+            type: power
+        area:
+          - expression: Combinational_Area+Noncombinational_Area
+            type: area
+        # Generate constraints on md_in0_ref_rw and md_in0_ref_ww to match characertized adder
+        # bitwidth values
+        generate_constraints: true
+
     implementations:
-      - name: C
-        taxonomic_instance_alias: C
+      - name: B_B_ripple_prefix_sum_parallel_dec2_priority_encoder
+        taxonomic_instance_alias: B_B_ripple_prefix_sum_parallel_dec2_priority_encoder
         objective:
           actions:
             - name: gen
-              energy: 2*(@pos_out_pr_thresh*@md_in_pr_thresh + @pos_out_cr_thresh*@md_in_cr_thresh + @pos_out_pw_thresh*@md_in_pw_thresh + @pos_out_nc_thresh*@md_in_nc_thresh)
+              energy: ( @pri_encoder )
+            - name: count_ref
+              energy: ( @ref_psum_ripple )/2
             - name: gated_gen
               energy: 0
-          area: ( @pos_out_pw_thresh*@md_in_pr_thresh+2 )
+          area: ( @pri_encoder ) + 2*( @ref_psum_ripple )
         constraints:
+          - type: characterization_metrics_model
+            list:
+            # Import:
+            #   pri_encoder constraints on md_in_rw and md_in1_ref_rw
+            #   ref_psum_ripple constraints on md_in0_ref_rw and md_in0_ref_ww
+            - pri_encoder
+            - ref_psum_ripple
+
+          # Dense data rank size (nc) passthru relations
           - type: passthrough
             list:
+              # md_in -> pos_outX
               - port_in: md_in
-                port_out: pos_out
+                port_out: pos_out0
                 suffixes:
-                  - level.position.positions_per_cycle
-                  - level.position.position_word_width
                   - level.coordinate.dense_data_rank_size
-                  - level.coordinate.nodes_per_cycle
-          - type: values
-            list:
-              - symbol: md_in.peak.position.positions_per_cycle
-                values:
-                  - 1
-                  - 8
-                  - 64
-                  - 256
-              - symbol: md_in.peak.position.position_word_width
-                values:
-                  - 1
-                  - 8
-                  - 64
-                  - 256
-              - symbol: md_in.peak.coordinate.dense_data_rank_size
-                values:
-                  - 1
-                  - 8
-                  - 64
-                  - 256
-              - symbol: md_in.peak.coordinate.nodes_per_cycle
-                values:
-                  - 1
-                  - 8
-                  - 64
-                  - 256
+              - port_in: md_in
+                port_out: pos_out1
+                suffixes:
+                  - level.coordinate.dense_data_rank_size
+              # md_inX_ref -> pos_outX
+              - port_in: md_in0_ref
+                port_out: pos_out0
+                suffixes:
+                  - level.coordinate.dense_data_rank_size
+              - port_in: md_in1_ref
+                port_out: pos_out1
+                suffixes:
+                  - level.coordinate.dense_data_rank_size
 
-              - symbol: pos_out.peak.position.positions_per_cycle
-                values:
-                  - 1
-                  - 8
-                  - 64
-                  - 256
-              - symbol: pos_out.peak.position.position_word_width
-                values:
-                  - 1
-                  - 8
-                  - 64
-                  - 256
-              - symbol: pos_out.peak.coordinate.dense_data_rank_size
-                values:
-                  - 1
-                  - 8
-                  - 64
-                  - 256
-              - symbol: pos_out.peak.coordinate.nodes_per_cycle
-                values:
-                  - 1
-                  - 8
-                  - 64
-                  - 256
+          - type: custom
+            list:
+              # Transitive RTL relations
+              # - All read-widths scale parameters (vector lengths) are equal
+              - ( @md_in0_ref_rw_thresh ) == ( @md_in1_ref_rw_thresh )
+              - ( @md_in0_ref_rw_thresh ) == ( @md_in_rw_thresh )
+              - ( @md_in0_ref_rw_thresh ) == ( @pos_out0_rw_thresh )
+              - ( @md_in0_ref_rw_thresh ) == ( @pos_out1_rw_thresh )
+              # - All metadata width scale parameters (word bitwidths) are equal to 1 (bitmask)
+              - ( @md_in0_ref_ww_thresh ) == 1
+              - ( @md_in1_ref_ww_thresh ) == 1
+              - ( @md_in_ww_thresh ) == 1
+              # Boundary conditions
+              # - Implicit bitwidth: output position bitwidth must be enough to represent [0,nc),
+              #   i.e. log2 dense rank size (nc). Rearrange into exponentiation to work around 
+              #   Sympy/Python/Pyomo syntax differences
+              - 2**( @pos_out0_pw ) >= ( @pos_out0_nc )
+              - 2**( @pos_out1_pw ) >= ( @pos_out1_nc )
+              # Transfer relation
+              # - Readwidth, md_inX_ref -> pos_outX and md_in -> pos_outX
+              - ( @pos_out0_rw ) >= ( @md_in_rw )
+              - ( @pos_out0_rw ) >= ( @md_in0_ref_rw )
+              - ( @pos_out1_rw ) >= ( @md_in_rw )
+              - ( @pos_out1_rw ) >= ( @md_in1_ref_rw )
+              # - Throughput, md_inX_ref -> pos_outX and md_in -> pos_outX
+              - ( @pos_out0_pr ) >= ( @md_in_pr )
+              - ( @pos_out0_pr ) >= ( @md_in0_ref_pr )
+              - ( @pos_out1_pr ) >= ( @md_in_pr )
+              - ( @pos_out1_pr ) >= ( @md_in1_ref_pr )
+              # - Coordinate throughput, md_inX_ref -> pos_outX and md_in -> pos_outX
+              - ( @pos_out0_cr ) >= ( @md_in_cr )
+              - ( @pos_out0_cr ) >= ( @md_in0_ref_cr )
+              - ( @pos_out1_cr ) >= ( @md_in_cr )
+              - ( @pos_out1_cr ) >= ( @md_in1_ref_cr )
+
+      - name: B_B_kogge_stone_prefix_sum_parallel_dec2_priority_encoder
+        taxonomic_instance_alias: B_B_kogge_stone_prefix_sum_parallel_dec2_priority_encoder
+        objective:
+          actions:
+            - name: gen
+              energy: ( @pri_encoder )
+            - name: count_ref
+              energy: ( @ref_psum_kogge_stone )/2
+            - name: gated_gen
+              energy: 0
+          area: ( @pri_encoder ) + 2*( @ref_psum_kogge_stone )
+        constraints:
+          - type: characterization_metrics_model
+            list:
+            # Import:
+            #   pri_encoder constraints on md_in_rw and md_in1_ref_rw
+            #   ref_psum_kogge_stone constraints on md_in0_ref_rw and md_in0_ref_ww
+            - pri_encoder
+            - ref_psum_kogge_stone
+
+          # Dense data rank size (nc) passthru relations
+          - type: passthrough
+            list:
+              # md_in -> pos_outX
+              - port_in: md_in
+                port_out: pos_out0
+                suffixes:
+                  - level.coordinate.dense_data_rank_size
+              - port_in: md_in
+                port_out: pos_out1
+                suffixes:
+                  - level.coordinate.dense_data_rank_size
+              # md_inX_ref -> pos_outX
+              - port_in: md_in0_ref
+                port_out: pos_out0
+                suffixes:
+                  - level.coordinate.dense_data_rank_size
+              - port_in: md_in1_ref
+                port_out: pos_out1
+                suffixes:
+                  - level.coordinate.dense_data_rank_size
+
+          - type: custom
+            list:
+              # Transitive RTL relations
+              # - All read-widths scale parameters (vector lengths) are equal
+              - ( @md_in0_ref_rw_thresh ) == ( @md_in1_ref_rw_thresh )
+              - ( @md_in0_ref_rw_thresh ) == ( @md_in_rw_thresh )
+              - ( @md_in0_ref_rw_thresh ) == ( @pos_out0_rw_thresh )
+              - ( @md_in0_ref_rw_thresh ) == ( @pos_out1_rw_thresh )
+              # - All metadata width scale parameters (word bitwidths) are equal to 1 (bitmask)
+              - ( @md_in0_ref_ww_thresh ) == 1
+              - ( @md_in1_ref_ww_thresh ) == 1
+              - ( @md_in_ww_thresh ) == 1
+              # Boundary conditions
+              # - Implicit bitwidth: output position bitwidth must be enough to represent [0,nc),
+              #   i.e. log2 dense rank size (nc). Rearrange into exponentiation to work around 
+              #   Sympy/Python/Pyomo syntax differences
+              - 2**( @pos_out0_pw ) >= ( @pos_out0_nc )
+              - 2**( @pos_out1_pw ) >= ( @pos_out1_nc )
+              # Transfer relation
+              # - Readwidth, md_inX_ref -> pos_outX and md_in -> pos_outX
+              - ( @pos_out0_rw ) >= ( @md_in_rw )
+              - ( @pos_out0_rw ) >= ( @md_in0_ref_rw )
+              - ( @pos_out1_rw ) >= ( @md_in_rw )
+              - ( @pos_out1_rw ) >= ( @md_in1_ref_rw )
+              # - Throughput, md_inX_ref -> pos_outX and md_in -> pos_outX
+              - ( @pos_out0_pr ) >= ( @md_in_pr )
+              - ( @pos_out0_pr ) >= ( @md_in0_ref_pr )
+              - ( @pos_out1_pr ) >= ( @md_in_pr )
+              - ( @pos_out1_pr ) >= ( @md_in1_ref_pr )
+              # - Coordinate throughput, md_inX_ref -> pos_outX and md_in -> pos_outX
+              - ( @pos_out0_cr ) >= ( @md_in_cr )
+              - ( @pos_out0_cr ) >= ( @md_in0_ref_cr )
+              - ( @pos_out1_cr ) >= ( @md_in_cr )
+              - ( @pos_out1_cr ) >= ( @md_in1_ref_cr )
