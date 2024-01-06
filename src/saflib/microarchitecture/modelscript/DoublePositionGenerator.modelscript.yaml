@@ -354,6 +354,9 @@ modelscript_primitives:
               #   Sympy/Python/Pyomo syntax differences
               - 2**( @pos_out0_pw ) >= ( @pos_out0_nc )
               - 2**( @pos_out1_pw ) >= ( @pos_out1_nc )
+              # - Read-width/throughput constraints: throughput in bits cannot exceed read width in bits
+              - ( @pos_out0_rw ) >= ( @pos_out0_pr ) * ( @pos_out0_ww )
+              - ( @pos_out1_rw ) >= ( @pos_out1_pr ) * ( @pos_out1_ww )
               # Transfer relation
               # - Readwidth, md_inX_ref -> pos_outX and md_in -> pos_outX
               - ( @pos_out0_rw ) >= ( @md_in_rw )
