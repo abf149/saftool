@@ -7,7 +7,6 @@ modelscript_primitives:
     - alias: C_C_two_finger_merge
       instances:
       - C_C_two_finger_merge
-    instance_aliases:
     - alias: B_B_bitwise_and
       instances:
       - B_B_bitwise_and
