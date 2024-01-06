@@ -118,6 +118,28 @@ modelscript_primitives:
           - load_tensor: bandwidth
             load_ranks:
             - load_rank: metadata_read_width
+
+      - port: pos_out1
+        symbol_types:
+        - type: level
+          load_tensors:
+          - load_tensor: position
+            load_ranks:
+            - load_rank: position_word_width
+            - load_rank: positions_per_cycle
+          - load_tensor: coordinate
+            load_ranks:
+            - load_rank: dense_data_rank_size
+            - load_rank: nodes_per_cycle
+          - load_tensor: bandwidth
+            load_ranks:
+            - load_rank: metadata_read_width
+        - type: peak
+          load_tensors:
+          - load_tensor: bandwidth
+            load_ranks:
+            - load_rank: metadata_read_width
+
     actions:
       - name: gen
       - name: count_ref
