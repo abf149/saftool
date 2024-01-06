@@ -290,6 +290,8 @@ modelscript_primitives:
                 suffixes:
                   - level.coordinate.dense_data_rank_size
 
+          - type: values
+            list:
               # Bitmask inputs/outputs are expected to have metadata word width of 1,
               # but this model doesn't need to upper bound that, so set scale parameter
               # range value(s) so high they are innocuous
