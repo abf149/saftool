@@ -101,6 +101,7 @@ modelscript_primitives:
       - port: pos_out0
         symbol_types:
         - type: level
+          load_tensors:
           - load_tensor: position
             load_ranks:
             - load_rank: position_word_width
