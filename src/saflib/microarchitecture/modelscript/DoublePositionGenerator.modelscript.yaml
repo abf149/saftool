@@ -344,10 +344,10 @@ modelscript_primitives:
               - ( @md_in0_ref_rw_thresh ) == ( @md_in_rw_thresh )
               - ( @md_in0_ref_rw_thresh ) == ( @pos_out0_rw_thresh )
               - ( @md_in0_ref_rw_thresh ) == ( @pos_out1_rw_thresh )
-              # - All metadata width scale parameters (word bitwidths) are equal to 1 (bitmask)
-              - ( @md_in0_ref_ww_thresh ) == 1
-              - ( @md_in1_ref_ww_thresh ) == 1
-              - ( @md_in_ww_thresh ) == 1
+              # - All metadata width scale parameters (word bitwidths) are >= to 1 (bitmask)
+              - ( @md_in0_ref_ww_thresh ) >= 1
+              - ( @md_in1_ref_ww_thresh ) >= 1
+              - ( @md_in_ww_thresh ) >= 1
               # Boundary conditions
               # - Implicit bitwidth: output position bitwidth must be enough to represent [0,nc),
               #   i.e. log2 dense rank size (nc). Rearrange into exponentiation to work around 

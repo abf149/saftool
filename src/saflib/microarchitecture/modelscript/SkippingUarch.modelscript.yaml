@@ -13,6 +13,9 @@ modelscript_components:
     - alias: C_C_bidirectional_no_opt_fills
       instances:
       - C_C_bidirectional_no_opt_fills
+    - alias: B_B_bidirectional_no_opt_fills
+      instances:
+      - B_B_bidirectional_no_opt_fills
     scale_parameters:
       - name: clock
         type: real
@@ -82,6 +85,16 @@ modelscript_components:
             actions:
             - name: gated_gen
 
+        # Skipping.fill_leader, B_B_bidirectional_no_opt_fills
+        - alias: B_B_bidirectional_no_opt_fills
+          subcomponents: 
+          - name: IntersectionBD
+            actions:
+            - name: fill
+          - name: DoublePgen
+            actions:
+            - name: count_ref
+
       - name: fill_follower
         implementations:
 
@@ -97,6 +110,16 @@ modelscript_components:
             actions:
             - name: gated_gen
           - name: SinglePgenFollower
+            actions:
+            - name: count_ref
+
+        # Skipping.fill_follower, B_B_bidirectional_no_opt_fills
+        - alias: B_B_bidirectional_no_opt_fills
+          subcomponents: 
+          - name: IntersectionBD
+            actions:
+            - name: fill
+          - name: DoublePgen
             actions:
             - name: count_ref
 
@@ -144,6 +167,16 @@ modelscript_components:
             actions:
             - name: gated_gen
 
+        # Skipping.skip_leader, B_B_bidirectional_no_opt_fills
+        - alias: B_B_bidirectional_no_opt_fills
+          subcomponents: 
+          - name: IntersectionBD
+            actions:
+            - name: intersect
+          - name: DoublePgen
+            actions:
+            - name: gen
+
       - name: skip_follower
         implementations:
 
@@ -187,6 +220,16 @@ modelscript_components:
             actions:
             - name: gen
 
+        # Skipping.skip_follower, B_B_bidirectional_no_opt_fills
+        - alias: B_B_bidirectional_no_opt_fills
+          subcomponents: 
+          - name: IntersectionBD
+            actions:
+            - name: intersect
+          - name: DoublePgen
+            actions:
+            - name: gen
+
     implementations:
       - name: C_U_leader_follower_yes_opt_fills
         taxonomic_instance_alias: C_U_leader_follower_yes_opt_fills
@@ -216,6 +259,19 @@ modelscript_components:
           area: 0
       - name: C_C_bidirectional_no_opt_fills
         taxonomic_instance_alias: C_C_bidirectional_no_opt_fills
+        objective:
+          actions:
+            - name: fill_leader
+              energy: 0
+            - name: fill_follower
+              energy: 0
+            - name: skip_leader
+              energy: 0
+            - name: skip_follower
+              energy: 0
+          area: 0
+      - name: B_B_bidirectional_no_opt_fills
+        taxonomic_instance_alias: B_B_bidirectional_no_opt_fills
         objective:
           actions:
             - name: fill_leader
