@@ -138,8 +138,6 @@ modelscript_primitives:
         # Generate constraints on md_in0_ww_thresh, md_in0_rw_thresh to match RTL scale parameters
         generate_constraints: true
 
-
-    characterization_metric_models:
       - name: bitmask_intersection
         # B_B_bitwise_and intersection unit is a a SparTen-like bitmask intersection unit
         approximation: poly

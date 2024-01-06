@@ -9,16 +9,17 @@ classes:
     format_dst: must_specify
     source_strategy: must_specify
     reference_strategy: must_specify
-    md_in_pr_thresh: must_specify
-    md_in_pw_thresh: must_specify
-    md_in_nc_thresh: must_specify
-    md_in_cr_thresh: must_specify
-    pos_out_pr_thresh: must_specify
-    pos_out_pw_thresh: must_specify
-    pos_out_nc_thresh: must_specify
-    pos_out_cr_thresh: must_specify
+    md_in_ww_thresh: must_specify
+    md_in_rw_thresh: must_specify
+    md_in0_ref_ww_thresh: must_specify
+    md_in0_ref_rw_thresh: must_specify
+    md_in1_ref_ww_thresh: must_specify
+    md_in1_ref_rw_thresh: must_specify
+    pos_out0_rw_thresh: must_specify
+    pos_out1_rw_thresh: must_specify
   actions:
   - name: gen
+  - name: count_ref
   - name: gated_gen
 - name: FillOptimizerModel
   attributes:
