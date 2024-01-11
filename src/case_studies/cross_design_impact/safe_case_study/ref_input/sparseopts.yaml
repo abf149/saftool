@@ -24,7 +24,7 @@ sparse_optimizations:
               flattened-rankIDs: [ [ R, E] ]
               payload-word-bits:  0
             - format: UOP             
-              payload-word-bits:  4
+              payload-word-bits:  7
               flattened-rankIDs: [ [ R ] ] 
             - format: CP      
               metadata-word-bits: 4
@@ -42,42 +42,42 @@ sparse_optimizations:
               payload-word-bits:  0            
             - format: UOP
               payload-word-bits:  7
-              flattened-rankIDs: [ [ C, R ] ] 
+              flattened-rankIDs: [ [ M ] ] 
             - format: CP
               metadata-word-bits: 4
-              flattened-rankIDs: [ [ M  ] ]
+              flattened-rankIDs: [ [ C  ] ]
           rank-application-order: inner-to-outer
 
-  - name: iact_spad
+  - name: shared_buffer
     representation-format:
       data-spaces:
         - name: Inputs
           ranks: 
             - format: UOP             
-              payload-word-bits:  4
+              payload-word-bits:  7
               flattened-rankIDs: [ [ R ] ] 
             - format: CP         # C0
               metadata-word-bits: 4
               flattened-rankIDs: [ [ C ] ] 
           rank-application-order: inner-to-outer
-  
-  - name: weight_spad
-    representation-format:
-      data-spaces:
         - name: Weights
           ranks:
             - format: UOP
               payload-word-bits:  7
-              flattened-rankIDs: [ [ C, R ] ] 
+              flattened-rankIDs: [ [ M ] ] # [ [ C, R ] ] 
             - format: CP
               metadata-word-bits: 4
-              flattened-rankIDs: [ [ M  ] ]
+              flattened-rankIDs: [ [ C ] ] # [ [ M  ] ]
           rank-application-order: inner-to-outer
     action-optimization:
       - type: skipping
         options:
           - target: Weights
             condition-on: [ Inputs ]
+      - type: skipping
+        options:
+          - target: Inputs
+            condition-on: [Weights]
 
   - name: psum_spad
     action-optimization:
@@ -86,14 +86,14 @@ sparse_optimizations:
           - target: Outputs
             condition-on: [ Inputs, Weights ]
           
-  - name: reg
-    representation-format:
-      data-spaces:
-        - name: Inputs
-          ranks: 
-            - format: CP
-              metadata-word-bits: 4
-          rank-application-order: inner-to-outer
+#  - name: reg
+#    representation-format:
+#      data-spaces:
+#        - name: Inputs
+#          ranks: 
+#            - format: CP
+#              metadata-word-bits: 4
+#          rank-application-order: inner-to-outer
 
 # Pipeline bubble == discard
   - name: MAC
