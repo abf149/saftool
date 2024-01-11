@@ -65,8 +65,8 @@ def transitive_closure_dfs(port_list,net_list,out_port_net_dict,port_attr_dict,r
     transitive_closure_relns={"eq":[],"ineq":[]}
     port_visited=[False]*len(port_list)
 
-    print(reln_dict)
-    assert(False)
+    #print(reln_dict)
+    #assert(False)
 
     for root_port in port_list:
         transitive_dfs_from_primitive_port(root_port,root_port,port_list,net_list,out_port_net_dict,port_attr_dict, \

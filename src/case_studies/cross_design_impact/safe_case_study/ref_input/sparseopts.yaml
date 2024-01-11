@@ -1,0 +1,101 @@
+# sparse config for dense input activations and sparse weights
+# Assumptions: 
+# - The only circumstances where ranks are flattened are:
+# -- A datatype tensor has a rank which is a projection of other ranks, in which case the rank IDs comprising the projection formula must be flattened in that tensor's spec
+# -- A datatype tensor is compressed at one level of storage and then decompressed using some SAF uarch in between storage levels
+
+sparse_optimizations:
+  targets:
+  - name: BackingStorage
+    representation-format:
+      data-spaces:
+        - name: Inputs
+          ranks:
+            - format: UOP             # G4
+              payload-word-bits:  0
+            - format: UOP             # N4
+              payload-word-bits:  0
+            - format: UOP             # C4
+              payload-word-bits:  0
+            - format: UOP             
+              flattened-rankIDs: [ [ S, F ] ]
+              payload-word-bits:  0
+            - format: UOP             
+              flattened-rankIDs: [ [ R, E] ]
+              payload-word-bits:  0
+            - format: UOP             
+              payload-word-bits:  4
+              flattened-rankIDs: [ [ R ] ] 
+            - format: CP      
+              metadata-word-bits: 4
+              flattened-rankIDs: [ [ C ] ] 
+          rank-application-order: inner-to-outer
+        - name: Weights
+          ranks:
+            - format: UOP            # G
+              payload-word-bits:  0
+            - format: UOP            # M
+              payload-word-bits:  0
+            - format: UOP            # S  
+              payload-word-bits:  0            
+            - format: UOP            # C 
+              payload-word-bits:  0            
+            - format: UOP
+              payload-word-bits:  7
+              flattened-rankIDs: [ [ C, R ] ] 
+            - format: CP
+              metadata-word-bits: 4
+              flattened-rankIDs: [ [ M  ] ]
+          rank-application-order: inner-to-outer
+
+  - name: iact_spad
+    representation-format:
+      data-spaces:
+        - name: Inputs
+          ranks: 
+            - format: UOP             
+              payload-word-bits:  4
+              flattened-rankIDs: [ [ R ] ] 
+            - format: CP         # C0
+              metadata-word-bits: 4
+              flattened-rankIDs: [ [ C ] ] 
+          rank-application-order: inner-to-outer
+  
+  - name: weight_spad
+    representation-format:
+      data-spaces:
+        - name: Weights
+          ranks:
+            - format: UOP
+              payload-word-bits:  7
+              flattened-rankIDs: [ [ C, R ] ] 
+            - format: CP
+              metadata-word-bits: 4
+              flattened-rankIDs: [ [ M  ] ]
+          rank-application-order: inner-to-outer
+    action-optimization:
+      - type: skipping
+        options:
+          - target: Weights
+            condition-on: [ Inputs ]
+
+  - name: psum_spad
+    action-optimization:
+      - type: skipping
+        options:
+          - target: Outputs
+            condition-on: [ Inputs, Weights ]
+          
+  - name: reg
+    representation-format:
+      data-spaces:
+        - name: Inputs
+          ranks: 
+            - format: CP
+              metadata-word-bits: 4
+          rank-application-order: inner-to-outer
+
+# Pipeline bubble == discard
+  - name: MAC
+    compute-optimization:
+    - type: skipping
