@@ -1,17 +1,5 @@
 version: 0.3
 classes:
-- name: IntersectionLeaderFollowerModel
-  attributes:
-    clock: must_specify
-    technology: must_specify
-    area_multiplier: must_specify
-    format_leader: must_specify
-    strategy: must_specify
-  actions:
-  - name: fill
-  - name: intersect
-  - name: gated_fill
-  - name: gated_intersect
 - name: DoublePositionGeneratorModel
   attributes:
     clock: must_specify
@@ -29,19 +17,6 @@ classes:
     md_in1_ref_rw_thresh: must_specify
     pos_out0_rw_thresh: must_specify
     pos_out1_rw_thresh: must_specify
-  actions:
-  - name: gen
-  - name: count_ref
-  - name: gated_gen
-- name: SinglePositionGeneratorModel
-  attributes:
-    clock: must_specify
-    technology: must_specify
-    area_multiplier: must_specify
-    format_src: must_specify
-    format_dst: must_specify
-    strategy: must_specify
-    md_in_ref_ww_thresh: must_specify
   actions:
   - name: gen
   - name: count_ref
@@ -74,6 +49,18 @@ classes:
   - name: intersect
   - name: gated_fill
   - name: gated_intersect
+- name: IntersectionLeaderFollowerModel
+  attributes:
+    clock: must_specify
+    technology: must_specify
+    area_multiplier: must_specify
+    format_leader: must_specify
+    strategy: must_specify
+  actions:
+  - name: fill
+  - name: intersect
+  - name: gated_fill
+  - name: gated_intersect
 - name: MetadataParserModel
   attributes:
     clock: must_specify
@@ -88,3 +75,16 @@ classes:
   actions:
   - name: check_bound
   - name: gated_check_bound
+- name: SinglePositionGeneratorModel
+  attributes:
+    clock: must_specify
+    technology: must_specify
+    area_multiplier: must_specify
+    format_src: must_specify
+    format_dst: must_specify
+    strategy: must_specify
+    md_in_ref_ww_thresh: must_specify
+  actions:
+  - name: gen
+  - name: count_ref
+  - name: gated_gen
