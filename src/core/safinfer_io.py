@@ -206,7 +206,7 @@ def dump_saf_uarch_topology(inferred_arch,topo_out_path):
 
     Returns: None
     '''
-    info("- Dumping inferred SAF microarchitecture topology to",topo_out_path,"...")
+    info("- Dumping inferred SAF microarchitecture topology to",topo_out_path,"...",also_stdout=True)
     inferred_arch.dump(topo_out_path)
     with open(topo_out_path+".pretty","w") as fp:
         fp.write(sprettyprint_taxo_uarch(inferred_arch))

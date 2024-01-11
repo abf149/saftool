@@ -13,56 +13,23 @@ custom_taxonomic_specifications:
     - name: Outputs
       dummy_format_interfaces:
       - flattened-rankIDs: [ [ C ] ]
-      - flattened-rankIDs: [ [ M ] ] 
+#      - flattened-rankIDs: [ [ M ] ] 
 
 force_attributes:
 
 # Next two settings: disable fill optimization for the iact -> psum and weight -> psum
 # skipping microarchitectures, since the "follower" is a dense buffer so there are no
 # unnecessary leader fills to optimize away.
-- uri: /.Skipping_iact_spad1_psum_spad0
+- uri: /.Skipping_shared_buffer1_shared_buffer3.IntersectionBD
+  settings:
+  - type: positional
+    values:
+    - position: 2
+      value: 'two_finger_merge'
+
+- uri: /.Skipping_shared_buffer1_psum_spad0
   settings:
   - type: positional
     values:
     - position: 3
       value: 'no_opt_fills'
-
-- uri: /.Skipping_weight_spad1_psum_spad1
-  settings:
-  - type: positional
-    values:
-    - position: 3
-      value: 'no_opt_fills'
-
-
-# Next two settings: account for fill optimization in the iact -> weight skipping
-# microarchitecture; use Eyeriss v2-style pipeline-bubble-gating-based fill optimization
-- uri: /.Skipping_iact_spad1_weight_spad0
-  settings:
-  - type: positional
-    values:
-    - position: 3
-      value: 'yes_opt_fills'
-
-- uri: /.Skipping_iact_spad1_weight_spad0.FillOptimizerLeader
-  settings:
-  - type: positional
-    values:
-    - position: 0
-      value: 'pipeline_bubble_gate'
-
-# Next two settings: account for contracted ranks associated with the iact -> weight skipping;
-# no need to faciltate coordinate arithmetic (default is to facilitate coordinate arithmetic)
-- uri: /.weight_spad_datatype_format_uarch.TestMetadataParser0
-  settings:
-  - type: positional
-    values:
-    - position: 2
-      value: 'no_arithmetic'
-
-- uri: /.iact_spad_datatype_format_uarch.TestMetadataParser1
-  settings:
-  - type: positional
-    values:
-    - position: 2
-      value: 'no_arithmetic'
