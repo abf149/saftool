@@ -180,8 +180,8 @@ class ValidationRuleSet(RuleSet):
                     error(str(component),also_stdout=True)
                     error("-- Validation ruleset FAILED!:",self.getId(),"",also_stdout=True)
                     error("-- Exiting completion rule set: ",self.getId(),"",also_stdout=True)
-                    #error("- Terminating.",also_stdout=True)
-                    #assert(False)
+                    error("- Terminating.",also_stdout=True)
+                    assert(False)
      
 
         info("-- Exiting validation rule set: ",self.id,"")

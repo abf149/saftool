@@ -1,0 +1,1338 @@
+attributes: []
+buffer_hierarchy:
+- BackingStorage
+- Buffer
+- Reg
+category: Architecture
+classtype: Architecture
+id: TestArchitecture
+interface: []
+saf_list: []
+topology:
+  classtype: Topology
+  component_list:
+  - attributes:
+    - - classtype: FormatType
+        id: format
+        value: U
+      - classtype: FormatType
+        id: format
+        value: U
+    category: BufferStub
+    classtype: Primitive
+    id: BackingStorage
+    interface:
+    - attr_ref: -1
+      classtype: Port
+      direction: out
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: U
+      id: md_out0
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: md
+    - attr_ref: -1
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: none
+      id: at_bound_in0
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: flag
+    - attr_ref: -1
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: addr
+      id: pos_in0
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: pos
+    - attr_ref: -1
+      classtype: Port
+      direction: out
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: U
+      id: md_out1
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: md
+    - attr_ref: -1
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: none
+      id: at_bound_in1
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: flag
+    - attr_ref: -1
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: addr
+      id: pos_in1
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: pos
+  - attributes:
+    - - classtype: FormatType
+        id: format
+        value: C
+      - classtype: FormatType
+        id: format
+        value: U
+      - classtype: FormatType
+        id: format
+        value: C
+    category: BufferStub
+    classtype: Primitive
+    id: Buffer
+    interface:
+    - attr_ref: -1
+      classtype: Port
+      direction: out
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: C
+      id: md_out0
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: md
+    - attr_ref: -1
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: none
+      id: at_bound_in0
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: flag
+    - attr_ref: -1
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: addr
+      id: pos_in0
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: pos
+    - attr_ref: -1
+      classtype: Port
+      direction: out
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: U
+      id: md_out1
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: md
+    - attr_ref: -1
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: none
+      id: at_bound_in1
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: flag
+    - attr_ref: -1
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: addr
+      id: pos_in1
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: pos
+    - attr_ref: -1
+      classtype: Port
+      direction: out
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: C
+      id: md_out2
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: md
+    - attr_ref: -1
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: none
+      id: at_bound_in2
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: flag
+    - attr_ref: -1
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: addr
+      id: pos_in2
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: pos
+  - attributes:
+    - - classtype: FormatType
+        id: format
+        value: U
+    category: BufferStub
+    classtype: Primitive
+    id: Reg
+    interface:
+    - attr_ref: -1
+      classtype: Port
+      direction: out
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: U
+      id: md_out0
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: md
+    - attr_ref: -1
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: none
+      id: at_bound_in0
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: flag
+    - attr_ref: -1
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: addr
+      id: pos_in0
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: pos
+  - attributes:
+    - - classtype: FormatType
+        id: format
+        value: U
+      - classtype: FormatType
+        id: format
+        value: U
+    category: FormatUarch
+    classtype: Component
+    id: BackingStorage_datatype_format_uarch
+    interface:
+    - attr_ref: -1
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: U
+      id: md_in0
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: md
+    - attr_ref: -1
+      classtype: Port
+      direction: out
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: none
+      id: at_bound_out0
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: flag
+    - attr_ref: -1
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: U
+      id: md_in1
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: md
+    - attr_ref: -1
+      classtype: Port
+      direction: out
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: none
+      id: at_bound_out1
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: flag
+    topology:
+      classtype: Topology
+      component_list:
+      - attributes:
+        - classtype: FormatType
+          id: TestFormatType
+          value: U
+        - sentinel
+        - no_arithmetic
+        category: MetadataParser
+        classtype: Primitive
+        id: TestMetadataParser0
+        interface:
+        - attr_ref: 0
+          classtype: Port
+          direction: in
+          format_type:
+            classtype: FormatType
+            id: TestFormatType
+            value: U
+          id: md_in
+          net_type:
+            classtype: NetType
+            id: TestNetType
+            value: md
+        - attr_ref: -1
+          classtype: Port
+          direction: out
+          format_type:
+            classtype: FormatType
+            id: TestFormatType
+            value: none
+          id: at_bound_out
+          net_type:
+            classtype: NetType
+            id: TestNetType
+            value: flag
+      - attributes:
+        - classtype: FormatType
+          id: TestFormatType
+          value: U
+        - sentinel
+        - no_arithmetic
+        category: MetadataParser
+        classtype: Primitive
+        id: TestMetadataParser1
+        interface:
+        - attr_ref: 0
+          classtype: Port
+          direction: in
+          format_type:
+            classtype: FormatType
+            id: TestFormatType
+            value: U
+          id: md_in
+          net_type:
+            classtype: NetType
+            id: TestNetType
+            value: md
+        - attr_ref: -1
+          classtype: Port
+          direction: out
+          format_type:
+            classtype: FormatType
+            id: TestFormatType
+            value: none
+          id: at_bound_out
+          net_type:
+            classtype: NetType
+            id: TestNetType
+            value: flag
+      id: TestTopology
+      is_hole: false
+      net_list:
+      - classtype: Net
+        format_type:
+          classtype: FormatType
+          id: TestFormatType
+          value: '?'
+        id: netTestTopology
+        net_type:
+          classtype: NetType
+          id: TestNetType
+          value: md
+        port_id_list:
+        - md_in0
+        - TestMetadataParser0.md_in
+      - classtype: Net
+        format_type:
+          classtype: FormatType
+          id: TestFormatType
+          value: '?'
+        id: netTestTopology
+        net_type:
+          classtype: NetType
+          id: TestNetType
+          value: flag
+        port_id_list:
+        - at_bound_out0
+        - TestMetadataParser0.at_bound_out
+      - classtype: Net
+        format_type:
+          classtype: FormatType
+          id: TestFormatType
+          value: '?'
+        id: netTestTopology
+        net_type:
+          classtype: NetType
+          id: TestNetType
+          value: md
+        port_id_list:
+        - md_in1
+        - TestMetadataParser1.md_in
+      - classtype: Net
+        format_type:
+          classtype: FormatType
+          id: TestFormatType
+          value: '?'
+        id: netTestTopology
+        net_type:
+          classtype: NetType
+          id: TestNetType
+          value: flag
+        port_id_list:
+        - at_bound_out1
+        - TestMetadataParser1.at_bound_out
+  - attributes:
+    - - classtype: FormatType
+        id: format
+        value: C
+      - classtype: FormatType
+        id: format
+        value: U
+      - classtype: FormatType
+        id: format
+        value: C
+    category: FormatUarch
+    classtype: Component
+    id: Buffer_datatype_format_uarch
+    interface:
+    - attr_ref: -1
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: C
+      id: md_in0
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: md
+    - attr_ref: -1
+      classtype: Port
+      direction: out
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: none
+      id: at_bound_out0
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: flag
+    - attr_ref: -1
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: U
+      id: md_in1
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: md
+    - attr_ref: -1
+      classtype: Port
+      direction: out
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: none
+      id: at_bound_out1
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: flag
+    - attr_ref: -1
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: C
+      id: md_in2
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: md
+    - attr_ref: -1
+      classtype: Port
+      direction: out
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: none
+      id: at_bound_out2
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: flag
+    topology:
+      classtype: Topology
+      component_list:
+      - attributes:
+        - classtype: FormatType
+          id: TestFormatType
+          value: C
+        - sentinel
+        - no_arithmetic
+        category: MetadataParser
+        classtype: Primitive
+        id: TestMetadataParser0
+        interface:
+        - attr_ref: 0
+          classtype: Port
+          direction: in
+          format_type:
+            classtype: FormatType
+            id: TestFormatType
+            value: C
+          id: md_in
+          net_type:
+            classtype: NetType
+            id: TestNetType
+            value: md
+        - attr_ref: -1
+          classtype: Port
+          direction: out
+          format_type:
+            classtype: FormatType
+            id: TestFormatType
+            value: none
+          id: at_bound_out
+          net_type:
+            classtype: NetType
+            id: TestNetType
+            value: flag
+      - attributes:
+        - classtype: FormatType
+          id: TestFormatType
+          value: U
+        - sentinel
+        - no_arithmetic
+        category: MetadataParser
+        classtype: Primitive
+        id: TestMetadataParser1
+        interface:
+        - attr_ref: 0
+          classtype: Port
+          direction: in
+          format_type:
+            classtype: FormatType
+            id: TestFormatType
+            value: U
+          id: md_in
+          net_type:
+            classtype: NetType
+            id: TestNetType
+            value: md
+        - attr_ref: -1
+          classtype: Port
+          direction: out
+          format_type:
+            classtype: FormatType
+            id: TestFormatType
+            value: none
+          id: at_bound_out
+          net_type:
+            classtype: NetType
+            id: TestNetType
+            value: flag
+      - attributes:
+        - classtype: FormatType
+          id: TestFormatType
+          value: C
+        - sentinel
+        - no_arithmetic
+        category: MetadataParser
+        classtype: Primitive
+        id: TestMetadataParser2
+        interface:
+        - attr_ref: 0
+          classtype: Port
+          direction: in
+          format_type:
+            classtype: FormatType
+            id: TestFormatType
+            value: C
+          id: md_in
+          net_type:
+            classtype: NetType
+            id: TestNetType
+            value: md
+        - attr_ref: -1
+          classtype: Port
+          direction: out
+          format_type:
+            classtype: FormatType
+            id: TestFormatType
+            value: none
+          id: at_bound_out
+          net_type:
+            classtype: NetType
+            id: TestNetType
+            value: flag
+      id: TestTopology
+      is_hole: false
+      net_list:
+      - classtype: Net
+        format_type:
+          classtype: FormatType
+          id: TestFormatType
+          value: '?'
+        id: netTestTopology
+        net_type:
+          classtype: NetType
+          id: TestNetType
+          value: md
+        port_id_list:
+        - md_in0
+        - TestMetadataParser0.md_in
+      - classtype: Net
+        format_type:
+          classtype: FormatType
+          id: TestFormatType
+          value: '?'
+        id: netTestTopology
+        net_type:
+          classtype: NetType
+          id: TestNetType
+          value: flag
+        port_id_list:
+        - at_bound_out0
+        - TestMetadataParser0.at_bound_out
+      - classtype: Net
+        format_type:
+          classtype: FormatType
+          id: TestFormatType
+          value: '?'
+        id: netTestTopology
+        net_type:
+          classtype: NetType
+          id: TestNetType
+          value: md
+        port_id_list:
+        - md_in1
+        - TestMetadataParser1.md_in
+      - classtype: Net
+        format_type:
+          classtype: FormatType
+          id: TestFormatType
+          value: '?'
+        id: netTestTopology
+        net_type:
+          classtype: NetType
+          id: TestNetType
+          value: flag
+        port_id_list:
+        - at_bound_out1
+        - TestMetadataParser1.at_bound_out
+      - classtype: Net
+        format_type:
+          classtype: FormatType
+          id: TestFormatType
+          value: '?'
+        id: netTestTopology
+        net_type:
+          classtype: NetType
+          id: TestNetType
+          value: md
+        port_id_list:
+        - md_in2
+        - TestMetadataParser2.md_in
+      - classtype: Net
+        format_type:
+          classtype: FormatType
+          id: TestFormatType
+          value: '?'
+        id: netTestTopology
+        net_type:
+          classtype: NetType
+          id: TestNetType
+          value: flag
+        port_id_list:
+        - at_bound_out2
+        - TestMetadataParser2.at_bound_out
+  - attributes:
+    - classtype: FormatType
+      id: TestFormatType
+      value: C
+    - classtype: FormatType
+      id: TestFormatType
+      value: C
+    - bidirectional
+    - no_opt_fills
+    category: SkippingUarch
+    classtype: Component
+    id: Skipping_Buffer2_Buffer0
+    interface:
+    - attr_ref: 0
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: C
+      id: md_in_leader
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: md
+    - attr_ref: 1
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: C
+      id: md_in_follower
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: md
+    - attr_ref: -1
+      classtype: Port
+      direction: out
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: addr
+      id: pos_out_leader
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: pos
+    - attr_ref: -1
+      classtype: Port
+      direction: out
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: addr
+      id: pos_out_follower
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: pos
+    topology:
+      classtype: Topology
+      component_list:
+      - attributes:
+        - classtype: FormatType
+          id: format
+          value: C
+        - classtype: FormatType
+          id: format
+          value: C
+        - two_finger_merge
+        category: IntersectionBidirectional
+        classtype: Primitive
+        id: IntersectionBD
+        interface:
+        - attr_ref: 0
+          classtype: Port
+          direction: in
+          format_type:
+            classtype: FormatType
+            id: TestFormatType
+            value: C
+          id: md_in0
+          net_type:
+            classtype: NetType
+            id: TestNetType
+            value: md
+        - attr_ref: 1
+          classtype: Port
+          direction: in
+          format_type:
+            classtype: FormatType
+            id: TestFormatType
+            value: C
+          id: md_in1
+          net_type:
+            classtype: NetType
+            id: TestNetType
+            value: md
+        - attr_ref: 0
+          classtype: Port
+          direction: out
+          format_type:
+            classtype: FormatType
+            id: format
+            value: C
+          id: md_out
+          net_type:
+            classtype: NetType
+            id: TestNetType
+            value: md
+      - attributes:
+        - classtype: FormatType
+          id: format
+          value: C
+        - classtype: FormatType
+          id: format
+          value: C
+        - counter
+        category: SinglePositionGenerator
+        classtype: Primitive
+        id: SinglePgenLeader
+        interface:
+        - attr_ref: 0
+          classtype: Port
+          direction: in
+          format_type:
+            classtype: FormatType
+            id: TestFormatType
+            value: C
+          id: md_in
+          net_type:
+            classtype: NetType
+            id: TestNetType
+            value: md
+        - attr_ref: 0
+          classtype: Port
+          direction: in
+          format_type:
+            classtype: FormatType
+            id: TestFormatType
+            value: C
+          id: md_in_ref
+          net_type:
+            classtype: NetType
+            id: TestNetType
+            value: md
+        - attr_ref: -1
+          classtype: Port
+          direction: out
+          format_type:
+            classtype: FormatType
+            id: TestFormatType
+            value: addr
+          id: pos_out
+          net_type:
+            classtype: NetType
+            id: TestNetType
+            value: pos
+      - attributes:
+        - classtype: FormatType
+          id: format
+          value: C
+        - classtype: FormatType
+          id: format
+          value: C
+        - counter
+        category: SinglePositionGenerator
+        classtype: Primitive
+        id: SinglePgenFollower
+        interface:
+        - attr_ref: 0
+          classtype: Port
+          direction: in
+          format_type:
+            classtype: FormatType
+            id: TestFormatType
+            value: C
+          id: md_in
+          net_type:
+            classtype: NetType
+            id: TestNetType
+            value: md
+        - attr_ref: 0
+          classtype: Port
+          direction: in
+          format_type:
+            classtype: FormatType
+            id: TestFormatType
+            value: C
+          id: md_in_ref
+          net_type:
+            classtype: NetType
+            id: TestNetType
+            value: md
+        - attr_ref: -1
+          classtype: Port
+          direction: out
+          format_type:
+            classtype: FormatType
+            id: TestFormatType
+            value: addr
+          id: pos_out
+          net_type:
+            classtype: NetType
+            id: TestNetType
+            value: pos
+      id: TestTopology
+      is_hole: false
+      net_list:
+      - classtype: Net
+        format_type:
+          classtype: FormatType
+          id: TestFormatType
+          value: '?'
+        id: netTestTopology
+        net_type:
+          classtype: NetType
+          id: TestNetType
+          value: md
+        port_id_list:
+        - md_in_leader
+        - IntersectionBD.md_in0
+      - classtype: Net
+        format_type:
+          classtype: FormatType
+          id: TestFormatType
+          value: '?'
+        id: netTestTopology
+        net_type:
+          classtype: NetType
+          id: TestNetType
+          value: md
+        port_id_list:
+        - md_in_leader
+        - SinglePgenLeader.md_in_ref
+      - classtype: Net
+        format_type:
+          classtype: FormatType
+          id: TestFormatType
+          value: '?'
+        id: netTestTopology
+        net_type:
+          classtype: NetType
+          id: TestNetType
+          value: md
+        port_id_list:
+        - md_in_follower
+        - IntersectionBD.md_in1
+      - classtype: Net
+        format_type:
+          classtype: FormatType
+          id: TestFormatType
+          value: '?'
+        id: netTestTopology
+        net_type:
+          classtype: NetType
+          id: TestNetType
+          value: md
+        port_id_list:
+        - md_in_follower
+        - SinglePgenFollower.md_in_ref
+      - classtype: Net
+        format_type:
+          classtype: FormatType
+          id: TestFormatType
+          value: '?'
+        id: netTestTopology
+        net_type:
+          classtype: NetType
+          id: TestNetType
+          value: md
+        port_id_list:
+        - IntersectionBD.md_out
+        - SinglePgenLeader.md_in
+      - classtype: Net
+        format_type:
+          classtype: FormatType
+          id: TestFormatType
+          value: '?'
+        id: netTestTopology
+        net_type:
+          classtype: NetType
+          id: TestNetType
+          value: md
+        port_id_list:
+        - IntersectionBD.md_out
+        - SinglePgenFollower.md_in
+      - classtype: Net
+        format_type:
+          classtype: FormatType
+          id: TestFormatType
+          value: '?'
+        id: netTestTopology
+        net_type:
+          classtype: NetType
+          id: TestNetType
+          value: pos
+        port_id_list:
+        - SinglePgenLeader.pos_out
+        - pos_out_leader
+      - classtype: Net
+        format_type:
+          classtype: FormatType
+          id: TestFormatType
+          value: '?'
+        id: netTestTopology
+        net_type:
+          classtype: NetType
+          id: TestNetType
+          value: pos
+        port_id_list:
+        - SinglePgenFollower.pos_out
+        - pos_out_follower
+  - attributes:
+    - classtype: FormatType
+      id: TestFormatType
+      value: C
+    - classtype: FormatType
+      id: TestFormatType
+      value: U
+    - leader_follower
+    - '?'
+    category: SkippingUarch
+    classtype: Component
+    id: Skipping_Buffer0_Reg0
+    interface:
+    - attr_ref: 0
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: C
+      id: md_in_leader
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: md
+    - attr_ref: 1
+      classtype: Port
+      direction: in
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: U
+      id: md_in_follower
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: md
+    - attr_ref: -1
+      classtype: Port
+      direction: out
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: addr
+      id: pos_out_leader
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: pos
+    - attr_ref: -1
+      classtype: Port
+      direction: out
+      format_type:
+        classtype: FormatType
+        id: TestFormatType
+        value: addr
+      id: pos_out_follower
+      net_type:
+        classtype: NetType
+        id: TestNetType
+        value: pos
+    topology:
+      classtype: Topology
+      component_list: []
+      id: TestTopology
+      is_hole: true
+      net_list: []
+  id: TestTopology
+  is_hole: false
+  net_list:
+  - classtype: Net
+    format_type:
+      classtype: FormatType
+      id: TestFormatType
+      value: '?'
+    id: BackingStorage.md_out0_BackingStorage_datatype_format_uarch.md_in0
+    net_type:
+      classtype: NetType
+      id: TestNetType
+      value: md
+    port_id_list:
+    - BackingStorage.md_out0
+    - BackingStorage_datatype_format_uarch.md_in0
+  - classtype: Net
+    format_type:
+      classtype: FormatType
+      id: TestFormatType
+      value: '?'
+    id: BackingStorage.at_bound_in0_BackingStorage_datatype_format_uarch.at_bound_out0
+    net_type:
+      classtype: NetType
+      id: TestNetType
+      value: flag
+    port_id_list:
+    - BackingStorage.at_bound_in0
+    - BackingStorage_datatype_format_uarch.at_bound_out0
+  - classtype: Net
+    format_type:
+      classtype: FormatType
+      id: TestFormatType
+      value: '?'
+    id: BackingStorage.md_out1_BackingStorage_datatype_format_uarch.md_in1
+    net_type:
+      classtype: NetType
+      id: TestNetType
+      value: md
+    port_id_list:
+    - BackingStorage.md_out1
+    - BackingStorage_datatype_format_uarch.md_in1
+  - classtype: Net
+    format_type:
+      classtype: FormatType
+      id: TestFormatType
+      value: '?'
+    id: BackingStorage.at_bound_in1_BackingStorage_datatype_format_uarch.at_bound_out1
+    net_type:
+      classtype: NetType
+      id: TestNetType
+      value: flag
+    port_id_list:
+    - BackingStorage.at_bound_in1
+    - BackingStorage_datatype_format_uarch.at_bound_out1
+  - classtype: Net
+    format_type:
+      classtype: FormatType
+      id: TestFormatType
+      value: '?'
+    id: Buffer.md_out0_Buffer_datatype_format_uarch.md_in0
+    net_type:
+      classtype: NetType
+      id: TestNetType
+      value: md
+    port_id_list:
+    - Buffer.md_out0
+    - Buffer_datatype_format_uarch.md_in0
+  - classtype: Net
+    format_type:
+      classtype: FormatType
+      id: TestFormatType
+      value: '?'
+    id: Buffer.at_bound_in0_Buffer_datatype_format_uarch.at_bound_out0
+    net_type:
+      classtype: NetType
+      id: TestNetType
+      value: flag
+    port_id_list:
+    - Buffer.at_bound_in0
+    - Buffer_datatype_format_uarch.at_bound_out0
+  - classtype: Net
+    format_type:
+      classtype: FormatType
+      id: TestFormatType
+      value: '?'
+    id: Buffer.md_out1_Buffer_datatype_format_uarch.md_in1
+    net_type:
+      classtype: NetType
+      id: TestNetType
+      value: md
+    port_id_list:
+    - Buffer.md_out1
+    - Buffer_datatype_format_uarch.md_in1
+  - classtype: Net
+    format_type:
+      classtype: FormatType
+      id: TestFormatType
+      value: '?'
+    id: Buffer.at_bound_in1_Buffer_datatype_format_uarch.at_bound_out1
+    net_type:
+      classtype: NetType
+      id: TestNetType
+      value: flag
+    port_id_list:
+    - Buffer.at_bound_in1
+    - Buffer_datatype_format_uarch.at_bound_out1
+  - classtype: Net
+    format_type:
+      classtype: FormatType
+      id: TestFormatType
+      value: '?'
+    id: Buffer.md_out2_Buffer_datatype_format_uarch.md_in2
+    net_type:
+      classtype: NetType
+      id: TestNetType
+      value: md
+    port_id_list:
+    - Buffer.md_out2
+    - Buffer_datatype_format_uarch.md_in2
+  - classtype: Net
+    format_type:
+      classtype: FormatType
+      id: TestFormatType
+      value: '?'
+    id: Buffer.at_bound_in2_Buffer_datatype_format_uarch.at_bound_out2
+    net_type:
+      classtype: NetType
+      id: TestNetType
+      value: flag
+    port_id_list:
+    - Buffer.at_bound_in2
+    - Buffer_datatype_format_uarch.at_bound_out2
+  - classtype: Net
+    format_type:
+      classtype: FormatType
+      id: TestFormatType
+      value: '?'
+    id: TestNet_Buffer_md_out2_Skipping_Buffer2_Buffer0_md_in_leader
+    net_type:
+      classtype: NetType
+      id: TestNetType
+      value: md
+    port_id_list:
+    - Buffer.md_out2
+    - Skipping_Buffer2_Buffer0.md_in_leader
+  - classtype: Net
+    format_type:
+      classtype: FormatType
+      id: TestFormatType
+      value: addr
+    id: TestNet_Buffer_pos_in2_Skipping_Buffer2_Buffer0_pos_out_leader
+    net_type:
+      classtype: NetType
+      id: TestNetType
+      value: pos
+    port_id_list:
+    - Buffer.pos_in2
+    - Skipping_Buffer2_Buffer0.pos_out_leader
+  - classtype: Net
+    format_type:
+      classtype: FormatType
+      id: TestFormatType
+      value: '?'
+    id: TestNet_Buffer_md_out0_Skipping_Buffer2_Buffer0_md_in_follower
+    net_type:
+      classtype: NetType
+      id: TestNetType
+      value: md
+    port_id_list:
+    - Buffer.md_out0
+    - Skipping_Buffer2_Buffer0.md_in_follower
+  - classtype: Net
+    format_type:
+      classtype: FormatType
+      id: TestFormatType
+      value: addr
+    id: TestNet_Buffer_pos_in0_Skipping_Buffer2_Buffer0_pos_out_follower
+    net_type:
+      classtype: NetType
+      id: TestNetType
+      value: pos
+    port_id_list:
+    - Buffer.pos_in0
+    - Skipping_Buffer2_Buffer0.pos_out_follower
+  - classtype: Net
+    format_type:
+      classtype: FormatType
+      id: TestFormatType
+      value: '?'
+    id: TestNet_Buffer_md_out0_Skipping_Buffer0_Reg0_md_in_leader
+    net_type:
+      classtype: NetType
+      id: TestNetType
+      value: md
+    port_id_list:
+    - Buffer.md_out0
+    - Skipping_Buffer0_Reg0.md_in_leader
+  - classtype: Net
+    format_type:
+      classtype: FormatType
+      id: TestFormatType
+      value: addr
+    id: TestNet_Buffer_pos_in0_Skipping_Buffer0_Reg0_pos_out_leader
+    net_type:
+      classtype: NetType
+      id: TestNetType
+      value: pos
+    port_id_list:
+    - Buffer.pos_in0
+    - Skipping_Buffer0_Reg0.pos_out_leader
+  - classtype: Net
+    format_type:
+      classtype: FormatType
+      id: TestFormatType
+      value: '?'
+    id: TestNet_Reg_md_out0_Skipping_Buffer0_Reg0_md_in_follower
+    net_type:
+      classtype: NetType
+      id: TestNetType
+      value: md
+    port_id_list:
+    - Reg.md_out0
+    - Skipping_Buffer0_Reg0.md_in_follower
+  - classtype: Net
+    format_type:
+      classtype: FormatType
+      id: TestFormatType
+      value: addr
+    id: TestNet_Reg_pos_in0_Skipping_Buffer0_Reg0_pos_out_follower
+    net_type:
+      classtype: NetType
+      id: TestNetType
+      value: pos
+    port_id_list:
+    - Reg.pos_in0
+    - Skipping_Buffer0_Reg0.pos_out_follower

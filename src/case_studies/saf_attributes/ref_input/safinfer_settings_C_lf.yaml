@@ -1,0 +1,35 @@
+# Designate the output datatype (via designating which datatype must support read *and* write)
+dataspaces:
+  read_write_dataspace_id: Z
+custom_taxonomic_specifications:
+
+  # psum_spad buffer is dense but we need to give it fake format interfaces so that
+  # skipping can target the psum_spad (in other words, so that we can save on psum_spad
+  # accesses by using weight_spad and iact_spad sparse format metadata to index into the 
+  # psum_spad memory)
+  dense_buffer_format_interfaces:
+  - name: psum_spad
+    dataspaces:
+    - name: Z
+      dummy_format_interfaces: []
+#      - flattened-rankIDs: [ [ K ] ]
+#      - flattened-rankIDs: [ [ M ] ] 
+
+force_attributes:
+
+# Next two settings: disable fill optimization for the iact -> psum and weight -> psum
+# skipping microarchitectures, since the "follower" is a dense buffer so there are no
+# unnecessary leader fills to optimize away.
+- uri: /.Skipping_shared_buffer3_shared_buffer1
+  settings:
+  - type: positional
+    values:
+    - position: 3
+      value: 'no_opt_fills'
+
+#- uri: /.Skipping_shared_buffer1_psum_spad0
+#  settings:
+#  - type: positional
+#    values:
+#    - position: 3
+#      value: 'no_opt_fills'
