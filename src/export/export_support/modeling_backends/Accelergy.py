@@ -13,7 +13,7 @@ def dict_representer(dumper, data):
 
 yaml.add_representer(dict, dict_representer)
 
-accelergy_root="src/accelergy/"
+accelergy_root = os.path.join(os.path.dirname(__file__), "../../..", "accelergy/") # src/accelergy
 ERTART_fn="primitives_ERT_ART.pkl"
 lib_fn="saf_primitives.lib.yaml"
 repo_obj_install_path=os.path.join(os.path.join(accelergy_root,"data/"),ERTART_fn)

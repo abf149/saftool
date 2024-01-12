@@ -1,13 +1,13 @@
 clock_period: 5ns
 dataspaces:
-  read_write_dataspace_id: Outputs
+  read_write_dataspace_id: Z
 custom_taxonomic_specifications:
   dense_buffer_format_interfaces:
   - name: psum_spad
     dataspaces:
-    - name: Outputs
-      dummy_format_interfaces:
-      - flattened-rankIDs: [ [ C ] ]
+    - name: Z
+      dummy_format_interfaces: []
+#      - flattened-rankIDs: [ [ C ] ]
 #      - flattened-rankIDs: [ [ M ] ] 
 custom_taxo_to_model_settings: []
 #   - type: buffer
