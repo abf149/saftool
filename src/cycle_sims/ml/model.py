@@ -14,6 +14,7 @@ class NormalizedTransformedPolynomial(BaseEstimator, TransformerMixin):
         ])
         self.sqrt=sqrt
         self.lg=lg
+        self.degree=degree
 
     def fit(self, X, y):
         # Finding the square root of the y training data
