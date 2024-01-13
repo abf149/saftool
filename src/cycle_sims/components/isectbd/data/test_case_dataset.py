@@ -1,4 +1,4 @@
-import cycle_sims.isectbd.harness.flexible_intersect_compressed_fibers as hr_
+import src.cycle_sims.components.isectbd.harness.flexible_intersect_compressed_fibers as hr_
 import torch
 from torch.utils.data import Dataset, DataLoader
 

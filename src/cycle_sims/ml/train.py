@@ -1,4 +1,4 @@
-from cycle_sims.ml import model as m_, test as t_
+from src.cycle_sims.ml import model as m_, test as t_
 import src.cycle_sims.data as d_
 
 def train_model(dataloader, result_column_name, target_features, degree=2):
