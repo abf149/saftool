@@ -1,4 +1,4 @@
-import cycle_sims.util.data as d_
+import src.cycle_sims.data as d_
 from sklearn.metrics import mean_squared_error, r2_score
 import numpy as np
 
