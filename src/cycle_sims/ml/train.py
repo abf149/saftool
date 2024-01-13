@@ -1,5 +1,5 @@
-from src.cycle_sims.ml import model as m_, test as t_
-import src.cycle_sims.data as d_
+from . import model as m_, test as t_
+from ..data import data as d_
 
 def train_model(dataloader, result_column_name, target_features, degree=2):
     model = m_.NormalizedTransformedPolynomial(degree=degree)
