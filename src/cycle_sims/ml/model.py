@@ -20,12 +20,12 @@ class NormalizedTransformedPolynomial(BaseEstimator, TransformerMixin):
         print(X.shape)
         print(y.shape)
         # Ensure that X and y have the same number of rows
-        assert X.shape[0] == len(y), "X and y must have the same number of rows."
+        assert X.shape[0] == y.shape[0], "X and y must have the same number of rows."
 
         # Create a mask to filter out rows where X or y contains zeros
         non_zero_mask_X = ~np.any(X == 0, axis=1)  # Rows in X that don't contain zero
-        non_zero_mask_y = y != 0                  # Elements in y that are not zero
-        non_zero_mask = non_zero_mask_X & non_zero_mask_y  # Combine masks
+        non_zero_mask_y = ~np.any(y == 0, axis=1)  # Rows in y that don't contain zero
+        non_zero_mask = non_zero_mask_X & non_zero_mask_y.squeeze()  # Combine masks
 
         # Apply the mask
         X_filtered = X[non_zero_mask]
@@ -34,6 +34,8 @@ class NormalizedTransformedPolynomial(BaseEstimator, TransformerMixin):
         # Print the number of rows removed
         rows_removed = X.shape[0] - X_filtered.shape[0]
         print(f"Removed {rows_removed} rows containing zeros.")
+
+        # ... [rest of your fit method] ...
 
         # Apply transformation to y
         transformed_y = y_filtered
