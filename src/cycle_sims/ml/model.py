@@ -17,11 +17,20 @@ class NormalizedTransformedPolynomial(BaseEstimator, TransformerMixin):
         self.zero_replace_value = zero_replace_value
 
     def fit(self, X, y):
-        # Remove rows where X or y contains zeros
-        non_zero_mask = ~np.any(X == 0, axis=1) & (y != 0)
+        # Ensure that X and y have the same number of rows
+        assert X.shape[0] == len(y), "X and y must have the same number of rows."
+
+        # Create a mask to filter out rows where X or y contains zeros
+        non_zero_mask_X = ~np.any(X == 0, axis=1)  # Rows in X that don't contain zero
+        non_zero_mask_y = y != 0                  # Elements in y that are not zero
+        non_zero_mask = non_zero_mask_X & non_zero_mask_y  # Combine masks
+
+        # Apply the mask
         X_filtered = X[non_zero_mask]
         y_filtered = y[non_zero_mask]
-        rows_removed = len(X) - len(X_filtered)
+
+        # Print the number of rows removed
+        rows_removed = X.shape[0] - X_filtered.shape[0]
         print(f"Removed {rows_removed} rows containing zeros.")
 
         # Apply transformation to y
