@@ -17,8 +17,6 @@ class NormalizedTransformedPolynomial(BaseEstimator, TransformerMixin):
         self.zero_replace_value = zero_replace_value
 
     def fit(self, X, y):
-        print(X.shape)
-        print(y.shape)
         # Ensure that X and y have the same number of rows
         assert X.shape[0] == y.shape[0], "X and y must have the same number of rows."
 
