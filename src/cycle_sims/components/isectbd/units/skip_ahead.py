@@ -12,7 +12,11 @@ def skipahead_radix2_merge_intersection(v1, v2):
     i = j = 0
     intersection = []
     cycle_count = 0
-    x = 0  # Start with queue 0 (v1) or 1 (v2) based on the initial condition
+
+    x = 0
+    if v1[0] < v2[0]:
+        # Start with queue 0 (v1) if v1[0] < v2[0]
+        x = 1  
 
     while i < len(v1) and j < len(v2):
         cycle_count += 1
