@@ -36,6 +36,8 @@ def get_batch_with_selected_result_expression(dataloader, result_expression, tar
         evaluated_results = np.apply_along_axis(
             lambda row: float(expression.subs({symbol: row[target_features.index(str(symbol))] for symbol in symbols})),
             axis=-1, arr=results
-        )
+        ).flatten().reshape(-1, 1)
+
+        test_cases = test_cases.numpy().reshape(-1, test_cases.shape[-1])
 
         return test_cases, evaluated_results
