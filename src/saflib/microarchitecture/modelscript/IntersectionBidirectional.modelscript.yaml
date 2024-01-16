@@ -7,6 +7,9 @@ modelscript_primitives:
     - alias: C_C_two_finger_merge
       instances:
       - C_C_two_finger_merge
+    - alias: C_C_skip_ahead
+      instances:
+      - C_C_skip_ahead
     - alias: B_B_bitwise_and
       instances:
       - B_B_bitwise_and
@@ -138,6 +141,41 @@ modelscript_primitives:
         # Generate constraints on md_in0_ww_thresh, md_in0_rw_thresh to match RTL scale parameters
         generate_constraints: true
 
+      - name: skip_ahead
+        # C_C_two_finger_merge intersection unit is an ExTensor-like radix-two-merge-based intersection unit
+        approximation: poly
+        table_id: accelergy/data/primitives_table.csv
+        rtl_id_expression: VectorSkipAheadIntersectionUnitRegistered_vectorLength$(u)_numTags$(v)_tagBitWidth$(w)
+        symbol_map:
+          # RTL scale parameter -> primitive scale parameter mappings.
+          # Note: additional custom constraints (provided further below)
+          # will transitively map metaDataWidth and arraySize to md_in1
+          # and md_out as well
+          - variable: u
+            # Metadata input 0 word width max (md_in0_ww_thresh) maps to intersection_unit.metaDataWidth
+            symbol: md_out.peak.bandwidth.metadata_read_width
+          - variable: v
+            # Metadata input 0 read bandwidth max (md_in0_rw_thresh) maps to intersection_unit.arraySize
+            symbol: md_in0.peak.bandwidth.metadata_read_width
+          - variable: w
+            # Metadata input 0 read bandwidth max (md_in0_rw_thresh) maps to intersection_unit.arraySize
+            symbol: md_in0.peak.datatype.metadata_word_width
+        latency:
+          # Critical path length complies with clock latency
+          parameter_id: clock
+          single_latency: true
+          latency_column_name: critical_path_clock_latency
+        energy:
+            # Convert characterized total power to energy, assuming the component is un-gated
+            # for a duration equal to its critical path length (worst-case)
+          - expression: combinational_total_power+register_total_power+clock_network_total_power
+            type: power
+        area:
+          - expression: Combinational_Area+Noncombinational_Area
+            type: area
+        # Generate constraints on md_in0_ww_thresh, md_in0_rw_thresh to match RTL scale parameters
+        generate_constraints: true
+
       - name: bitmask_intersection
         # B_B_bitwise_and intersection unit is a a SparTen-like bitmask intersection unit
         approximation: poly
@@ -216,6 +254,77 @@ modelscript_primitives:
               #
               - ( @md_out_pr ) * ( @md_in0_cr ) * ( @md_in1_ww_thresh ) <= ( @md_in0_pr ) * ( @md_in1_rw_thresh )
               - ( @md_out_pr ) * ( @md_in1_cr ) * ( @md_in0_ww_thresh ) <= ( @md_in1_pr ) * ( @md_in0_rw_thresh )
+
+          - type: passthrough
+            list:
+              - port_in: md_in0
+                port_out: md_out
+                suffixes:
+                  - level.coordinate.dense_data_rank_size # md_in0_nc = md_out_nc
+
+
+
+
+      - name: C_C_skip_ahead
+        taxonomic_instance_alias: C_C_skip_ahead
+        objective:
+          actions:
+            # Heuristically, I am dividing the power consumption between the operand 0 fills and the
+            # operand 1 fills. Ever intersection entails a fill of both operands i.e. two fills, which will have a total
+            # energy of ( %(two_fingered_intersection) )
+            - name: fill
+              energy: 0
+            - name: intersect
+              energy: ( %(skip_ahead) ) / 2.0 # No need to model the intersection as consuming any energy, but keep this anyway
+            - name: gated_fill
+              energy: 0
+            - name: gated_intersect
+              energy: 0
+          area: ( %(skip_ahead) )
+        constraints:
+          - type: characterization_metrics_model
+            list:
+            # Import ref_counter constraints on md_in_ref_ww
+            - skip_ahead
+          - type: custom
+            list:
+              # Transitively map RTL metaDataWidth to all ports' metadata_word_width scale parameters
+              # (the mapping to md_in0 was already accomplished when the RTL model was imported further above)
+              - ( @md_in1_ww_thresh ) == ( @md_in0_ww_thresh )
+              - ( @md_out_ww_thresh ) == ( @md_in0_ww_thresh )
+              # Transitively map RTL arraySize to all ports' metadata_read_width scale parameters
+              # (the mapping to md_in0 was already accomplished when the RTL model was imported further above)
+              - ( @md_in1_rw_thresh ) == ( @md_in0_rw_thresh )
+              - ( @md_out_rw_thresh ) <= ( @md_in0_rw_thresh )
+              # At all ports, interface bandwidth (converted from bits/cyc to word/cyc) scale param. must meet or exceed throughput (words/cyc) load
+              - ( @md_in0_rw_thresh ) >= ( @md_in0_pr ) * ( @md_in0_ww_thresh )
+              - ( @md_in1_rw_thresh ) >= ( @md_in1_pr ) * ( @md_in1_ww_thresh )
+              - ( @md_out_rw_thresh ) >= ( @md_out_pr ) * ( @md_out_ww_thresh )
+              # Transfer relation (load): intersection vectorization scale parameters must be sufficient to source the required output 
+              # throughput load, given the operand sparsities (ratio of operand positional throughput load to operand coordinate throughput load.)
+              # This is derived from an analytical model of the relationship between input throughput, output throughput, vectorization and sparsity
+              # for a two-fingered merge. Specifically:
+              #
+              # md_out throughput <= (operand 0 sparsity)*(intersection unit vectorization at input 1)
+              # md_out throughput <= (operand 1 sparsity)*(intersection unit vectorization at input 0)
+              #
+              # Note: these constraints implicitly enforce an additional requirement, that the vectorization of both inputs must be greater
+              # than or equal to the throughput requirement at the output, because the number of intersections discovered per cycle can never
+              # exceed the degree of vectorization: for example, intersecting two length-4 vectors, you will never get more than 4 intersections
+              # per cycle at the output.
+              #
+              #- ( @md_out_pr ) * ( @md_in0_cr ) * ( @md_in1_ww_thresh ) <= ( @md_in0_pr ) * ( @md_in1_rw_thresh )
+              #- ( @md_out_pr ) * ( @md_in1_cr ) * ( @md_in0_ww_thresh ) <= ( @md_in1_pr ) * ( @md_in0_rw_thresh )
+
+              - ( @md_out_pr ) <= 0.102688658293311*( ( md_out_rw_thresh ) / ( md_out_ww ) )*(( @md_in0_nc )*( @md_in0_pr )/( @md_in0_cr ))**0.456341968944978*(( @md_in0_nc )*( @md_in1_pr )/( @md_in1_cr ))**0.50222928249573 + (1000*(( @md_in0_nc ) - 8)**2 + 1000*(( @md_in0_rw_thresh )/( @md_in0_ww ) - 1)**2)/((( @md_in0_nc ) - 8)**2 + (( @md_in0_rw_thresh )/( @md_in0_ww ) - 1)**2 + 0.0101)
+              - ( @md_out_pr ) <= 0.138149115260567*( ( md_out_rw_thresh ) / ( md_out_ww ) )*(( @md_in0_nc )*( @md_in0_pr )/( @md_in0_cr ))**0.467557309694482*(( @md_in0_nc )*( @md_in1_pr )/( @md_in1_cr ))**0.380352607458631 + (1000*(( @md_in0_nc ) - 8)**2 + 1000*(( @md_in0_rw_thresh )/( @md_in0_ww ) - 2)**2)/((( @md_in0_nc ) - 8)**2 + (( @md_in0_rw_thresh )/( @md_in0_ww ) - 2)**2 + 0.0101)
+              - ( @md_out_pr ) <= 0.161473700669281*( ( md_out_rw_thresh ) / ( md_out_ww ) )*(( @md_in0_nc )*( @md_in0_pr )/( @md_in0_cr ))**0.459304737274758*(( @md_in0_nc )*( @md_in1_pr )/( @md_in1_cr ))**0.358271368009653 + (1000*(( @md_in0_nc ) - 8)**2 + 1000*(( @md_in0_rw_thresh )/( @md_in0_ww ) - 4)**2)/((( @md_in0_nc ) - 8)**2 + (( @md_in0_rw_thresh )/( @md_in0_ww ) - 4)**2 + 0.0101)
+              - ( @md_out_pr ) <= 0.0344535991703489*( ( md_out_rw_thresh ) / ( md_out_ww ) )*(( @md_in0_nc )*( @md_in0_pr )/( @md_in0_cr ))**0.584975078352616*(( @md_in0_nc )*( @md_in1_pr )/( @md_in1_cr ))**0.538564832469838 + (1000*(( @md_in0_nc ) - 16)**2 + 1000*(( @md_in0_rw_thresh )/( @md_in0_ww ) - 1)**2)/((( @md_in0_nc ) - 16)**2 + (( @md_in0_rw_thresh )/( @md_in0_ww ) - 1)**2 + 0.0101)
+              - ( @md_out_pr ) <= 0.0584523955541039*( ( md_out_rw_thresh ) / ( md_out_ww ) )*(( @md_in0_nc )*( @md_in0_pr )/( @md_in0_cr ))**0.496163069796445*(( @md_in0_nc )*( @md_in1_pr )/( @md_in1_cr ))**0.428866885740339 + (1000*(( @md_in0_nc ) - 16)**2 + 1000*(( @md_in0_rw_thresh )/( @md_in0_ww ) - 2)**2)/((( @md_in0_nc ) - 16)**2 + (( @md_in0_rw_thresh )/( @md_in0_ww ) - 2)**2 + 0.0101)
+              - ( @md_out_pr ) <= 0.0781888062429171*( ( md_out_rw_thresh ) / ( md_out_ww ) )*(( @md_in0_nc )*( @md_in0_pr )/( @md_in0_cr ))**0.42092181383563*(( @md_in0_nc )*( @md_in1_pr )/( @md_in1_cr ))**0.412393936316564 + (1000*(( @md_in0_nc ) - 16)**2 + 1000*(( @md_in0_rw_thresh )/( @md_in0_ww ) - 4)**2)/((( @md_in0_nc ) - 16)**2 + (( @md_in0_rw_thresh )/( @md_in0_ww ) - 4)**2 + 0.0101)
+              - ( @md_out_pr ) <= 0.0137464715418352*( ( md_out_rw_thresh ) / ( md_out_ww ) )*(( @md_in0_nc )*( @md_in0_pr )/( @md_in0_cr ))**0.617577162905066*(( @md_in0_nc )*( @md_in1_pr )/( @md_in1_cr ))**0.536692730397843 + (1000*(( @md_in0_nc ) - 32)**2 + 1000*(( @md_in0_rw_thresh )/( @md_in0_ww ) - 1)**2)/((( @md_in0_nc ) - 32)**2 + (( @md_in0_rw_thresh )/( @md_in0_ww ) - 1)**2 + 0.0101)
+              - ( @md_out_pr ) <= 0.0196899860327367*( ( md_out_rw_thresh ) / ( md_out_ww ) )*(( @md_in0_nc )*( @md_in0_pr )/( @md_in0_cr ))**0.545370337593939*(( @md_in0_nc )*( @md_in1_pr )/( @md_in1_cr ))**0.508501836887005 + (1000*(( @md_in0_nc ) - 32)**2 + 1000*(( @md_in0_rw_thresh )/( @md_in0_ww ) - 2)**2)/((( @md_in0_nc ) - 32)**2 + (( @md_in0_rw_thresh )/( @md_in0_ww ) - 2)**2 + 0.0101)
+              - ( @md_out_pr ) <= 0.0326474422301006*( ( md_out_rw_thresh ) / ( md_out_ww ) )*(( @md_in0_nc )*( @md_in0_pr )/( @md_in0_cr ))**0.477506292312224*(( @md_in0_nc )*( @md_in1_pr )/( @md_in1_cr ))**0.435847936397014 + (1000*(( @md_in0_nc ) - 32)**2 + 1000*(( @md_in0_rw_thresh )/( @md_in0_ww ) - 4)**2)/((( @md_in0_nc ) - 32)**2 + (( @md_in0_rw_thresh )/( @md_in0_ww ) - 4)**2 + 0.0101)
 
           - type: passthrough
             list:
