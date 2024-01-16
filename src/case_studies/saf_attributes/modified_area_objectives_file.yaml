@@ -1,0 +1,50 @@
+TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser0: ( TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser0.md_in_pr_thresh
+  ) * ( 0.00166193389941797*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser0.md_in_ww_thresh**3
+  - 0.196171442556322*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser0.md_in_ww_thresh**2
+  + 18.9034258453812*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser0.md_in_ww_thresh
+  + 12.6194203869047 )
+TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser1: ( TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser1.md_in_pr_thresh
+  ) * ( 0.00166193389941797*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser1.md_in_ww_thresh**3
+  - 0.196171442556322*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser1.md_in_ww_thresh**2
+  + 18.9034258453812*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser1.md_in_ww_thresh
+  + 12.6194203869047 )
+TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser2: ( TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser2.md_in_pr_thresh
+  ) * ( 0.00166193389941797*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser2.md_in_ww_thresh**3
+  - 0.196171442556322*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser2.md_in_ww_thresh**2
+  + 18.9034258453812*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser2.md_in_ww_thresh
+  + 12.6194203869047 )
+TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser3: ( TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser3.md_in_pr_thresh
+  ) * ( 0.00166193389941797*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser3.md_in_ww_thresh**3
+  - 0.196171442556322*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser3.md_in_ww_thresh**2
+  + 18.9034258453812*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser3.md_in_ww_thresh
+  + 12.6194203869047 )
+TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD: ( 0.114999626599742*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_vectorization**3
+  - 0.726235817510315*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_vectorization**2*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_ww_thresh
+  + 1.17917265186701*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_vectorization**2*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_out_vectorization
+  - 6.60946795100123*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_vectorization**2
+  - 6.08773684822839*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_vectorization*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_ww_thresh**2
+  + 25.8414238333072*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_vectorization*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_ww_thresh*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_out_vectorization
+  + 129.242657432295*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_vectorization*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_ww_thresh
+  + 34.5400520322168*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_vectorization*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_out_vectorization**2
+  - 188.120668577266*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_vectorization*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_out_vectorization
+  + 243.717251099976*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_vectorization
+  - 0.0560104945372795*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_ww_thresh**3
+  - 30.6651273615283*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_ww_thresh**2*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_out_vectorization
+  + 53.4698851351093*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_ww_thresh**2
+  - 37.6012676274181*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_ww_thresh*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_out_vectorization**2
+  + 398.183637402855*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_ww_thresh*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_out_vectorization
+  - 457.665558742261*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_ww_thresh
+  + 320.946741202925*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_out_vectorization**3
+  - 2287.30512150136*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_out_vectorization**2
+  + 4674.92898837231*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_out_vectorization
+  - 2606.20255357026 )
+TestArchitecture.Skipping_shared_buffer3_shared_buffer1.SinglePgenLeader: ( 0.00366803114258532*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.SinglePgenLeader.md_in_ref_ww_thresh**3
+  - 0.262303001084883*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.SinglePgenLeader.md_in_ref_ww_thresh**2
+  + 37.4582728020918*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.SinglePgenLeader.md_in_ref_ww_thresh
+  + 5.82434727976128 )
+TestArchitecture.Skipping_shared_buffer3_shared_buffer1.SinglePgenFollower: ( 0.00366803114258532*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.SinglePgenFollower.md_in_ref_ww_thresh**3
+  - 0.262303001084883*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.SinglePgenFollower.md_in_ref_ww_thresh**2
+  + 37.4582728020918*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.SinglePgenFollower.md_in_ref_ww_thresh
+  + 5.82434727976128 )
+TestArchitecture.shared_buffer_datatype_format_uarch: '0'
+TestArchitecture.Skipping_shared_buffer3_shared_buffer1: '0'

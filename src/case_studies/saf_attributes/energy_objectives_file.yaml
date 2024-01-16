@@ -1,0 +1,74 @@
+TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser0:
+  check_bound: ( TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser0.md_in_pr_thresh
+    ) * ( 3.39519598264422e-6*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser0.md_in_ww_thresh**3
+    - 0.0004030131448777*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser0.md_in_ww_thresh**2
+    + 0.0196580319453973*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser0.md_in_ww_thresh
+    + 0.0203547110119046 )
+  gated_check_bound: '0'
+TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser1:
+  check_bound: ( TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser1.md_in_pr_thresh
+    ) * ( 3.39519598264422e-6*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser1.md_in_ww_thresh**3
+    - 0.0004030131448777*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser1.md_in_ww_thresh**2
+    + 0.0196580319453973*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser1.md_in_ww_thresh
+    + 0.0203547110119046 )
+  gated_check_bound: '0'
+TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser2:
+  check_bound: ( TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser2.md_in_pr_thresh
+    ) * ( 3.39519598264422e-6*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser2.md_in_ww_thresh**3
+    - 0.0004030131448777*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser2.md_in_ww_thresh**2
+    + 0.0196580319453973*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser2.md_in_ww_thresh
+    + 0.0203547110119046 )
+  gated_check_bound: '0'
+TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser3:
+  check_bound: ( TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser3.md_in_pr_thresh
+    ) * ( 3.39519598264422e-6*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser3.md_in_ww_thresh**3
+    - 0.0004030131448777*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser3.md_in_ww_thresh**2
+    + 0.0196580319453973*TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser3.md_in_ww_thresh
+    + 0.0203547110119046 )
+  gated_check_bound: '0'
+TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD:
+  fill: '0'
+  intersect: ( 4.97201025518546e-5*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_rw_thresh**3
+    - 0.00227453432575169*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_rw_thresh**2*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_ww_thresh
+    + 0.00175842191980313*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_rw_thresh**2*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_out_rw_thresh
+    + 0.00591346051944958*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_rw_thresh**2
+    + 0.0128673787351659*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_rw_thresh*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_ww_thresh**2
+    - 0.0163623340338598*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_rw_thresh*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_ww_thresh*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_out_rw_thresh
+    + 0.0444545895611632*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_rw_thresh*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_ww_thresh
+    + 0.035143273794849*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_rw_thresh*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_out_rw_thresh**2
+    - 0.0665383003261552*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_rw_thresh*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_out_rw_thresh
+    + 0.219492441192721*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_rw_thresh
+    - 0.00350830785562613*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_ww_thresh**3
+    + 0.0149489609838354*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_ww_thresh**2*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_out_rw_thresh
+    - 0.0264860906132738*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_ww_thresh**2
+    - 0.0188376441929267*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_ww_thresh*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_out_rw_thresh**2
+    + 0.125299613992351*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_ww_thresh*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_out_rw_thresh
+    + 0.148480656074253*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_in0_ww_thresh
+    + 0.188832250435778*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_out_rw_thresh**3
+    - 1.43349759283433*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_out_rw_thresh**2
+    + 3.01274944025297*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.IntersectionBD.md_out_rw_thresh
+    - 1.93726869030955 ) / 2.0
+  gated_fill: '0'
+  gated_intersect: '0'
+TestArchitecture.Skipping_shared_buffer3_shared_buffer1.SinglePgenLeader:
+  gen: '0'
+  count_ref: ( 1.80850592323413e-6*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.SinglePgenLeader.md_in_ref_ww_thresh**3
+    - 0.00012939402082957*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.SinglePgenLeader.md_in_ref_ww_thresh**2
+    + 0.0450869716648882*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.SinglePgenLeader.md_in_ref_ww_thresh
+    + 0.00883133303571363 )
+  gated_gen: '0'
+TestArchitecture.Skipping_shared_buffer3_shared_buffer1.SinglePgenFollower:
+  gen: '0'
+  count_ref: ( 1.80850592323413e-6*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.SinglePgenFollower.md_in_ref_ww_thresh**3
+    - 0.00012939402082957*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.SinglePgenFollower.md_in_ref_ww_thresh**2
+    + 0.0450869716648882*TestArchitecture.Skipping_shared_buffer3_shared_buffer1.SinglePgenFollower.md_in_ref_ww_thresh
+    + 0.00883133303571363 )
+  gated_gen: '0'
+TestArchitecture.shared_buffer_datatype_format_uarch:
+  check_bounds: '0'
+  gated_check_bounds: '0'
+TestArchitecture.Skipping_shared_buffer3_shared_buffer1:
+  fill_leader: '0'
+  fill_follower: '0'
+  skip_leader: '0'
+  skip_follower: '0'

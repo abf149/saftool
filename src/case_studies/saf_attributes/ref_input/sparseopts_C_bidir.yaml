@@ -10,7 +10,7 @@ sparse_optimizations:
         - name: A
           ranks: 
             - format: UOP             
-              payload-word-bits:  7
+              payload-word-bits:  4
               flattened-rankIDs: [ [ M ] ] 
             - format: CP         # C0
               metadata-word-bits: 4
@@ -19,7 +19,7 @@ sparse_optimizations:
         - name: B
           ranks:
             - format: UOP
-              payload-word-bits:  7
+              payload-word-bits:  4
               flattened-rankIDs: [ [ N ] ] # [ [ C, R ] ] 
             - format: CP
               metadata-word-bits: 4

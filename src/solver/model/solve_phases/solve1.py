@@ -87,6 +87,29 @@ def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,f
     # Mapping symbols to more convenient names
     variable_mapping = {sym: f'x{i+1}' for i, sym in enumerate(final_symbols)}
 
+    def invert_dict(input_dict):
+        # Invert the dictionary: keys become values and values become keys
+        # Assuming the input dictionary implements a 1:1 relation
+        return {value: key for key, value in input_dict.items()}
+
+    def replace_var_names(expr, var_map):
+        # This function takes an expression as a string and a variable mapping,
+        # and replaces all occurrences of the variables with their human-readable names.
+
+        # Regular expression to match variable names (e.g., x67, x22)
+        # Adjust the pattern if variable names have a different format
+        var_pattern = r'\bx\d+\b'
+
+        def replace_match(match):
+            var_name = match.group(0)
+            # Replace with human-readable name if it exists in the mapping
+            return var_map.get(var_name, var_name)
+
+        # Replace all occurrences of the variable names in the expression
+        return re.sub(var_pattern, replace_match, expr)
+
+    variable_inverse_mapping=invert_dict(variable_mapping)
+
 
     # Defining the variables based on their types
     for sym, sym_type in zip(final_symbols, final_symbol_types):
@@ -165,10 +188,13 @@ def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,f
     #obj_expr=sum(getattr(model, variable_mapping[sym]) for sym in final_symbols)
     model.obj = Objective(expr=obj_expr, sense=minimize)
 
+    # Example usage in your loop
     for constraint in model.component_objects(Constraint, active=True):
         constraint_object = getattr(model, constraint.name)
         for index in constraint_object:
-            print(f"Constraint {constraint.name}[{index}]: {constraint_object[index].expr}")
+            expr = str(constraint_object[index].expr)
+            readable_expr = replace_var_names(expr, variable_inverse_mapping)
+            info(f"Constraint {constraint.name}[{index}]: {readable_expr}", also_stdout=True)
 
     # Solve the model
     if solver_man=='neos':
