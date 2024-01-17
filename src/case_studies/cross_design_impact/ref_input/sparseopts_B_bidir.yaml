@@ -1,0 +1,48 @@
+# A: T-<UC>(HW)
+# B: T-<UC>(WH)
+# Z: dense
+
+sparse_optimizations:
+  targets:
+  - name: shared_buffer
+    representation-format:
+      data-spaces:
+        - name: A
+          ranks: 
+            - format: UOP             
+              payload-word-bits:  4
+              flattened-rankIDs: [ [ M ] ] 
+            - format: B         # C0
+              metadata-word-bits: 4
+              flattened-rankIDs: [ [ K ] ] 
+          rank-application-order: inner-to-outer
+        - name: B
+          ranks:
+            - format: UOP
+              payload-word-bits:  4
+              flattened-rankIDs: [ [ N ] ] # [ [ C, R ] ] 
+            - format: B
+              metadata-word-bits: 4
+              flattened-rankIDs: [ [ K ] ] # [ [ M  ] ]
+          rank-application-order: inner-to-outer
+    action-optimization:
+      - type: skipping
+        options:
+          - target: A
+            condition-on: [ B ]
+      - type: skipping
+        options:
+          - target: B
+            condition-on: [A]
+
+  - name: psum_spad
+    action-optimization:
+      - type: skipping
+        options:
+          - target: Z
+            condition-on: [ A, B ]
+
+# Pipeline bubble == discard
+  - name: MAC
+    compute-optimization:
+    - type: skipping

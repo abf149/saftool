@@ -11,8 +11,8 @@ custom_taxonomic_specifications:
   - name: Reg
     dataspaces:
     - name: Z
-      dummy_format_interfaces:
-      - flattened-rankIDs: [ [ F ] ]
+      dummy_format_interfaces: []
+#      - flattened-rankIDs: [ [ F ] ]
 
 force_attributes:
 

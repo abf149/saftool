@@ -8,6 +8,7 @@ modelscript_primitives:
     - alias: C_no_arithmetic_sentinel
       instances:
       - C_no_arithmetic_sentinel
+      - B_no_arithmetic_sentinel
     - alias: C_yes_arithmetic_sentinel
       instances:
       - C_yes_arithmetic_sentinel

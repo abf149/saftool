@@ -245,12 +245,12 @@ modelscript_primitives:
         objective:
           actions:
             - name: gen
-              energy: ( @pri_encoder )
+              energy: ( %(pri_encoder) )
             - name: count_ref
-              energy: ( @ref_psum_ripple )/2
+              energy: ( %(ref_psum_ripple) )/2
             - name: gated_gen
               energy: 0
-          area: ( @pri_encoder ) + 2*( @ref_psum_ripple )
+          area: ( %(pri_encoder) ) + 2*( %(ref_psum_ripple) )
         constraints:
           - type: characterization_metrics_model
             list:
@@ -322,12 +322,12 @@ modelscript_primitives:
         objective:
           actions:
             - name: gen
-              energy: ( @pri_encoder )
+              energy: ( %(pri_encoder) )
             - name: count_ref
-              energy: ( @ref_psum_kogge_stone )/2
+              energy: ( %(ref_psum_kogge_stone) )/2
             - name: gated_gen
               energy: 0
-          area: ( @pri_encoder ) + 2*( @ref_psum_kogge_stone )
+          area: ( %(pri_encoder) ) + 2*( %(ref_psum_kogge_stone) )
         constraints:
           - type: characterization_metrics_model
             list:
