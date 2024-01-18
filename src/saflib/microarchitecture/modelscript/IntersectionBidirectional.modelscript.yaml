@@ -113,7 +113,7 @@ modelscript_primitives:
         # C_C_two_finger_merge intersection unit is an ExTensor-like radix-two-merge-based intersection unit
         approximation: poly
         table_id: accelergy/data/primitives_table.csv
-        rtl_id_expression: VectorTwoFingerMergeIntersectionRegistered_metaDataWidth$(u)_arraySize$(v)
+        rtl_id_expression: VectorTwoFingerMergeIntersectionRegistered_metaDataWidth$(u)_arraySize$(v)_numStages$(w)
         symbol_map:
           # RTL scale parameter -> primitive scale parameter mappings.
           # Note: additional custom constraints (provided further below)
@@ -125,6 +125,9 @@ modelscript_primitives:
           - variable: v
             # Metadata input 0 read bandwidth max (md_in0_rw_thresh) maps to intersection_unit.arraySize
             symbol: md_in0.peak.bandwidth.metadata_read_width
+          - variable: w
+            # Metadata input 0 word width max (md_in0_ww_thresh) maps to intersection_unit.metaDataWidth
+            symbol: md_out.peak.bandwidth.metadata_read_width
         latency:
           # Critical path length complies with clock latency
           parameter_id: clock
@@ -234,7 +237,7 @@ modelscript_primitives:
               # Transitively map RTL arraySize to all ports' metadata_read_width scale parameters
               # (the mapping to md_in0 was already accomplished when the RTL model was imported further above)
               - ( @md_in1_rw_thresh ) == ( @md_in0_rw_thresh )
-              - ( @md_out_rw_thresh ) == ( @md_in0_rw_thresh )
+              - ( @md_out_rw_thresh ) <= ( @md_in0_rw_thresh )
               # At all ports, interface bandwidth (converted from bits/cyc to word/cyc) scale param. must meet or exceed throughput (words/cyc) load
               - ( @md_in0_rw_thresh ) >= ( @md_in0_pr ) * ( @md_in0_ww_thresh )
               - ( @md_in1_rw_thresh ) >= ( @md_in1_pr ) * ( @md_in1_ww_thresh )
@@ -252,8 +255,18 @@ modelscript_primitives:
               # exceed the degree of vectorization: for example, intersecting two length-4 vectors, you will never get more than 4 intersections
               # per cycle at the output.
               #
-              - ( @md_out_pr ) * ( @md_in0_cr ) * ( @md_in1_ww_thresh ) <= ( @md_in0_pr ) * ( @md_in1_rw_thresh )
-              - ( @md_out_pr ) * ( @md_in1_cr ) * ( @md_in0_ww_thresh ) <= ( @md_in1_pr ) * ( @md_in0_rw_thresh )
+              #- ( @md_out_pr ) * ( @md_in0_cr ) * ( @md_in1_ww_thresh ) <= ( @md_in0_pr ) * ( @md_in1_rw_thresh )
+              #- ( @md_out_pr ) * ( @md_in1_cr ) * ( @md_in0_ww_thresh ) <= ( @md_in1_pr ) * ( @md_in0_rw_thresh )
+
+              - ( @md_out_pr ) <= 0.102688658293311*( ( md_out_rw_thresh ) / ( md_out_ww ) )*(( @md_in0_nc )*( @md_in0_pr )/( @md_in0_cr ))**0.456341968944978*(( @md_in0_nc )*( @md_in1_pr )/( @md_in1_cr ))**0.50222928249573 + (1000*(( @md_in0_nc ) - 8)**2 + 1000*(( @md_in0_rw_thresh )/( @md_in0_ww ) - 1)**2)/((( @md_in0_nc ) - 8)**2 + (( @md_in0_rw_thresh )/( @md_in0_ww ) - 1)**2 + 0.0101)
+              - ( @md_out_pr ) <= 0.138149115260567*( ( md_out_rw_thresh ) / ( md_out_ww ) )*(( @md_in0_nc )*( @md_in0_pr )/( @md_in0_cr ))**0.467557309694482*(( @md_in0_nc )*( @md_in1_pr )/( @md_in1_cr ))**0.380352607458631 + (1000*(( @md_in0_nc ) - 8)**2 + 1000*(( @md_in0_rw_thresh )/( @md_in0_ww ) - 2)**2)/((( @md_in0_nc ) - 8)**2 + (( @md_in0_rw_thresh )/( @md_in0_ww ) - 2)**2 + 0.0101)
+              - ( @md_out_pr ) <= 0.161473700669281*( ( md_out_rw_thresh ) / ( md_out_ww ) )*(( @md_in0_nc )*( @md_in0_pr )/( @md_in0_cr ))**0.459304737274758*(( @md_in0_nc )*( @md_in1_pr )/( @md_in1_cr ))**0.358271368009653 + (1000*(( @md_in0_nc ) - 8)**2 + 1000*(( @md_in0_rw_thresh )/( @md_in0_ww ) - 4)**2)/((( @md_in0_nc ) - 8)**2 + (( @md_in0_rw_thresh )/( @md_in0_ww ) - 4)**2 + 0.0101)
+              - ( @md_out_pr ) <= 0.0344535991703489*( ( md_out_rw_thresh ) / ( md_out_ww ) )*(( @md_in0_nc )*( @md_in0_pr )/( @md_in0_cr ))**0.584975078352616*(( @md_in0_nc )*( @md_in1_pr )/( @md_in1_cr ))**0.538564832469838 + (1000*(( @md_in0_nc ) - 16)**2 + 1000*(( @md_in0_rw_thresh )/( @md_in0_ww ) - 1)**2)/((( @md_in0_nc ) - 16)**2 + (( @md_in0_rw_thresh )/( @md_in0_ww ) - 1)**2 + 0.0101)
+              - ( @md_out_pr ) <= 0.0584523955541039*( ( md_out_rw_thresh ) / ( md_out_ww ) )*(( @md_in0_nc )*( @md_in0_pr )/( @md_in0_cr ))**0.496163069796445*(( @md_in0_nc )*( @md_in1_pr )/( @md_in1_cr ))**0.428866885740339 + (1000*(( @md_in0_nc ) - 16)**2 + 1000*(( @md_in0_rw_thresh )/( @md_in0_ww ) - 2)**2)/((( @md_in0_nc ) - 16)**2 + (( @md_in0_rw_thresh )/( @md_in0_ww ) - 2)**2 + 0.0101)
+              - ( @md_out_pr ) <= 0.0781888062429171*( ( md_out_rw_thresh ) / ( md_out_ww ) )*(( @md_in0_nc )*( @md_in0_pr )/( @md_in0_cr ))**0.42092181383563*(( @md_in0_nc )*( @md_in1_pr )/( @md_in1_cr ))**0.412393936316564 + (1000*(( @md_in0_nc ) - 16)**2 + 1000*(( @md_in0_rw_thresh )/( @md_in0_ww ) - 4)**2)/((( @md_in0_nc ) - 16)**2 + (( @md_in0_rw_thresh )/( @md_in0_ww ) - 4)**2 + 0.0101)
+              - ( @md_out_pr ) <= 0.0137464715418352*( ( md_out_rw_thresh ) / ( md_out_ww ) )*(( @md_in0_nc )*( @md_in0_pr )/( @md_in0_cr ))**0.617577162905066*(( @md_in0_nc )*( @md_in1_pr )/( @md_in1_cr ))**0.536692730397843 + (1000*(( @md_in0_nc ) - 32)**2 + 1000*(( @md_in0_rw_thresh )/( @md_in0_ww ) - 1)**2)/((( @md_in0_nc ) - 32)**2 + (( @md_in0_rw_thresh )/( @md_in0_ww ) - 1)**2 + 0.0101)
+              - ( @md_out_pr ) <= 0.0196899860327367*( ( md_out_rw_thresh ) / ( md_out_ww ) )*(( @md_in0_nc )*( @md_in0_pr )/( @md_in0_cr ))**0.545370337593939*(( @md_in0_nc )*( @md_in1_pr )/( @md_in1_cr ))**0.508501836887005 + (1000*(( @md_in0_nc ) - 32)**2 + 1000*(( @md_in0_rw_thresh )/( @md_in0_ww ) - 2)**2)/((( @md_in0_nc ) - 32)**2 + (( @md_in0_rw_thresh )/( @md_in0_ww ) - 2)**2 + 0.0101)
+              - ( @md_out_pr ) <= 0.0326474422301006*( ( md_out_rw_thresh ) / ( md_out_ww ) )*(( @md_in0_nc )*( @md_in0_pr )/( @md_in0_cr ))**0.477506292312224*(( @md_in0_nc )*( @md_in1_pr )/( @md_in1_cr ))**0.435847936397014 + (1000*(( @md_in0_nc ) - 32)**2 + 1000*(( @md_in0_rw_thresh )/( @md_in0_ww ) - 4)**2)/((( @md_in0_nc ) - 32)**2 + (( @md_in0_rw_thresh )/( @md_in0_ww ) - 4)**2 + 0.0101)
 
           - type: passthrough
             list:
