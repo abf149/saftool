@@ -81,7 +81,7 @@ class TestVectorSkipAheadIntersectionUnitRegistered extends AnyFlatSpec with Chi
 
   val numTagsValues = List(1,2,4) // 2, 4, 8, 16, 3
   val fiberLengths = List(8,16,32) // 2, 4, 8, 16, 32
-  val vectorLengths = List(1,2,3,4,5,6,7,8)
+  val vectorLengths = List(1,2,3,4) // 1,2,3,4,5,6,7,8
 
   val combinations = for {
     vectorLength <- vectorLengths

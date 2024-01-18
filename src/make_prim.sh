@@ -22,7 +22,8 @@ SIM_DATA_DIR="hw/sim_data"
 #verilog_file_template="$VERILOG_DEST_DIR"/*.v
 echo Target verilog files:
 #verilog_file_template="${VERILOG_DEST_DIR}/VectorSkipAheadIntersectionUnitRegistered*.v ${VERILOG_DEST_DIR}/VectorTwoFingerMergeIntersectionRegistered*.v"
-verilog_file_template="${VERILOG_DEST_DIR}/VectorTwoFingerMergeIntersectionRegistered*.v"
+verilog_file_template="${VERILOG_DEST_DIR}/VectorSkipAheadIntersectionUnitRegistered*.v"
+
 echo $verilog_file_template
 
 make clean_log clean_summary clean_rtl
