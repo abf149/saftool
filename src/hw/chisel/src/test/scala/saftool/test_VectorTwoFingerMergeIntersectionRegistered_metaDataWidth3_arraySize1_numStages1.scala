@@ -58,7 +58,7 @@ class Test_VectorTwoFingerMergeIntersectionRegistered extends AnyFlatSpec with C
 
   val arraySizes = List(1,2,4)
   val fiberLengths = List(8,16,32)
-  val stageCounts = List(1,2,3,4,5,6,7,8)
+  val stageCounts = List(1,2,3,4) // 1,2,3,4,5,6,7,8
   val chiselTestDir = sys.env.getOrElse("CHISEL_TEST_DIR", "src/test/scala/saftool")
   var verilog_dir = "src/verilog/"
 

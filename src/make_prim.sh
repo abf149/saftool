@@ -14,9 +14,18 @@ VERILOG_SRC_DIR="hw/chisel/src/verilog"
 VERILOG_DEST_DIR="hw/rtl_out"
 SIM_DATA_DIR="hw/sim_data"
 
-verilog_file_template="$VERILOG_DEST_DIR"/*.v
+#echo Copying over verilog...
+#echo $VERILOG_SRC_DIR/*.v
+#echo $VERILOG_DEST_DIR/*.v
+#cp $VERILOG_SRC_DIR/*.v $VERILOG_DEST_DIR/*.v
 
-make clean_log clean_summary
+#verilog_file_template="$VERILOG_DEST_DIR"/*.v
+echo Target verilog files:
+#verilog_file_template="${VERILOG_DEST_DIR}/VectorSkipAheadIntersectionUnitRegistered*.v ${VERILOG_DEST_DIR}/VectorTwoFingerMergeIntersectionRegistered*.v"
+verilog_file_template="${VERILOG_DEST_DIR}/VectorTwoFingerMergeIntersectionRegistered*.v"
+echo $verilog_file_template
+
+make clean_log clean_summary clean_rtl
 rm -f $SIM_DATA_DIR/*.csv
 rm -f hw/sim_data/primitives_table_global.csv # probably redundant
 touch hw/sim_data/primitives_table_global.csv
@@ -44,7 +53,7 @@ for CLOCK_PERIOD in $CLOCK_PERIODS; do \
         echo copying...
         find "$VERILOG_SRC_DIR" -name "*.v" -type f -print0 | xargs -0 -I {} cp {} "$VERILOG_DEST_DIR/"
         echo enumerating verilog files
-        v_files=("$VERILOG_DEST_DIR"/*.v)
+        v_files=($verilog_file_template)
         total_files=${#v_files[@]}
 
         echo "Total_files: $total_files"
@@ -118,7 +127,7 @@ for CLOCK_PERIOD in $CLOCK_PERIODS; do \
         cp hw/sim_data/*.latency hw/sim_data/$CLOCK_PERIOD/ # Latency excerpt
         cp hw/sim_data/*.summary hw/sim_data/$CLOCK_PERIOD/ # Primitive data table row
         #cp hw/sim_data/primitives_data.csv hw/sim_data/$CLOCK_PERIOD/primitives_data.csv
-        make clean_log clean_summary
+        make clean_log clean_summary clean_rtl
         echo ...characterization done.
     fi
 
@@ -132,8 +141,8 @@ for CLOCK_PERIOD in $CLOCK_PERIODS; do \
     #    echo "- Primitive data table for $CLOCK_PERIOD generated."
     #fi
 
-    echo "- Appending to global primitives table..."
-	cat hw/sim_data/$CLOCK_PERIOD/primitives_table.csv >> hw/sim_data/primitives_table_global.csv   
+    #echo "- Appending to global primitives table..."
+	#cat hw/sim_data/$CLOCK_PERIOD/primitives_table.csv >> hw/sim_data/primitives_table_global.csv   
 done
 
 echo "Installing accelergy primitives table csv"
