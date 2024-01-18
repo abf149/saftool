@@ -1,0 +1,660 @@
+compound_components:
+  version: 0.3
+  classes:
+  - name: TestArchitecture__BackingStorage_datatype_format_uarch
+    attributes:
+      clock: must_specify
+      technology: must_specify
+      area_multiplier: must_specify
+      fibertree: must_specify
+    subcomponents:
+    - name: TestMetadataParser0
+      class: MetadataParserModel
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: area_multiplier
+        format: U
+        strategy: sentinel
+        coordinate_arithmetic: no_arithmetic
+        md_in_rw_thresh: 32.0
+        md_in_pr_thresh: 2.0
+        md_in_ww_thresh: 16.0
+    - name: TestMetadataParser1
+      class: MetadataParserModel
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: area_multiplier
+        format: U
+        strategy: sentinel
+        coordinate_arithmetic: no_arithmetic
+        md_in_rw_thresh: 32.0
+        md_in_pr_thresh: 1.0
+        md_in_ww_thresh: 16.0
+    - name: TestMetadataParser2
+      class: MetadataParserModel
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: area_multiplier
+        format: U
+        strategy: sentinel
+        coordinate_arithmetic: no_arithmetic
+        md_in_rw_thresh: 32.0
+        md_in_pr_thresh: 1.0
+        md_in_ww_thresh: 16.0
+    - name: TestMetadataParser3
+      class: MetadataParserModel
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: area_multiplier
+        format: U
+        strategy: sentinel
+        coordinate_arithmetic: no_arithmetic
+        md_in_rw_thresh: 32.0
+        md_in_pr_thresh: 1.0
+        md_in_ww_thresh: 16.0
+    - name: TestMetadataParser4
+      class: MetadataParserModel
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: area_multiplier
+        format: U
+        strategy: sentinel
+        coordinate_arithmetic: no_arithmetic
+        md_in_rw_thresh: 32.0
+        md_in_pr_thresh: 1.0
+        md_in_ww_thresh: 16.0
+    - name: TestMetadataParser5
+      class: MetadataParserModel
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: area_multiplier
+        format: U
+        strategy: sentinel
+        coordinate_arithmetic: no_arithmetic
+        md_in_rw_thresh: 32.0
+        md_in_pr_thresh: 1.0
+        md_in_ww_thresh: 1.0
+    - name: TestMetadataParser6
+      class: MetadataParserModel
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: area_multiplier
+        format: U
+        strategy: sentinel
+        coordinate_arithmetic: no_arithmetic
+        md_in_rw_thresh: 16.0
+        md_in_pr_thresh: 1.0
+        md_in_ww_thresh: 1.0
+    - name: TestMetadataParser7
+      class: MetadataParserModel
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: area_multiplier
+        format: U
+        strategy: sentinel
+        coordinate_arithmetic: no_arithmetic
+        md_in_rw_thresh: 16.0
+        md_in_pr_thresh: 1.0
+        md_in_ww_thresh: 1.0
+    - name: TestMetadataParser8
+      class: MetadataParserModel
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: area_multiplier
+        format: U
+        strategy: sentinel
+        coordinate_arithmetic: no_arithmetic
+        md_in_rw_thresh: 16.0
+        md_in_pr_thresh: 2.0
+        md_in_ww_thresh: 1.0
+    actions:
+    - name: check_bounds
+      subcomponents:
+      - name: TestMetadataParser0
+        actions:
+        - name: gated_check_bound
+      - name: TestMetadataParser1
+        actions:
+        - name: gated_check_bound
+      - name: TestMetadataParser2
+        actions:
+        - name: gated_check_bound
+      - name: TestMetadataParser3
+        actions:
+        - name: gated_check_bound
+      - name: TestMetadataParser4
+        actions:
+        - name: gated_check_bound
+      - name: TestMetadataParser5
+        actions:
+        - name: gated_check_bound
+      - name: TestMetadataParser6
+        actions:
+        - name: gated_check_bound
+      - name: TestMetadataParser7
+        actions:
+        - name: gated_check_bound
+      - name: TestMetadataParser8
+        actions:
+        - name: gated_check_bound
+    - name: gated_check_bounds
+      subcomponents:
+      - name: TestMetadataParser0
+        actions:
+        - name: gated_check_bound
+      - name: TestMetadataParser1
+        actions:
+        - name: gated_check_bound
+      - name: TestMetadataParser2
+        actions:
+        - name: gated_check_bound
+      - name: TestMetadataParser3
+        actions:
+        - name: gated_check_bound
+      - name: TestMetadataParser4
+        actions:
+        - name: gated_check_bound
+      - name: TestMetadataParser5
+        actions:
+        - name: gated_check_bound
+      - name: TestMetadataParser6
+        actions:
+        - name: gated_check_bound
+      - name: TestMetadataParser7
+        actions:
+        - name: gated_check_bound
+      - name: TestMetadataParser8
+        actions:
+        - name: gated_check_bound
+  - name: TestArchitecture__shared_buffer_datatype_format_uarch
+    attributes:
+      clock: must_specify
+      technology: must_specify
+      area_multiplier: must_specify
+      fibertree: must_specify
+    subcomponents:
+    - name: TestMetadataParser0
+      class: MetadataParserModel
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: area_multiplier
+        format: U
+        strategy: sentinel
+        coordinate_arithmetic: no_arithmetic
+        md_in_rw_thresh: 32.0
+        md_in_pr_thresh: 1.0
+        md_in_ww_thresh: 8.0
+    - name: TestMetadataParser1
+      class: MetadataParserModel
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: area_multiplier
+        format: C
+        strategy: sentinel
+        coordinate_arithmetic: no_arithmetic
+        md_in_rw_thresh: 32.0
+        md_in_pr_thresh: 1.0
+        md_in_ww_thresh: 1.0
+    - name: TestMetadataParser2
+      class: MetadataParserModel
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: area_multiplier
+        format: U
+        strategy: sentinel
+        coordinate_arithmetic: no_arithmetic
+        md_in_rw_thresh: 16.0
+        md_in_pr_thresh: 1.0
+        md_in_ww_thresh: 2.0
+    - name: TestMetadataParser3
+      class: MetadataParserModel
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: area_multiplier
+        format: C
+        strategy: sentinel
+        coordinate_arithmetic: no_arithmetic
+        md_in_rw_thresh: 32.0
+        md_in_pr_thresh: 1.0
+        md_in_ww_thresh: 1.0
+    actions:
+    - name: check_bounds
+      subcomponents:
+      - name: TestMetadataParser1
+        actions:
+        - name: check_bound
+      - name: TestMetadataParser3
+        actions:
+        - name: check_bound
+      - name: TestMetadataParser0
+        actions:
+        - name: gated_check_bound
+      - name: TestMetadataParser2
+        actions:
+        - name: gated_check_bound
+    - name: gated_check_bounds
+      subcomponents:
+      - name: TestMetadataParser0
+        actions:
+        - name: gated_check_bound
+      - name: TestMetadataParser1
+        actions:
+        - name: gated_check_bound
+      - name: TestMetadataParser2
+        actions:
+        - name: gated_check_bound
+      - name: TestMetadataParser3
+        actions:
+        - name: gated_check_bound
+  - name: TestArchitecture__Skipping_shared_buffer1_shared_buffer3
+    attributes:
+      clock: must_specify
+      technology: must_specify
+      area_multiplier: must_specify
+      format_leader: must_specify
+      format_follower: must_specify
+      direction: must_specify
+      optimize_fills: must_specify
+    subcomponents:
+    - name: IntersectionBD
+      class: IntersectionBidirectionalModel
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: area_multiplier
+        format_0: C
+        format_1: C
+        strategy: two_finger_merge
+        md_in0_ww_thresh: 2.0
+        md_in0_rw_thresh: 2.0
+        md_in1_ww_thresh: 2.0
+        md_in1_rw_thresh: 2.0
+        md_out_ww_thresh: 2.0
+        md_out_rw_thresh: 2.0
+    - name: SinglePgenLeader
+      class: SinglePositionGeneratorModel
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: area_multiplier
+        format_src: C
+        format_dst: C
+        strategy: counter
+        md_in_ref_ww_thresh: 1.0
+    - name: SinglePgenFollower
+      class: SinglePositionGeneratorModel
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: area_multiplier
+        format_src: C
+        format_dst: C
+        strategy: counter
+        md_in_ref_ww_thresh: 1.0
+    actions:
+    - name: fill_leader
+      subcomponents:
+      - name: IntersectionBD
+        actions:
+        - name: fill
+      - name: SinglePgenLeader
+        actions:
+        - name: count_ref
+      - name: SinglePgenFollower
+        actions:
+        - name: gated_gen
+    - name: fill_follower
+      subcomponents:
+      - name: IntersectionBD
+        actions:
+        - name: fill
+      - name: SinglePgenLeader
+        actions:
+        - name: gated_gen
+      - name: SinglePgenFollower
+        actions:
+        - name: count_ref
+    - name: skip_leader
+      subcomponents:
+      - name: IntersectionBD
+        actions:
+        - name: intersect
+      - name: SinglePgenLeader
+        actions:
+        - name: gen
+      - name: SinglePgenFollower
+        actions:
+        - name: gated_gen
+    - name: skip_follower
+      subcomponents:
+      - name: IntersectionBD
+        actions:
+        - name: intersect
+      - name: SinglePgenLeader
+        actions:
+        - name: gated_gen
+      - name: SinglePgenFollower
+        actions:
+        - name: gen
+  - name: TestArchitecture__Skipping_shared_buffer1_psum_spad0
+    attributes:
+      clock: must_specify
+      technology: must_specify
+      area_multiplier: must_specify
+      format_leader: must_specify
+      format_follower: must_specify
+      direction: must_specify
+      optimize_fills: must_specify
+    subcomponents:
+    - name: IntersectionLF
+      class: IntersectionLeaderFollowerModel
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: area_multiplier
+        format_leader: C
+        strategy: passthrough
+    - name: SinglePgenFollower
+      class: SinglePositionGeneratorModel
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: area_multiplier
+        format_src: C
+        format_dst: U
+        strategy: passthrough
+        md_in_ref_ww_thresh: 1000.0
+    actions:
+    - name: fill_leader
+      subcomponents:
+      - name: IntersectionLF
+        actions:
+        - name: fill
+      - name: SinglePgenFollower
+        actions:
+        - name: gated_gen
+    - name: skip_leader
+      subcomponents:
+      - name: IntersectionLF
+        actions:
+        - name: intersect
+      - name: SinglePgenFollower
+        actions:
+        - name: gen
+        - name: count_ref
+    - name: skip_follower
+      subcomponents:
+      - name: IntersectionLF
+        actions:
+        - name: gated_intersect
+      - name: SinglePgenFollower
+        actions:
+        - name: gated_gen
+  - name: DUMMY_SRAM_MD_TestArchitecture__BackingStorage
+    attributes:
+      technology: must_specify
+      data_storage_depth: must_specify
+      data_storage_width: must_specify
+      metadata_storage_width: 0
+      metadata_storage_depth: 0
+      n_banks: 1
+      n_rdwr_ports: 2
+      counter_width: 0
+      phy_datawidth: data_storage_width
+      phy_metadata_datawidth: metadata_storage_width
+      ag_datawidth: log(data_storage_depth)
+    subcomponents:
+    - class: DUMMY_SRAM_MD
+      attributes:
+        data_storage_depth: data_storage_depth
+        data_storage_width: data_storage_width
+        metadata_storage_depth: metadata_storage_depth
+        metadata_storage_width: metadata_storage_width
+        datawidth: 8
+        block_size: 8
+        technology: technology
+        n_banks: n_banks
+        n_rdwr_ports: n_rdwr_ports
+        counter_width: counter_width
+        phy_datawidth: phy_datawidth
+        phy_metadata_datawidth: phy_metadata_datawidth
+        ag_datawidth: ag_datawidth
+      name: BackingStorage_wrapped
+    - name: inst_TestArchitecture__BackingStorage_datatype_format_uarch
+      class: TestArchitecture__BackingStorage_datatype_format_uarch
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: 1.0
+        fibertree: UUUUUUUUU
+    actions:
+    - name: write
+      subcomponents:
+      - name: BackingStorage_wrapped
+        actions:
+        - name: write
+    - name: read
+      subcomponents:
+      - name: BackingStorage_wrapped
+        actions:
+        - name: read
+    - name: gated_write
+      subcomponents:
+      - name: BackingStorage_wrapped
+        actions:
+        - name: gated_write
+    - name: gated_read
+      subcomponents:
+      - name: BackingStorage_wrapped
+        actions:
+        - name: gated_read
+    - name: metadata_read
+      subcomponents:
+      - name: BackingStorage_wrapped
+        actions:
+        - name: metadata_read
+      - name: inst_TestArchitecture__BackingStorage_datatype_format_uarch
+        actions:
+        - name: check_bounds
+    - name: metadata_write
+      subcomponents:
+      - name: BackingStorage_wrapped
+        actions:
+        - name: metadata_write
+    - name: gated_metadata_read
+      subcomponents:
+      - name: BackingStorage_wrapped
+        actions:
+        - name: gated_metadata_read
+      - name: inst_TestArchitecture__BackingStorage_datatype_format_uarch
+        actions:
+        - name: gated_check_bounds
+    - name: gated_metadata_write
+      subcomponents:
+      - name: BackingStorage_wrapped
+        actions:
+        - name: gated_metadata_write
+  - name: SRAM_MD_TestArchitecture__shared_buffer
+    attributes:
+      technology: must_specify
+      data_storage_depth: must_specify
+      data_storage_width: must_specify
+      metadata_storage_width: 0
+      metadata_storage_depth: 0
+      n_banks: 1
+      n_rdwr_ports: 2
+      counter_width: 0
+      phy_datawidth: data_storage_width
+      phy_metadata_datawidth: metadata_storage_width
+      ag_datawidth: log(data_storage_depth)
+    subcomponents:
+    - class: SRAM_MD
+      attributes:
+        data_storage_depth: data_storage_depth
+        data_storage_width: data_storage_width
+        metadata_storage_depth: metadata_storage_depth
+        metadata_storage_width: metadata_storage_width
+        datawidth: 8
+        block_size: 1
+        technology: technology
+        n_banks: n_banks
+        n_rdwr_ports: n_rdwr_ports
+        counter_width: counter_width
+        phy_datawidth: phy_datawidth
+        phy_metadata_datawidth: phy_metadata_datawidth
+        ag_datawidth: ag_datawidth
+      name: shared_buffer_wrapped
+    - name: inst_TestArchitecture__Skipping_shared_buffer1_shared_buffer3
+      class: TestArchitecture__Skipping_shared_buffer1_shared_buffer3
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: 1.0
+        format_leader: C
+        format_follower: C
+        direction: bidirectional
+        optimize_fills: no_opt_fills
+    - name: inst_TestArchitecture__Skipping_shared_buffer1_psum_spad0
+      class: TestArchitecture__Skipping_shared_buffer1_psum_spad0
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: 0.5
+        format_leader: C
+        format_follower: U
+        direction: leader_follower
+        optimize_fills: no_opt_fills
+    - name: inst_TestArchitecture__shared_buffer_datatype_format_uarch
+      class: TestArchitecture__shared_buffer_datatype_format_uarch
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: 1.0
+        fibertree: UCUC
+    actions:
+    - name: write
+      subcomponents:
+      - name: shared_buffer_wrapped
+        actions:
+        - name: write
+    - name: read
+      subcomponents:
+      - name: shared_buffer_wrapped
+        actions:
+        - name: read
+      - name: inst_TestArchitecture__Skipping_shared_buffer1_shared_buffer3
+        actions:
+        - name: skip_leader
+        - name: skip_follower
+      - name: inst_TestArchitecture__Skipping_shared_buffer1_psum_spad0
+        actions:
+        - name: skip_leader
+    - name: gated_write
+      subcomponents:
+      - name: shared_buffer_wrapped
+        actions:
+        - name: gated_write
+    - name: gated_read
+      subcomponents:
+      - name: shared_buffer_wrapped
+        actions:
+        - name: gated_read
+    - name: metadata_read
+      subcomponents:
+      - name: shared_buffer_wrapped
+        actions:
+        - name: metadata_read
+      - name: inst_TestArchitecture__shared_buffer_datatype_format_uarch
+        actions:
+        - name: check_bounds
+      - name: inst_TestArchitecture__Skipping_shared_buffer1_shared_buffer3
+        actions:
+        - name: fill_leader
+        - name: fill_follower
+      - name: inst_TestArchitecture__Skipping_shared_buffer1_psum_spad0
+        actions:
+        - name: fill_leader
+    - name: metadata_write
+      subcomponents:
+      - name: shared_buffer_wrapped
+        actions:
+        - name: metadata_write
+    - name: gated_metadata_read
+      subcomponents:
+      - name: shared_buffer_wrapped
+        actions:
+        - name: gated_metadata_read
+      - name: inst_TestArchitecture__shared_buffer_datatype_format_uarch
+        actions:
+        - name: gated_check_bounds
+    - name: gated_metadata_write
+      subcomponents:
+      - name: shared_buffer_wrapped
+        actions:
+        - name: gated_metadata_write
+  - name: SRAM_TestArchitecture__psum_spad
+    attributes:
+      technology: 65nm
+      width: 64
+      depth: 512
+      n_rd_ports: 0
+      n_wr_ports: 0
+      n_rdwr_ports: 1
+      n_banks: 1
+      latency: 5ns
+    subcomponents:
+    - class: SRAM
+      attributes:
+        depth: depth
+        width: width
+        datawidth: 20
+        block_size: 1
+        technology: technology
+        n_rd_ports: n_rd_ports
+        n_wr_ports: n_wr_ports
+        n_rdwr_ports: n_rdwr_ports
+        n_banks: n_banks
+        latency: latency
+      name: psum_spad_wrapped
+    - name: inst_TestArchitecture__Skipping_shared_buffer1_psum_spad0
+      class: TestArchitecture__Skipping_shared_buffer1_psum_spad0
+      attributes:
+        clock: clock
+        technology: technology
+        area_multiplier: 0.5
+        format_leader: C
+        format_follower: U
+        direction: leader_follower
+        optimize_fills: no_opt_fills
+    actions:
+    - name: read
+      subcomponents:
+      - name: psum_spad_wrapped
+        actions:
+        - name: read
+      - name: inst_TestArchitecture__Skipping_shared_buffer1_psum_spad0
+        actions:
+        - name: skip_follower
+    - name: write
+      subcomponents:
+      - name: psum_spad_wrapped
+        actions:
+        - name: write
+    - name: idle
+      subcomponents:
+      - name: psum_spad_wrapped
+        actions:
+        - name: idle

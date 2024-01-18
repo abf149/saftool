@@ -116,10 +116,10 @@ class IntersectFmtCDirBidirStageCombinational(headWidth: Int, metaDataWidth: Int
   io.enable_out := !checkIfFinished.io.isFinished && io.enable_in
 }
 
-class VectorTwoFingerMergeIntersection(val metaDataWidth: Int, val arraySize: Int, val numStages) extends Module  with RequireSyncReset{
+class VectorTwoFingerMergeIntersection(val metaDataWidth: Int, val arraySize: Int, val numStages: Int) extends Module  with RequireSyncReset{
 
 
-  val M = numStages //numStages // 2 * arraySize - 1
+  val M = numStages
   val headWidth = log2Ceil(arraySize)+1 // Assuming headWidth based on arraySize
 
   val io = IO(new Bundle {
@@ -130,13 +130,7 @@ class VectorTwoFingerMergeIntersection(val metaDataWidth: Int, val arraySize: In
     val outputWireArrays = Output(Vec(arraySize, UInt(metaDataWidth.W)))
 
     val num_matches = Output(UInt(log2Ceil(M + 1).W))   
-    //val outputFlagArrays = Output(Vec(arraySize, UInt(1.W)))
 
-    /*
-    val inputWireArrays = Input(Vec(M, Vec(2, Vec(arraySize, UInt(metaDataWidth.W)))))
-    val outputWireArrays = Output(Vec(M, Vec(arraySize, UInt(metaDataWidth.W))))
-    val outputFlagArrays = Output(Vec(M, Vec(arraySize, UInt(1.W))))
-    */
   })
 
   // Create instances of pipeline stages, read muxes, and write muxes
@@ -144,14 +138,6 @@ class VectorTwoFingerMergeIntersection(val metaDataWidth: Int, val arraySize: In
   val readMuxes0 = Module(new VectorizedDynamicReadMux(M, arraySize, metaDataWidth))
   val readMuxes1 = Module(new VectorizedDynamicReadMux(M, arraySize, metaDataWidth))
   val writeMuxesData = Module(new VectorizedDynamicWriteMux(M, arraySize, metaDataWidth))
-  //val writeMuxesFlag = Module(new VectorizedDynamicWriteMux(arraySize, 1))
-
-  /*
-  val readMuxes0 = Seq.fill(M)(Module(new VectorizedDynamicReadMux(arraySize, metaDataWidth)))
-  val readMuxes1 = Seq.fill(M)(Module(new VectorizedDynamicReadMux(arraySize, metaDataWidth)))
-  val writeMuxesData = Seq.fill(M)(Module(new VectorizedDynamicWriteMux(arraySize, metaDataWidth)))
-  val writeMuxesFlag = Seq.fill(M)(Module(new VectorizedDynamicWriteMux(arraySize, 1)))
-  */
 
   // Initial head inputs and enable signal for the first stage
   pipelineStages.head.io.in0_head := 0.U
@@ -163,7 +149,6 @@ class VectorTwoFingerMergeIntersection(val metaDataWidth: Int, val arraySize: In
   readMuxes0.io.sharedWireArray := io.inputWireArrays(0)
   readMuxes1.io.sharedWireArray := io.inputWireArrays(1)
   io.outputWireArrays := writeMuxesData.io.sharedWriteArray
-  //io.outputFlagArrays := writeMuxesFlag.io.sharedWriteArray
 
   val matchCount = Wire(Vec(M + 1, UInt(log2Ceil(M + 1).W)))
   matchCount(0) := 0.U
@@ -182,13 +167,6 @@ class VectorTwoFingerMergeIntersection(val metaDataWidth: Int, val arraySize: In
     pipelineStages(i).io.writeMux <> writeMuxesData.io.dynamicWriteMuxVec(i)
     
     // Special handling for write mux flags
-    /*
-    writeMuxesFlag(i).io.dynamicWriteMuxVec.foreach { w =>
-      w.enable := pipelineStages(i).io.writeMux.enable
-      w.writeData := pipelineStages(i).io.writeMux.writeData
-      w.writeAddress := pipelineStages(i).io.writeMux.writeAddress
-    }
-    */
 
     // Chain stages
     if (i < M - 1) {

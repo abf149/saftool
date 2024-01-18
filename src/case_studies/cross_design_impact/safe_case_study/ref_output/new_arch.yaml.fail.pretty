@@ -1,0 +1,228 @@
+TestArchitecture(Architecture):
+- Components:
+  - BackingStorage(BufferStub)
+  - shared_buffer(BufferStub)
+  - BackingStorage_datatype_format_uarch(FormatUarch)
+  - shared_buffer_datatype_format_uarch(FormatUarch)
+  - Skipping_shared_buffer1_shared_buffer3(SkippingUarch)
+- Nets:
+ - ['BackingStorage.md_out0', 'BackingStorage_datatype_format_uarch.md_in0']
+ - ['BackingStorage.at_bound_in0', 'BackingStorage_datatype_format_uarch.at_bound_out0']
+ - ['BackingStorage.md_out1', 'BackingStorage_datatype_format_uarch.md_in1']
+ - ['BackingStorage.at_bound_in1', 'BackingStorage_datatype_format_uarch.at_bound_out1']
+ - ['BackingStorage.md_out2', 'BackingStorage_datatype_format_uarch.md_in2']
+ - ['BackingStorage.at_bound_in2', 'BackingStorage_datatype_format_uarch.at_bound_out2']
+ - ['BackingStorage.md_out3', 'BackingStorage_datatype_format_uarch.md_in3']
+ - ['BackingStorage.at_bound_in3', 'BackingStorage_datatype_format_uarch.at_bound_out3']
+ - ['BackingStorage.md_out4', 'BackingStorage_datatype_format_uarch.md_in4']
+ - ['BackingStorage.at_bound_in4', 'BackingStorage_datatype_format_uarch.at_bound_out4']
+ - ['BackingStorage.md_out5', 'BackingStorage_datatype_format_uarch.md_in5']
+ - ['BackingStorage.at_bound_in5', 'BackingStorage_datatype_format_uarch.at_bound_out5']
+ - ['BackingStorage.md_out6', 'BackingStorage_datatype_format_uarch.md_in6']
+ - ['BackingStorage.at_bound_in6', 'BackingStorage_datatype_format_uarch.at_bound_out6']
+ - ['BackingStorage.md_out7', 'BackingStorage_datatype_format_uarch.md_in7']
+ - ['BackingStorage.at_bound_in7', 'BackingStorage_datatype_format_uarch.at_bound_out7']
+ - ['BackingStorage.md_out8', 'BackingStorage_datatype_format_uarch.md_in8']
+ - ['BackingStorage.at_bound_in8', 'BackingStorage_datatype_format_uarch.at_bound_out8']
+ - ['shared_buffer.md_out0', 'shared_buffer_datatype_format_uarch.md_in0']
+ - ['shared_buffer.at_bound_in0', 'shared_buffer_datatype_format_uarch.at_bound_out0']
+ - ['shared_buffer.md_out1', 'shared_buffer_datatype_format_uarch.md_in1']
+ - ['shared_buffer.at_bound_in1', 'shared_buffer_datatype_format_uarch.at_bound_out1']
+ - ['shared_buffer.md_out2', 'shared_buffer_datatype_format_uarch.md_in2']
+ - ['shared_buffer.at_bound_in2', 'shared_buffer_datatype_format_uarch.at_bound_out2']
+ - ['shared_buffer.md_out3', 'shared_buffer_datatype_format_uarch.md_in3']
+ - ['shared_buffer.at_bound_in3', 'shared_buffer_datatype_format_uarch.at_bound_out3']
+ - ['shared_buffer.md_out1', 'Skipping_shared_buffer1_shared_buffer3.md_in_leader']
+ - ['shared_buffer.pos_in1', 'Skipping_shared_buffer1_shared_buffer3.pos_out_leader']
+ - ['shared_buffer.md_out3', 'Skipping_shared_buffer1_shared_buffer3.md_in_follower']
+ - ['shared_buffer.pos_in3', 'Skipping_shared_buffer1_shared_buffer3.pos_out_follower']
+
+
+TestArchitecture.BackingStorage(BufferStub):
+- Attributes:
+  - (fibertree) ['U', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U']
+
+
+TestArchitecture.shared_buffer(BufferStub):
+- Attributes:
+  - (fibertree) ['U', 'B', 'U', 'B']
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch(FormatUarch):
+- Attributes:
+  - (fibertree) ['U', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U']
+- Components:
+  - TestMetadataParser0(MetadataParser)
+  - TestMetadataParser1(MetadataParser)
+  - TestMetadataParser2(MetadataParser)
+  - TestMetadataParser3(MetadataParser)
+  - TestMetadataParser4(MetadataParser)
+  - TestMetadataParser5(MetadataParser)
+  - TestMetadataParser6(MetadataParser)
+  - TestMetadataParser7(MetadataParser)
+  - TestMetadataParser8(MetadataParser)
+- Nets:
+ - ['md_in0', 'TestMetadataParser0.md_in']
+ - ['at_bound_out0', 'TestMetadataParser0.at_bound_out']
+ - ['md_in1', 'TestMetadataParser1.md_in']
+ - ['at_bound_out1', 'TestMetadataParser1.at_bound_out']
+ - ['md_in2', 'TestMetadataParser2.md_in']
+ - ['at_bound_out2', 'TestMetadataParser2.at_bound_out']
+ - ['md_in3', 'TestMetadataParser3.md_in']
+ - ['at_bound_out3', 'TestMetadataParser3.at_bound_out']
+ - ['md_in4', 'TestMetadataParser4.md_in']
+ - ['at_bound_out4', 'TestMetadataParser4.at_bound_out']
+ - ['md_in5', 'TestMetadataParser5.md_in']
+ - ['at_bound_out5', 'TestMetadataParser5.at_bound_out']
+ - ['md_in6', 'TestMetadataParser6.md_in']
+ - ['at_bound_out6', 'TestMetadataParser6.at_bound_out']
+ - ['md_in7', 'TestMetadataParser7.md_in']
+ - ['at_bound_out7', 'TestMetadataParser7.at_bound_out']
+ - ['md_in8', 'TestMetadataParser8.md_in']
+ - ['at_bound_out8', 'TestMetadataParser8.at_bound_out']
+
+
+TestArchitecture.shared_buffer_datatype_format_uarch(FormatUarch):
+- Attributes:
+  - (fibertree) ['U', 'B', 'U', 'B']
+- Components:
+  - TestMetadataParser0(MetadataParser)
+  - TestMetadataParser1(MetadataParser)
+  - TestMetadataParser2(MetadataParser)
+  - TestMetadataParser3(MetadataParser)
+- Nets:
+ - ['md_in0', 'TestMetadataParser0.md_in']
+ - ['at_bound_out0', 'TestMetadataParser0.at_bound_out']
+ - ['md_in1', 'TestMetadataParser1.md_in']
+ - ['at_bound_out1', 'TestMetadataParser1.at_bound_out']
+ - ['md_in2', 'TestMetadataParser2.md_in']
+ - ['at_bound_out2', 'TestMetadataParser2.at_bound_out']
+ - ['md_in3', 'TestMetadataParser3.md_in']
+ - ['at_bound_out3', 'TestMetadataParser3.at_bound_out']
+
+
+TestArchitecture.Skipping_shared_buffer1_shared_buffer3(SkippingUarch):
+- Attributes:
+  - (format) B
+  - (format) B
+  - bidirectional
+  - no_opt_fills
+- Components:
+  - IntersectionBD(IntersectionBidirectional)
+  - DoublePgen(DoublePositionGenerator)
+- Nets:
+ - ['md_in_leader', 'IntersectionBD.md_in0']
+ - ['md_in_leader', 'DoublePgen.md_in0_ref']
+ - ['md_in_follower', 'IntersectionBD.md_in1']
+ - ['md_in_follower', 'DoublePgen.md_in1_ref']
+ - ['IntersectionBD.md_out', 'DoublePgen.md_in']
+ - ['DoublePgen.pos_out0', 'pos_out_leader']
+ - ['DoublePgen.pos_out1', 'pos_out_follower']
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser0(MetadataParser):
+- Attributes:
+  - (format) U
+  - sentinel
+  - no_arithmetic
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser1(MetadataParser):
+- Attributes:
+  - (format) U
+  - sentinel
+  - no_arithmetic
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser2(MetadataParser):
+- Attributes:
+  - (format) U
+  - sentinel
+  - no_arithmetic
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser3(MetadataParser):
+- Attributes:
+  - (format) U
+  - sentinel
+  - no_arithmetic
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser4(MetadataParser):
+- Attributes:
+  - (format) U
+  - sentinel
+  - no_arithmetic
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser5(MetadataParser):
+- Attributes:
+  - (format) U
+  - sentinel
+  - no_arithmetic
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser6(MetadataParser):
+- Attributes:
+  - (format) U
+  - sentinel
+  - no_arithmetic
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser7(MetadataParser):
+- Attributes:
+  - (format) U
+  - sentinel
+  - no_arithmetic
+
+
+TestArchitecture.BackingStorage_datatype_format_uarch.TestMetadataParser8(MetadataParser):
+- Attributes:
+  - (format) U
+  - sentinel
+  - no_arithmetic
+
+
+TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser0(MetadataParser):
+- Attributes:
+  - (format) U
+  - sentinel
+  - no_arithmetic
+
+
+TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser1(MetadataParser):
+- Attributes:
+  - (format) B
+  - sentinel
+  - no_arithmetic
+
+
+TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser2(MetadataParser):
+- Attributes:
+  - (format) U
+  - sentinel
+  - no_arithmetic
+
+
+TestArchitecture.shared_buffer_datatype_format_uarch.TestMetadataParser3(MetadataParser):
+- Attributes:
+  - (format) B
+  - sentinel
+  - no_arithmetic
+
+
+TestArchitecture.Skipping_shared_buffer1_shared_buffer3.IntersectionBD(IntersectionBidirectional):
+- Attributes:
+  - (format) B
+  - (format) B
+  - two_finger_merge
+
+
+TestArchitecture.Skipping_shared_buffer1_shared_buffer3.DoublePgen(DoublePositionGenerator):
+- Attributes:
+  - (format) B
+  - (format) B
+  - ?
+  - ?
+
+

@@ -1,0 +1,255 @@
+fmt_iface_bindings:
+  BackingStorage:
+    Inputs:
+    - dense: false
+      fiber_layout:
+      - - '!0'
+      format: UOP
+      payloadwidth: 0
+    - dense: false
+      fiber_layout:
+      - - '!1'
+      format: UOP
+      payloadwidth: 0
+    - dense: false
+      fiber_layout:
+      - - '!2'
+      format: UOP
+      payloadwidth: 0
+    - dense: false
+      fiber_layout:
+      - - S
+        - F
+      format: UOP
+      payloadwidth: 0
+    - dense: false
+      fiber_layout:
+      - - R
+        - E
+      format: UOP
+      payloadwidth: 0
+    Outputs: []
+    Weights:
+    - dense: false
+      fiber_layout:
+      - - '!3'
+      format: UOP
+      payloadwidth: 0
+    - dense: false
+      fiber_layout:
+      - - '!4'
+      format: UOP
+      payloadwidth: 0
+    - dense: false
+      fiber_layout:
+      - - '!5'
+      format: UOP
+      payloadwidth: 0
+    - dense: false
+      fiber_layout:
+      - - '!6'
+      format: UOP
+      payloadwidth: 0
+  MAC:
+    Inputs: []
+    Outputs: []
+    Weights: []
+  psum_spad:
+    Inputs: []
+    Outputs:
+    - dense: true
+      fiber_layout:
+      - - C
+      format: UOP
+      payloadwidth: 0
+    - dense: true
+      fiber_layout:
+      - - M
+      format: UOP
+      payloadwidth: 0
+    Weights: []
+  shared_buffer:
+    Inputs:
+    - dense: false
+      fiber_layout:
+      - - R
+      format: UOP
+      payloadwidth: 7
+    - dense: false
+      fiber_layout:
+      - - C
+      format: CP
+      mdwidth: 4
+    Outputs: []
+    Weights:
+    - dense: false
+      fiber_layout:
+      - - M
+      format: UOP
+      payloadwidth: 7
+    - dense: false
+      fiber_layout:
+      - - C
+      format: CP
+      mdwidth: 4
+skip_bindings:
+- bidirectional: true
+  condition:
+    buffer: shared_buffer
+    dtype: Inputs
+  must_discard: false
+  must_post_gate: false
+  target:
+    buffer: shared_buffer
+    dtype: Weights
+  type: skipping
+- bidirectional: false
+  condition:
+    buffer: shared_buffer
+    dtype: Inputs
+  condition_list:
+    buffer_list:
+    - shared_buffer
+    - shared_buffer
+    dtype_list:
+    - Inputs
+    - Weights
+  must_discard: false
+  must_post_gate: false
+  note:
+    action:
+      options:
+      - condition-on:
+        - Inputs
+        - Weights
+        target: Outputs
+      type: skipping
+    compute_optimization: skipping
+    dtype_buffer_list:
+      Inputs:
+      - BackingStorage
+      - shared_buffer
+      - psum_spad
+      - MAC
+      Outputs:
+      - BackingStorage
+      - shared_buffer
+      - psum_spad
+      - MAC
+      Weights:
+      - BackingStorage
+      - shared_buffer
+      - psum_spad
+      - MAC
+    fmt_iface_bindings:
+      BackingStorage:
+        Inputs:
+        - dense: false
+          fiber_layout:
+          - - '!0'
+          format: UOP
+          payloadwidth: 0
+        - dense: false
+          fiber_layout:
+          - - '!1'
+          format: UOP
+          payloadwidth: 0
+        - dense: false
+          fiber_layout:
+          - - '!2'
+          format: UOP
+          payloadwidth: 0
+        - dense: false
+          fiber_layout:
+          - - S
+            - F
+          format: UOP
+          payloadwidth: 0
+        - dense: false
+          fiber_layout:
+          - - R
+            - E
+          format: UOP
+          payloadwidth: 0
+        Outputs: []
+        Weights:
+        - dense: false
+          fiber_layout:
+          - - '!3'
+          format: UOP
+          payloadwidth: 0
+        - dense: false
+          fiber_layout:
+          - - '!4'
+          format: UOP
+          payloadwidth: 0
+        - dense: false
+          fiber_layout:
+          - - '!5'
+          format: UOP
+          payloadwidth: 0
+        - dense: false
+          fiber_layout:
+          - - '!6'
+          format: UOP
+          payloadwidth: 0
+      MAC:
+        Inputs: []
+        Outputs: []
+        Weights: []
+      psum_spad:
+        Inputs: []
+        Outputs:
+        - dense: true
+          fiber_layout:
+          - - C
+          format: UOP
+          payloadwidth: 0
+        - dense: true
+          fiber_layout:
+          - - M
+          format: UOP
+          payloadwidth: 0
+        Weights: []
+      shared_buffer:
+        Inputs:
+        - dense: false
+          fiber_layout:
+          - - R
+          format: UOP
+          payloadwidth: 7
+        - dense: false
+          fiber_layout:
+          - - C
+          format: CP
+          mdwidth: 4
+        Outputs: []
+        Weights:
+        - dense: false
+          fiber_layout:
+          - - M
+          format: UOP
+          payloadwidth: 7
+        - dense: false
+          fiber_layout:
+          - - C
+          format: CP
+          mdwidth: 4
+    option:
+      condition-on:
+      - Inputs
+      - Weights
+      target: Outputs
+    target:
+      action-optimization:
+      - options:
+        - condition-on:
+          - Inputs
+          - Weights
+          target: Outputs
+        type: skipping
+      name: psum_spad
+  target:
+    buffer: psum_spad
+    dtype: Outputs
+  type: skipping
