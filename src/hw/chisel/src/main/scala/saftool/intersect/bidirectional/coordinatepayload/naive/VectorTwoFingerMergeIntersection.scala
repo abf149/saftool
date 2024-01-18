@@ -116,10 +116,10 @@ class IntersectFmtCDirBidirStageCombinational(headWidth: Int, metaDataWidth: Int
   io.enable_out := !checkIfFinished.io.isFinished && io.enable_in
 }
 
-class VectorTwoFingerMergeIntersection(val metaDataWidth: Int, val arraySize: Int) extends Module  with RequireSyncReset{
+class VectorTwoFingerMergeIntersection(val metaDataWidth: Int, val arraySize: Int, val numStages) extends Module  with RequireSyncReset{
 
 
-  val M = 2 * arraySize - 1
+  val M = numStages //numStages // 2 * arraySize - 1
   val headWidth = log2Ceil(arraySize)+1 // Assuming headWidth based on arraySize
 
   val io = IO(new Bundle {

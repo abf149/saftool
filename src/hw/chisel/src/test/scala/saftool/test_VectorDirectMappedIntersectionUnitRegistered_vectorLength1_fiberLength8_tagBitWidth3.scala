@@ -56,8 +56,8 @@ class Test_VectorDirectMappedIntersectionUnitRegistered extends AnyFlatSpec with
   //assert(false,println(s"Current working directory: $currentWorkingDirectory"))
 
 
-  val vectorLengths = List(1, 2, 4)
-  val fiberLengths = List(8, 16, 32)
+  val vectorLengths = List(1,2,4)
+  val fiberLengths = List(8,16,32)
   val chiselTestDir = sys.env.getOrElse("CHISEL_TEST_DIR", "src/test/scala/saftool") // Default path if the environment variable is not set
   var verilog_dir = "src/verilog/"
 

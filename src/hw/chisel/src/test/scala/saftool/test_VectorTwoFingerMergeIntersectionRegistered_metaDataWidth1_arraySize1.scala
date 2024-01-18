@@ -55,54 +55,48 @@ class Workload_VectorTwoFingerMergeIntersectionRegistered(dut: VectorTwoFingerMe
 class Test_VectorTwoFingerMergeIntersectionRegistered extends AnyFlatSpec with ChiselScalatestTester {
   behavior of "VectorTwoFingerMergeIntersectionRegistered"
 
-  /*
-  if (arraySize == 2 && metaDataWidth == 1) {
-      assert(false, "Assertion triggered: numTags is 2 and metaDataWidth is 1")
-  }
-  */
-
-  val arraySizes = List(2, 4, 8)
-  val fiberLengths = List(4, 8, 16, 32)
+  val arraySizes = List(1,2,4)
+  val fiberLengths = List(8,16,32)
+  val stageCounts = List(1,2,3,4,5,6,7,8)
   val chiselTestDir = sys.env.getOrElse("CHISEL_TEST_DIR", "src/test/scala/saftool")
   var verilog_dir = "src/verilog/"
 
   val combinations = for {
     arraySize <- arraySizes
     fiberLength <- fiberLengths
-    if arraySize < fiberLength
+    stageCount <- stageCounts
+    if arraySize < fiberLength && stageCount <= 2*arraySize
   } yield (log2Ceil(fiberLength), arraySize)
 
-  def createTest(metaDataWidth: Int, arraySize: Int): Unit = {
+  def createTest(metaDataWidth: Int, arraySize: Int, numStages: Int): Unit = {
 
 
-    val testName = s"test_VectorTwoFingerMergeIntersectionRegistered_metaDataWidth${metaDataWidth}_arraySize${arraySize}.scala"
+    val testName = s"test_VectorTwoFingerMergeIntersectionRegistered_metaDataWidth${metaDataWidth}_arraySize${arraySize}_numStages${numStages}.scala"
     val testFilePath = Paths.get(chiselTestDir, testName)
 
     if (!Files.exists(testFilePath)) {
       Files.createFile(testFilePath)
     }
 
+    it should s"metaDataWidth${metaDataWidth}_arraySize${arraySize}_numStages${numStages}" in {
 
 
-    it should s"metaDataWidth${metaDataWidth}_arraySize${arraySize}" in {
-
-
-      test(new VectorTwoFingerMergeIntersectionRegistered(metaDataWidth, arraySize))
+      test(new VectorTwoFingerMergeIntersectionRegistered(metaDataWidth, arraySize, numStages))
         .withAnnotations(Seq(WriteVcdAnnotation))
         .runPeekPoke(new Workload_VectorTwoFingerMergeIntersectionRegistered(_))
 
 
     }
-    emitVerilog(metaDataWidth, arraySize)
+    emitVerilog(metaDataWidth, arraySize, numStages)
   }
 
-  def emitVerilog(metaDataWidth: Int, arraySize: Int): Unit = {
-    val filename = s"VectorTwoFingerMergeIntersectionRegistered_metaDataWidth${metaDataWidth}_arraySize${arraySize}.v"
-    val verilogString = chisel3.getVerilogString(new VectorTwoFingerMergeIntersectionRegistered(metaDataWidth, arraySize))
+  def emitVerilog(metaDataWidth: Int, arraySize: Int, numStages: Int): Unit = {
+    val filename = s"VectorTwoFingerMergeIntersectionRegistered_metaDataWidth${metaDataWidth}_arraySize${arraySize}_numStages${numStages}.v"
+    val verilogString = chisel3.getVerilogString(new VectorTwoFingerMergeIntersectionRegistered(metaDataWidth, arraySize, numStages))
     Files.write(Paths.get(verilog_dir + filename), verilogString.getBytes(StandardCharsets.UTF_8))
   }
 
-  combinations.foreach { case (metaDataWidth, arraySize) =>
-    createTest(metaDataWidth, arraySize)
+  combinations.foreach { case (metaDataWidth, arraySize, numStages) =>
+    createTest(metaDataWidth, arraySize, numStages)
   }
 }

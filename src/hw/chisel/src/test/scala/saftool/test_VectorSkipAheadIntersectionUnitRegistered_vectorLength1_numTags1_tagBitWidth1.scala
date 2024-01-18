@@ -79,15 +79,15 @@ class TestVectorSkipAheadIntersectionUnitRegistered extends AnyFlatSpec with Chi
   val chiselTestDir = sys.env.getOrElse("CHISEL_TEST_DIR", "src/test/scala/saftool") // Default path if the environment variable is not set
   var verilog_dir = "src/verilog/"
 
-  val vectorLengths = List(1, 2, 4)
-  val numTagsValues = List(2, 4, 8, 16, 32)
-  val fiberLengths = List(2, 4, 8, 16, 32)
+  val numTagsValues = List(1,2,4) // 2, 4, 8, 16, 3
+  val fiberLengths = List(8,16,32) // 2, 4, 8, 16, 32
+  val vectorLengths = List(1,2,3,4,5,6,7,8)
 
   val combinations = for {
     vectorLength <- vectorLengths
     numTags <- numTagsValues
     fiberLength <- fiberLengths
-    if vectorLength <= numTags && numTags <= fiberLength
+    if vectorLength <= 2*numTags && numTags <= fiberLength && vectorLength <= fiberLength
   } yield (vectorLength, numTags, log2Ceil(fiberLength))
 
   def createTest(vectorLength: Int, numTags: Int, tagBitWidth: Int): Unit = {
