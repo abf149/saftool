@@ -132,6 +132,7 @@ def solve1_scale_inference_simplified_problem(final_symbols,final_symbol_types,f
                 mapped = variable_mapping[original]
                 constraint = constraint.replace(original, f"model.{mapped}")
             #print("-",constraint)
+            print(constraint)
             constr_expr = eval(constraint)
             setattr(model, f'constr_{str(jdx)}', Constraint(expr=constr_expr))
 
