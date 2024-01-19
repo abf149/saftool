@@ -25,7 +25,7 @@ force_attributes:
   - type: positional
     values:
     - position: 2
-      value: 'direct_map' # two_finger_merge , skip_ahead
+      value: 'two_finger_merge' # two_finger_merge , skip_ahead
 
 - uri: /.Skipping_shared_buffer1_psum_spad0
   settings:
