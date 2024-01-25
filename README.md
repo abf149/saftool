@@ -1,8 +1,9 @@
 # SAFTools
 
-This is a simple example package. You can use
-[GitHub-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
-to write your content.
+SAFTools is a software suite for inferring and sizing Sparse Acceleration Feature (SAF) microarchitecture, starting from an architecture specification and a declarative description of SAF optimizations.
+
+SAFTools is an artifact associated with the masters thesis "Microarchitecture Categorization and Pre-RTL
+Analytical Modeling for Sparse Tensor Accelerators" (Feldman, 2024.)
 
 ## Quickstart
 
@@ -41,4 +42,21 @@ sphinx-apidoc -o docs .
 
 ```
 ./make_html
+```
+
+## Overview of directory structure
+
+```
+src/ # Source directory
+|-- accelergy
+|-- case_studies
+|-- core
+|-- cycle_sims
+|-- export
+|-- hw
+|-- saflib
+|-- script_parser
+
+
+docs/ # Docs build directory
 ```
