@@ -1,5 +1,7 @@
 # SAFTools
 
+[Additional documentation (WIP)](https://saftools.readthedocs.io/en/latest/)
+
 SAFTools is a software suite for inferring and sizing Sparse Acceleration Feature (SAF) microarchitecture, starting from an architecture specification and a declarative description of SAF optimizations. The input specifications are expected in the [Sparseloop](https://sparseloop.mit.edu/) configuration file format.
 
 SAFTools allows you to quickly figure out what microarchitecture may be required to exploit tensor zero-sparsity in a hardware accelerator. SAFTools also facilitates design-space exploration over the space of possible microarchitectures. This can be done with the user writing any RTL ("pre-RTL".)
