@@ -1,5 +1,7 @@
 # SAFTools
 
+Please cite Git repo via the following DOI: 10.5281/zenodo.10568496
+
 [Additional documentation (WIP)](https://saftools.readthedocs.io/en/latest/)
 
 SAFTools is a software suite for inferring and sizing Sparse Acceleration Feature (SAF) microarchitecture, starting from an architecture specification and a declarative description of SAF optimizations. The input specifications are expected in the [Sparseloop](https://sparseloop.mit.edu/) configuration file format.
